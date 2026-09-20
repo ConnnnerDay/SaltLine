@@ -1,0 +1,147 @@
+import { randomUUID } from 'node:crypto'
+import { sha256Hex, sign, type SignedRequestFields } from './internal-signature'
+
+/**
+ * Server-only client for calling apps/api through ADR-004's signed
+ * internal request path (docs/architecture.md). Never call this from a
+ * Client Component -- it reads server-only env vars and signs with a
+ * secret that must never reach the browser bundle.
+ *
+ * Env vars (see apps/web/README.md and apps/api/README.md -- both apps
+ * need the *same* INTERNAL_SIGNING_KEY_ID/SECRET values for local dev):
+ * - INTERNAL_API_BASE_URL: apps/api's base URL, default
+ *   http://localhost:8000
+ * - INTERNAL_SIGNING_KEY_ID / INTERNAL_SIGNING_KEY_SECRET: required,
+ *   throws if either is unset -- fails closed, matching apps/api's
+ *   InternalAuthDependency posture, rather than silently calling
+ *   unsigned and letting apps/api's own 401 surface as a confusing
+ *   downstream error.
+ *
+ * `userId` (sprint 36): pass it explicitly per call -- this function
+ * doesn't fetch the current session itself, since most calls (location
+ * search, an anonymous forecast lookup) have no need to and shouldn't
+ * pay for it. Callers that need it read it once from Better Auth's
+ * server-side `auth.api.getSession()` (see app/api/preferences/route.ts
+ * for the pattern) and pass the result through. Omitted or empty means
+ * the same anonymous request every call already made before this
+ * option existed -- apps/api's `require_internal_signature` returns
+ * `None`/empty for that case, and routes that require a real session
+ * (`/v1/me/preferences`) 401 on it themselves.
+ *
+ * Sprint 41 ("Structured observability," the dependency-free half): every
+ * call logs one structured JSON trace line (`request_id`/method/path/
+ * `status_code`/`duration_ms`) to stdout, correlated with
+ * `apps/api/app/infra/request_logging.py`'s own trace line for the same
+ * call via the same `requestId` this function already generates for
+ * ADR-004's signature -- grepping one id in both services' logs finds
+ * both halves of one request. "Safe context" matches that module's rule:
+ * `path` is logged with its query string stripped (a caller can embed
+ * one, e.g. the location-search route's `?q=...`), never headers or the
+ * request/response body.
+ *
+ * This trace log is also what caught a real, previously-undetected
+ * issue on `app/forecast/[locationId]/page.tsx`: `generateMetadata` and
+ * the page body each call this function once, and were assumed (sprint
+ * 49) to share one call via React `cache()` -- a two-server trace using
+ * this exact logging showed two distinct `request_id`s reaching
+ * apps/api for one page view instead. See that page's `getForecast`
+ * docstring for the full account; apps/api's own snapshot cache keeps
+ * the real cost of the second call low regardless.
+ */
+
+const VALIDITY_SECONDS = 20
+
+export class InternalApiError extends Error {
+  constructor(
+    public status: number,
+    public bodyText: string,
+  ) {
+    super(`internal API request failed: ${status} ${bodyText}`)
+  }
+}
+
+function requiredEnv(name: string): string {
+  const value = process.env[name]
+  if (!value) {
+    throw new Error(
+      `${name} is not set -- required to sign requests to apps/api (see apps/web/README.md)`,
+    )
+  }
+  return value
+}
+
+export async function internalApiFetch<T>(
+  path: string,
+  init: { method?: string; body?: unknown; userId?: string } = {},
+): Promise<T> {
+  const baseUrl = process.env.INTERNAL_API_BASE_URL ?? 'http://localhost:8000'
+  const keyId = requiredEnv('INTERNAL_SIGNING_KEY_ID')
+  const secret = requiredEnv('INTERNAL_SIGNING_KEY_SECRET')
+
+  const method = init.method ?? 'GET'
+  const bodyText = init.body !== undefined ? JSON.stringify(init.body) : ''
+  const userId = init.userId ?? ''
+  const now = Math.floor(Date.now() / 1000)
+
+  const fields: SignedRequestFields = {
+    method,
+    path,
+    bodyDigest: sha256Hex(bodyText),
+    userId,
+    issuedAt: now,
+    expiresAt: now + VALIDITY_SECONDS,
+    requestId: randomUUID(),
+    keyId,
+  }
+
+  const headers: Record<string, string> = {
+    'X-Internal-Key-Id': keyId,
+    'X-Internal-Request-Id': fields.requestId,
+    'X-Internal-Issued-At': String(fields.issuedAt),
+    'X-Internal-Expires-At': String(fields.expiresAt),
+    'X-Internal-Signature': sign(secret, fields),
+  }
+  // Only sent when non-empty so an unauthenticated call's request looks
+  // exactly like it did before this option existed -- apps/api's own
+  // verifier reads a missing header as the same empty string this
+  // function already signs by default (see internal_auth.py).
+  if (userId) {
+    headers['X-Internal-User-Id'] = userId
+  }
+  if (bodyText) {
+    headers['Content-Type'] = 'application/json'
+  }
+
+  const started = performance.now()
+  const response = await fetch(`${baseUrl}${path}`, {
+    method,
+    headers,
+    body: bodyText || undefined,
+    cache: 'no-store',
+  })
+  const durationMs = Math.round((performance.now() - started) * 10) / 10
+
+  console.log(
+    JSON.stringify({
+      request_id: fields.requestId,
+      method,
+      path: path.split('?')[0],
+      status_code: response.status,
+      duration_ms: durationMs,
+    }),
+  )
+
+  if (!response.ok) {
+    throw new InternalApiError(response.status, await response.text())
+  }
+
+  // A 204 (apps/api's DELETE routes) has no body -- response.json()
+  // throws on empty input, so this returns undefined instead of
+  // pretending every successful call has JSON to parse. Callers that
+  // expect no data type this as internalApiFetch<void>(...).
+  if (response.status === 204) {
+    return undefined as T
+  }
+
+  return (await response.json()) as T
+}

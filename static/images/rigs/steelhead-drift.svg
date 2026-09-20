@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 340" font-family="Arial, sans-serif">
+  <rect x="0" y="0" width="500" height="340" fill="#FAFAF8"/>
+  <defs>
+    <linearGradient id="fishGrad_8aa9c4" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#5c7fa0"/>
+      <stop offset="55%" stop-color="#8aa9c4"/>
+      <stop offset="100%" stop-color="#cad8e4"/>
+    </linearGradient>
+    <radialGradient id="beadGrad_e74c3c" cx="32%" cy="28%" r="75%">
+      <stop offset="0%" stop-color="#ffc9bd"/>
+      <stop offset="55%" stop-color="#e74c3c"/>
+      <stop offset="100%" stop-color="#c0392b"/>
+    </radialGradient>
+  </defs>
+  <defs>
+    <radialGradient id="baitGrad" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#ffe4c4"/>
+      <stop offset="45%" stop-color="#e8b48a"/>
+      <stop offset="100%" stop-color="#b5794a"/>
+    </radialGradient>
+    <filter id="glossBlur" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="1.1"/>
+    </filter>
+  </defs>
+  <defs>
+    <linearGradient id="steelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f2f2f2"/>
+      <stop offset="35%" stop-color="#b8b8b8"/>
+      <stop offset="70%" stop-color="#6e6e6e"/>
+      <stop offset="100%" stop-color="#3d3d3d"/>
+    </linearGradient>
+    <linearGradient id="steelGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9a9a9a"/>
+      <stop offset="45%" stop-color="#5c5c5c"/>
+      <stop offset="100%" stop-color="#242424"/>
+    </linearGradient>
+    <radialGradient id="leadGrad" cx="32%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#e2e2e2"/>
+      <stop offset="35%" stop-color="#9a9a9a"/>
+      <stop offset="75%" stop-color="#5c5c5c"/>
+      <stop offset="100%" stop-color="#333333"/>
+    </radialGradient>
+    <filter id="softShadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="1.4" dy="2.2" stdDeviation="1.6" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <text x="250" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1a3a5c">River Drift &amp; Float Rig (Steelhead &amp; Salmon)</text>
+
+  <!-- River current -->
+  <rect x="15" y="45" width="470" height="150" rx="8" fill="#dcedf7" stroke="#a9cfe6" stroke-width="1"/>
+  <path d="M40 70 q15 8 30 0 q15 -8 30 0 q15 8 30 0" fill="none" stroke="#9cc4de" stroke-width="1.5"/>
+  <path d="M40 100 q15 8 30 0 q15 -8 30 0 q15 8 30 0" fill="none" stroke="#9cc4de" stroke-width="1.5"/>
+  <path d="M340 70 q15 8 30 0 q15 -8 30 0 q15 8 30 0" fill="none" stroke="#9cc4de" stroke-width="1.5"/>
+  <path d="M340 100 q15 8 30 0 q15 -8 30 0 q15 8 30 0" fill="none" stroke="#9cc4de" stroke-width="1.5"/>
+  <path d="M20 55 L440 55" stroke="#6ba3c9" stroke-width="1.5" stroke-dasharray="2,4"/>
+  <text x="460" y="58" font-size="10" fill="#5387a8">flow &#8594;</text>
+
+  <!-- Rod tip at bank -->
+  <line x1="30" y1="200" x2="90" y2="120" stroke="#555" stroke-width="3"/>
+  <text x="30" y="215" font-size="10" fill="#777">Rod on bank</text>
+
+  <!-- Main line to swivel -->
+  <line x1="90" y1="120" x2="160" y2="105" stroke="#2a6" stroke-width="2.5" stroke-dasharray="7,4"/>
+  <line x1="90" y1="119.2" x2="160" y2="104.2" stroke="#8fe6b8" stroke-width="0.80" stroke-dasharray="7,4" opacity="0.6"/>
+  <text x="115" y="98" text-anchor="middle" font-size="10" fill="#555">10-15 lb mainline</text>
+
+  <!-- Small swivel: an oval barrel body with a small wire eye at each end -->
+  <ellipse cx="165.0" cy="103.0" rx="5.0" ry="5.0" fill="url(#steelGrad)" stroke="#333333" stroke-width="1.2" filter="url(#softShadow)"/>
+  <circle cx="161.1" cy="103.0" r="3.1" fill="none" stroke="url(#steelGrad)" stroke-width="1.49" filter="url(#softShadow)"/>
+  <circle cx="168.9" cy="103.0" r="3.1" fill="none" stroke="url(#steelGrad)" stroke-width="1.49" filter="url(#softShadow)"/>
+  <ellipse cx="163.6" cy="101.2" rx="2.0" ry="1.6" fill="#ffffff" opacity="0.55" filter="url(#glossBlur)"/>
+
+  <!-- Option A: pencil lead dropper -->
+  <line x1="165" y1="103" x2="180" y2="130" stroke="#68b" stroke-width="1.5"/>
+  <rect x="174" y="128" width="6" height="22" rx="2" fill="url(#leadGrad)" stroke="#4a4a4a" stroke-width="1"/>
+  <text x="205" y="140" font-size="10" fill="#555">Pencil lead</text>
+  <text x="205" y="152" font-size="10" fill="#555">(bounces bottom)</text>
+
+  <!-- Option B: float above leader -->
+  <line x1="165" y1="103" x2="230" y2="90" stroke="#68b" stroke-width="1.5"/>
+  <ellipse cx="245" cy="86" rx="10" ry="20" fill="url(#beadGrad_e74c3c)" stroke="#c0392b" stroke-width="1.5" transform="rotate(20 245 86)"/>
+  <text x="245" y="60" text-anchor="middle" font-size="10" fill="#555">or a drift float</text>
+
+  <!-- Leader down to hook -->
+  <line x1="180" y1="150" x2="220" y2="175" stroke="#5da" stroke-width="2"/>
+  <line x1="180" y1="149.4" x2="220" y2="174.4" stroke="#e8fbf3" stroke-width="0.70" opacity="0.55"/>
+  <text x="185" y="172" text-anchor="middle" font-size="10" fill="#555" transform="rotate(25, 185, 172)">18-24 in leader</text>
+
+  <!-- Hook with yarn/roe -->
+  <g transform="translate(220, 175)">
+    <circle cx="0" cy="0" r="1.4" fill="none" stroke="url(#steelGrad)" stroke-width="1.3" filter="url(#softShadow)"/>
+    <path d="M0 0 L0 10 Q0 16 5 16 Q10 16 10 12 Q10 8 7 6" fill="none" stroke="url(#steelGrad)" stroke-width="1.8" filter="url(#softShadow)"/>
+    <circle cx="4" cy="20" r="6" fill="#f2a6b0" stroke="#d47c8c" stroke-width="1"/>
+    <text x="25" y="20" font-size="10" fill="#555">Cured roe / shrimp</text>
+    <text x="25" y="32" font-size="10" fill="#555">or small jig</text>
+  </g>
+
+  <!-- Drift direction arrows near hook -->
+  <path d="M300 160 L330 175 M322 172 L330 175 L327 167" fill="none" stroke="#c44" stroke-width="1.5"/>
+  <text x="330" y="190" font-size="10" fill="#c44">drifted at</text>
+  <text x="330" y="202" font-size="10" fill="#c44">walking pace</text>
+
+  <!-- Fish silhouette -->
+  <g transform="translate(360, 130)" opacity="0.7">
+    <path d="M0 10 Q20 -8 45 10 Q20 28 0 10 Z" fill="url(#fishGrad_8aa9c4)" stroke="#5c7fa0" stroke-width="1"/>
+    <path d="M45 10 L58 0 L58 20 Z" fill="url(#fishGrad_8aa9c4)" stroke="#5c7fa0" stroke-width="1"/>
+  </g>
+
+  <!-- Legend box -->
+  <rect x="15" y="215" width="470" height="105" rx="6" fill="#f7f9fc" stroke="#ccd" stroke-width="1" filter="url(#softShadow)"/>
+  <text x="30" y="235" font-size="11" fill="#333" font-weight="bold">How it works:</text>
+  <text x="30" y="253" font-size="10.5" fill="#555">A river technique, not an ocean one. Pencil lead ticks bottom through a current seam while a</text>
+  <text x="30" y="268" font-size="10.5" fill="#555">float instead suspends bait or a small jig just off bottom. Either way the presentation drifts</text>
+  <text x="30" y="283" font-size="10.5" fill="#555">downstream at the same speed as the current — no faster, no slower — through the holding water.</text>
+  <text x="30" y="301" font-size="10.5" fill="#555">Standard for steelhead and river-run salmon on Pacific coast rivers.</text>
+</svg>

@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 395" font-family="Arial, sans-serif">
+  <rect x="0" y="0" width="500" height="395" fill="#132235"/>
+  <defs>
+    <linearGradient id="waterTint" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#bfe0f2" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#bfe0f2" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <defs>
+    <radialGradient id="beadGrad_f1c40f" cx="32%" cy="28%" r="75%">
+      <stop offset="0%" stop-color="#fff3c0"/>
+      <stop offset="55%" stop-color="#f1c40f"/>
+      <stop offset="100%" stop-color="#d4ac0d"/>
+    </radialGradient>
+    <radialGradient id="beadGrad_e74c3c" cx="32%" cy="28%" r="75%">
+      <stop offset="0%" stop-color="#ffc9bd"/>
+      <stop offset="55%" stop-color="#e74c3c"/>
+      <stop offset="100%" stop-color="#c0392b"/>
+    </radialGradient>
+  </defs>
+  <defs>
+    <radialGradient id="baitGrad" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#ffe4c4"/>
+      <stop offset="45%" stop-color="#e8b48a"/>
+      <stop offset="100%" stop-color="#b5794a"/>
+    </radialGradient>
+    <filter id="glossBlur" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="1.1"/>
+    </filter>
+  </defs>
+  <defs>
+    <linearGradient id="steelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f2f2f2"/>
+      <stop offset="35%" stop-color="#b8b8b8"/>
+      <stop offset="70%" stop-color="#6e6e6e"/>
+      <stop offset="100%" stop-color="#3d3d3d"/>
+    </linearGradient>
+    <linearGradient id="steelGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9a9a9a"/>
+      <stop offset="45%" stop-color="#5c5c5c"/>
+      <stop offset="100%" stop-color="#242424"/>
+    </linearGradient>
+    <radialGradient id="leadGrad" cx="32%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#e2e2e2"/>
+      <stop offset="35%" stop-color="#9a9a9a"/>
+      <stop offset="75%" stop-color="#5c5c5c"/>
+      <stop offset="100%" stop-color="#333333"/>
+    </radialGradient>
+    <filter id="softShadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="1.4" dy="2.2" stdDeviation="1.6" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <text x="250" y="28" text-anchor="middle" font-size="18" font-weight="bold" fill="#7DD3FC">Popping Cork Rig</text>
+
+  <!-- Water surface -->
+  <rect x="25" y="110" width="460" height="26" fill="url(#waterTint)"/>
+
+  <path d="M30 110 Q80 100 130 110 Q180 120 230 110 Q280 100 330 110 Q380 120 430 110 Q460 105 470 110" fill="none" stroke="#4a9eda" stroke-width="2" opacity="0.5"/>
+
+  <!-- Main line -->
+  <line x1="30" y1="85" x2="190" y2="85" stroke="#2a6" stroke-width="3" stroke-dasharray="8,4"/>
+  <line x1="30" y1="84.2" x2="190" y2="84.2" stroke="#8fe6b8" stroke-width="0.96" stroke-dasharray="8,4" opacity="0.6"/>
+  <text x="110" y="77" text-anchor="middle" font-size="11" fill="#c8d3dd">Main line (15-20 lb braid)</text>
+
+  <!-- Popping cork -->
+  <g transform="translate(200, 68)">
+    <!-- Cork body with concave top -->
+    <path d="M0 20 Q0 10 8 5 L12 0 Q20 -4 28 0 L32 5 Q40 10 40 20 Q40 35 20 38 Q0 35 0 20" fill="#f39c12" stroke="#d68910" stroke-width="2"/>
+    <!-- Concave top detail -->
+    <path d="M12 2 Q20 8 28 2" fill="none" stroke="#d68910" stroke-width="1.5"/>
+    <!-- Wire through -->
+    <line x1="20" y1="-8" x2="20" y2="42" stroke="#666" stroke-width="1.5"/>
+    <!-- Beads on wire -->
+    <circle cx="20" cy="44" r="4" fill="url(#beadGrad_e74c3c)" stroke="#c0392b" stroke-width="1"/>
+    <circle cx="20" cy="52" r="4" fill="url(#beadGrad_f1c40f)" stroke="#d4ac0d" stroke-width="1"/>
+
+    <text x="55" y="10" font-size="12" fill="#c8d3dd" font-weight="bold">Popping cork</text>
+    <text x="55" y="25" font-size="10" fill="#93a5b8">Concave top creates</text>
+    <text x="55" y="37" font-size="10" fill="#93a5b8">splash when popped</text>
+  </g>
+
+  <!-- Splash effect -->
+  <g transform="translate(200, 65)" opacity="0.4">
+    <path d="M-8 0 L-15 -8" stroke="#4a9eda" stroke-width="1.5"/>
+    <path d="M5 -5 L3 -15" stroke="#4a9eda" stroke-width="1.5"/>
+    <path d="M38 -2 L48 -10" stroke="#4a9eda" stroke-width="1.5"/>
+    <circle cx="-12" cy="-5" r="2" fill="#4a9eda"/>
+    <circle cx="45" cy="-7" r="2" fill="#4a9eda"/>
+  </g>
+
+  <!-- Leader -->
+  <line x1="220" y1="128" x2="220" y2="280" stroke="#5da" stroke-width="2.5"/>
+  <line x1="220" y1="127.4" x2="220" y2="279.4" stroke="#e8fbf3" stroke-width="0.85" opacity="0.55"/>
+  <text x="240" y="200" font-size="11" fill="#c8d3dd">Fluorocarbon</text>
+  <text x="240" y="215" font-size="11" fill="#c8d3dd">leader</text>
+  <text x="240" y="230" font-size="10" fill="#93a5b8">18-36 in</text>
+
+  <!-- Hook -->
+  <g transform="translate(207, 280)">
+    <circle cx="13" cy="0" r="3.1" fill="none" stroke="url(#steelGrad)" stroke-width="1.8" filter="url(#softShadow)"/>
+    <path d="M13 0 L13 22 Q13 36 24 36 Q34 36 34 24 Q34 16 28 12" fill="none" stroke="url(#steelGrad)" stroke-width="2.5" filter="url(#softShadow)"/>
+    <path d="M29.72 15.55 L35.77 14.05 L29.89 18.55 Z" fill="url(#steelGradDark)"/>
+    <text x="42" y="16" font-size="11" fill="#c8d3dd">Circle hook</text>
+    <text x="42" y="30" font-size="10" fill="#93a5b8">1/0 - 2/0</text>
+  </g>
+
+  <!-- Live shrimp on hook -->
+  <g transform="translate(198, 312)">
+    <path d="M5 2 Q15 -2 25 2 Q30 5 28 10 Q25 14 22 12 L15 14 Q8 14 5 10 Q2 6 5 2" fill="url(#baitGrad)" stroke="#a8663a" stroke-width="1"/>
+    <line x1="5" y1="4" x2="-2" y2="0" stroke="#d4956a" stroke-width="1"/>
+    <line x1="5" y1="6" x2="-2" y2="6" stroke="#d4956a" stroke-width="1"/>
+    <text x="15" y="28" text-anchor="middle" font-size="10" fill="#93a5b8">Live shrimp</text>
+  </g>
+
+  <!-- Action arrows showing popping motion -->
+  <g transform="translate(270, 42)">
+    <path d="M0 15 L10 0 L20 15" fill="none" stroke="#ff8a7a" stroke-width="2"/>
+    <text x="10" y="28" text-anchor="middle" font-size="9" fill="#ff8a7a">Pop!</text>
+  </g>
+
+  <!-- Legend -->
+  <rect x="15" y="333" width="470" height="52" rx="6" fill="#0f2032" stroke="#2c4a68" stroke-width="1" filter="url(#softShadow)"/>
+  <text x="30" y="352" font-size="11" fill="#e8eef3" font-weight="bold">Technique:</text>
+  <text x="110" y="352" font-size="10.5" fill="#c8d3dd">Twitch rod tip to pop the cork — splash imitates feeding fish.</text>
+  <text x="30" y="369" font-size="10.5" fill="#c8d3dd">Attracts speckled trout, redfish, and flounder keying on the commotion.</text>
+</svg>

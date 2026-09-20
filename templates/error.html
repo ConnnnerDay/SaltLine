@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forecast Unavailable &mdash; Surf &amp; Pier Fishing Forecast</title>
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#0a1a24">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    {% include 'partials/_head_fonts.html' %}
+    <link rel="preload" as="style" href="{{ surl('style.min.css') }}" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ surl('style.min.css') }}"></noscript>
+    <style>:root{--bg-body:#EDE8DF}[data-theme="dark"]{--bg-body:#0A1520}body{margin:0;background:var(--bg-body)}</style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <h1>Surf &amp; Pier Fishing Outlook</h1>
+            <p class="subtitle">Forecast Unavailable</p>
+        </div>
+    </header>
+    {% include 'partials/_main_nav.html' %}
+
+
+    <main>
+        <section class="error-message">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#6b7b8d" stroke-width="1.5" aria-hidden="true">
+                <path d="M2 12c2-3 4-5 6-5s4 5 6 5 4-5 6-5"/>
+                <path d="M2 17c2-3 4-5 6-5s4 5 6 5 4-5 6-5"/>
+                <path d="M2 7c2-3 4-5 6-5s4 5 6 5 4-5 6-5"/>
+            </svg>
+            <h2>Forecast Unavailable</h2>
+            <p>{{ message }}</p>
+            <div class="error-actions">
+                <form method="post" action="{{ url_for('api.refresh') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button type="submit">Try Again</button>
+                </form>
+                <a href="{{ url_for('views.setup') }}" class="error-change-location">Change Location</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Surf &amp; Pier Fishing Outlook</p>
+    </footer>
+</body>
+</html>

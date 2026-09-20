@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Location &mdash; Surf &amp; Pier Fishing Forecast</title>
+    {% include 'partials/_head_fonts.html' %}
+    <link rel="preload" as="style" href="{{ surl('style.min.css') }}" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ surl('style.min.css') }}"></noscript>
+    <link rel="manifest" href="{{ surl('manifest.json') }}">
+    <meta name="theme-color" content="#0a1a24">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="description" content="Choose your coastal fishing location for real-time surf and pier fishing forecasts">
+    {% include 'partials/_theme_bootstrap.html' %}
+    <link rel="preload" as="style" href="{{ surl('leaflet.min.css') }}" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ surl('leaflet.min.css') }}"></noscript>
+    <link rel="preload" as="script" href="{{ surl('js/leaflet.min.js') }}" fetchpriority="low">
+    <link rel="preload" as="script" href="{{ surl('js/setup_map.min.js') }}" fetchpriority="low">
+    <link rel="preconnect" href="https://server.arcgisonline.com">
+    <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
+    <link rel="dns-prefetch" href="https://tile.openstreetmap.org">
+</head>
+<body class="has-app-header">
+    {% import 'partials/_location_macros.html' as loc_macros with context %}
+    {% include 'partials/_main_nav.html' %}
+    <div class="page-hero">
+        <h1>Choose Your Location</h1>
+        <p class="page-subtitle">{{ all_locations|length }} coastal fishing areas across the US</p>
+    </div>
+
+    <main>
+        <section class="setup-flow-card setup-flow-card--onboarding">
+            <p class="setup-flow-title">Getting started</p>
+            <div class="setup-flow-steps">
+                <span class="setup-flow-step is-active">
+                    <span class="setup-flow-step-num">1</span>
+                    Pick location
+                </span>
+                <a href="{{ url_for('views.profile') }}" class="setup-flow-step setup-flow-step--link">
+                    <span class="setup-flow-step-num">2</span>
+                    Fishing profile
+                </a>
+                <a href="{{ url_for('views.index') }}" class="setup-flow-step setup-flow-step--link">
+                    <span class="setup-flow-step-num">3</span>
+                    View forecast
+                </a>
+            </div>
+        </section>
+
+        {% if current_location %}
+        <section class="setup-current">
+            <div class="current-location-info">
+                <span class="current-label">Current location</span>
+                <h3>{{ current_location.name }}, {{ current_location.state }}</h3>
+            </div>
+            <a href="{{ url_for('views.index') }}" class="current-keep-btn">Back to Forecast</a>
+        </section>
+        {% endif %}
+
+        <!-- Search section — primary entry point -->
+        <section class="setup-section setup-section--flush-bottom">
+            <h2>Find your spot</h2>
+            <p class="section-sub" id="geo-subtitle">Search by city, beach name, or zip code</p>
+            <div class="location-search-bar" id="loc-search-bar">
+                <label for="loc-search-input" class="sr-only">Search city, zip code, or beach name</label>
+                <input id="loc-search-input" type="search" class="location-search-input"
+                       placeholder="City, zip code, or beach name&hellip;"
+                       autocomplete="off" inputmode="search"
+                       {% if not current_location %}autofocus{% endif %}
+                       aria-autocomplete="list" aria-controls="loc-search-results">
+                <button type="button" class="location-search-btn" id="loc-search-btn" aria-label="Search">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    Search
+                </button>
+            </div>
+            <!-- Shown only when browser will prompt for geolocation permission -->
+            <button type="button" class="geo-use-location-btn" id="geo-use-btn" hidden
+                    aria-label="Use my device location to find the nearest fishing spot">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 7.1 11.5 7.4 11.8a1 1 0 0 0 1.2 0C12.9 21.5 20 15.4 20 10a8 8 0 0 0-8-8z"/></svg>
+                Use My Location
+            </button>
+            {% if error %}
+            <div class="setup-error" role="alert">{{ error }}</div>
+            {% endif %}
+            <div class="location-search-results" id="loc-search-results" role="listbox" aria-live="polite"></div>
+        </section>
+
+        <!-- Map section — click any marker to select instantly -->
+        <section class="setup-section">
+            <h2>Pick on the Map</h2>
+            <p class="section-sub">Click a marker to select it &mdash; hover to preview the name</p>
+            <div id="map"
+                 data-supported-locations='{{ all_locations|tojson }}'
+                 data-csrf="{{ csrf_token }}"
+                 class="setup-map"></div>
+            <!-- Shown after clicking open ocean; hidden when clicking a named marker directly -->
+            <div id="map-confirm" class="map-confirm" hidden>
+                <div class="map-confirm-info">
+                    <span class="map-confirm-label">Nearest:</span>
+                    <strong data-map-confirm-name></strong><span class="map-confirm-sep">, </span><span data-map-confirm-state></span>
+                </div>
+                <button type="button" class="map-confirm-btn" data-map-confirm-btn>Use this location</button>
+            </div>
+        </section>
+
+        {% if favorite_locations %}
+        <section class="setup-section">
+            <h2>Favorites</h2>
+            <p class="section-sub">Your saved locations for quick access</p>
+            <div class="location-results">
+                {% for loc in favorite_locations %}
+                    {{ loc_macros.location_result_card(loc, current_location, favorite_ids=favorite_ids, show_star=false, logged_in=g.user) }}
+                {% endfor %}
+            </div>
+        </section>
+        {% elif not g.user %}
+        <section class="setup-section" id="recent-section" hidden>
+            <h2>Recent Locations</h2>
+            <p class="section-sub">Your last 3 setup choices on this device</p>
+            <div class="location-results" id="recent-locations"></div>
+        </section>
+        {% endif %}
+
+        {% if exact_location %}
+        <section class="setup-section">
+            <h2>Your Exact Spot</h2>
+            <p class="section-sub">A forecast built for these coordinates — tides, surf, and water temp from the nearest stations</p>
+            <div class="location-results">
+                <div class="location-card-row" data-location-name="{{ exact_location.name|lower }}" data-location-state="{{ exact_location.state|lower }}">
+                    <form method="post" action="{{ url_for('views.setup_select', location_id=exact_location.id) }}" class="location-card-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <button type="submit" class="location-card{% if current_location and exact_location.id == current_location.id %} location-card--active{% endif %}">
+                            <div class="location-card-body">
+                                <h3>{{ exact_location.name }}</h3>
+                                <span class="location-state">{{ exact_location.state }}</span>
+                            </div>
+                            <span class="location-distance">Exact</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        {% if results %}
+        <section class="setup-section">
+            <h2>Nearby Locations</h2>
+            <p class="section-sub">Or pick a named spot near you</p>
+            <div class="location-results">
+                {% for loc in results %}
+                    {{ loc_macros.location_result_card(loc, current_location, favorite_ids=favorite_ids, show_star=false, logged_in=g.user) }}
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% set state_names = {
+            'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas',
+            'CA': 'California', 'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware',
+            'FL': 'Florida', 'GA': 'Georgia', 'HI': 'Hawaii', 'ID': 'Idaho',
+            'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa', 'KS': 'Kansas',
+            'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+            'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi',
+            'MO': 'Missouri', 'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada',
+            'NH': 'New Hampshire', 'NJ': 'New Jersey', 'NM': 'New Mexico', 'NY': 'New York',
+            'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio', 'OK': 'Oklahoma',
+            'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+            'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah',
+            'VT': 'Vermont', 'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia',
+            'WI': 'Wisconsin', 'WY': 'Wyoming'
+        } %}
+        <section class="setup-section">
+            <h2>Browse all locations</h2>
+            <p class="section-sub">Can&rsquo;t find it above? Expand a state to see every supported spot.</p>
+            <div class="browse-search-row">
+                <input id="browse-filter" type="search" class="browse-filter-input"
+                       placeholder="Filter by name or state&hellip;" autocomplete="off"
+                       aria-label="Filter locations by name or state">
+            </div>
+            <div class="location-browse" id="location-browse">
+                {% set ns = namespace(current_state='', state_count=0) %}
+                {% for loc in all_locations %}
+                    {% if loc.state != ns.current_state %}
+                        {% if ns.current_state != '' %}
+                            </div>
+                            </details>
+                        {% endif %}
+                        {% set ns.current_state = loc.state %}
+                        {% set ns.state_count = all_locations|selectattr('state', 'equalto', loc.state)|list|length %}
+                        <details class="state-group" data-state-group data-state="{{ loc.state|lower }}">
+                            <summary class="state-label" aria-label="Toggle {{ state_names.get(loc.state, loc.state) }} locations">
+                                <span>{{ state_names.get(loc.state, loc.state) }}</span>
+                                <span class="state-count">{{ ns.state_count }}</span>
+                            </summary>
+                            <div class="state-items">
+                    {% endif %}
+                    {{ loc_macros.browse_location_button(loc, current_location, favorite_ids=favorite_ids, show_star=false, logged_in=g.user) }}
+                {% endfor %}
+                {% if ns.current_state != '' %}
+                    </div>
+                </details>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Surf &amp; Pier Fishing Outlook &mdash; 70 locations nationwide</p>
+    </footer>
+
+    <script src="{{ surl('js/leaflet.min.js') }}" defer></script>
+    <script src="{{ surl('js/setup_map.min.js') }}" defer></script>
+    <script>
+        (function () {
+            var FAV_KEY = 'setup_favorite_locations';
+            var RECENT_KEY = 'setup_recent_locations';
+            var loggedIn = {{ 'true' if g.user else 'false' }};
+            var hasCurrentLocation = {{ 'true' if current_location else 'false' }};
+            var allLocations = {{ all_locations|tojson }};
+
+            /* Geo suggestion saved so it can be restored if user clears the search field.
+               geoSuggestion is the nearest curated spot (for the label); geoCoords are the
+               detected coordinates, submitted to /setup/coords so the server can also offer
+               an exact-point forecast for unmapped coastline. */
+            var geoSuggestion = null;
+            var geoCoords = null;
+
+            function esc2(s) {
+                return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            }
+
+            function onReady(fn) {
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', fn);
+                    return;
+                }
+                fn();
+            }
+
+            function parseJSON(key, fallback) {
+                try {
+                    var raw = window.localStorage.getItem(key);
+                    if (!raw) return fallback;
+                    var parsed = JSON.parse(raw);
+                    return Array.isArray(parsed) ? parsed : fallback;
+                } catch (err) {
+                    return fallback;
+                }
+            }
+
+            function saveJSON(key, value) {
+                try {
+                    window.localStorage.setItem(key, JSON.stringify(value));
+                } catch (err) {}
+            }
+
+            function updateRecent(locationId) {
+                if (!locationId) return;
+                var recent = parseJSON(RECENT_KEY, []);
+                recent = recent.filter(function (id) { return id !== locationId; });
+                recent.unshift(locationId);
+                saveJSON(RECENT_KEY, recent.slice(0, 3));
+            }
+
+            function renderRecentSection() {
+                if (loggedIn) return;
+                var section = document.getElementById('recent-section');
+                var container = document.getElementById('recent-locations');
+                if (!section || !container) return;
+                var recentIds = parseJSON(RECENT_KEY, []).slice(0, 3);
+                if (!recentIds.length) return;
+                var byId = {};
+                allLocations.forEach(function (loc) { byId[loc.id] = loc; });
+                var html = '';
+                recentIds.forEach(function (id) {
+                    var loc = byId[id];
+                    if (!loc) return;
+                    html += '<form method="post" action="/setup/select/' + encodeURIComponent(loc.id) + '" class="location-card-form" data-recent-select="' + esc2(loc.id) + '">';
+                    html += '<input type="hidden" name="csrf_token" value="{{ csrf_token }}">';
+                    html += '<button type="submit" class="location-card">';
+                    html += '<div class="location-card-body"><h3>' + esc2(loc.name) + '</h3><span class="location-state">' + esc2(loc.state) + '</span></div>';
+                    html += '<span class="location-distance">Recent</span>';
+                    html += '</button></form>';
+                });
+                container.innerHTML = html;
+                section.hidden = !html;
+            }
+
+            function setupBrowseFilter() {
+                var input = document.getElementById('browse-filter');
+                if (!input) return;
+                var groups = Array.prototype.slice.call(document.querySelectorAll('[data-state-group]'));
+                input.addEventListener('input', function () {
+                    var q = input.value.trim().toLowerCase();
+                    groups.forEach(function (group) {
+                        var rows = Array.prototype.slice.call(group.querySelectorAll('[data-location-name]'));
+                        var visible = 0;
+                        rows.forEach(function (row) {
+                            var name = row.getAttribute('data-location-name') || '';
+                            var state = row.getAttribute('data-location-state') || '';
+                            var match = !q || name.indexOf(q) !== -1 || state.indexOf(q) !== -1;
+                            row.hidden = !match;
+                            if (match) visible += 1;
+                        });
+                        group.hidden = visible === 0;
+                        if (q && visible > 0) group.open = true;
+                        if (!q) group.open = false;
+                    });
+                });
+            }
+
+            function setupFavoritesForAnonymous() {
+                if (loggedIn) return;
+                var favorites = parseJSON(FAV_KEY, []);
+                var buttons = Array.prototype.slice.call(document.querySelectorAll('[data-favorite-btn]'));
+                buttons.forEach(function (button) {
+                    var locationId = button.getAttribute('data-location-id');
+                    if (favorites.indexOf(locationId) !== -1) {
+                        button.classList.add('favorite-toggle-btn--active');
+                        button.setAttribute('aria-pressed', 'true');
+                    }
+                    button.addEventListener('click', function (event) {
+                        event.preventDefault();
+                        if (favorites.indexOf(locationId) !== -1) {
+                            favorites = favorites.filter(function (id) { return id !== locationId; });
+                            button.classList.remove('favorite-toggle-btn--active');
+                            button.setAttribute('aria-pressed', 'false');
+                        } else {
+                            favorites.push(locationId);
+                            button.classList.add('favorite-toggle-btn--active');
+                            button.setAttribute('aria-pressed', 'true');
+                        }
+                        saveJSON(FAV_KEY, favorites);
+                    });
+                });
+            }
+
+            function bindRecentTracking() {
+                document.addEventListener('click', function (event) {
+                    var form = event.target.closest('form[action^="/setup/select/"]');
+                    if (!form) return;
+                    var action = form.getAttribute('action') || '';
+                    var locationId = action.split('/').pop();
+                    updateRecent(locationId);
+                });
+            }
+
+            onReady(function () {
+                setupBrowseFilter();
+                renderRecentSection();
+                setupFavoritesForAnonymous();
+                bindRecentTracking();
+                setupUnifiedSearch();
+                autoRequestGeolocation();
+            });
+
+            /* Haversine distance in miles */
+            function haversineMiles(lat1, lon1, lat2, lon2) {
+                var R = 3958.8;
+                var φ1 = lat1 * Math.PI / 180, φ2 = lat2 * Math.PI / 180;
+                var Δφ = (lat2 - lat1) * Math.PI / 180;
+                var Δλ = (lon2 - lon1) * Math.PI / 180;
+                var a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                        Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+                return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            }
+
+            function findNearestLocation(lat, lon) {
+                var best = null, bestDist = Infinity;
+                allLocations.forEach(function (loc) {
+                    if (loc.lat == null || loc.lng == null) return;
+                    var d = haversineMiles(lat, lon, loc.lat, loc.lng);
+                    if (d < bestDist) { bestDist = d; best = loc; }
+                });
+                return best;
+            }
+
+            /* Render the geo suggestion card in the results area.  Submits the
+               detected coordinates to /setup/coords, which returns both the
+               nearest named spots and a forecast built for the exact point. */
+            function showGeoSuggestion() {
+                if (!geoCoords) return;
+                var subtitle = document.getElementById('geo-subtitle');
+                if (subtitle) subtitle.textContent = 'Found your location:';
+                var resultsEl = document.getElementById('loc-search-results');
+                if (!resultsEl) return;
+                var label = geoSuggestion
+                    ? ('Get my forecast — near ' + esc2(geoSuggestion.name))
+                    : 'Get my forecast for this spot';
+                var html = '<form method="post" action="{{ url_for("views.setup_coords") }}">';
+                html += '<input type="hidden" name="csrf_token" value="{{ csrf_token }}">';
+                html += '<input type="hidden" name="location_lat" value="' + geoCoords.lat + '">';
+                html += '<input type="hidden" name="location_lon" value="' + geoCoords.lon + '">';
+                html += '<button type="submit" class="location-search-result-item location-search-result-item--suggested">';
+                html += '<div><span class="location-search-result-name">' + label + '</span>';
+                html += '<span class="location-search-result-geo-label"> &mdash; near you</span></div>';
+                html += '</button></form>';
+                resultsEl.innerHTML = html;
+            }
+
+            function autoRequestGeolocation() {
+                if (!navigator.geolocation) return;
+                if (hasCurrentLocation) return;
+
+                var useBtn = document.getElementById('geo-use-btn');
+
+                function _runGeoDetect() {
+                    var subtitle = document.getElementById('geo-subtitle');
+                    var resultsEl = document.getElementById('loc-search-results');
+
+                    if (subtitle) subtitle.textContent = 'Detecting your location\u2026';
+                    if (useBtn) useBtn.hidden = true;
+                    /* Inline spinner — no full-screen overlay needed since we no longer auto-submit */
+                    if (resultsEl) {
+                        resultsEl.innerHTML = '<div class="setup-geo-loading" role="status">' +
+                            '<span class="geo-spinner-sm" aria-hidden="true"></span>Finding your nearest spot\u2026</div>';
+                    }
+
+                    navigator.geolocation.getCurrentPosition(
+                        function (pos) {
+                            geoCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+                            geoSuggestion = findNearestLocation(pos.coords.latitude, pos.coords.longitude);
+                            showGeoSuggestion();
+                        },
+                        function () {
+                            if (resultsEl) resultsEl.innerHTML = '';
+                            var subtitle2 = document.getElementById('geo-subtitle');
+                            if (subtitle2) subtitle2.textContent = 'Search by city, beach name, or zip code';
+                        },
+                        { timeout: 10000, maximumAge: 60000 }
+                    );
+                }
+
+                if (useBtn) useBtn.addEventListener('click', _runGeoDetect);
+
+                if (navigator.permissions && navigator.permissions.query) {
+                    navigator.permissions.query({ name: 'geolocation' }).then(function (result) {
+                        if (result.state === 'granted') {
+                            _runGeoDetect();
+                        } else if (result.state === 'prompt') {
+                            var subtitle = document.getElementById('geo-subtitle');
+                            if (subtitle) subtitle.textContent = 'Use your device location to find your nearest spot';
+                            if (useBtn) useBtn.hidden = false;
+                        }
+                    }).catch(function () {
+                        _runGeoDetect();
+                    });
+                } else {
+                    _runGeoDetect();
+                }
+            }
+
+            /* Unified location search: city, zip, beach */
+            function setupUnifiedSearch() {
+                var input = document.getElementById('loc-search-input');
+                var resultsEl = document.getElementById('loc-search-results');
+                var btn = document.getElementById('loc-search-btn');
+                if (!input || !resultsEl) return;
+
+                function doSearch() {
+                    var q = input.value.trim().toLowerCase();
+                    if (!q) {
+                        /* Restore geo suggestion if the user clears the field */
+                        if (geoCoords) {
+                            showGeoSuggestion();
+                        } else {
+                            resultsEl.innerHTML = '<p class="setup-help">Try a city name, beach name, or zip code &mdash; or pick on the map below.</p>';
+                        }
+                        return;
+                    }
+
+                    var isZip = /^\d{3,5}$/.test(q.replace(/\s/g, ''));
+
+                    var matches = allLocations.filter(function (loc) {
+                        var name = (loc.name || '').toLowerCase();
+                        var state = (loc.state || '').toLowerCase();
+                        var id = (loc.id || '').toLowerCase();
+                        return name.indexOf(q) !== -1 || state.indexOf(q) !== -1 || id.indexOf(q) !== -1;
+                    }).slice(0, 8);
+
+                    if (matches.length === 0) {
+                        if (isZip) {
+                            resultsEl.innerHTML = '<div class="setup-geo-loading"><span class="geo-spinner-sm" aria-hidden="true"></span>Searching by zip code\u2026</div>';
+                            var zipSearchForm = document.createElement('form');
+                            zipSearchForm.method = 'post';
+                            zipSearchForm.action = '{{ url_for("views.setup_search") }}';
+                            var csrfField = document.createElement('input');
+                            csrfField.type = 'hidden'; csrfField.name = 'csrf_token';
+                            csrfField.value = '{{ csrf_token }}';
+                            var zipField = document.createElement('input');
+                            zipField.type = 'hidden'; zipField.name = 'zipcode'; zipField.value = q;
+                            zipSearchForm.appendChild(csrfField);
+                            zipSearchForm.appendChild(zipField);
+                            document.body.appendChild(zipSearchForm);
+                            zipSearchForm.submit();
+                        } else {
+                            resultsEl.innerHTML = '<p class="setup-help">No locations match &ldquo;' + esc2(q) + '&rdquo;. Try a zip code or browse below.</p>';
+                        }
+                        return;
+                    }
+
+                    var html = '';
+                    matches.forEach(function (loc) {
+                        html += '<form method="post" action="/setup/select/' + encodeURIComponent(loc.id) + '">';
+                        html += '<input type="hidden" name="csrf_token" value="{{ csrf_token }}">';
+                        html += '<button type="submit" class="location-search-result-item" role="option">';
+                        html += '<div><span class="location-search-result-name">' + esc2(loc.name) + '</span></div>';
+                        html += '<span class="location-search-result-state">' + esc2(loc.state) + '</span>';
+                        html += '</button></form>';
+                    });
+                    resultsEl.innerHTML = html;
+                }
+
+                /* Keyboard navigation: ArrowDown from input enters result list */
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'ArrowDown') {
+                        var items = resultsEl.querySelectorAll('.location-search-result-item');
+                        if (items.length) { e.preventDefault(); items[0].focus(); }
+                    } else if (e.key === 'Escape') {
+                        input.value = '';
+                        if (geoCoords) { showGeoSuggestion(); } else { resultsEl.innerHTML = ''; }
+                    } else if (e.key === 'Enter') {
+                        clearTimeout(debounceTimer);
+                        doSearch();
+                    }
+                });
+
+                /* Arrow key navigation within results; Escape returns to input */
+                resultsEl.addEventListener('keydown', function (e) {
+                    var items = Array.prototype.slice.call(resultsEl.querySelectorAll('.location-search-result-item'));
+                    var idx = items.indexOf(document.activeElement);
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        items[(idx + 1) % items.length].focus();
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        if (idx <= 0) { input.focus(); } else { items[idx - 1].focus(); }
+                    } else if (e.key === 'Escape') {
+                        input.value = '';
+                        if (geoCoords) { showGeoSuggestion(); } else { resultsEl.innerHTML = ''; }
+                        input.focus();
+                    }
+                });
+
+                /* "/" shortcut focuses the search input from anywhere on the page */
+                document.addEventListener('keydown', function (e) {
+                    if (e.key !== '/') return;
+                    var tag = (document.activeElement || {}).tagName || '';
+                    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+                    e.preventDefault();
+                    input.focus();
+                    input.select();
+                });
+
+                var debounceTimer;
+                input.addEventListener('input', function () {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(doSearch, 200);
+                });
+
+                if (btn) btn.addEventListener('click', function () { clearTimeout(debounceTimer); doSearch(); });
+            }
+        })();
+    </script>
+</body>
+</html>

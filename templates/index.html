@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark light">
+    <title>{{ forecast.location_name or 'Fishing Forecast' }} &mdash; Surf &amp; Pier Forecast</title>
+    {% include 'partials/_head_fonts.html' %}
+    {# Critical CSS — inlined to eliminate render-blocking on style.css.
+       Contains only CSS custom properties (both themes) and the minimum base
+       rules needed to prevent FOUC: body background, header colour, hidden
+       suppression, and box-sizing.  The full style.css loads non-blocking. #}
+    <style>
+    :root{--ocean:#0077B6;--ocean-dark:#023E8A;--ocean-light:#D6EAF5;--sand:#FFFBF0;--sand-dark:#F5E8CE;--coral:#F4543B;--sea-green:#059669;--amber:#D97706;--sky:#0EA5E9;--red:#DC2626;--text:#1C3245;--text-muted:#5B7285;--white:#FAFAF8;--bg-subtle:#EBE8E2;--bg-body:#EDE8DF;--border-light:#D8E3EC;--card-bg:#FAFAF8;--shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--shadow-md:0 4px 12px rgba(0,0,0,.1);--shadow-lg:0 8px 28px rgba(0,0,0,.14);--radius:10px;--radius-sm:6px}
+    [data-theme="dark"]{--ocean:#38C0FF;--ocean-dark:#0EA5E9;--ocean-light:#0D2035;--sand:#0E1824;--sand-dark:#0A1118;--coral:#FF6B4A;--sea-green:#34D399;--amber:#FBBF24;--sky:#7DD3FC;--red:#F87171;--text:#D8EBF8;--text-muted:#7AA3BE;--white:#111E2E;--bg-subtle:#172438;--bg-body:#0A1520;--border-light:#1D3550;--card-bg:#122035;--shadow-sm:0 1px 3px rgba(0,0,0,.35);--shadow-md:0 4px 12px rgba(0,0,0,.45);--shadow-lg:0 8px 28px rgba(0,0,0,.6)}
+    *,*::before,*::after{box-sizing:border-box}
+    [hidden]{display:none!important}
+    html{overflow-x:hidden}
+    body{margin:0;background:var(--bg-body);color:var(--text)}
+    header{background:#0D2240;color:var(--white)}
+    [data-theme="dark"] header{background:#07131F}
+    </style>
+    <link rel="preload" as="style" href="{{ surl('style.min.css') }}" fetchpriority="high" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ surl('style.min.css') }}"></noscript>
+    <link rel="preload" as="script" href="{{ surl('js/page.min.js') }}" fetchpriority="high">
+    <link rel="preload" as="script" href="{{ surl('js/stat-cards.min.js') }}">
+    <link rel="preload" as="script" href="{{ surl('js/solunar.min.js') }}">
+    <link rel="preload" as="script" href="{{ surl('js/tides.min.js') }}">
+    <link rel="preload" as="script" href="{{ surl('js/collapsibles.min.js') }}">
+    <link rel="preload" as="script" href="{{ surl('js/layout-editor.min.js') }}">
+    <link rel="manifest" href="{{ surl('manifest.json') }}">
+    <meta name="theme-color" content="#0a1a24">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="{{ surl('icons/icon-192.svg') }}">
+    <script>
+    (function() {
+        var t = localStorage.getItem('theme');
+        if (t === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            if (!t) localStorage.setItem('theme', 'dark');
+        }
+    })();
+    </script>
+    <meta name="description" content="Surf and pier fishing forecast with real-time conditions, species rankings, tide charts, and solunar times for {{ forecast.location_name or 'your location' }}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ forecast.conditions.verdict }} — {{ forecast.location_name or 'Fishing Forecast' }}">
+    <meta property="og:description" content="Water {{ forecast.conditions.water_temp_f }}°F | Wind {{ forecast.conditions.wind }} | Waves {{ forecast.conditions.waves }}{% if forecast.species %} | Top: {{ forecast.species[0].name }}{% endif %}">
+    <meta property="og:image" content="{{ url_for('static', filename='icons/icon-192.svg', _external=True) }}">
+    {% if share_id %}<meta property="og:url" content="{{ url_for('views.shared_forecast', location_id=share_id, _external=True) }}">{% endif %}
+    <meta name="twitter:card" content="summary">
+</head>
+<body class="forecast-page has-app-header">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+{% include 'partials/_main_nav.html' %}
+
+<!-- Location info bar -->
+<div class="location-bar">
+    <div class="location-bar-inner">
+        <span class="location-bar-name">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 7.1 11.5 7.4 11.8a1 1 0 0 0 1.2 0C12.9 21.5 20 15.4 20 10a8 8 0 0 0-8-8z"/></svg>
+            {{ forecast.location_name or 'Your Location' }}
+        </span>
+        <div class="location-bar-actions">
+            <a href="{{ url_for('views.setup') }}" class="location-bar-change">
+                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 1.91 12.63M4.93 4.93A10 10 0 0 0 3.02 17.56M12 2v2M12 20v2"/></svg>
+                Change
+            </a>
+            <button class="location-bar-fav" id="fav-toggle" onclick="toggleFavorite()" title="Save to favorites" aria-label="Save to favorites" aria-pressed="false">
+                <svg class="fav-icon fav-icon--off" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <svg class="fav-icon fav-icon--on" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                Save
+            </button>
+        </div>
+    </div>
+    <div class="location-bar-inner" id="favorites-bar-wrap" hidden>
+        <div class="location-bar-favs" id="favorites-bar"></div>
+    </div>
+</div>
+
+{% if cached == "refreshing" %}
+<div class="banner" id="refresh-banner">Refreshing forecast&hellip; showing cached data from <span id="refresh-banner-time" class="iso-timestamp" data-iso="{{ forecast.generated_at }}">{{ forecast.generated_at }}</span></div>
+{% elif cached %}
+<div class="banner">Cached forecast from <span class="iso-timestamp" data-iso="{{ forecast.generated_at }}">{{ forecast.generated_at }}</span></div>
+{% endif %}
+
+
+<main id="main-content" role="main">
+
+    <!-- Weather Alerts -->
+    {% set all_alerts = (forecast.alerts or []) + (forecast.state_alerts or []) %}
+    {% if all_alerts %}
+    {% set ns = namespace(seen=[], top_severity='moderate') %}
+    {% for alert in all_alerts %}{% if alert.event not in ns.seen %}{% set ns.seen = ns.seen + [alert.event] %}{% if alert.severity|lower in ('extreme','warning','severe') %}{% set ns.top_severity = alert.severity|lower %}{% endif %}{% endif %}{% endfor %}
+    {% set unique_count = ns.seen|length %}
+    <div class="alerts-banner alerts-banner--collapsed alert-{{ ns.top_severity }}" role="region" aria-label="Weather alerts">
+        <button class="alerts-summary-btn" type="button" onclick="toggleAlerts(this)" aria-expanded="false" aria-controls="alerts-detail">
+            <span class="alerts-summary-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+            <span class="alerts-summary-text">{% if unique_count == 1 %}{{ ns.seen[0] }}{% else %}{{ unique_count }} weather alerts &mdash; {{ ns.seen[0] }}{% if unique_count > 1 %} + {{ unique_count - 1 }} more{% endif %}{% endif %}</span>
+            <span class="alerts-toggle-chevron" aria-hidden="true">&#9660;</span>
+        </button>
+        <div class="alerts-detail" id="alerts-detail" hidden>
+            {% set ns2 = namespace(seen=[]) %}
+            {% for alert in all_alerts %}{% if alert.event not in ns2.seen %}{% set ns2.seen = ns2.seen + [alert.event] %}
+            <div class="alert-item alert-{{ alert.severity|lower }}"><div class="alert-body"><strong class="alert-event">{{ alert.event }}</strong><span class="alert-headline">{{ alert.headline }}</span></div></div>
+            {% endif %}{% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div id="sections-container">
+
+    <!-- ============================================================
+         1. CONDITIONS SUMMARY CARD — most prominent element
+         ============================================================ -->
+    <div class="section-block" data-section-id="conditions" data-section-label="Conditions" data-required="1">
+    {% include 'partials/_conditions.html' %}
+    </div><!-- /.section-block conditions -->
+
+    <!-- ============================================================
+         4. TOP 5 SPECIES BITING
+         ============================================================ -->
+    {% if forecast.species %}
+    <div class="section-block" data-section-id="whats-biting" data-section-label="What's Biting" data-required="1">
+    <section class="top-species-section" aria-label="Top species biting now">
+        <div class="top-species-header">
+            <h2>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6.5 12c0 0-3.5-3-4.5-6 3 0 5.5 1.5 7 3"/><path d="M6.5 12c0 0-3.5 3-4.5 6 3 0 5.5-1.5 7-3"/><path d="M6.5 12h11"/><path d="M17.5 12c1.5 1.5 3 2.5 4.5 2.5-.5-1.5-.5-3.5 0-5-1.5 0-3 1-4.5 2.5z"/></svg>
+                What&rsquo;s Biting
+            </h2>
+            {% if forecast.species|length > 5 %}
+            <button class="top-species-viewall" type="button" id="view-all-species-btn" aria-expanded="false" aria-controls="full-species-panel">
+                View All ({{ forecast.species|length }})
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            {% endif %}
+        </div>
+
+        <div class="top-species-scroller" id="top-species-grid">
+            {% for sp in forecast.species[:5] %}
+            <div class="tsr-card">
+                <span class="tsr-card-rank">{{ loop.index }}</span>
+                <span class="tsr-card-name">{{ sp.name }}</span>
+                <span class="tsr-card-bait">
+                    {% if sp.bait %}{{ sp.bait[:60] }}{% if sp.bait|length > 60 %}&hellip;{% endif %}{% else %}&mdash;{% endif %}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if forecast.species|length > 5 %}
+        <button class="top-species-expand-btn" type="button" id="species-expand-btn" aria-expanded="false" aria-controls="full-species-panel">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" id="species-btn-icon"><polyline points="6 9 12 15 18 9"/></svg>
+            View Full Species Forecast
+        </button>
+        {% endif %}
+    </section>
+
+    <!-- Full species list (hidden by default) -->
+    {% set lures_only = profile and profile.lures == 'yes' and profile.live_bait != 'yes' and profile.live_bait != 'sometimes' and profile.cut_bait != 'yes' and profile.cut_bait != 'sometimes' %}
+    {% set uses_lures = profile and profile.lures in ('yes', 'sometimes') %}
+    <div id="full-species-panel" class="full-species-list" aria-label="Full species forecast" hidden>
+        {% include 'partials/_species.html' %}
+    </div>
+    </div><!-- /.section-block whats-biting -->
+    {% if g.user %}
+    <div class="section-block" data-section-id="your-patterns" data-section-label="Your Patterns" id="your-patterns-block" hidden>
+        <div class="catch-patterns" style="border-top:none;margin-top:0">
+            <h4 class="cp-title">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+                Your Patterns
+            </h4>
+            <p class="cp-sub">Learned from the conditions recorded when you logged catches here.</p>
+            <ul class="cp-list" id="dash-cp-list"></ul>
+        </div>
+    </div>
+    <script>
+    (function () {
+        var locId = {{ (forecast.location_id or '') | tojson }};
+        var block = document.getElementById('your-patterns-block');
+        var list = document.getElementById('dash-cp-list');
+        if (!block || !list || !locId) return;
+        fetch('/api/v1/log/patterns?location_id=' + encodeURIComponent(locId))
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (body) {
+                var data = body && body.data || {};
+                var insights = data.insights || [];
+                var matches = data.matches || [];
+                if (!insights.length) return;
+                insights.forEach(function (text) {
+                    var li = document.createElement('li');
+                    li.className = 'cp-item' + (matches.indexOf(text) !== -1 ? ' cp-item--match' : '');
+                    li.textContent = text;
+                    list.appendChild(li);
+                });
+                block.hidden = false;
+            }).catch(function () {});
+    })();
+    </script>
+    <div class="section-block" data-section-id="community" data-section-label="Recent Catches Nearby" id="community-block" hidden>
+        <div class="catch-patterns" style="border-top:none;margin-top:0">
+            <h4 class="cp-title">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Recent Catches Nearby
+            </h4>
+            <p class="cp-sub" id="community-sub"></p>
+            <ul class="cp-list" id="community-list"></ul>
+        </div>
+    </div>
+    <script>
+    (function () {
+        var locId = {{ (forecast.location_id or '') | tojson }};
+        var block = document.getElementById('community-block');
+        var sub = document.getElementById('community-sub');
+        var list = document.getElementById('community-list');
+        if (!block || !list || !locId) return;
+        fetch('/api/v1/community/activity?location_id=' + encodeURIComponent(locId))
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (body) {
+                var d = body && body.data;
+                if (!d || !d.available) return;
+                sub.textContent = d.contributors + ' anglers logged ' + d.count +
+                    ' catch' + (d.count === 1 ? '' : 'es') + ' here in the last ' + d.days + ' days.';
+                (d.top_species || []).forEach(function (s) {
+                    var li = document.createElement('li');
+                    li.className = 'cp-item';
+                    li.textContent = s.species + ' — ' + s.count;
+                    list.appendChild(li);
+                });
+                block.hidden = false;
+            }).catch(function () {});
+    })();
+    </script>
+    {% endif %}
+    {% if profile_incomplete %}
+    <div class="banner banner--profile-nudge" id="profile-nudge-banner">
+        <span>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" class="banner--profile-nudge-icon"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            Set up your fishing profile for personalized species and bait recommendations.
+        </span>
+        <span class="banner--profile-nudge-actions">
+            <a href="{{ url_for('views.profile') }}" class="banner--profile-nudge-link">Set up profile</a>
+            <button onclick="dismissProfileNudge()" aria-label="Dismiss" class="banner--profile-nudge-dismiss">&times;</button>
+        </span>
+    </div>
+    <script>
+    (function() {
+        if (localStorage.getItem('profile_nudge_dismissed') === '1') {
+            var b = document.getElementById('profile-nudge-banner');
+            if (b) b.remove();
+        }
+    })();
+    function dismissProfileNudge() {
+        try { localStorage.setItem('profile_nudge_dismissed', '1'); } catch(e) {}
+        var b = document.getElementById('profile-nudge-banner');
+        if (b) b.remove();
+    }
+    </script>
+    {% endif %}
+    {% else %}
+    <div class="section-block" data-section-id="whats-biting" data-section-label="What's Biting" data-required="1">
+    <section class="top-species-section" aria-label="Top species biting now">
+        <div class="top-species-header">
+            <h2>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6.5 12c0 0-3.5-3-4.5-6 3 0 5.5 1.5 7 3"/><path d="M6.5 12c0 0-3.5 3-4.5 6 3 0 5.5-1.5 7-3"/><path d="M6.5 12h11"/><path d="M17.5 12c1.5 1.5 3 2.5 4.5 2.5-.5-1.5-.5-3.5 0-5-1.5 0-3 1-4.5 2.5z"/></svg>
+                What&rsquo;s Biting
+            </h2>
+        </div>
+        <p class="section-no-data">
+            Species data is temporarily unavailable &mdash; check back shortly or
+            <a href="?force_refresh=1">refresh the forecast</a>.
+            {% if profile %}
+            Your fishing profile is applied; results will appear once data loads.
+            {% endif %}
+        </p>
+    </section>
+    </div><!-- /.section-block whats-biting -->
+    {% endif %}
+
+    <!-- ============================================================
+         5. PACK FOR TODAY — personalised tackle/bait card
+         ============================================================ -->
+    {% if trip_setup %}
+    <div class="section-block" data-section-id="pack-for-today" data-section-label="Pack for Today">
+    <details class="collapsible-module" id="pack-for-today">
+        <summary>
+            <span class="collapsible-module-title">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                Pack for Today
+            </span>
+            <span class="collapsible-module-sub">{{ trip_setup.headline }}</span>
+            <svg class="collapsible-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="collapsible-module-body">
+        <div class="trip-setup-rows">
+            {% for row in trip_setup.rows %}
+            <div class="trip-row trip-row--{{ row.icon }}">
+                <span class="trip-row-label">
+                    {% if row.icon == 'lure' %}
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12l2 2 4-4"/></svg>
+                    {% elif row.icon == 'bait' %}
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M12 12v8M8 16h8"/></svg>
+                    {% elif row.icon == 'rig' %}
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                    {% elif row.icon == 'hook' %}
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v10a4 4 0 0 1-4 4H6"/><path d="M4 14l2 2-2 2"/></svg>
+                    {% elif row.icon == 'weight' %}
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="15" r="5"/><path d="M9 9h6l-1.5-4h-3L9 9z"/></svg>
+                    {% elif row.icon == 'color' %}
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+                    {% else %}
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    {% endif %}
+                    {{ row.label }}
+                </span>
+                <span class="trip-row-value">{{ row.value }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% if not profile or not (profile.lures or profile.live_bait or profile.cut_bait) %}
+        <p class="trip-setup-personalise">
+            <a href="{{ url_for('views.profile') }}">Set your gear preferences</a> for personalised recommendations
+        </p>
+        {% endif %}
+        </div>
+    </details>
+    </div><!-- /.section-block pack-for-today -->
+    {% endif %}
+
+    <!-- ============================================================
+         6. SECONDARY DATA — COLLAPSIBLE SECTIONS
+         ============================================================ -->
+
+    <!-- NDFD Daily Temperature 5-day strip (ArcGIS Live Feed) — populated client-side -->
+    <div class="section-block" data-section-id="temp-forecast" data-section-label="5-Day Temperatures" id="temp-forecast-block">
+    <details class="collapsible-module" id="temp-forecast-details">
+        <summary>
+            <span class="collapsible-module-title">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+                5-Day Temperatures
+            </span>
+            <span class="collapsible-module-sub" id="temp-forecast-sub">NDFD forecast</span>
+            <svg class="collapsible-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="collapsible-module-body">
+            <p class="wind-outlook-source">Source: NOAA National Digital Forecast Database via ArcGIS Living Atlas &middot; Daily high/low</p>
+            <div id="temp-forecast-grid" class="temp-forecast-grid"><div class="skeleton-grid"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
+        </div>
+    </details>
+    </div><!-- /.section-block temp-forecast -->
+
+    <!-- Tides -->
+    <div class="section-block" data-section-id="todays-tides" data-section-label="Today's Tides">
+    <details class="collapsible-module">
+        <summary>
+            <span class="collapsible-module-title">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12h4l3-9 4 18 3-9h6"/></svg>
+                Today's Tides
+            </span>
+            <svg class="collapsible-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="collapsible-module-body">
+            {% include 'partials/_tides.html' %}
+        </div>
+    </details>
+    </div><!-- /.section-block todays-tides -->
+
+    <!-- Fishing Plan (rigs, tips, bait) -->
+    <div class="section-block" data-section-id="rigs-tips" data-section-label="Rigs &amp; Tips">
+    <details class="collapsible-module">
+        <summary>
+            <span class="collapsible-module-title">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 4l-6 3-6-3v10l6 3 6-3V4z"/></svg>
+                Rigs &amp; Tips
+            </span>
+            <svg class="collapsible-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="collapsible-module-body">
+
+            {# Rig section — hidden for lure-only anglers #}
+            {% if forecast.rig_recommendations and not lures_only %}
+            <section class="rig-section">
+                <h2>Recommended Rigs</h2>
+                <p class="section-sub">Matched to species biting now</p>
+                <div class="rig-cards">
+                    {% for rig in forecast.rig_recommendations %}
+                    <div class="rig-card">
+                        <h3>{{ rig.name }}</h3>
+                        {% if rig.image %}
+                        <button type="button" class="rig-diagram" data-open-rig-img data-rig-img-src="{{ url_for('static', filename=rig.image) }}" data-rig-img-name="{{ rig.name }}" aria-label="View larger diagram of {{ rig.name }}">
+                            <img src="{{ url_for('static', filename=rig.image) }}" alt="{{ rig.name }} diagram" loading="lazy">
+                        </button>
+                        {% endif %}
+                        <p class="rig-desc">{{ rig.description }}</p>
+                        {% if rig.cr_tip %}
+                        <p class="rig-cr-tip">{{ rig.cr_tip }}</p>
+                        {% endif %}
+                        {% if rig.knots %}
+                        <div class="rig-knots">
+                            <h4 class="rig-knots-title">Recommended Knots</h4>
+                            {% for knot in rig.knots %}
+                            <details class="knot-detail">
+                                <summary><strong>{{ knot.name }}</strong><span class="knot-strength">{{ knot.strength }}</span><span class="knot-use">{{ knot.use }}</span></summary>
+                                <p class="knot-steps">{{ knot.steps }}</p>
+                            </details>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+            {% if forecast.spot_tips %}
+            <section class="spot-tips-section">
+                <h2>Today&rsquo;s Fishing Tips</h2>
+                <div class="spot-tips-list">
+                    {% for tip in forecast.spot_tips %}
+                    <div class="spot-tip">
+                        <div class="spot-tip-icon">
+                            {% if tip.icon == 'wind' %}<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>
+                            {% elif tip.icon == 'waves' %}<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12c2-3 4-5 6-5s4 5 6 5 4-5 6-5"/><path d="M2 17c2-3 4-5 6-5s4 5 6 5 4-5 6-5"/></svg>
+                            {% elif tip.icon == 'tide' %}<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h4l3-9 4 18 3-9h6"/></svg>
+                            {% elif tip.icon == 'time' %}<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            {% elif tip.icon == 'season' %}<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            {% elif tip.icon == 'water' %}<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7s6 6 6 10a6 6 0 0 1-12 0c0-4 6-10 6-10z"/></svg>
+                            {% elif tip.icon == 'warning' %}<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            {% elif tip.icon == 'structure' %}<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="9" y2="18"/></svg>
+                            {% endif %}
+                        </div>
+                        <div class="spot-tip-body">
+                            <strong class="spot-tip-title">{{ tip.title }}</strong>
+                            <p class="spot-tip-detail">{{ tip.detail }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+            {# Natural bait section — hidden for lure-only anglers #}
+            {% if forecast.bait_rankings and not lures_only %}
+            <section class="bait-section">
+                <h2>Natural Bait Recommendations</h2>
+                <div class="bait-list">
+                    {% for item in forecast.bait_rankings[:4] %}
+                    <div class="bait-item" data-bait-name="{{ item.bait|lower }}">
+                        <span class="bait-num">{{ loop.index }}</span>
+                        <div class="bait-info">
+                            <strong>{{ item.bait }}</strong>
+                            <span>{{ item.notes }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+        </div>
+    </details>
+    </div><!-- /.section-block rigs-tips -->
+
+    <!-- Lure Box — only for anglers who use lures -->
+    {% if uses_lures and forecast.lure_recommendations %}
+    <div class="section-block" data-section-id="lure-guide" data-section-label="Lure Guide">
+    <details class="collapsible-module lure-module">
+        <summary>
+            <span class="collapsible-module-title">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                Lure Guide
+            </span>
+            <svg class="collapsible-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="collapsible-module-body">
+            {% include 'partials/_lures.html' %}
+        </div>
+    </details>
+    </div><!-- /.section-block lure-guide -->
+    {% endif %}
+
+    <!-- Additional Data (spawning, calendar, forage) -->
+    <div class="section-block" data-section-id="species-calendar" data-section-label="Species Calendar">
+    <details class="collapsible-module">
+        <summary>
+            <span class="collapsible-module-title">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Species Calendar
+            </span>
+            <svg class="collapsible-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="collapsible-module-body">
+            {% if forecast.calendar %}
+            <section class="calendar-section">
+                <p class="section-sub">Monthly availability at {{ forecast.location_name or 'this location' }}</p>
+                <div class="calendar-table-wrap">
+                    <table class="calendar-table" aria-label="Monthly species availability calendar">
+                        <thead>
+                            <tr>
+                                <th class="cal-species-col" scope="col">Species</th>
+                                {% set full_months = ['January','February','March','April','May','June','July','August','September','October','November','December'] %}
+                                {% for i in range(12) %}<th class="cal-month-col" scope="col" abbr="{{ full_months[i] }}">{{ ['J','F','M','A','M','J','J','A','S','O','N','D'][i] }}</th>{% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sp in forecast.calendar %}
+                            <tr>
+                                <td class="cal-species-name" scope="row">{{ sp.name }}</td>
+                                {% for mo in sp.months %}
+                                <td>
+                                    {% if mo.level == 'peak' %}<span class="cal-dot cal-dot--peak" title="{{ mo.abbr }}: Peak" aria-label="{{ mo.abbr }}: Peak"></span>
+                                    {% elif mo.level == 'good' %}<span class="cal-dot cal-dot--good" title="{{ mo.abbr }}: Good" aria-label="{{ mo.abbr }}: Good"></span>
+                                    {% else %}<span class="cal-dot cal-dot--off" title="{{ mo.abbr }}: Off" aria-label="{{ mo.abbr }}: Off season"></span>{% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="calendar-legend">
+                    <span class="cal-legend-item"><span class="cal-dot cal-dot--peak"></span> Peak</span>
+                    <span class="cal-legend-item"><span class="cal-dot cal-dot--good"></span> Good</span>
+                    <span class="cal-legend-item"><span class="cal-dot cal-dot--off"></span> Off season</span>
+                </div>
+            </section>
+            {% endif %}
+
+            {% include 'partials/_spawning.html' %}
+
+            {% if forecast.natural_bait and not lures_only %}
+            <section class="forage-section">
+                <h2>What&rsquo;s in the Water</h2>
+                <p class="section-sub">Natural forage this month &mdash; match your bait</p>
+                <div class="forage-grid">
+                    {% for bait in forecast.natural_bait %}{% if bait.status == 'available' %}
+                    <div class="forage-item">
+                        <div class="forage-status"><svg viewBox="0 0 16 16" width="12" height="12"><circle cx="8" cy="8" r="6" fill="var(--sea-green)"/></svg></div>
+                        <div class="forage-info">
+                            <strong class="forage-name">{{ bait.name }}</strong>
+                            <span class="forage-note">{{ bait.note }}</span>
+                        </div>
+                    </div>
+                    {% endif %}{% endfor %}
+                </div>
+            </section>
+            {% endif %}
+        </div>
+    </details>
+    </div><!-- /.section-block species-calendar -->
+
+
+
+
+    </div><!-- /#sections-container -->
+
+    <!-- Share & Refresh -->
+    <section class="share-section">
+        <h2>Share This Forecast</h2>
+        <div class="share-buttons">
+            <button type="button" class="share-btn share-btn--link" onclick="shareLink()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <span>Copy Link</span>
+            </button>
+            <button type="button" class="share-btn share-btn--text" onclick="shareText()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h10M7 12h10M7 17h6"/></svg>
+                <span>Copy Summary</span>
+            </button>
+            <button type="button" class="share-btn share-btn--print" onclick="window.print()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                <span>Print</span>
+            </button>
+        </div>
+        <div id="share-toast" class="share-toast" hidden role="status" aria-live="polite">Copied!</div>
+    </section>
+
+    <section class="refresh">
+        <form method="post" action="{{ url_for('api.refresh') }}" id="refresh-form" onsubmit="handleRefreshSubmit(this)">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" id="refresh-btn">
+                <span id="refresh-btn-label">Refresh Forecast</span>
+                <span id="refresh-btn-spinner" hidden aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="spin-icon" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    Refreshing&hellip;
+                </span>
+            </button>
+        </form>
+        <p class="timestamp" data-ts="{{ forecast.generated_at }}">Updated {{ forecast.age_human if forecast.age_human else forecast.generated_at }}<span id="auto-refresh-note"></span></p>
+    </section>
+
+    <!-- Regulations Modal (rendered by species partial JS) -->
+    <div class="reg-modal" id="reg-modal" role="dialog" aria-modal="true" aria-labelledby="reg-modal-title" aria-hidden="true" hidden>
+        <div class="reg-modal__card">
+            <div class="reg-modal__hdr">
+                <h3 id="reg-modal-title" class="reg-modal__title">Fishing Regulations</h3>
+                <button class="reg-modal__close" id="reg-modal-close" aria-label="Close regulations">&times;</button>
+            </div>
+            <div class="reg-modal__body" id="reg-modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Rig Diagram Lightbox -->
+    <div class="rig-img-modal" id="rig-img-modal" role="dialog" aria-modal="true" aria-labelledby="rig-img-modal-title" aria-hidden="true" hidden>
+        <div class="rig-img-modal__card">
+            <div class="rig-img-modal__hdr">
+                <h3 id="rig-img-modal-title" class="rig-img-modal__title">Rig diagram</h3>
+                <button type="button" class="rig-img-modal__close" id="rig-img-modal-close" aria-label="Close">&times;</button>
+            </div>
+            <div class="rig-img-modal__body">
+                <img id="rig-img-modal-img" src="" alt="">
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<footer>
+    <p>&copy; {{ forecast.generated_at[:4] }} Surf &amp; Pier Fishing Outlook &mdash; {{ forecast.location_name or 'Your Fishing Forecast' }}</p>
+</footer>
+
+<script>
+/* ---- Auth + location globals (server-rendered) ---- */
+var LOGGED_IN = {{ 'true' if user else 'false' }};
+var FAV_KEY = 'favorite_locations';
+var CURRENT_LOC_ID = {{ (forecast.location_id or '')|tojson }};
+var CURRENT_LOC_STATE = {{ (forecast.location_state or ((forecast.location_name.split(',')[-1].strip()) if forecast.location_name and ',' in forecast.location_name else ''))|tojson }};
+var CURRENT_LOC_NAME = {{ (forecast.location_name or '')|tojson }};
+var CURRENT_LOC_LAT = {{ location_lat|tojson }};
+var CURRENT_LOC_LNG = {{ location_lng|tojson }};
+var IS_REFRESHING = {{ ('true' if cached == 'refreshing' else 'false') }};
+var MAP_IS_ADMIN  = {{ ('true' if g.user and g.user.get('is_admin') else 'false') }};
+var SERVER_PROFILE = {{ (profile or {})|tojson }};
+var SHARE_ID = {{ share_id|tojson }};
+var SHARE_TEXT_URL = {{ url_for('api.share_text')|tojson }};
+
+// Seed localStorage favorites from server-stored account data (logged-in users).
+// This ensures favorites appear immediately on first load from a new device.
+{% if favorite_locations %}
+(function() {
+    var serverFavs = {{ favorite_locations|tojson }};
+    if (serverFavs && serverFavs.length) {
+        var local;
+        try { local = JSON.parse(localStorage.getItem(FAV_KEY)) || []; } catch(e) { local = []; }
+        var localIds = local.map(function(f) { return f.id; });
+        serverFavs.forEach(function(sf) {
+            if (localIds.indexOf(sf.id) < 0) {
+                local.push({ id: sf.id, name: sf.name });
+            }
+        });
+        localStorage.setItem(FAV_KEY, JSON.stringify(local));
+    }
+})();
+{% endif %}
+
+// ── Tide data (logic in solunar.min.js + tides.min.js) ─────────────────────
+window._TIDES = {{ (forecast.tides if forecast.tides else []) | tojson }};
+window._TIDE_CURVE = {{ (forecast.tide_chart.curve if forecast.tide_chart else []) | tojson }};
+window._SUN_TIMES = {{ (forecast.conditions.sunrise_sunset if forecast.conditions else '') | tojson }};
+
+// ── Refreshing poll — must run immediately when IS_REFRESHING is true ──────
+if (IS_REFRESHING && CURRENT_LOC_ID) {
+    (function() {
+        var POLL_MS = 3000;
+        var MAX_MS = 120000;
+        var started = Date.now();
+        var statusUrl = '/api/v1/forecast/' + encodeURIComponent(CURRENT_LOC_ID) + '/status';
+        function check() {
+            if (Date.now() - started > MAX_MS) { window.location.href = window.location.pathname; return; }
+            fetch(statusUrl).then(function(r) { return r.json(); }).then(function(data) {
+                var d = data && data.data;
+                if (d && !d.is_refreshing) { window.location.href = window.location.pathname; }
+                else { setTimeout(check, POLL_MS); }
+            }).catch(function() { setTimeout(check, POLL_MS); });
+        }
+        setTimeout(check, POLL_MS);
+    })();
+}
+</script>
+<script>
+// ── Fishing condition alert — fires if the user opted in ──────────────────
+(function () {
+    var ALERTS_KEY = 'fish_alerts_enabled';
+    var NOTIF_THROTTLE_KEY = 'fish_alert_last_' + {{ (forecast.location_id or '') | tojson }};
+    var THROTTLE_MS = 60 * 60 * 1000; // max once per hour per location
+
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    if (localStorage.getItem(ALERTS_KEY) !== '1') return;
+    if (!navigator.serviceWorker) return;
+
+    var verdict = {{ (forecast.conditions.verdict or '') | tojson }}.toLowerCase();
+    var isGood = verdict.indexOf('good') !== -1 || verdict.indexOf('great') !== -1 ||
+                 verdict.indexOf('excellent') !== -1 || verdict.indexOf('prime') !== -1;
+    if (!isGood) return;
+
+    var lastSent = parseInt(localStorage.getItem(NOTIF_THROTTLE_KEY) || '0', 10);
+    if (Date.now() - lastSent < THROTTLE_MS) return;
+    localStorage.setItem(NOTIF_THROTTLE_KEY, String(Date.now()));
+
+    var locationName = {{ (forecast.location_name or 'your location') | tojson }};
+    var body = 'Conditions are looking great at ' + locationName + ' right now — ' +
+               {{ (forecast.conditions.verdict or 'good fishing today') | tojson }} + '.';
+
+    navigator.serviceWorker.ready.then(function (reg) {
+        reg.showNotification('Great fishing conditions!', {
+            body: body,
+            icon: '/static/icons/icon-192.svg',
+            tag: 'fish-conditions',
+            data: { url: window.location.href },
+        });
+    }).catch(function () {});
+})();
+</script>
+<script>
+// ── Offline snapshot — saves key forecast data so offline.html can show it ──
+(function () {
+    try {
+        {% set _score = forecast.conditions.fishability_score_for_angler | default(none) %}
+        {% if _score is none %}{% set _score = forecast.conditions.fishability_score | default(none) %}{% endif %}
+        var snap = {
+            location_name: {{ (forecast.location_name or '') | tojson }},
+            generated_at:  {{ (forecast.generated_at or '') | tojson }},
+            saved_at: Date.now(),
+            conditions: {
+                verdict:      {{ (forecast.conditions.verdict_for_angler or forecast.conditions.verdict_for_type or forecast.conditions.verdict or '') | tojson }},
+                score:        {{ _score | tojson if _score is not none else 'null' }},
+                summary:      {{ (forecast.conditions.summary or '') | tojson }},
+                water_temp_f: {{ (forecast.conditions.water_temp_f | string) if forecast.conditions.water_temp_f is not none else 'null' }},
+                wind:         {{ (forecast.conditions.wind or '') | tojson }},
+                waves:        {{ (forecast.conditions.waves or '') | tojson }},
+                swell:        {{ (forecast.conditions.swell or '') | tojson }}
+            },
+            tide_state: {{ (forecast.tide_state or '') | tojson }},
+            tides: {{ (forecast.tides[:6] if forecast.tides else []) | tojson }},
+            species: {{ (forecast.species[:5] if forecast.species else []) | tojson }},
+            best_times: {{ (forecast.best_times[:4] if forecast.best_times else []) | tojson }},
+            gear: {{ (forecast.gear_checklist[:14] if forecast.gear_checklist else []) | tojson }},
+            solunar: {{ (forecast.solunar) | tojson if forecast.solunar else 'null' }}
+        };
+        localStorage.setItem('fishforecast_snapshot', JSON.stringify(snap));
+    } catch (e) {}
+})();
+</script>
+<script src="{{ surl('js/collapsibles.min.js') }}" defer></script>
+<script src="{{ surl('js/layout-editor.min.js') }}" defer></script>
+<script>window.IS_LOGGED_IN = {{ 'true' if g.user else 'false' }};</script>
+<script>
+/* ── Auto-detected location toast ────────────────────────────────────────── */
+(function () {
+    try {
+        var detected = sessionStorage.getItem('geo_auto_detected');
+        if (!detected) return;
+        sessionStorage.removeItem('geo_auto_detected');
+
+        var toast = document.createElement('div');
+        toast.className = 'layout-toast';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        toast.innerHTML = 'Auto-detected: ' + detected + ' &nbsp;·&nbsp; <a href="{{ url_for("views.setup") }}">Change</a>';
+        document.body.appendChild(toast);
+
+        // Two rAF frames to ensure the element is in the DOM before transitioning.
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                toast.classList.add('layout-toast--visible');
+            });
+        });
+
+        // Auto-dismiss after 5 s.
+        setTimeout(function () {
+            toast.classList.remove('layout-toast--visible');
+            setTimeout(function () {
+                if (toast.parentNode) toast.parentNode.removeChild(toast);
+            }, 300);
+        }, 5000);
+    } catch (e) {}
+})();
+</script>
+
+<script src="{{ surl('js/stat-cards.min.js') }}" defer></script>
+<script src="{{ surl('js/solunar.min.js') }}" defer></script>
+<script src="{{ surl('js/tides.min.js') }}" defer></script>
+<script src="{{ surl('js/page.min.js') }}" defer></script>
+</html>

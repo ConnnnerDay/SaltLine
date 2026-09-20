@@ -1,0 +1,19 @@
+{
+  "name": "Surf & Pier Fishing Forecast",
+  "short_name": "Fish Forecast",
+  "description": "Real-time surf and pier fishing forecast with species rankings, tide charts, and solunar times",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0e5f78",
+  "theme_color": "#0e5f78",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

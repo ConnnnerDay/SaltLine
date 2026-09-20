@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In &mdash; Surf &amp; Pier Fishing Forecast</title>
+    {% include 'partials/_head_fonts.html' %}
+    <link rel="preload" as="style" href="{{ surl('style.min.css') }}" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ surl('style.min.css') }}"></noscript>
+    <meta name="theme-color" content="#0e5f78">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    {% include 'partials/_theme_bootstrap.html' %}
+</head>
+<body class="auth-page">
+    <header>
+        <div class="header-inner">
+            <h1>Surf &amp; Pier Fishing Outlook</h1>
+            <p class="subtitle">Log in to your account</p>
+        </div>
+    </header>
+
+    <main>
+        <section class="auth-section">
+
+            {% if error %}
+            <div class="setup-error" role="alert">{{ error }}</div>
+            {% endif %}
+
+            <form method="post" action="{{ url_for('auth.login') }}" class="auth-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div class="auth-field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username"
+                           value="{{ username|default('', true) }}" class="auth-input" maxlength="30"
+                           autocomplete="username" autocorrect="off" autocapitalize="off" spellcheck="false"
+                           required autofocus>
+                </div>
+                <div class="auth-field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password"
+                           class="auth-input" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="auth-btn">Log In</button>
+            </form>
+
+            <p class="auth-switch">Don't have an account? <a href="{{ url_for('auth.register') }}">Create one</a></p>
+            <p class="auth-switch"><a href="{{ url_for('auth.landing') }}">&larr; Back</a></p>
+        </section>
+    </main>
+
+    <footer>
+        <p>Surf &amp; Pier Fishing Outlook</p>
+    </footer>
+</body>
+</html>

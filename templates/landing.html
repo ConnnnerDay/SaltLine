@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surf &amp; Pier Fishing Forecast &mdash; Real-time Coastal Forecasts</title>
+    {% include 'partials/_head_fonts.html' %}
+    <link rel="preload" as="style" href="{{ surl('style.min.css') }}" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ surl('style.min.css') }}"></noscript>
+    <link rel="manifest" href="{{ surl('manifest.json') }}">
+    <meta name="theme-color" content="#0e5f78">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Real-time surf and pier fishing forecasts for 70+ coastal US locations. Species outlooks, live conditions, and up-to-date regulations.">
+    {% include 'partials/_theme_bootstrap.html' %}
+</head>
+<body class="landing-page">
+
+    <main class="landing-main">
+        <!-- Hero -->
+        <section class="landing-hero-section">
+            <div class="landing-hero-inner">
+                <div class="landing-logo-mark" aria-hidden="true">&#127754;</div>
+                <h1 class="landing-title">Surf &amp; Pier<br><em>Fishing Forecast</em></h1>
+                <p class="landing-tagline">Know before you go &mdash; real-time coastal fishing forecasts for 70+ spots across the US.</p>
+
+                <!-- Primary CTAs -->
+                <div class="landing-cta-stack">
+                    <a href="{{ url_for('auth.register') }}" class="landing-btn landing-btn--primary">Create Free Account</a>
+                    <a href="{{ url_for('auth.login') }}" class="landing-btn landing-btn--ghost">Log In</a>
+                </div>
+
+                <p class="landing-location-count">&#127757; 70+ coastal spots &mdash; FL, VA, NC, NY, TX &amp; more</p>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="landing-features-section">
+            <div class="landing-features">
+                <div class="landing-feature">
+                    <span class="landing-feature-icon" aria-hidden="true">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c2-3 4-5 6-5s4 5 6 5 4-5 6-5"/><path d="M2 17c2-3 4-5 6-5s4 5 6 5 4-5 6-5"/></svg>
+                    </span>
+                    <strong>Live Conditions</strong>
+                    <p>Wind, swell, tides, and water temp refreshed hourly from NOAA and NWS.</p>
+                </div>
+                <div class="landing-feature">
+                    <span class="landing-feature-icon" aria-hidden="true">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M5 12H3"/><path d="M21 12h-2"/><path d="M12 5V3"/><path d="M12 21v-2"/><path d="M7.05 7.05 5.64 5.64"/><path d="M18.36 18.36l-1.41-1.41"/><path d="M7.05 16.95l-1.41 1.41"/><path d="M18.36 5.64l-1.41 1.41"/></svg>
+                    </span>
+                    <strong>Species Outlook</strong>
+                    <p>See which fish are biting based on conditions and solunar timing.</p>
+                </div>
+                <div class="landing-feature">
+                    <span class="landing-feature-icon" aria-hidden="true">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+                    </span>
+                    <strong>Regulations</strong>
+                    <p>Size and bag limits pulled live from state agencies so you always know the rules.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="landing-footer">
+        <p>Surf &amp; Pier Fishing Outlook &mdash; 70 locations nationwide</p>
+    </footer>
+</body>
+</html>

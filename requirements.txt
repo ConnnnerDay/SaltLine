@@ -1,1 +1,20 @@
-jupyterlab>3.0
+# Runtime dependencies — pinned to compatible minor versions.
+# Run `pip install -r requirements.txt` to reproduce the exact environment.
+# Regenerate with: pip-compile requirements.in  (or uv pip compile)
+Flask>=3.1,<4.0
+Werkzeug>=3.1,<4.0
+requests>=2.32,<3.0
+beautifulsoup4>=4.12,<5.0
+
+# Production WSGI server (recommended outside development)
+gunicorn>=21.2,<26.0
+
+# .env file support — loads environment variables from .env in dev automatically
+python-dotenv>=1.0,<2.0
+
+# Brotli compression — optional, falls back to gzip if not installed
+brotli>=1.0,<2.0
+
+# Web Push (VAPID) — optional; web-push notifications are disabled unless
+# VAPID keys are configured. Imported lazily so the app runs without it.
+pywebpush>=1.14,<3.0

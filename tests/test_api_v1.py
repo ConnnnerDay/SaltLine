@@ -1,0 +1,691 @@
+"""Integration tests for versioned API routes and stable response envelopes."""
+
+import pytest
+
+from app import create_app
+from storage.sqlite import create_user, init_db, save_preferences
+
+
+@pytest.fixture
+def app(tmp_path, monkeypatch):
+    db_path = str(tmp_path / "test.db")
+    monkeypatch.setattr("storage.sqlite.DB_PATH", db_path)
+    init_db()
+    app = create_app()
+    app.config["TESTING"] = True
+    return app
+
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
+
+
+def _login_session(client, user_id, location_id="wrightsville-beach-nc"):
+    with client.session_transaction() as sess:
+        sess["user_id"] = user_id
+        sess["session_version"] = 0
+        sess["location_id"] = location_id
+
+
+def test_v1_forecast_envelope(client, monkeypatch):
+    sample = {"generated_at": "2026-03-03T10:00:00", "conditions": {"verdict": "Good"}}
+
+    monkeypatch.setattr(
+        "web.api.load_cached_forecast",
+        lambda loc_id, user_id=None, include_stale=False: sample,
+    )
+    monkeypatch.setattr("web.api.enqueue_forecast_refresh", lambda *a, **kw: None)
+
+    resp = client.get("/api/v1/forecast?location_id=wrightsville-beach-nc")
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert set(body.keys()) == {"ok", "data", "error", "meta"}
+    assert body["ok"] is True
+    assert body["error"] is None
+    assert body["meta"]["version"] == "v1"
+    assert body["data"]["location_id"] == "wrightsville-beach-nc"
+    assert body["data"]["forecast"]["conditions"]["verdict"] == "Good"
+
+
+def test_v1_forecast_status_endpoint(client, monkeypatch):
+    sample = {"generated_at": "2026-03-03T10:00:00"}
+    monkeypatch.setattr(
+        "web.api.load_cached_forecast",
+        lambda loc_id, user_id=None, include_stale=False: sample,
+    )
+    monkeypatch.setattr("web.api._forecast_age_minutes", lambda forecast: 15)
+    monkeypatch.setattr("web.api.is_refreshing", lambda loc_id, user_id=None: True)
+
+    resp = client.get("/api/v1/forecast/wrightsville-beach-nc/status")
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["ok"] is True
+    data = body["data"]
+    assert data["location_id"] == "wrightsville-beach-nc"
+    assert data["last_generated_at"] == "2026-03-03T10:00:00"
+    assert data["is_stale"] is False
+    assert data["is_refreshing"] is True
+
+
+def test_legacy_forecast_force_refresh(client, monkeypatch):
+    generated = {
+        "generated_at": "2026-03-03T11:00:00",
+        "conditions": {"verdict": "Excellent"},
+    }
+    monkeypatch.setattr("web.api.generate_forecast", lambda location: generated)
+
+    saved = {}
+
+    def _save(data, location_id, user_id=None):
+        saved["location_id"] = location_id
+        saved["data"] = data
+
+    monkeypatch.setattr("web.api.save_forecast", _save)
+
+    resp = client.get(
+        "/api/forecast?location_id=wrightsville-beach-nc&force_refresh=true"
+    )
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["conditions"]["verdict"] == "Excellent"
+    assert saved["location_id"] == "wrightsville-beach-nc"
+
+
+def test_v1_profile_requires_login(client):
+    resp = client.get("/api/v1/profile")
+    assert resp.status_code == 401
+    body = resp.get_json()
+    assert body["ok"] is False
+    assert body["error"]["code"] == "unauthorized"
+
+
+def test_v1_profile_get_and_post(client):
+    uid = create_user("apiv1_user", "pass1234")
+    assert uid is not None
+    _login_session(client, uid)
+
+    post = client.post(
+        "/api/v1/profile",
+        json={"theme": "dark", "units": "F", "favorites": ["wrightsville-beach-nc"]},
+    )
+    assert post.status_code == 200
+    pbody = post.get_json()
+    assert pbody["ok"] is True
+    assert pbody["data"]["profile"]["theme"] == "dark"
+
+    get = client.get("/api/v1/profile")
+    assert get.status_code == 200
+    gbody = get.get_json()
+    assert gbody["ok"] is True
+    assert set(gbody.keys()) == {"ok", "data", "error", "meta"}
+
+
+def test_v1_profile_notification_prefs_roundtrip(client):
+    from storage.sqlite import get_preferences
+
+    uid = create_user("apiv1_notif", "pass1234")
+    assert uid is not None
+    _login_session(client, uid)
+
+    post = client.post(
+        "/api/v1/profile",
+        json={
+            "notification_prefs": {
+                "enabled": True,
+                "email": True,
+                "push": False,
+                "min_rating": "Excellent",
+                "lead_hours": 3,
+            }
+        },
+    )
+    assert post.status_code == 200
+    np = post.get_json()["data"]["profile"]["notification_prefs"]
+    assert np["enabled"] is True
+    assert np["min_rating"] == "Excellent"
+    assert np["lead_hours"] == 3
+    # Persisted to storage as well.
+    assert get_preferences(uid)["notification_prefs"]["enabled"] is True
+
+
+def test_v1_profile_rejects_bad_notification_prefs(client):
+    uid = create_user("apiv1_notif_bad", "pass1234")
+    _login_session(client, uid)
+    resp = client.post(
+        "/api/v1/profile",
+        json={"notification_prefs": {"min_rating": "Perfect"}},
+    )
+    assert resp.status_code == 400
+
+
+def test_v1_log_captures_conditions_and_patterns(client, monkeypatch):
+    from storage.sqlite import create_user, get_catch_conditions
+
+    # Stub the cached forecast so logging snapshots conditions.
+    sample = {
+        "tide_state": "Rising",
+        "conditions": {"wind_dir": "NE", "water_temp_f": 64.0},
+        "solunar": {"moon_phase": "Full Moon"},
+        "water_quality": {"available": True, "hab_risk": "watch"},
+        "river_discharge": {"available": True, "nearest": {"flow_cfs": 120.0}},
+    }
+    monkeypatch.setattr(
+        "web.api.load_cached_forecast",
+        lambda loc_id, user_id=None, include_stale=False: sample,
+    )
+    uid = create_user("apiv1_patterns", "pass1234")
+    _login_session(client, uid)
+
+    for _ in range(5):
+        resp = client.post(
+            "/api/v1/log",
+            json={"species": "Red drum", "location_id": "wrightsville-beach-nc"},
+        )
+        assert resp.status_code == 201
+
+    rows = get_catch_conditions(uid, "wrightsville-beach-nc")
+    assert rows and rows[0]["tide_state"] == "Rising"
+    assert rows[0]["moon_phase"] == "Full Moon"
+    assert rows[0]["hab_risk"] == "watch"
+    assert rows[0]["river_discharge_cfs"] == 120.0
+
+    pat = client.get("/api/v1/log/patterns?location_id=wrightsville-beach-nc")
+    assert pat.status_code == 200
+    data = pat.get_json()["data"]
+    assert data["total"] == 5
+    assert any("rising tide" in i.lower() for i in data["insights"])
+    assert any("algal bloom advisory" in i.lower() for i in data["insights"])
+
+
+def test_v1_log_patterns_requires_login(client):
+    resp = client.get("/api/v1/log/patterns")
+    assert resp.status_code == 401
+
+
+def test_v1_notifications_test_requires_login(client):
+    assert client.post("/api/v1/notifications/test", json={}).status_code == 401
+
+
+def test_v1_notifications_test_email_channel(client, monkeypatch):
+    from storage.sqlite import create_user, save_preferences
+
+    sent = {}
+    monkeypatch.setattr(
+        "services.email.send_email",
+        lambda to, subj, text, html: sent.update(to=to, subj=subj) or True,
+    )
+    uid = create_user("notif_test", "pass1234", email="t@example.com")
+    _login_session(client, uid)
+    save_preferences(
+        uid, notification_prefs={"enabled": True, "email": True, "push": False}
+    )
+    resp = client.post("/api/v1/notifications/test", json={})
+    assert resp.status_code == 200
+    data = resp.get_json()["data"]["sent"]
+    assert data["email"] is True
+    assert data["push"] is False
+    assert sent["to"] == "t@example.com"
+    assert "[Test]" in sent["subj"]
+
+
+def test_v1_notifications_test_nothing_when_channels_off(client, monkeypatch):
+    from storage.sqlite import create_user, save_preferences
+
+    uid = create_user("notif_off", "pass1234", email="o@example.com")
+    _login_session(client, uid)
+    save_preferences(uid, notification_prefs={"enabled": True, "email": False})
+    resp = client.post("/api/v1/notifications/test", json={})
+    data = resp.get_json()["data"]["sent"]
+    assert data == {"email": False, "push": False}
+
+
+def test_v1_log_crud(client):
+    uid = create_user("apiv1_log", "pass1234")
+    assert uid is not None
+    _login_session(client, uid)
+
+    create = client.post(
+        "/api/v1/log",
+        json={"species": "Red Drum", "size": "22 in", "notes": "Slot fish"},
+    )
+    assert create.status_code == 201
+    cbody = create.get_json()
+    assert cbody["ok"] is True
+    entry_id = cbody["data"]["entry"]["id"]
+
+    listing = client.get("/api/v1/log?location_id=wrightsville-beach-nc")
+    assert listing.status_code == 200
+    lbody = listing.get_json()
+    assert lbody["ok"] is True
+    assert isinstance(lbody["data"]["entries"], list)
+    assert "stats" in lbody["data"]
+
+    delete = client.delete(f"/api/v1/log/{entry_id}", content_type="application/json")
+    assert delete.status_code == 200
+    dbody = delete.get_json()
+    assert dbody["ok"] is True
+    assert dbody["data"]["deleted"] is True
+
+
+# ---------------------------------------------------------------------------
+# /api/v1/regulations
+# ---------------------------------------------------------------------------
+
+
+def test_v1_regulations_missing_species(client):
+    """Omitting the required 'species' param returns 400."""
+    resp = client.get("/api/v1/regulations")
+    assert resp.status_code == 400
+    body = resp.get_json()
+    assert body["ok"] is False
+    assert body["error"]["code"] == "missing_param"
+
+
+def test_v1_regulations_with_state_returns_envelope(client):
+    """Valid species + state returns 200 v1 envelope with regulation dict."""
+    resp = client.get("/api/v1/regulations?species=Red+drum+%28puppy+drum%29&state=NC")
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["ok"] is True
+    assert set(body.keys()) == {"ok", "data", "error", "meta"}
+    assert body["error"] is None
+    assert body["meta"]["version"] == "v1"
+    data = body["data"]
+    assert data["species"] == "Red drum (puppy drum)"
+    assert data["state"] == "NC"
+    reg = data["regulation"]
+    assert reg is not None
+    assert "min_size" in reg
+    assert "bag_limit" in reg
+    assert "season" in reg
+    assert "notes" in reg
+    assert "official_source" in reg
+    assert "snapshot_source" in reg
+    assert "source_file" in reg
+
+
+def test_v1_regulations_species_lookup_is_case_insensitive(client, monkeypatch):
+    """Species lookup should work even when species capitalization differs."""
+    # Disable live scraper so the snapshot data path is exercised.
+    monkeypatch.setattr("regulations._scrape_regulation", lambda *a, **kw: None)
+    resp = client.get("/api/v1/regulations?species=red+drum+%28puppy+drum%29&state=NC")
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["ok"] is True
+    reg = body["data"]["regulation"]
+    assert reg is not None
+    assert reg["data_status"] == "snapshot"
+    assert reg["min_size"] == "18 in TL"
+
+
+def test_v1_regulations_unknown_species_returns_null(client):
+    """Species without snapshot rows still returns official-source guidance."""
+    resp = client.get("/api/v1/regulations?species=Fantasy+Fish&state=NC")
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["ok"] is True
+    reg = body["data"]["regulation"]
+    assert reg is not None
+    assert reg["official_source"].startswith("https://")
+    assert reg["data_status"] == "official_reference"
+    assert reg["source_file"].endswith("regulations_data.json")
+
+
+def test_v1_regulations_no_state_returns_null(client):
+    """Without state info the regulation is null but the response is still 200."""
+    resp = client.get("/api/v1/regulations?species=Red+drum+%28puppy+drum%29")
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["ok"] is True
+    assert body["data"]["state"] is None
+    assert body["data"]["regulation"] is None
+
+
+def test_v1_regulations_falls_back_to_session_location_state(client, monkeypatch):
+    """If no state/location params are passed, state is derived from session location."""
+    monkeypatch.setattr(
+        "web.api.get_session_location",
+        lambda: {"id": "session-loc", "state": "NC", "name": "Session Beach"},
+    )
+    resp = client.get("/api/v1/regulations?species=Red+drum+%28puppy+drum%29")
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["ok"] is True
+    assert body["data"]["state"] == "NC"
+    assert body["data"]["regulation"] is not None
+
+
+def test_v1_regulations_derives_state_from_location_id(client, monkeypatch):
+    """Passing location_id causes state to be derived from the location config."""
+    monkeypatch.setattr(
+        "web.api.get_location",
+        lambda loc_id: {"id": loc_id, "state": "NC", "name": "Test Beach"},
+    )
+    resp = client.get(
+        "/api/v1/regulations?species=Red+drum+%28puppy+drum%29&location_id=test-nc"
+    )
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["ok"] is True
+    assert body["data"]["state"] == "NC"
+    assert body["data"]["regulation"] is not None
+
+
+def test_v1_regulations_invalid_location_id_falls_back_to_session_location(
+    client, monkeypatch
+):
+    """If location_id is invalid, API should still try the active session location."""
+    monkeypatch.setattr("web.api.get_location", lambda loc_id: None)
+    monkeypatch.setattr(
+        "web.api.get_session_location",
+        lambda: {"id": "session-loc", "state": "NC", "name": "Session Beach"},
+    )
+    resp = client.get(
+        "/api/v1/regulations?species=Red+drum+%28puppy+drum%29&location_id=missing-loc"
+    )
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["ok"] is True
+    assert body["data"]["state"] == "NC"
+    assert body["data"]["regulation"] is not None
+
+
+def test_v1_regulations_state_overrides_location_id(client, monkeypatch):
+    """Explicit 'state' query param takes priority over location_id lookup."""
+    # location_id would give SC, but state=NC is provided explicitly
+    monkeypatch.setattr(
+        "web.api.get_location",
+        lambda loc_id: {"id": loc_id, "state": "SC", "name": "SC Beach"},
+    )
+    resp = client.get(
+        "/api/v1/regulations?species=Red+drum+%28puppy+drum%29&state=NC&location_id=sc-loc"
+    )
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["data"]["state"] == "NC"
+
+
+def test_v1_regulations_unknown_state_returns_null(client):
+    """Unknown states still return fallback official-source guidance."""
+    resp = client.get("/api/v1/regulations?species=Red+drum+%28puppy+drum%29&state=ZZ")
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["ok"] is True
+    reg = body["data"]["regulation"]
+    assert reg is not None
+    assert reg["official_source"].startswith("https://")
+
+
+def test_v1_forecast_outlook_cached_only(client, monkeypatch):
+    sample = {
+        "outlook": [
+            {
+                "day": "Mon",
+                "date": "Apr 1",
+                "verdict": "Good",
+                "wind": "10 kt",
+                "waves": "2 ft",
+                "top_species": ["Red Drum"],
+            }
+        ],
+        "best_day": {
+            "best_day": "Mon",
+            "recommendation": "Fish dawn",
+            "verdict": "Good",
+        },
+        "activity_timeline": [{"hour": 0, "label": "12 AM", "level": 35, "tag": "low"}],
+    }
+    monkeypatch.setattr(
+        "web.api.load_cached_forecast", lambda loc_id, user_id=None: sample
+    )
+    monkeypatch.setattr(
+        "web.api.generate_forecast",
+        lambda location: (_ for _ in ()).throw(AssertionError("should not generate")),
+    )
+
+    resp = client.get("/api/v1/forecast/wrightsville-beach-nc/outlook")
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["ok"] is True
+    assert body["data"]["location_id"] == "wrightsville-beach-nc"
+    assert body["data"]["outlook"][0]["day"] == "Mon"
+    assert body["data"]["activity_timeline"][0]["label"] == "12 AM"
+
+
+def test_v1_forecast_solunar_cached_only(client, monkeypatch):
+    sample = {
+        "solunar": {
+            "rating": "Great",
+            "moon_phase": "Full Moon",
+            "major_periods": [],
+            "minor_periods": [],
+        }
+    }
+    monkeypatch.setattr(
+        "web.api.load_cached_forecast", lambda loc_id, user_id=None: sample
+    )
+    monkeypatch.setattr(
+        "web.api.generate_forecast",
+        lambda location: (_ for _ in ()).throw(AssertionError("should not generate")),
+    )
+
+    resp = client.get("/api/v1/forecast/wrightsville-beach-nc/solunar")
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["ok"] is True
+    assert body["data"]["solunar"]["rating"] == "Great"
+
+
+def test_v1_regulations_uses_account_saved_location_when_no_params(
+    client, app, monkeypatch
+):
+    """Logged-in user with a saved location gets regulations for that state even
+    when neither 'state' nor 'location_id' are passed to the API.
+
+    This exercises the full chain: user account DB preference → session fallback
+    in get_session_location() → state derivation → regulation lookup.
+    """
+    # Disable live scraper so the snapshot data path is exercised.
+    monkeypatch.setattr("regulations._scrape_regulation", lambda *a, **kw: None)
+
+    with app.app_context():
+        uid = create_user("loctest", "pw")
+        # Save wrightsville-beach-nc (NC) as the user's primary location
+        save_preferences(uid, location_id="wrightsville-beach-nc")
+
+    # Log in the user but do NOT put location_id in the session so the helper
+    # falls back to the DB preference.
+    with client.session_transaction() as sess:
+        sess["user_id"] = uid
+        sess["session_version"] = 0
+
+    resp = client.get("/api/v1/regulations?species=Red+drum+%28puppy+drum%29")
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["ok"] is True
+    data = body["data"]
+    # State must be derived from the user's saved NC location
+    assert data["state"] == "NC"
+    reg = data["regulation"]
+    assert reg is not None
+    # The NC snapshot has data for red drum
+    assert reg["data_status"] == "snapshot"
+    assert reg["min_size"] == "18 in TL"
+
+
+def test_v1_forecast_section_endpoints_404_when_missing_cache(client, monkeypatch):
+    monkeypatch.setattr(
+        "web.api.load_cached_forecast", lambda loc_id, user_id=None: None
+    )
+
+    outlook = client.get("/api/v1/forecast/wrightsville-beach-nc/outlook")
+    assert outlook.status_code == 404
+    assert outlook.get_json()["error"]["code"] == "forecast_not_cached"
+
+    solunar = client.get("/api/v1/forecast/wrightsville-beach-nc/solunar")
+    assert solunar.status_code == 404
+    assert solunar.get_json()["error"]["code"] == "forecast_not_cached"
+
+
+# ---------------------------------------------------------------------------
+# Security regression tests for recent fixes
+# ---------------------------------------------------------------------------
+
+
+def test_regulations_refresh_requires_auth(client):
+    """/api/v1/regulations/refresh must return 401 when the caller is unauthenticated."""
+    # Plain POST without session — should be rejected
+    resp = client.post(
+        "/api/v1/regulations/refresh",
+        json={},
+    )
+    assert resp.status_code == 401
+    body = resp.get_json()
+    assert body["ok"] is False
+    assert body["error"]["code"] == "unauthorized"
+
+
+def test_regulations_refresh_allowed_when_authenticated(client, monkeypatch):
+    """/api/v1/regulations/refresh succeeds for a logged-in user."""
+    monkeypatch.setattr(
+        "web.api.invalidate_cache"
+        if hasattr(
+            __import__("web.api", fromlist=["invalidate_cache"]), "invalidate_cache"
+        )
+        else "storage.reg_scraper.invalidate_cache",
+        lambda state=None: 0,
+        raising=False,
+    )
+
+    uid = create_user("reg_refresh_user", "Aa123456")
+    assert uid is not None
+    _login_session(client, uid)
+
+    resp = client.post("/api/v1/regulations/refresh", json={})
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["ok"] is True
+
+
+def test_legacy_refresh_endpoint_is_rate_limited(client, monkeypatch):
+    """/api/refresh must enforce the shared forecast refresh rate limit."""
+    from web import auth as auth_module
+
+    # Isolate from other tests' state
+    monkeypatch.setattr(auth_module, "_refresh_rate_limit_store", {})
+
+    # Exhaust the rate limit
+    uid = create_user("refresh_rl_user", "Aa123456")
+    assert uid is not None
+
+    with client.session_transaction() as sess:
+        sess["user_id"] = uid
+        sess["session_version"] = 0
+        sess["location_id"] = "wrightsville-beach-nc"
+
+    # Get a CSRF token from any page
+    page = client.get("/setup")
+    import re as _re
+
+    m = _re.search(r'name="csrf_token" value="([^"]+)"', page.data.decode())
+    assert m is not None
+    token = m.group(1)
+
+    monkeypatch.setattr(
+        "web.api.enqueue_forecast_refresh", lambda loc_id, user_id=None: None
+    )
+
+    # Exhaust the rate limit
+    for _ in range(auth_module._REFRESH_RATE_LIMIT_MAX_ATTEMPTS):
+        client.post("/api/refresh", data={"csrf_token": token})
+
+    # The next call should be silently redirected back to index (not refresh)
+    resp = client.post(
+        "/api/refresh", data={"csrf_token": token}, follow_redirects=False
+    )
+    assert resp.status_code == 302
+    assert "refreshing" not in resp.headers.get("Location", "")
+
+
+def test_forecast_query_location_id_is_bounded(client, monkeypatch):
+    """location_id longer than 100 chars is silently truncated to avoid oversized DB keys."""
+    from web.schemas import ForecastQuery
+
+    long_id = "x" * 200
+    q = ForecastQuery.from_request({"location_id": long_id})
+    assert len(q.location_id) <= 100
+
+
+def test_v1_forecast_section_endpoints_fall_back_to_shared_cache_for_logged_in_user(
+    client, app, monkeypatch
+):
+    # The anonymous-cache fallback is handled inside load_cached_forecast via
+    # a single SQL query (WHERE user_id IN (user_id, 0)).  The endpoints call
+    # load_cached_forecast exactly once with the logged-in user_id; they never
+    # make a second call with user_id=None.
+    calls = []
+
+    def _fake_load(loc_id, user_id=None):
+        calls.append((loc_id, user_id))
+        return {
+            "outlook": [
+                {
+                    "day": "Tue",
+                    "date": "Apr 2",
+                    "verdict": "Fair",
+                    "wind": "8 kt",
+                    "waves": "1 ft",
+                }
+            ],
+            "solunar": {"rating": "Good", "moon_phase": "Waxing"},
+        }
+
+    monkeypatch.setattr("web.api.load_cached_forecast", _fake_load)
+
+    with app.test_request_context("/"):
+        from flask import g
+        from web.api import forecast_outlook_v1, forecast_solunar_v1
+
+        g.user = {"id": 999}
+
+        outlook_resp = forecast_outlook_v1("wrightsville-beach-nc")
+        solunar_resp = forecast_solunar_v1("wrightsville-beach-nc")
+
+        assert outlook_resp.status_code == 200
+        assert outlook_resp.get_json()["data"]["outlook"][0]["day"] == "Tue"
+        assert solunar_resp.status_code == 200
+        assert solunar_resp.get_json()["data"]["solunar"]["rating"] == "Good"
+
+    # Each endpoint makes exactly one call with the logged-in user_id.
+    assert calls.count(("wrightsville-beach-nc", 999)) == 2
+    assert ("wrightsville-beach-nc", None) not in calls
+
+
+def test_v1_community_activity_requires_login(client):
+    assert client.get("/api/v1/community/activity?location_id=x").status_code == 401
+
+
+def test_v1_community_activity_unavailable_below_threshold(client):
+    from storage.sqlite import create_user
+
+    uid = create_user("comm_api", "pass1234")
+    _login_session(client, uid)
+    resp = client.get("/api/v1/community/activity?location_id=wrightsville-beach-nc")
+    assert resp.status_code == 200
+    assert resp.get_json()["data"]["available"] is False
+
+
+def test_v1_community_activity_available_when_threshold_met(client):
+    from storage.sqlite import create_user, save_preferences, add_log_entry
+
+    viewer = create_user("comm_viewer", "pass1234")
+    _login_session(client, viewer)
+    for i in range(3):
+        uid = create_user(f"comm_c{i}", "pass1234")
+        save_preferences(uid, fishing_profile={"share_catches": True})
+        add_log_entry(uid, "wrightsville-beach-nc", "Red drum")
+    resp = client.get("/api/v1/community/activity?location_id=wrightsville-beach-nc")
+    data = resp.get_json()["data"]
+    assert data["available"] is True
+    assert data["contributors"] == 3

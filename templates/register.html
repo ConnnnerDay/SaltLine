@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account &mdash; Surf &amp; Pier Fishing Forecast</title>
+    {% include 'partials/_head_fonts.html' %}
+    <link rel="preload" as="style" href="{{ surl('style.min.css') }}" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ surl('style.min.css') }}"></noscript>
+    <meta name="theme-color" content="#0e5f78">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    {% include 'partials/_theme_bootstrap.html' %}
+</head>
+<body class="auth-page">
+    <header>
+        <div class="header-inner">
+            <h1>Surf &amp; Pier Fishing Outlook</h1>
+            <p class="subtitle">Create your free account</p>
+        </div>
+    </header>
+
+    <main>
+        <section class="auth-section">
+
+            {% if error %}
+            <div class="setup-error" role="alert">{{ error }}</div>
+            {% endif %}
+
+            <h2 class="auth-section-title">Create Account</h2>
+
+            <form method="post" action="{{ url_for('auth.register') }}" class="auth-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div class="auth-field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a username"
+                           value="{{ username|default('', true) }}" class="auth-input" maxlength="30"
+                           autocomplete="username" autocorrect="off" autocapitalize="off" spellcheck="false"
+                           required autofocus>
+                </div>
+                <div class="auth-field">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="you@example.com"
+                           value="{{ email|default('', true) }}" class="auth-input" maxlength="254"
+                           autocomplete="email" autocorrect="off" autocapitalize="off" spellcheck="false"
+                           required>
+                    <p class="auth-field-hint">Used to verify your account. We won&rsquo;t spam you.</p>
+                </div>
+                <div class="auth-field">
+                    <label for="password">Password</label>
+                    <div class="auth-input-wrap">
+                        <input type="password" id="password" name="password" placeholder="Choose a password"
+                               class="auth-input" minlength="8" autocomplete="new-password" required
+                               aria-describedby="pw-reqs">
+                        <button type="button" class="auth-show-pw" onclick="togglePwVis('password', this)" aria-label="Show password" title="Show/hide password">&#128065;</button>
+                    </div>
+                    <ul id="pw-reqs" class="pw-reqs" aria-label="Password requirements">
+                        <li id="req-len"  class="pw-req">At least 8 characters</li>
+                        <li id="req-up"   class="pw-req">One uppercase letter</li>
+                        <li id="req-low"  class="pw-req">One lowercase letter</li>
+                        <li id="req-num"  class="pw-req">One number</li>
+                    </ul>
+                </div>
+                <div class="auth-field">
+                    <label for="confirm">Confirm Password</label>
+                    <div class="auth-input-wrap">
+                        <input type="password" id="confirm" name="confirm" placeholder="Confirm your password"
+                               class="auth-input" minlength="8" autocomplete="new-password" required
+                               aria-describedby="pw-match-hint">
+                        <button type="button" class="auth-show-pw" onclick="togglePwVis('confirm', this)" aria-label="Show confirm password" title="Show/hide password">&#128065;</button>
+                    </div>
+                    <span id="pw-match-hint" class="pw-match-hint" aria-live="polite"></span>
+                </div>
+                <button type="submit" class="auth-btn">Create Account</button>
+            </form>
+
+            <p class="auth-switch">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+            <p class="auth-switch"><a href="{{ url_for('auth.landing') }}">&larr; Back</a></p>
+        </section>
+    </main>
+
+    <footer>
+        <p>Surf &amp; Pier Fishing Outlook</p>
+    </footer>
+
+    <script>
+    function togglePwVis(id, btn) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        input.type = input.type === 'password' ? 'text' : 'password';
+        btn.style.opacity = input.type === 'text' ? '1' : '0.55';
+    }
+    </script>
+    <script>
+    (function() {
+        var pw  = document.getElementById('password');
+        var cf  = document.getElementById('confirm');
+        var matchHint = document.getElementById('pw-match-hint');
+
+        function setReq(id, ok) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.classList.toggle('pw-req--ok',   ok);
+            el.classList.toggle('pw-req--fail', pw.value.length > 0 && !ok);
+        }
+
+        pw.addEventListener('input', function() {
+            var v = pw.value;
+            setReq('req-len', v.length >= 8);
+            setReq('req-up',  /[A-Z]/.test(v));
+            setReq('req-low', /[a-z]/.test(v));
+            setReq('req-num', /\d/.test(v));
+            if (cf.value) checkMatch();
+        });
+
+        function checkMatch() {
+            if (!cf.value) { matchHint.textContent = ''; return; }
+            var match = pw.value === cf.value;
+            matchHint.textContent = match ? '\u2713 Passwords match' : '\u2717 Passwords do not match';
+            matchHint.style.color  = match ? 'var(--sea-green, #2a7d6e)' : '#c0392b';
+        }
+        cf.addEventListener('input', checkMatch);
+
+        document.querySelector('.auth-form').addEventListener('submit', function(e) {
+            if (pw.value !== cf.value) {
+                e.preventDefault();
+                var err = document.querySelector('.setup-error');
+                if (!err) {
+                    err = document.createElement('div');
+                    err.className = 'setup-error';
+                    this.parentNode.insertBefore(err, this);
+                }
+                err.textContent = 'Passwords do not match.';
+                cf.focus();
+            }
+        });
+    }());
+    </script>
+</body>
+</html>

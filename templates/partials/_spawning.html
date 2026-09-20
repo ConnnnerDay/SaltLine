@@ -1,0 +1,50 @@
+{% if forecast.spawning %}
+<section class="spawning-section">
+    <h2>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="section-hdr-svg" aria-hidden="true">
+            <path d="M6.5 12c0 0-3.5-3-4.5-6 3 0 5.5 1.5 7 3"/>
+            <path d="M6.5 12c0 0-3.5 3-4.5 6 3 0 5.5-1.5 7-3"/>
+            <path d="M6.5 12h11"/>
+            <path d="M17.5 12c1.5 1.5 3 2.5 4.5 2.5-.5-1.5-.5-3.5 0-5-1.5 0-3 1-4.5 2.5z"/>
+            <circle cx="9.5" cy="12" r="0.8" fill="currentColor" stroke="none"/>
+        </svg>
+        What's Spawning
+    </h2>
+    <p class="section-sub">Species spawning near you right now — based on water temp &amp; time of year</p>
+    <p class="reg-section-disclaimer">
+        Spawning regulations change seasonally — please check local rules before keeping fish.
+        {% if forecast.official_regulations_url %}
+        <a href="{{ forecast.official_regulations_url }}" target="_blank" rel="noopener noreferrer" class="reg-disclaimer-link">Official {{ forecast.location_state or '' }} regulations ↗</a>
+        {% endif %}
+    </p>
+
+    <div class="spawning-grid">
+        {% for sp in forecast.spawning %}
+        <div class="spawning-card spawning-card--spawning">
+            <div class="spawning-card-header">
+                <div class="spawning-status-badge spawning-status--spawning">
+                    <svg viewBox="0 0 10 10" width="8" height="8" aria-hidden="true"><circle cx="5" cy="5" r="4" fill="currentColor"/></svg>
+                    Spawning Now
+                </div>
+                <span class="spawning-name">{{ sp.name }}</span>
+            </div>
+
+            <p class="spawning-note">{{ sp.spawn_note }}</p>
+
+            <div class="spawning-meta">
+                <span class="spawning-meta-item" title="Water temperature needed for spawning activity">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+                    {{ sp.temp_range }}
+                </span>
+                <span class="spawning-meta-item" title="Typical spawn window">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    {{ sp.spawn_window }}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% else %}
+<p class="section-no-data">No spawning activity data available for this area right now.</p>
+{% endif %}

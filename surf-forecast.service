@@ -1,0 +1,41 @@
+[Unit]
+Description=Surf & Pier Fishing Forecast
+Documentation=https://github.com/ConnnnerDay/surf-pier-forecast
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=REPLACE_USER
+WorkingDirectory=REPLACE_DIR
+# Use gunicorn (production WSGI server) instead of the Flask dev server.
+# 2 sync workers handle concurrent requests without the GIL bottleneck;
+# increase to 4 on multi-core machines.
+# Binds to all interfaces so the app is reachable from other machines on the
+# LAN.  If you put nginx/Caddy in front for TLS, change this back to
+# 127.0.0.1:5757 and proxy_pass from the reverse proxy.
+ExecStart=REPLACE_DIR/.venv/bin/gunicorn \
+    --workers 2 \
+    --bind 0.0.0.0:5757 \
+    --timeout 60 \
+    --access-logfile - \
+    --error-logfile - \
+    "app:create_app()"
+Restart=on-failure
+RestartSec=10
+Environment=PORT=5757
+# Comma-separated list of usernames to grant admin privileges on startup.
+# Environment=ADMIN_USERS=yourusername
+# Set SESSION_COOKIE_SECURE=1 when running behind HTTPS (TLS at nginx/Caddy).
+# Environment=SESSION_COOKIE_SECURE=1
+# Set TRUSTED_PROXY=1 when behind a reverse proxy so rate limiting uses the
+# real client IP from X-Forwarded-For instead of the proxy's IP.
+# Environment=TRUSTED_PROXY=1
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=REPLACE_DIR/data
+
+[Install]
+WantedBy=multi-user.target

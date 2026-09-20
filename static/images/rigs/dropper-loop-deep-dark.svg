@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400" font-family="Arial, sans-serif">
+  <rect x="0" y="0" width="500" height="400" fill="#132235"/>
+  <defs>
+    <radialGradient id="baitGrad" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#ffe4c4"/>
+      <stop offset="45%" stop-color="#e8b48a"/>
+      <stop offset="100%" stop-color="#b5794a"/>
+    </radialGradient>
+    <filter id="glossBlur" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="1.1"/>
+    </filter>
+  </defs>
+  <defs>
+    <linearGradient id="steelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f2f2f2"/>
+      <stop offset="35%" stop-color="#b8b8b8"/>
+      <stop offset="70%" stop-color="#6e6e6e"/>
+      <stop offset="100%" stop-color="#3d3d3d"/>
+    </linearGradient>
+    <linearGradient id="steelGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9a9a9a"/>
+      <stop offset="45%" stop-color="#5c5c5c"/>
+      <stop offset="100%" stop-color="#242424"/>
+    </linearGradient>
+    <radialGradient id="leadGrad" cx="32%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#e2e2e2"/>
+      <stop offset="35%" stop-color="#9a9a9a"/>
+      <stop offset="75%" stop-color="#5c5c5c"/>
+      <stop offset="100%" stop-color="#333333"/>
+    </radialGradient>
+    <filter id="softShadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="1.4" dy="2.2" stdDeviation="1.6" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <text x="250" y="28" text-anchor="middle" font-size="18" font-weight="bold" fill="#7DD3FC">Deep Dropper Loop Rig</text>
+
+  <!-- Depth gradient background -->
+  <rect x="15" y="45" width="470" height="230" fill="#dbe9f4"/>
+  <rect x="15" y="45" width="470" height="230" fill="url(#depthGrad)"/>
+  <defs>
+    <linearGradient id="depthGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#eaf4fb" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#2c5f8a" stop-opacity="0.55"/>
+    </linearGradient>
+  </defs>
+  <text x="470" y="60" text-anchor="end" font-size="9" fill="#8fc1e0">surface</text>
+  <text x="470" y="260" text-anchor="end" font-size="9" fill="#eaf4fb">100-500+ ft</text>
+
+  <!-- Main line down -->
+  <line x1="60" y1="50" x2="60" y2="90" stroke="#2a6" stroke-width="3" stroke-dasharray="8,4"/>
+  <line x1="60" y1="49.2" x2="60" y2="89.2" stroke="#8fe6b8" stroke-width="0.96" stroke-dasharray="8,4" opacity="0.6"/>
+  <text x="60" y="42" text-anchor="middle" font-size="10" fill="#345">Braid (50-80 lb)</text>
+  <line x1="60" y1="90" x2="60" y2="250" stroke="#5da" stroke-width="2"/>
+  <line x1="60" y1="89.4" x2="60" y2="249.4" stroke="#e8fbf3" stroke-width="0.70" opacity="0.55"/>
+
+  <!-- Dropper loop hooks, 3 of them -->
+  <g>
+    <path d="M60 120 Q90 120 90 135" fill="none" stroke="#5da" stroke-width="1.75"/>
+    <path d="M90 135 L90 150 Q90 158 98 158 Q104 158 104 152 Q104 148 99 145" fill="none" stroke="#eee" stroke-width="2"/>
+    <circle cx="103" cy="147" r="1.5" fill="#eee"/>
+    <text x="115" y="140" font-size="10" fill="#eaf4fb">Dropper 1</text>
+  </g>
+  <g>
+    <path d="M60 170 Q90 170 90 185" fill="none" stroke="#5da" stroke-width="1.75"/>
+    <path d="M90 185 L90 200 Q90 208 98 208 Q104 208 104 202 Q104 198 99 195" fill="none" stroke="#eee" stroke-width="2"/>
+    <circle cx="103" cy="197" r="1.5" fill="#eee"/>
+    <text x="115" y="190" font-size="10" fill="#eaf4fb">Dropper 2</text>
+  </g>
+  <g>
+    <path d="M60 218 Q90 218 90 233" fill="none" stroke="#5da" stroke-width="1.75"/>
+    <path d="M90 233 L90 248 Q90 256 98 256 Q104 256 104 250 Q104 246 99 243" fill="none" stroke="#eee" stroke-width="2"/>
+    <circle cx="103" cy="245" r="1.5" fill="#eee"/>
+    <text x="115" y="238" font-size="10" fill="#eaf4fb">Dropper 3</text>
+  </g>
+
+  <!-- Heavy sinker at the bottom -->
+  <ellipse cx="60" cy="270" rx="14" ry="28" fill="url(#leadGrad)" stroke="#3a3a3a" stroke-width="1.5" filter="url(#softShadow)"/>
+  <ellipse cx="55.5" cy="259.4" rx="4.2" ry="6.2" fill="#ffffff" opacity="0.5" filter="url(#glossBlur)"/>
+
+  <!-- Rocky bank -->
+  <path d="M180 275 Q220 250 260 272 Q300 245 340 270 Q380 250 420 272 Q450 258 480 272 L480 280 L180 280 Z" fill="#7a8a9a" stroke="#5a6a7a" stroke-width="1.5"/>
+
+  <!-- Captions below the water column -->
+  <text x="60" y="305" text-anchor="middle" font-size="10" fill="#c8d3dd">Heavy bank / torpedo</text>
+  <text x="60" y="317" text-anchor="middle" font-size="10" fill="#c8d3dd">sinker — reaches bottom</text>
+  <text x="60" y="329" text-anchor="middle" font-size="10" fill="#c8d3dd">fast and holds in current</text>
+  <text x="330" y="305" text-anchor="middle" font-size="10" fill="#c8d3dd">Offshore rocky bank / reef</text>
+
+  <!-- Legend box -->
+  <rect x="15" y="355" width="470" height="35" rx="6" fill="#0f2032" stroke="#2c4a68" stroke-width="1" filter="url(#softShadow)"/>
+  <text x="30" y="369" font-size="11" fill="#e8eef3" font-weight="bold">How it works:</text>
+  <text x="30" y="384" font-size="10.5" fill="#c8d3dd">Dropped straight down to schooling rockfish and reef fish spotted on sonar; jig with a slow lift.</text>
+</svg>

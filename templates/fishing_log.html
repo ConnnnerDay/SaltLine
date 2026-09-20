@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fishing Log &mdash; Surf &amp; Pier Fishing Forecast</title>
+    {% include 'partials/_head_fonts.html' %}
+    <link rel="preload" as="style" href="{{ surl('style.min.css') }}" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ surl('style.min.css') }}"></noscript>
+    <link rel="preload" as="script" href="{{ surl('js/fishing_log.min.js') }}" fetchpriority="high">
+    {% include 'partials/_theme_bootstrap.html' %}
+</head>
+<body class="forecast-page has-app-header">
+    {% include 'partials/_main_nav.html' %}
+    <div class="page-hero">
+        <h1>Fishing Log</h1>
+        <p class="page-subtitle">{{ location.name }}, {{ location.state }} &mdash; saved on this device</p>
+    </div>
+
+    <main>
+        <section class="fishlog-section" id="fish-log" data-location-id="{{ location.id }}" data-logged-in="{{ 1 if user else 0 }}">
+            <p class="section-sub">Track your catches at this location</p>
+
+            <div class="fishlog-form" id="fishlog-form" role="form" aria-label="Add a catch to your fishing log">
+                <div class="fishlog-row">
+                    <label for="log-species" class="sr-only">Species caught</label>
+                    <input type="text" id="log-species" placeholder="Species caught" class="fishlog-input" maxlength="60" autocomplete="off">
+                    <label for="log-size" class="sr-only">Size</label>
+                    <input type="text" id="log-size" placeholder="Size (optional)" class="fishlog-input fishlog-input--sm" maxlength="20" autocomplete="off">
+                </div>
+                <div class="fishlog-row">
+                    <label for="log-bait" class="sr-only">Bait or lure used</label>
+                    <input type="text" id="log-bait" placeholder="Bait / lure (optional)" class="fishlog-input fishlog-input--sm" maxlength="60" autocomplete="off">
+                    <label for="log-rig" class="sr-only">Rig used</label>
+                    <input type="text" id="log-rig" placeholder="Rig (optional)" class="fishlog-input fishlog-input--sm" maxlength="60" autocomplete="off">
+                    <label for="log-notes" class="sr-only">Notes</label>
+                    <input type="text" id="log-notes" placeholder="Notes (location, tactics, etc.)" class="fishlog-input" maxlength="200" autocomplete="off">
+                    <button type="button" class="fishlog-add-btn" id="fishlog-add-btn" aria-label="Add catch entry">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add
+                    </button>
+                </div>
+            </div>
+
+            <div class="fishlog-entries" id="fishlog-entries" aria-live="polite"></div>
+            <div class="fishlog-empty" id="fishlog-empty" hidden>
+                <p>No catches logged yet. Record your first catch above!</p>
+            </div>
+
+            <div class="catch-stats" id="catch-stats" hidden>
+                <div class="catch-stats-grid">
+                    <div class="catch-stat">
+                        <span class="catch-stat-value" id="stat-total">0</span>
+                        <span class="catch-stat-label">Total Catches</span>
+                    </div>
+                    <div class="catch-stat">
+                        <span class="catch-stat-value" id="stat-species">0</span>
+                        <span class="catch-stat-label">Species</span>
+                    </div>
+                    <div class="catch-stat">
+                        <span class="catch-stat-value" id="stat-top">—</span>
+                        <span class="catch-stat-label">Most Caught</span>
+                    </div>
+                    <div class="catch-stat">
+                        <span class="catch-stat-value" id="stat-recent">—</span>
+                        <span class="catch-stat-label">Last Catch</span>
+                    </div>
+                </div>
+                <button type="button" class="fishlog-export-btn" id="fishlog-export-btn" title="Download catches as CSV">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Export CSV
+                </button>
+            </div>
+            <div class="personal-bests" id="personal-bests" hidden>
+                <h4 class="pb-title">Personal Bests</h4>
+                <div class="pb-list" id="pb-list"></div>
+            </div>
+
+            <div class="catch-patterns" id="catch-patterns" hidden>
+                <h4 class="cp-title">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+                    Your Patterns
+                </h4>
+                <p class="cp-sub">Learned from the conditions recorded when you logged catches.</p>
+                <ul class="cp-list" id="cp-list"></ul>
+            </div>
+        </section>
+    </main>
+
+    <script src="{{ surl('js/fishing_log.min.js') }}" defer></script>
+    <script>
+    // Catch-pattern insights — fetched from the API and rendered when present.
+    (function () {
+        var sec = document.getElementById('fish-log');
+        if (!sec || sec.getAttribute('data-logged-in') !== '1') return;
+        var panel = document.getElementById('catch-patterns');
+        var list = document.getElementById('cp-list');
+        if (!panel || !list) return;
+        var locId = sec.getAttribute('data-location-id') || '';
+        var url = '/api/v1/log/patterns' + (locId ? ('?location_id=' + encodeURIComponent(locId)) : '');
+        fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (body) {
+            if (!body || !body.data) return;
+            var insights = body.data.insights || [];
+            var matches = body.data.matches || [];
+            if (!insights.length) return;
+            insights.forEach(function (text) {
+                var li = document.createElement('li');
+                li.className = 'cp-item' + (matches.indexOf(text) !== -1 ? ' cp-item--match' : '');
+                li.textContent = text;
+                list.appendChild(li);
+            });
+            panel.hidden = false;
+        }).catch(function () {});
+    })();
+    </script>
+</body>
+</html>

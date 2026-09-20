@@ -1,0 +1,362 @@
+        <!-- Conditions grid -->
+        <section class="conditions-section">
+            {% set _eff_verdict = forecast.conditions.verdict_for_angler or forecast.conditions.verdict_for_type or forecast.conditions.verdict %}
+            {% set _score = forecast.conditions.fishability_score_for_angler | default(none) %}
+            {% if _score is none %}{% set _score = forecast.conditions.fishability_score | default(none) %}{% endif %}
+            <div class="csc-verdict-bar">
+                <div class="csc-verdict-info">
+                    <p class="csc-location">Today&rsquo;s Forecast</p>
+                    {% if _eff_verdict %}
+                    <span class="verdict-badge verdict-{{ _eff_verdict|lower|replace(' ', '-') }} csc-verdict-badge">{{ _eff_verdict }}{% if _score is not none %} &middot; {{ _score }}/100{% endif %}</span>
+                    {% endif %}
+                    {% if forecast.conditions.summary %}
+                    <p class="csc-verdict-summary">{{ forecast.conditions.summary }}</p>
+                    {% endif %}
+                    {% if forecast.conditions.exceeds_thresholds %}
+                    <ul class="csc-verdict-exceeds" aria-label="Conditions exceeding your limits">
+                        {% for warn in forecast.conditions.exceeds_thresholds %}
+                        <li class="csc-verdict-exceed">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            {{ warn }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                <button class="csc-share-btn" type="button" aria-label="Share forecast" onclick="shareConditions(this)">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                </button>
+            </div>
+
+            <!-- Wind quality: go/no-go signal at a glance -->
+            {% set _wind_str = forecast.conditions.wind or '' %}
+            {% set _wind_speed = namespace(val=0) %}
+            {% for _tok in _wind_str.split(' ') %}
+                {% if _wind_speed.val == 0 and _tok and _tok[0].isdigit() %}
+                    {% set _wind_speed.val = _tok.split('-')[0] | int %}
+                {% endif %}
+            {% endfor %}
+            {% if 'calm' in _wind_str.lower() or _wind_speed.val == 0 %}
+                {% set _wqc = 'calm' %}{% set _wql = 'Calm Seas' %}
+            {% elif _wind_speed.val <= 8 %}
+                {% set _wqc = 'light' %}{% set _wql = 'Light Wind — good fishing conditions' %}
+            {% elif _wind_speed.val <= 15 %}
+                {% set _wqc = 'moderate' %}{% set _wql = 'Moderate Wind — manageable' %}
+            {% elif _wind_speed.val <= 25 %}
+                {% set _wqc = 'strong' %}{% set _wql = 'Strong Wind — difficult conditions' %}
+            {% else %}
+                {% set _wqc = 'gale' %}{% set _wql = 'Gale Warning — stay off piers' %}
+            {% endif %}
+            <div class="wind-quality-row">
+                <span class="wind-quality-indicator wind-quality-indicator--{{ _wqc }}">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>
+                    {{ _wql }}
+                </span>
+            </div>
+
+            <!-- Fishing-relevant stats only -->
+            <div class="stat-grid">
+                {% set _wt_f = forecast.conditions.water_temp_f | float %}
+                {% if _wt_f < 45 %}{% set _wt_cat = 'very cold — sluggish bite' %}
+                {% elif _wt_f < 55 %}{% set _wt_cat = 'cold — slow bite' %}
+                {% elif _wt_f < 65 %}{% set _wt_cat = 'cool — fair conditions' %}
+                {% elif _wt_f < 75 %}{% set _wt_cat = 'ideal temp' %}
+                {% elif _wt_f < 82 %}{% set _wt_cat = 'warm — active bite' %}
+                {% else %}{% set _wt_cat = 'hot — fish run deep' %}{% endif %}
+                <div class="stat-card" data-stat="water-temp">
+                    <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></span>
+                    <span class="stat-label">Water Temp</span>
+                    <span class="stat-value">
+                        <span class="unit-temp" data-f="{{ forecast.conditions.water_temp_f }}">{{ forecast.conditions.water_temp_f }}&deg;F</span>
+                        {% set _trend = (forecast.conditions.water_temp_trend or '')|lower|trim %}
+                        {% if _trend == 'warming' %}
+                        <svg class="temp-trend-icon" viewBox="0 0 16 16" width="14" height="14"><path d="M8 3l4 5H4z" fill="#e05830"/></svg>
+                        {% elif _trend == 'cooling' %}
+                        <svg class="temp-trend-icon" viewBox="0 0 16 16" width="14" height="14"><path d="M8 13l4-5H4z" fill="#2980b9"/></svg>
+                        {% elif _trend in ('stable', 'steady') %}
+                        <svg class="temp-trend-icon" viewBox="0 0 16 16" width="14" height="14"><rect x="2" y="7" width="12" height="2" rx="1" fill="#6b7b8d"/></svg>
+                        {% endif %}
+                    </span>
+                    <span class="stat-detail" title="{{ forecast.conditions.water_temp_trend_detail }}">{% if forecast.conditions.water_temp_live %}live reading{% else %}monthly avg{% endif %}{% if forecast.conditions.water_temp_trend %} &middot; {{ forecast.conditions.water_temp_trend }}{% endif %} &middot; {{ _wt_cat }}</span>
+                </div>
+
+                <div class="stat-card" data-stat="wind">
+                    <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg></span>
+                    <span class="stat-label">Wind</span>
+                    <span class="stat-value">
+                        {% set _wdir = (forecast.conditions.wind_dir or '') | upper %}
+                        {% set _wdrot = {'N':180,'NNE':202,'NE':225,'ENE':247,'E':270,'ESE':292,'SE':315,'SSE':337,'S':0,'SSW':22,'SW':45,'WSW':67,'W':90,'WNW':112,'NW':135,'NNW':157} %}
+                        {% if _wdir in _wdrot %}
+                        <svg class="wind-dir-arrow" viewBox="0 0 10 14" width="10" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ _wdrot[_wdir] }}deg)" aria-hidden="true"><path d="M5 12V2M2 5l3-3 3 3"/></svg>
+                        {% endif %}
+                        {{ forecast.conditions.wind }}
+                    </span>
+                    <span class="stat-detail">next 24 h</span>
+                </div>
+
+                <div class="stat-card" data-stat="waves">
+                    <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2"/></svg></span>
+                    <span class="stat-label">Waves</span>
+                    <span class="stat-value">{{ forecast.conditions.waves }}</span>
+                    <span class="stat-detail">next 24 h</span>
+                </div>
+
+                {% if forecast.rip_current_risk %}
+                {% set _rip_lvl = (forecast.rip_current_risk.level or '') | lower %}
+                {% if _rip_lvl == 'high' %}{% set _rip_clr = '#ef4444' %}
+                {% elif _rip_lvl == 'moderate' %}{% set _rip_clr = '#f97316' %}
+                {% else %}{% set _rip_clr = '#22c55e' %}{% endif %}
+                <div class="stat-card" data-stat="rip" style="border-top-color:{{ _rip_clr }}">
+                    <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                    <span class="stat-label">Rip Current</span>
+                    <span class="stat-value" style="color:{{ _rip_clr }}">{{ forecast.rip_current_risk.level }}</span>
+                    {% if _rip_lvl == 'high' %}{% set _rip_short = 'Stay off surf — fish from structure' %}
+                    {% elif _rip_lvl == 'moderate' %}{% set _rip_short = 'Currents near piers/jetties' %}
+                    {% else %}{% set _rip_short = 'Minimal risk — stay alert' %}{% endif %}
+                    <span class="stat-detail" title="{{ forecast.rip_current_risk.guidance }}">{{ _rip_short }}</span>
+                </div>
+                {% endif %}
+
+                {% if forecast.tide_state %}
+                <div class="stat-card" data-stat="tide">
+                    <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 9c.6.5 1.2 1 2.5 1C7 10 7 8 9.5 8c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2M2 15c.6.5 1.2 1 2.5 1C7 16 7 14 9.5 14c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2"/></svg></span>
+                    <span class="stat-label">Tide</span>
+                    {% set _ts = (forecast.tide_state or '')|lower|trim %}
+                    <span class="stat-value">
+                        {% if _ts == 'rising' %}
+                        <svg viewBox="0 0 20 20" width="16" height="16" class="stat-trend-icon"><path d="M10 4l5 6H5z" fill="var(--ocean)"/></svg>
+                        {% elif _ts == 'falling' %}
+                        <svg viewBox="0 0 20 20" width="16" height="16" class="stat-trend-icon"><path d="M10 16l5-6H5z" fill="var(--amber)"/></svg>
+                        {% elif _ts == 'slack' %}
+                        <svg viewBox="0 0 20 20" width="16" height="16" class="stat-trend-icon"><rect x="4" y="9" width="12" height="2" rx="1" fill="#6b7b8d"/></svg>
+                        {% endif %}
+                        {{ forecast.tide_state }}
+                    </span>
+                    <span class="stat-detail" id="tide-next-detail">current tidal flow</span>
+                </div>
+                {% endif %}
+
+                {% set pressure_mb = (forecast.pressure.pressure_mb if forecast.pressure and forecast.pressure.pressure_mb is defined else (forecast.environment.air_pressure_mb if forecast.environment and forecast.environment.air_pressure_mb is defined else none)) %}
+                {% if pressure_mb is not none %}
+                {% set _ptrd = ((forecast.pressure.trend if forecast.pressure and forecast.pressure.trend else '') or '')|lower|trim %}
+                <div class="stat-card" data-stat="pressure">
+                    <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 12l3.5-3.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></span>
+                    <span class="stat-label">Pressure</span>
+                    <span class="stat-value">
+                        {% if _ptrd == 'rising' %}
+                        <svg class="temp-trend-icon" viewBox="0 0 16 16" width="14" height="14"><path d="M8 3l4 5H4z" fill="#27ae60"/></svg>
+                        Rising
+                        {% elif _ptrd == 'falling' %}
+                        <svg class="temp-trend-icon" viewBox="0 0 16 16" width="14" height="14"><path d="M8 13l4-5H4z" fill="#e05830"/></svg>
+                        Falling
+                        {% elif _ptrd %}
+                        Steady
+                        {% else %}
+                        {{ pressure_mb }} mb
+                        {% endif %}
+                    </span>
+                    <span class="stat-detail" title="{{ forecast.pressure.fishing_impact if forecast.pressure and forecast.pressure.fishing_impact else '' }}">{{ pressure_mb }} mb{% if forecast.pressure and forecast.pressure.fishing_impact %} &middot; {{ forecast.pressure.fishing_impact }}{% elif not forecast.pressure and forecast.environment and forecast.environment.air_pressure_mb is defined %} &middot; CO-OPS latest reading{% endif %}</span>
+                </div>
+                {% endif %}
+
+                {% set _air_temp_f = (forecast.conditions.air_temp_f if forecast.conditions and forecast.conditions.air_temp_f is defined else (forecast.environment.air_temp_f if forecast.environment and forecast.environment.air_temp_f is defined else none)) %}
+                {% if _air_temp_f is not none %}
+                <div class="stat-card" data-stat="air-temp">
+                    <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></span>
+                    <span class="stat-label">Air Temp</span>
+                    <span class="stat-value">
+                        <span class="unit-temp" data-f="{{ _air_temp_f }}">{{ _air_temp_f }}&deg;F</span>
+                    </span>
+                    <span class="stat-detail">current air temperature</span>
+                </div>
+                {% endif %}
+
+                {% if forecast.uv and forecast.uv.index is defined %}
+                {% set _uv_idx = forecast.uv.index %}
+                {% if _uv_idx <= 2 %}{% set _uv_color = '#22c55e' %}
+                {% elif _uv_idx <= 5 %}{% set _uv_color = '#eab308' %}
+                {% elif _uv_idx <= 7 %}{% set _uv_color = '#f97316' %}
+                {% elif _uv_idx <= 10 %}{% set _uv_color = '#ef4444' %}
+                {% else %}{% set _uv_color = '#8b5cf6' %}{% endif %}
+                {% set _uv_pct = [(_uv_idx | float * 100 / 11) | round | int, 100] | min %}
+                <div class="stat-card" data-stat="uv">
+                    <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>
+                    <span class="stat-label">UV Index</span>
+                    <span class="stat-value" style="color:{{ _uv_color }}">{{ _uv_idx }}</span>
+                    <span class="stat-detail">{{ forecast.uv.level or 'sun exposure' }}</span>
+                    <div class="uv-scale-bar" aria-hidden="true">
+                        <div class="uv-scale-marker" style="left:{{ _uv_pct }}%;background:{{ _uv_color }}"></div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if forecast.conditions.humidity is defined and forecast.conditions.humidity is not none %}
+                {% set _hum = forecast.conditions.humidity | round | int %}
+                <div class="stat-card" data-stat="humidity">
+                    <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6M8 14v6M12 16v6"/></svg></span>
+                    <span class="stat-label">Humidity</span>
+                    <span class="stat-value">{{ _hum }}%</span>
+                    <span class="stat-detail">relative humidity</span>
+                </div>
+                {% endif %}
+
+                {% if forecast.environment and forecast.environment.salinity_psu is defined %}
+                <div class="stat-card" data-stat="salinity">
+                    <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span>
+                    <span class="stat-label">Salinity</span>
+                    <span class="stat-value">{{ forecast.environment.salinity_psu }} PSU</span>
+                    <span class="stat-detail">water freshness</span>
+                </div>
+                {% endif %}
+
+                {# Air Quality card — populated client-side from ArcGIS OpenAQ live feed #}
+                <div class="stat-card stat-card--loading" data-stat="aqi" id="aqi-stat-card">
+                    <span class="stat-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 8h18M5 12h14M8 16h8"/></svg>
+                    </span>
+                    <span class="stat-label">Air Quality</span>
+                    <span class="stat-value" id="aqi-stat-value">&nbsp;</span>
+                    <span class="stat-detail" id="aqi-stat-detail">&nbsp;</span>
+                </div>
+                {# Drought card — populated client-side from ArcGIS US Drought Monitor live feed #}
+                <div class="stat-card stat-card--loading" data-stat="drought" id="drought-stat-card">
+                    <span class="stat-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                    </span>
+                    <span class="stat-label">Drought</span>
+                    <span class="stat-value" id="drought-stat-value">&nbsp;</span>
+                    <span class="stat-detail" id="drought-stat-detail">&nbsp;</span>
+                </div>
+                {# Nearest NDBC buoy — populated client-side from ArcGIS NDBC live feed #}
+                <div class="stat-card stat-card--loading" data-stat="buoy" id="ndbc-stat-card">
+                    <span class="stat-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 15H2a10 10 0 0 0 20 0h-3"/></svg>
+                    </span>
+                    <span class="stat-label">Nearest Buoy</span>
+                    <span class="stat-value" id="ndbc-stat-value">&nbsp;</span>
+                    <span class="stat-detail" id="ndbc-stat-detail">&nbsp;</span>
+                </div>
+                {# Tropical Outlook — populated client-side from ArcGIS NHC live feed #}
+                <div class="stat-card stat-card--loading" data-stat="tropical" id="tropical-stat-card">
+                    <span class="stat-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+                    </span>
+                    <span class="stat-label">Tropics</span>
+                    <span class="stat-value" id="tropical-stat-value">&nbsp;</span>
+                    <span class="stat-detail" id="tropical-stat-detail">&nbsp;</span>
+                </div>
+                {# Flood stage — populated client-side from ArcGIS Live Stream Gauges #}
+                <div class="stat-card stat-card--loading" data-stat="gauge" id="gauge-stat-card">
+                    <span class="stat-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 16c2-4 4-4 6-8s4-4 6-8"/></svg>
+                    </span>
+                    <span class="stat-label">Flood Stage</span>
+                    <span class="stat-value" id="gauge-stat-value">&nbsp;</span>
+                    <span class="stat-detail" id="gauge-stat-detail">&nbsp;</span>
+                </div>
+                {# Nearest METAR — visibility, flight category & conditions from ArcGIS NOAA METAR live feed #}
+                <div class="stat-card stat-card--loading" data-stat="metar" id="metar-stat-card">
+                    <span class="stat-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+                    </span>
+                    <span class="stat-label">Nearest METAR</span>
+                    <span class="stat-value" id="metar-stat-value">&nbsp;</span>
+                    <span class="stat-detail" id="metar-stat-detail">&nbsp;</span>
+                </div>
+                {# Wildfire & Smoke — populated client-side from ArcGIS NIFC/NDGD live feeds #}
+                <div class="stat-card stat-card--loading" data-stat="wildfire" id="wildfire-stat-card">
+                    <span class="stat-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2c0 6-6 8-6 14a6 6 0 0 0 12 0c0-6-6-8-6-14z"/></svg>
+                    </span>
+                    <span class="stat-label">Wildfires</span>
+                    <span class="stat-value" id="wildfire-stat-value">&nbsp;</span>
+                    <span class="stat-detail" id="wildfire-stat-detail">&nbsp;</span>
+                </div>
+            </div>
+
+        </section>
+
+        {% if forecast.activity_timeline %}
+        <section class="hourly-timeline-section">
+            <p class="timeline-label">Fishing Activity &amp; Day Timeline</p>
+            <div class="activity-timeline">
+                <div class="timeline-bars">
+                    {% for entry in forecast.activity_timeline %}
+                    {%- set _evt_title -%}
+                        {{ entry.label }}{% if entry.reason %} — {{ entry.reason }}{% endif %} ({{ entry.level }}%)
+                        {%- if entry.sun == 'sunrise' %} · Sunrise{% elif entry.sun == 'sunset' %} · Sunset{% endif -%}
+                        {%- if entry.tide == 'high' %} · High tide {{ entry.tide_time }}{% elif entry.tide == 'low' %} · Low tide {{ entry.tide_time }}{% endif -%}
+                    {%- endset -%}
+                    <div class="timeline-bar-col{% if entry.is_now %} timeline-bar-col--now{% endif %}{% if entry.feeding %} timeline-bar-col--feed-{{ entry.feeding }}{% endif %}"
+                         title="{{ _evt_title | trim }}">
+                        <div class="timeline-bar timeline-bar--{{ entry.tag }}{% if entry.peak %} timeline-bar--peak{% endif %}"
+                             style="height: {{ [((entry.level * 0.58) | round | int), 2] | max }}px;"></div>
+                        <div class="timeline-events" aria-hidden="true">
+                            {%- if entry.sun == 'sunrise' -%}
+                            <span class="tl-evt tl-evt--sun" aria-label="Sunrise"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/><polyline points="8 6 12 2 16 6"/></svg></span>
+                            {%- elif entry.sun == 'sunset' -%}
+                            <span class="tl-evt tl-evt--sun" aria-label="Sunset"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/><polyline points="16 5 12 9 8 5"/></svg></span>
+                            {%- endif -%}
+                            {%- if entry.tide == 'high' -%}
+                            <span class="tl-evt tl-evt--tide-high" aria-label="High tide">&#9650;</span>
+                            {%- elif entry.tide == 'low' -%}
+                            <span class="tl-evt tl-evt--tide-low" aria-label="Low tide">&#9660;</span>
+                            {%- endif -%}
+                        </div>
+                        <div class="timeline-hour">
+                            {%- if entry.is_now -%}Now{%- elif entry.hour % 6 == 0 -%}{{ entry.short_label }}{%- endif -%}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="timeline-legend">
+                    <span><span class="tl-key tl-key--prime"></span>Prime</span>
+                    <span><span class="tl-key tl-key--high"></span>High</span>
+                    <span><span class="tl-key tl-key--med"></span>Good</span>
+                    <span><span class="tl-key tl-key--low"></span>Low</span>
+                    <span><span class="tl-key tl-key--feed"></span>Feeding window</span>
+                    <span><span class="tl-evt tl-evt--tide-high">&#9650;</span>/<span class="tl-evt tl-evt--tide-low">&#9660;</span> Tide</span>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        {% if forecast.currents %}
+        <details class="collapsible-module">
+            <summary>
+                <span class="collapsible-module-title">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 12c0 0-4 6-10 6S2 12 2 12s4-6 10-6 10 6 10 6z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Currents & Slack Windows
+                </span>
+                <svg class="collapsible-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div class="collapsible-module-body">
+                <div class="table-scroll">
+                    <table class="currents-table">
+                        <thead><tr><th>Time</th><th>Event</th><th>Speed</th><th>Direction</th></tr></thead>
+                        <tbody>
+                        {% for c in forecast.currents %}
+                            <tr {% if 'Slack' in c.event %}class="currents-table__slack"{% endif %}><td>{{ c.time }}</td><td>{{ c.event }}</td><td>{{ c.speed_kt }} kt</td><td>{{ c.direction or '&mdash;' }}</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </details>
+        {% endif %}
+
+        {% if forecast.best_times %}
+        <section class="conditions-section">
+            <h2>When to Fish</h2>
+            <div class="best-times-cards">
+                {% for bt in forecast.best_times %}
+                <div class="best-time-card best-time--{{ bt.quality|lower }}">
+                    <div class="bt-quality">{{ bt.quality }}</div>
+                    <div class="bt-window">{{ bt.window }}</div>
+                    <div class="bt-reason">{{ bt.reason }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+

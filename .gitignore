@@ -52,4 +52,11 @@ coverage.xml
 .pytest_cache/
 cover/
 
+# SaltLine app-specific ignores
+.venv/
+venv/
+*.pyc
+/data/
+.env
+
 # Workbench Project Layout

@@ -48,6 +48,12 @@ case this sprint exercised, but not the only one a genuinely unexpected
 bug could hit. See its own comment below for why it's registered where
 it is (between `log_requests` and routing) and what it changes for both
 this service's own logs and apps/web's rendered error state.
+
+`app/api/v1/analytics.py` (sprint 43, "Privacy-safe analytics") adds
+`POST /v1/analytics/events` — see that module's and
+`app.domain.analytics`'s own docstrings for the event vocabulary, the
+privacy posture (no email/name/IP, an opaque user id only for a
+registration event), and why recording is deliberately best-effort.
 """
 
 import json
@@ -62,6 +68,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.deps import AppState
 from app.api.v1.account import router as account_router
+from app.api.v1.analytics import router as analytics_router
 from app.api.v1.forecasts import router as forecasts_router
 from app.api.v1.locations import router as locations_router
 from app.api.v1.preferences import router as preferences_router
@@ -142,6 +149,7 @@ app.include_router(forecasts_router)
 app.include_router(preferences_router)
 app.include_router(saved_locations_router)
 app.include_router(account_router)
+app.include_router(analytics_router)
 
 
 @app.get("/health/live")

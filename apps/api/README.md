@@ -721,6 +721,49 @@ not a crash or invented data; nothing needed fixing there. `apps/web`'s
 half of this sprint (the BFF-layer error surfaces this service's new
 clean JSON body actually reaches) is in that app's own README.
 
+Privacy-safe analytics (sprint 43) — `docs/CANONICAL_ROADMAP.md`'s own
+guidance for this row: "no named vendor preference -- choose pragmatic,
+free-tier-friendly tools rather than spending a sprint deciding between
+options." Pragmatic here means no third-party service at all: a new
+`app/domain/analytics.py` (`AnalyticsEvent`, one small table in the
+same `forecast`-schema Postgres this service already owns) and
+`POST /v1/analytics/events` (`app/api/v1/analytics.py`). This sprint
+only builds the capture path -- actually *reporting* a signup-funnel or
+return-usage rate needs real production traffic to be meaningful
+(sprints 58/59, both still "Not accepted," both directional 6-12-
+month-post-launch goals); what's captured here is what those later
+sprints will query. Three event types, wired at exactly the places
+named in this row's acceptance bar: `registration` (via the new
+`POST /v1/analytics/events`, called from `apps/web`'s own Better Auth
+`user.create.after` hook -- account creation happens in that app's
+`auth`-schema database, which this service has no access to per
+ADR-006), `location_resolved` (`POST /v1/locations/resolve`, after a
+successful resolution only -- a 404/422 records nothing), and
+`forecast_generated` (`GET /v1/forecasts/{location_id}`, carrying the
+envelope's own `state` and this handler's own wall-clock latency, not
+the explicit `.../refresh` path, to keep the signal to the common read
+case). Privacy: `user_id` is Better Auth's opaque id (the same posture
+`UserPreferences`/`SavedLocation` already hold) and is only ever set on
+a `registration` event -- the other two carry no caller identity at
+all, since neither existing endpoint threads one through today. No
+email, name, IP address, or user agent, ever. Recording is deliberately
+best-effort (`try_record_event` never raises, and no-ops with no
+database configured at all) -- directly the lesson sprint 47 drew from
+testing this exact class of dependency failure live, applied here from
+the start rather than found as a bug afterward. Verified against real
+running `next start`/`uvicorn`/local-Postgres servers, not just unit
+tests: registered a real account and browsed real forecast/share pages,
+then read the real rows back out of Postgres (`registration` with a
+real Better Auth user id; `forecast_generated` with a real `partial`
+state and real ~6.7s latency, this sandbox's own honest blocked-
+upstream number, not a fabricated one; `location_resolved` from a
+direct signed `POST /v1/locations/resolve` call) -- then killed
+`apps/api` entirely and confirmed a fresh registration still succeeds
+end-to-end, proving best-effort recording actually holds under real
+failure, not just in a test double. 7 new tests
+(`tests/test_analytics.py`); full suite 393 passed (was 386). OpenAPI
+snapshot regenerated (new schemas/path only).
+
 If you change a model in `app/domain/models.py`, its schema snapshot test
 will fail — regenerate deliberately and review the diff:
 

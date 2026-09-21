@@ -8,6 +8,35 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Sprint 43 ("Privacy-safe analytics")**: "Registration, resolution,
+forecast state, latency, return use." `docs/CANONICAL_ROADMAP.md`'s own
+guidance for this row explicitly allows a pragmatic, no-vendor-decision
+tool choice, so this is entirely self-hosted: no third-party analytics
+script, no cookie, nothing added to the CSP's `connect-src`. `lib/
+auth.ts` gained a `databaseHooks.user.create.after` hook -- the one
+event type this app produces itself, since account creation lands in
+this app's own `auth`-schema Postgres, which `apps/api` has no access
+to (ADR-006). It calls a new `apps/api` endpoint (`POST /v1/analytics/
+events`) through the same signed internal path every other call already
+uses; `apps/api`'s own `location_resolved`/`forecast_generated` events
+are recorded in-process there, not from here. Wrapped in `try`/`catch`
+and never rethrown, same reasoning as sprint 47's email hooks just
+above: an analytics side effect must never fail, or even be seen to
+fail, the actual signup.
+
+Verified live, not just wired: registered a real account against real
+local Postgres/`apps/api` servers, browsed real forecast/share pages,
+and read the real rows back out of `apps/api`'s database (a real
+Better Auth user id on the registration row, real `state`/latency
+numbers on the forecast rows) -- then killed `apps/api` entirely and
+registered again, confirming signup still completes normally with the
+analytics call failing silently underneath it, not just in theory.
+Full account, including what's *not* built here (an actual signup-
+funnel or return-usage report needs real production traffic to mean
+anything -- sprints 58/59's job, not this one's), in `apps/api/
+README.md`'s own Status entry for this sprint. `npm run lint`/`build`
+both clean.
+
 **Sprint 47 ("Degraded-mode UX")**: "Database/API/email/upstream chaos
 yields actionable UI." Found three real gaps by actually breaking each
 dependency this session had the means to break (a stopped local

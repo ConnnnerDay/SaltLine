@@ -6,6 +6,8 @@ docs/R2_CI_BASELINE.md's no-live-provider-dependence rule for CI.
 
 from __future__ import annotations
 
+import gzip
+
 import httpx
 import pytest
 
@@ -68,6 +70,37 @@ async def test_get_text_success() -> None:
         result = await client.get_text("https://example.test/data.txt")
 
     assert result.startswith("#YY MM DD")
+
+
+@pytest.mark.asyncio
+async def test_get_text_handles_gzip_encoded_response() -> None:
+    """`_request_once` drains the response via `aiter_bytes()`, which
+    already undoes gzip while streaming, then rebuilds a plain
+    `httpx.Response` from those decoded bytes. If it carried the
+    upstream's `Content-Encoding: gzip` header over unchanged, httpx
+    would try to gzip-decode the already-decoded body a second time on
+    `.text` access and raise `httpx.DecodingError` ("incorrect header
+    check") — this reproduces a real NDBC failure where a gzip-encoded
+    `realtime2` feed reached the same code path.
+    """
+    body = "#YY MM DD hh mm WDIR WSPD\n#yr mo dy hr mn degT m/s\n"
+    compressed = gzip.compress(body.encode())
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            headers={
+                "content-encoding": "gzip",
+                "content-length": str(len(compressed)),
+            },
+            content=compressed,
+        )
+
+    transport = httpx.MockTransport(handler)
+    async with BoundedHTTPClient(transport=transport) as client:
+        result = await client.get_text("https://example.test/data.txt")
+
+    assert result == body
 
 
 @pytest.mark.asyncio

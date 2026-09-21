@@ -8,6 +8,51 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Sprint 30 ("Onboarding shell")**: closes the gap `app/register/
+page.tsx`'s own docstring had flagged since sprint 28 -- registration
+alone was "nothing here is a real profile/onboarding flow." A brand-new
+user finishing signup used to land back on `/` (the marketing homepage,
+`next`'s old default), the same "Find your spot" CTA they'd already
+seen pre-signup. Now `RegisterForm` routes through a new `/onboarding`
+page instead, carrying the real destination forward as its own
+`?next=` (default `/locations`, not `/` -- a first-run user has nothing
+saved yet, so the search page is the real destination, matching
+`docs/product-definition.md`'s "First-run success: a new user can
+register, choose a coastal point, and quickly understand whether and
+when to fish").
+
+`app/onboarding/page.tsx` is a static four-step mobile-first carousel,
+adapted from `v2/frontend/src/pages/Onboarding.tsx`'s concept per
+`docs/R1_RECONCILIATION_AUDIT.md`'s row for this sprint (`Step X of N`,
+Back/Next, a final step whose button reads "Get started" and links to
+`next`) -- but not its copy: v2's steps promised ranked species and rig
+recommendations, which `docs/CANONICAL_ROADMAP.md`'s "Deferred until
+production evidence" list explicitly excludes from v1. These three
+steps instead restate `app/page.tsx`'s own three value props (one clear
+verdict, every source shown, best hour) so onboarding never promises
+anything the product doesn't already do today. No new persisted state
+(no `onboarding_completed` column/migration): nothing in
+`docs/product-definition.md`'s "V1 capabilities" preferences list names
+onboarding-seen tracking, and the flow only ever needs to run once,
+right after a real signup -- a fresh `/onboarding` visit is harmless
+(the same static content every time), not a security boundary, so it
+isn't session-gated either.
+
+Login (`app/login/page.tsx`) is unchanged and still goes straight to
+`next` -- onboarding is only for a signup that just happened, not every
+return visit.
+
+Verified end-to-end against real running `next start`/`uvicorn`/local-
+Postgres servers with a real Playwright-driven mobile browser (390×844
+viewport, matching an iPhone-class device) recording video, not just a
+manual click-through: register a real account → land on `/onboarding`
+→ step through all four steps (and back) → "Get started" → land on the
+real session-gated `/locations` page, confirmed by URL and by the
+account menu rendering (proving the session survived the redirect
+chain, not just that no error was thrown). Run twice, light and dark.
+A fresh `axe-core` sweep on the first and last onboarding step, both
+color schemes, found 0 violations. `npm run lint`/`build` both clean.
+
 **Sprint 45 ("Privacy and deletion")**: self-service data export and
 account deletion -- required at v1 launch per the round-2 product
 decision (a public product with real accounts), not deferred with the

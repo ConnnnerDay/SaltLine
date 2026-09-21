@@ -13,15 +13,23 @@ import { safeRedirectTarget } from '@/lib/safe-redirect'
  * owns hashing, session creation, and rate limiting -- this page is
  * presentation and error display only, not auth logic. `name` is
  * collected because Better Auth's default user schema requires it (see
- * the migrated `auth.user` table); nothing here is a real profile/
- * onboarding flow, which stays sprint 30's job.
+ * the migrated `auth.user` table).
  *
  * `?next=` (sprint 29): see app/login/page.tsx's docstring -- same
  * reasoning, same `safeRedirectTarget` guard against an open redirect.
+ * Defaults to `/locations`, not `/` -- a brand-new user has nothing
+ * saved yet, so the search page (not the marketing homepage they just
+ * left) is the real first-run destination.
+ *
+ * Sprint 30: a fresh signup routes through `/onboarding` first, not
+ * straight to `next` -- that page carries `next` forward itself once
+ * its walkthrough finishes. Logging in (app/login/page.tsx) is
+ * unchanged and still goes straight to `next`; onboarding is only for
+ * a signup that just happened, not every return visit.
  */
 function RegisterForm() {
   const router = useRouter()
-  const next = safeRedirectTarget(useSearchParams().get('next'), '/')
+  const next = safeRedirectTarget(useSearchParams().get('next'), '/locations')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -38,7 +46,7 @@ function RegisterForm() {
       setError(signUpError.message ?? 'Could not create your account.')
       return
     }
-    router.push(next)
+    router.push(`/onboarding?next=${encodeURIComponent(next)}`)
     router.refresh()
   }
 
@@ -84,7 +92,7 @@ function RegisterForm() {
       <p className="text-center text-sm text-text-muted">
         Already have an account?{' '}
         <Link
-          href={next === '/' ? '/login' : `/login?next=${encodeURIComponent(next)}`}
+          href={next === '/locations' ? '/login' : `/login?next=${encodeURIComponent(next)}`}
           className="font-semibold text-primary"
         >
           Log in

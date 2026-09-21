@@ -29,13 +29,27 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
  * could finally exist (`GET /v1/locations`, apps/api, this same
  * change) and why it lists `/share/*` rather than the session-gated
  * `/forecast/*` this Disallow rule already excludes.
+ *
+ * `/offline` (sprint 38, "PWA baseline") is disallowed for a different
+ * reason than the routes above: it's never gated, but it's a service-
+ * worker fallback with no unique content of its own (the same static
+ * "you're offline" message regardless of which URL served it) -- not a
+ * page worth a search result.
  */
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/locations', '/forecast/', '/preferences', '/saved', '/account', '/api/'],
+      disallow: [
+        '/locations',
+        '/forecast/',
+        '/preferences',
+        '/saved',
+        '/account',
+        '/offline',
+        '/api/',
+      ],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   }

@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import { OfflineBanner } from './offline-banner'
+import { ServiceWorkerRegistration } from './service-worker-registration'
 import { SiteHeader } from './components/site-header'
 
 // Sprint 49 ("SEO and sharing"): NEXT_PUBLIC_SITE_URL lets metadataBase
@@ -77,6 +79,8 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <ServiceWorkerRegistration />
+        <OfflineBanner />
         <SiteHeader />
         {children}
       </body>

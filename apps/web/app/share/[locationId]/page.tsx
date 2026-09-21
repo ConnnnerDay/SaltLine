@@ -84,6 +84,7 @@ export default async function SharedForecastPage({ params }: Props) {
     <ForecastPageBody
       forecast={forecast}
       error={error}
+      retryHref={`/share/${encodeURIComponent(locationId)}`}
       backHref="/"
       backLabel="Back to Saltline"
     >

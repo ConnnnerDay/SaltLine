@@ -692,6 +692,35 @@ restored into a separate freshly created blank database, not just a
 documented procedure, confirming the restored data, indexes,
 constraints, and Alembic migration state all match.
 
+Degraded-mode UX (sprint 47) — this service's half of "database/API/
+upstream chaos yields actionable UI": found and fixed two real gaps by
+deliberately breaking things this session already had the means to
+break for real, not by inspection alone. (1) An unhandled exception (a
+genuine Postgres outage is the concrete case exercised, not the only
+one a real bug could hit) used to fall through to Starlette's bare
+`text/plain "Internal Server Error"` — no structure, and (checked
+against the actually-installed Starlette version, not assumed)
+`app.exception_handler(Exception)` installs as `ServerErrorMiddleware`'s
+own handler, which wraps every other middleware — including
+`log_requests` — from the *outside*, so that request also got no
+structured trace line at all. `app/main.py`'s new
+`handle_unexpected_error` returns a small, never-leaky `{"detail":
+"internal server error"}` JSON body instead (the real traceback still
+goes to `apps/api`'s own logs, never the client) and
+`app.infra.request_logging.log_requests` gained its own `try`/`except`
+around `call_next` so that request gets a real trace line too
+(`status_code: 500`) — both verified live against a real stopped local
+Postgres, not just the two new tests (`tests/test_error_handling.py`,
+one added case in `tests/test_request_logging.py`) that cover the same
+behavior deterministically. Upstream (NWS/NOAA/CO-OPS/NDBC) chaos was
+checked too and found already solid — this sandbox's own blocked
+network to real upstream domains is free, always-on evidence for that
+path, and the existing `SourceStatus`/confidence machinery (sprints
+21-26) already renders it as honest per-source `unavailable` labels,
+not a crash or invented data; nothing needed fixing there. `apps/web`'s
+half of this sprint (the BFF-layer error surfaces this service's new
+clean JSON body actually reaches) is in that app's own README.
+
 If you change a model in `app/domain/models.py`, its schema snapshot test
 will fail — regenerate deliberately and review the diff:
 

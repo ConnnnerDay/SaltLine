@@ -40,13 +40,25 @@ observability," the dependency-free half) wraps every request with one
 structured JSON trace log line, correlated with `apps/web`'s own log
 line for the same call via ADR-004's `X-Internal-Request-Id` header —
 see that module's docstring.
+
+`handle_unexpected_error` (sprint 47, "Degraded-mode UX") is this
+service's one catch-all for anything that isn't a deliberate
+`HTTPException` — a database connection failure being the concrete
+case this sprint exercised, but not the only one a genuinely unexpected
+bug could hit. See its own comment below for why it's registered where
+it is (between `log_requests` and routing) and what it changes for both
+this service's own logs and apps/web's rendered error state.
 """
 
+import json
+import logging
 import os
+import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from app.api.deps import AppState
 from app.api.v1.account import router as account_router
@@ -81,7 +93,47 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 await engine.dispose()
 
 
+# Sprint 47 ("Degraded-mode UX"): without this, an unhandled exception
+# (a database connection failure, a genuine bug -- anything not raised
+# as a deliberate HTTPException) falls through to Starlette's own
+# default `ServerErrorMiddleware`, which returns a bare `text/plain`
+# "Internal Server Error" body with no structure. Registering a handler
+# for `Exception` here installs it *as* `ServerErrorMiddleware`'s own
+# handler (verified against the actually-installed Starlette version,
+# not assumed from general FastAPI docs: a handler keyed on `Exception`
+# or `500` is special-cased into that middleware, which wraps every
+# other middleware -- including `log_requests` -- from the *outside*,
+# not into `ExceptionMiddleware` nested inside them). That's why
+# `app.infra.request_logging.log_requests` needed its own `try`/`except`
+# around `call_next` (see that module) to still get a structured trace
+# line for a request this handler catches -- without it, the request
+# that failed hardest would be the one with no trace line at all. What
+# this handler itself gives apps/web either way: a small, predictable,
+# never-leaky JSON body to render as an honest "try again" message,
+# instead of a raw, and potentially implementation-revealing, error
+# string reaching a real visitor.
+_error_logger = logging.getLogger("app.errors")
+_error_logger.setLevel(logging.ERROR)
+if not _error_logger.handlers:
+    # Same reasoning as request_logging.py's own handler: uvicorn's
+    # logging config never wires up an arbitrary app logger, so without
+    # this, every call below is silently dropped under a real server.
+    _handler = logging.StreamHandler(sys.stderr)
+    _handler.setFormatter(logging.Formatter("%(message)s"))
+    _error_logger.addHandler(_handler)
+
+
 app = FastAPI(title="Saltline API", version="0.1.0", lifespan=lifespan)
+
+
+@app.exception_handler(Exception)
+async def handle_unexpected_error(request: Request, exc: Exception) -> JSONResponse:
+    _error_logger.error(
+        json.dumps({"method": request.method, "path": request.url.path}),
+        exc_info=exc,
+    )
+    return JSONResponse(status_code=500, content={"detail": "internal server error"})
+
 
 app.middleware("http")(log_requests)
 

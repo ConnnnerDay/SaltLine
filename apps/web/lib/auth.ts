@@ -131,6 +131,33 @@ export const auth = betterAuth({
       },
     },
   },
+  // Sprint 43 ("Privacy-safe analytics"): a `registration` event, the
+  // one signal this sprint wires that only apps/web can produce --
+  // account creation lands in this app's own `auth`-schema database,
+  // which apps/api has no access to (ADR-006), so this goes through
+  // the same signed internal path `deleteUser.beforeDelete` above
+  // already uses rather than apps/api reaching into a schema it
+  // doesn't own. Fires after the real insert (`user.create.after`,
+  // not `before`), so a rejected/failed signup never gets counted.
+  // Best-effort, same reasoning as the email hooks above: an analytics
+  // side effect must never fail (or even be seen to fail) the actual
+  // signup, so failures are swallowed, not surfaced.
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          try {
+            await internalApiFetch('/v1/analytics/events', {
+              method: 'POST',
+              body: { event_type: 'registration', user_id: user.id },
+            })
+          } catch (error) {
+            console.error('Failed to record registration analytics event:', error)
+          }
+        },
+      },
+    },
+  },
   rateLimit: {
     enabled: true,
     window: 60,

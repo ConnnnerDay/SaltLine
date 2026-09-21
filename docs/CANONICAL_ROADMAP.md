@@ -369,7 +369,7 @@ to reconciliation, not proof that the agreed outcome passed.
 |---:|---|---|---|
 | 41 | Structured observability | One request trace across web/API/sources with safe context | **Partially complete** — the dependency-free half, no observability vendor: `apps/api/app/infra/request_logging.py`'s `log_requests` middleware emits one structured JSON trace line per request (`request_id`/method/path/status_code/duration_ms, "safe context" — no query string, headers, or body), correlated with `apps/web/lib/internal-api-client.ts`'s own trace line for the same call via ADR-004's `X-Internal-Request-Id` header (already generated for signing, not a new correlation scheme). Fires even for requests that never reach a route handler (an unsigned/unauthenticated call), since it wraps the whole ASGI call. Caught and fixed a real bug in the process: the middleware's `logger.info(...)` calls were silently dropped under a real `uvicorn app.main:app` run (no handler attached — uvicorn only wires up its own loggers, and pytest's `caplog` fixture had been masking this by attaching its own handler regardless) — fixed by giving the logger its own `StreamHandler`. Verified end-to-end against two real running servers: grepped the same `request_id` out of both services' real log output for one real page load, not asserted from unit tests alone — and in the process caught and corrected a real inaccuracy in sprint 49's fetch-deduplication claim (see that row). Per-source (NWS/NOAA CO-OPS/NDBC provider) log lines remain uncorrelated with the request trace — a larger refactor threading the request id through every provider call, not attempted here without evidence it's worth the churn |
 | 42 | Error monitoring | Frontend/API releases, source maps and secret redaction | Not accepted |
-| 43 | Privacy-safe analytics | Registration, resolution, forecast state, latency, return use | Not accepted |
+| 43 | Privacy-safe analytics | Registration, resolution, forecast state, latency, return use | **Complete** — see `apps/api/README.md` and `apps/web/README.md`'s Status sections (their sprint-43 entries) and the Live checkpoint's session note below. Self-hosted, no third-party vendor, per this row's own "no named vendor preference -- choose pragmatic, free-tier-friendly tools" guidance: a new `analytics_event` table in `apps/api`'s existing `forecast`-schema Postgres, a new `POST /v1/analytics/events` apps/web calls for a `registration` event (the one event type only apps/web can produce), and in-process recording of `location_resolved`/`forecast_generated` (with state and latency) from apps/api's own existing routes. Privacy: an opaque Better Auth user id only on the registration event, never an email/name/IP/user agent; recording is best-effort and never blocks the real request, verified live by killing apps/api and confirming registration still succeeds. This sprint builds the capture path only -- actually reporting a signup-funnel or return-usage rate needs real production traffic (sprints 58/59, both still "Not accepted" for exactly that reason) |
 | 44 | Security hardening | CSP, CSRF, signed internal API, brute force, headers, threat model | **Complete** — the signed-internal-API piece was built **and wired end-to-end**: `apps/api/app/infra/internal_signature.py` + `app/api/internal_auth.py` implement ADR-004's HMAC-SHA-256 contract (no legacy precedent), required on every `/v1` route via `Depends(require_internal_signature)`; `apps/web/lib/internal-signature.ts` + `internal-api-client.ts` are the matching signer, exercised by `apps/web/app/forecast/demo/page.tsx`. CSP and security headers were also done: `apps/web/next.config.ts`'s `headers()` attaches a self-only `Content-Security-Policy` plus `X-Content-Type-Options`/`X-Frame-Options`/`Referrer-Policy`/`Permissions-Policy`/`X-Permitted-Cross-Domain-Policies`/`Strict-Transport-Security` to every response, adapted (stricter, since apps/web has no third-party origins yet) from the legacy Flask app's `_set_security_headers`; verified against a real production build/server, not just `next dev` — real headers on static/dynamic/Route-Handler responses, a full headless-Chromium interactive pass confirming zero actual CSP violations, and a fresh `axe-core` spot-check. CSRF and brute-force defense, this row's own note said, needed Better Auth (sprint 28) and real mutating authenticated endpoints (sprints 36/37) to be meaningful — both now exist, so this closes out: brute-force defense is Better Auth's own per-action rate limiting (verified live in sprint 28 — 7 rapid sign-in attempts, exactly 5 allowed before a real `429`). CSRF gets two independent layers on every BFF route with real per-user data (`lib/require-session-user-id.ts`, shared by `app/api/preferences/route.ts` and `app/api/saved-locations/route.ts`): the session cookie's own `SameSite=Lax` policy, and a new explicit `Origin` header check (`403` on mismatch) added as defense-in-depth per ADR-005's literal "state-changing web routes enforce origin and CSRF validation." Verified live, not just configured: a real cross-site `<form>` POST (the actual CSRF vector, not a CORS-only claim) got no session cookie at all and was rejected; a second test manually attached a valid session cookie with a forged `Origin` header and got an explicit `403 origin mismatch`, proving the new check is a real second layer, not redundant with the cookie policy alone; a legitimate same-origin request still succeeds normally. `docs/THREAT_MODEL.md` is the last named piece — a boundary-by-boundary (browser↔BFF, BFF↔FastAPI, FastAPI↔providers, database) threat/mitigation/evidence table citing the real file or test behind each mitigation, plus an explicit accepted-residual-risk section (CAPTCHA gap, no WAF/DDoS layer, no continuous dependency scanning, live-upstream threats untestable in this sandboxed environment) rather than only listing what's covered |
 | 45 | Privacy and deletion | **Required for v1 launch** (public product, real accounts): self-service export and account deletion/anonymization proof; legal pages | **Partially complete** — self-service export and account deletion, the round-2 product decision's explicit v1-required carve-out, are both done. `apps/api`: a new `app/api/v1/account.py` router, `GET /v1/me/export` (the literal stored rows for the caller — preferences fields, saved locations' `location_id`/`saved_at` — not re-derived data; a saved location's name/state is public curated data, not personal data this account holds) and `DELETE /v1/me` (clears both tables this service owns for that user, `user_preferences` and `saved_location`). `apps/web`: `lib/auth.ts` enables Better Auth's built-in `user.deleteUser` (off by default), confirmed via the current password rather than an email-verification-token flow that would add a second, SMTP-dependent path for no real gain; its `beforeDelete` hook calls apps/api's `DELETE /v1/me` before Better Auth removes the `auth`-schema account row, so no `forecast`-schema data outlives a deleted account — the two schemas ADR-006 splits between apps have no shared foreign key to cascade this automatically. New `/account` page (session-gated like `/preferences`, linked from the account menu): a plain download link to a new BFF export route (merging Better Auth's own account fields with apps/api's export, `Content-Disposition: attachment`) and a two-step delete-confirmation form (password, then an explicit second button) rather than a one-click path for an irreversible action. Verified end-to-end against real running `next start`/`uvicorn`/local-Postgres servers, not just wired: registered, set real preferences, saved a real location, downloaded and confirmed the real merged export content, confirmed a wrong password is rejected, then deleted the account for real with the correct password — confirmed via direct SQL against *both* Postgres schemas that every row was actually gone afterward (not just that a subsequent login failed), and confirmed re-login with the same credentials is rejected. A fresh `axe-core` sweep (desktop/mobile × light/dark, delete-confirmation form open) found 0 violations and no overflow; the account menu's now-four items still fit at 360px. Full check suites clean on both apps (`ruff`/`ruff format`/`mypy`/`pytest` — 380 passed; `npm run lint`/`build`). **Legal pages** (real Terms of Service/Privacy Policy copy) remain open — needs real legal review this session can't supply, flagged the same way sprint 28's CAPTCHA credentials gap is, not guessed at |
 | 46 | Database resilience | Migrations, constraints, indexes, pooling, backups, blank restore drill | **Partially complete** — see `docs/DB_RESILIENCE.md` and the Live checkpoint's session note below for the full account. Found and fixed a real migration bug (missing `search_path`, `migrations/env.py`), added a DB-layer `CHECK` constraint on `user_preferences.units`, reviewed indexes (adequate, one minor redundancy noted), configured connection pooling (`pool_pre_ping`/`pool_recycle`/`pool_size`/`max_overflow`), and ran a real backup/restore drill against local Postgres (dump restored into a separate blank database, data/constraints/`alembic_version` all verified intact). **Not done**: automated production backups (blocked on sprints 9/10's not-yet-provisioned Neon project) and a CI/CD migration gate (sprint 48's job) |
@@ -461,6 +461,64 @@ table above as the authoritative current state (it matches the actual
 `apps/web`/`apps/api` code in this repo, spot-checked against several
 rows below before starting new work), and record this repo's own
 handoffs as new session notes here, at the top of this section.
+
+**Session note (unmerged, this branch, `claude/ecstatic-rubin-mj5c0k`):**
+sprint 43 (privacy-safe analytics), previously **Not accepted**,
+advances to **Complete**. Full account in `apps/api/README.md` and
+`apps/web/README.md`'s Status sections (top entries) and the sprint
+ledger row above. Short version: this row's own guidance explicitly
+allows a pragmatic, no-vendor-debate tool choice ("choose pragmatic,
+free-tier-friendly tools rather than spending a sprint deciding between
+options"), so this is entirely self-hosted -- a new `analytics_event`
+table in `apps/api`'s existing `forecast`-schema Postgres (migration
+`0dec7a45d7ba`), no third-party script or cookie. Three event types
+wired at exactly the places this row's acceptance bar names:
+`registration` (a new `POST /v1/analytics/events`, called from
+`apps/web`'s `lib/auth.ts` via Better Auth's `user.create.after` hook --
+the one event type only `apps/web` can produce, since account creation
+lives in that app's own `auth`-schema database, which `apps/api` has no
+access to per ADR-006), and `location_resolved`/`forecast_generated`
+(recorded in-process from `apps/api`'s own existing `POST /v1/locations
+/resolve` and `GET /v1/forecasts/{location_id}` routes -- no HTTP round
+trip needed since they're already inside this service). Privacy:
+`user_id` is Better Auth's opaque id (the same posture `UserPreferences`
+/`SavedLocation` already hold) and is only ever set on the registration
+event; the other two carry no caller identity, since neither existing
+endpoint threads one through today. No email, name, IP address, or user
+agent, ever. Recording is deliberately best-effort (`try_record_event`
+never raises, no-ops with no database configured at all) -- applying
+sprint 47's own lesson from the start here rather than finding it as a
+bug afterward. This sprint builds the capture path only: actually
+*reporting* a signup-funnel or return-usage rate needs real production
+traffic to mean anything (sprints 58/59, both still "Not accepted," both
+directional 6-12-month-post-launch goals) -- what's captured here is
+what those later sprints will query. Verified against real running
+`next start`/`uvicorn`/local-Postgres servers, not just unit tests:
+registered a real account and browsed real forecast/share pages, read
+the real rows back out of Postgres (a real Better Auth user id on the
+registration row; real `partial`-state and ~6.7s-latency numbers on the
+forecast rows -- this sandbox's own honest blocked-upstream reality, not
+fabricated data; a `location_resolved` row from a direct signed
+`POST /v1/locations/resolve` call) -- then killed `apps/api` entirely
+and registered again, confirming signup still completes normally with
+the analytics call failing silently underneath it, not just in theory.
+7 new tests (`tests/test_analytics.py`); full suite 393 passed (was
+386). `ruff`/`ruff format`/`mypy` and `npm run lint`/`build` all clean;
+OpenAPI snapshot regenerated (new schemas/path only). **Next action**
+for whichever agent picks this up after it merges: the credential-free,
+self-contained ledger rows are now essentially exhausted --
+sprints 9/10/28's CAPTCHA/31's map search/45's legal pages remain
+flagged pending real credentials or legal review; sprint 42 (error
+monitoring) has the same "no named vendor preference" allowance this
+sprint used but likely needs an actual third-party service (source maps/
+release tracking is a harder self-host than analytics was) to be worth
+doing at all; sprint 35 (fishing guidance) is real, not-yet-started v1
+scope (`docs/product-definition.md` names "limited bait, rig, or
+target-category guidance" as required, distinct from the deferred full
+species catalogue) but is more product-judgment-laden than this
+session's recent sprints and probably worth a product-owner check-in on
+exact scope before a large diff, not a unilateral design; everything
+else is gated on live production traffic or real hosting.
 
 **Session note (unmerged, this branch, `claude/ecstatic-rubin-mj5c0k`):**
 sprint 47 (degraded-mode UX), previously **Not accepted**, advances to

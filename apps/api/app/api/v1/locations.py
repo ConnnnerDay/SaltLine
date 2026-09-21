@@ -1,4 +1,5 @@
-"""`/v1/locations` router (sprint 25).
+"""`/v1/locations` router (sprint 25; sprint 43 added a `resolve`
+analytics event).
 
 Two of the canonical roadmap's required endpoints
 (`GET /v1/locations/search`, `POST /v1/locations/resolve`), both
@@ -29,15 +30,25 @@ module's docstring and `app.api.internal_auth`'s for the full rationale.
 A plain `Depends()` function dependency like this one adds nothing to
 the OpenAPI schema (FastAPI only documents `fastapi.security` classes),
 so this doesn't touch `tests/openapi_snapshot.json`.
+
+`resolve_location` (sprint 43, "Privacy-safe analytics") records a
+`location_resolved` event after a successful resolution -- placed
+after `resolve_location_id` returns rather than before, so a 404/422
+resolution failure never gets counted as a "resolved" event. See
+`app.domain.analytics`'s own docstring for why this never fails the
+actual request even if the write itself does.
 """
 
 from __future__ import annotations
+
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, model_validator
 
 from app.api.deps import AppState, get_app_state, resolve_location_id
 from app.api.internal_auth import require_internal_signature
+from app.domain.analytics import AnalyticsEventIn, AnalyticsEventType, try_record_event
 from app.providers.coastal_bounds import is_valid_coordinate
 from app.providers.locations import (
     CuratedLocation,
@@ -96,4 +107,12 @@ async def resolve_location(
     else:
         assert body.lat is not None and body.lng is not None
         location_id = format_dynamic_id(body.lat, body.lng)
-    return await resolve_location_id(location_id, state)
+    location = await resolve_location_id(location_id, state)
+    await try_record_event(
+        state.db_sessionmaker,
+        AnalyticsEventIn(
+            event_type=AnalyticsEventType.LOCATION_RESOLVED, location_id=location.id
+        ),
+        now=datetime.now(UTC),
+    )
+    return location

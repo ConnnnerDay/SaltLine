@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 # and define their models against it -- importing them here is what
 # populates Base.metadata for autogenerate. Every future forecast/
 # preferences model needs the same import added here.
+from app.domain.analytics import AnalyticsEvent  # noqa: F401
 from app.domain.preferences import UserPreferences  # noqa: F401
 from app.domain.saved_locations import SavedLocation  # noqa: F401
 from app.infra.database import Base

@@ -8,6 +8,76 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Sprint 38 ("PWA baseline")**: full offline app-shell navigation with
+graceful degradation, not just last-cached-forecast viewing -- and
+authenticated forecasts aren't cached forever. `docs/
+R1_RECONCILIATION_AUDIT.md`'s §3.5 disposition for this row was "adapt
+the requirement, replace the implementation": v2's `vite-plugin-pwa`
+config only cached the last-loaded forecast (and its `/api/*` cache
+rule's URL pattern didn't even match this app's real request paths --
+a latent bug, not something worth porting), so this is a from-scratch
+build under Next.js 16 tooling, not an adaptation of that code.
+
+Two complementary pieces, covering the two kinds of offline navigation:
+
+- `experimental.useOffline` (`next.config.ts`) -- Next 16's own
+  (experimental) connectivity-aware retry for *soft*, already-hydrated
+  in-app navigations, prefetches, and Server Actions. `app/
+  offline-banner.tsx` surfaces the `useOffline` hook it exposes as a
+  site-wide "You're offline" banner in the root layout, adapted
+  directly from `node_modules/next/dist/docs/01-app/02-guides/
+  offline-support.md`'s own example. This alone doesn't cover a hard
+  reload or an installed PWA's cold launch -- the guide says so
+  explicitly ("full offline loads would need a service worker").
+- `public/sw.js` -- a hand-written service worker (not Workbox/Serwist:
+  no bundler-level SW build step exists in this app, and Next's own
+  docs name Serwist as *one option*, not a requirement) for exactly
+  that full-navigation case. Runtime caching, not precaching: Turbopack's
+  build output is content-hashed per build, so a static precache list
+  of asset URLs would go stale on every deploy -- pages get cached only
+  as they're actually visited, and only within an explicit allow-list
+  (`/`, `/locations`, `/forecast/*`, `/share/*`) that deliberately
+  excludes `/saved`/`/preferences`/`/account`: those render a signed-in
+  user's own personal data into the HTML, and Cache Storage is shared
+  across every account that ever signs into a given browser profile,
+  not scoped per session -- caching them risks a cross-account leak on
+  a shared device. `/forecast/*` and `/share/*` (the two routes that
+  embed live scored conditions) additionally carry a stamped
+  `x-saltline-cached-at` header and a 4-hour TTL (`FORECAST_TTL_MS`,
+  matching `docs/product-definition.md`'s existing freshness-window
+  decision, the same value `apps/api`'s `SnapshotCache` already
+  defaults to) -- past that age, a cached copy is more likely to
+  mislead than help, so it's treated as a miss rather than served,
+  satisfying this sprint's "authenticated forecasts not cached forever"
+  requirement literally. A new `app/offline/page.tsx` (real Saltline
+  chrome, not a raw string) is what the worker serves for anything it
+  can't fulfill -- an unvisited URL, or a `forecast`/`share` entry past
+  its TTL -- instead of the browser's native offline error. `app/
+  service-worker-registration.tsx` registers it, production builds
+  only (a service worker caching `next dev`'s unstable dev bundles
+  would fight hot-reload).
+
+Verified against real infrastructure, not emulated: Chromium's
+per-target network-offline emulation (`browserContext.setOffline`)
+doesn't reliably reach a service worker's own `fetch()` calls (it runs
+in a separate CDP target from the page), so this was tested by actually
+stopping the `next start` process -- a real connection-refused, not a
+simulated one -- with a persistent browser profile carried across the
+process restarts so the installed worker and its Cache Storage survive
+them the way a real browser session would. With the server down: a
+previously-visited `/share/wrightsville-beach-nc` reload served its
+real cached content; a never-visited `/share/cocoa-beach-fl` rendered
+the real `/offline` page, not a browser error. Restarting the server
+made the previously-failed URL render live again. Separately, the
+4-hour TTL was exercised without waiting four real hours: the cached
+entry's own `x-saltline-cached-at` header was rewritten (via the page's
+own `caches` API, the same interface the worker itself uses) to look
+5 hours old, and with the server down again, that same URL now
+correctly rendered `/offline` instead of the stale forecast -- proving
+the staleness check itself works, not just that the happy path does.
+`axe-core` on `/offline`, both color schemes: 0 violations. `npm run
+lint`/`build` both clean.
+
 **Sprint 30 ("Onboarding shell")**: closes the gap `app/register/
 page.tsx`'s own docstring had flagged since sprint 28 -- registration
 alone was "nothing here is a real profile/onboarding flow." A brand-new

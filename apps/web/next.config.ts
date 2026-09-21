@@ -56,6 +56,19 @@ const CSP_DIRECTIVES = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Sprint 38 ("PWA baseline"): retries a soft (client-side) navigation,
+  // prefetch, or Server Action once connectivity returns instead of
+  // throwing, and exposes the `useOffline` hook (app/offline-banner.tsx)
+  // -- see node_modules/next/dist/docs/01-app/02-guides/
+  // offline-support.md. This only covers already-hydrated, in-app
+  // navigation; a hard reload or a fresh/installed launch still needs a
+  // real network response for the HTML itself, which is what
+  // public/sw.js (registered by app/service-worker-registration.tsx)
+  // separately provides. Experimental per Next 16's own docs -- no
+  // stable alternative exists yet for this exact behavior.
+  experimental: {
+    useOffline: true,
+  },
   async headers() {
     return [
       {
@@ -78,6 +91,15 @@ const nextConfig: NextConfig = {
             value: 'max-age=31536000; includeSubDomains',
           },
         ],
+      },
+      {
+        // The service worker script itself must never be served stale
+        // -- a cached /sw.js would mean the browser's update check
+        // (which byte-compares a fresh fetch against the installed
+        // worker) never sees a real change, silently freezing every
+        // client on the first-ever version of the caching logic.
+        source: '/sw.js',
+        headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
       },
     ]
   },

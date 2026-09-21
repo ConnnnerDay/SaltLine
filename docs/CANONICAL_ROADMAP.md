@@ -372,7 +372,7 @@ to reconciliation, not proof that the agreed outcome passed.
 | 43 | Privacy-safe analytics | Registration, resolution, forecast state, latency, return use | Not accepted |
 | 44 | Security hardening | CSP, CSRF, signed internal API, brute force, headers, threat model | **Complete** — the signed-internal-API piece was built **and wired end-to-end**: `apps/api/app/infra/internal_signature.py` + `app/api/internal_auth.py` implement ADR-004's HMAC-SHA-256 contract (no legacy precedent), required on every `/v1` route via `Depends(require_internal_signature)`; `apps/web/lib/internal-signature.ts` + `internal-api-client.ts` are the matching signer, exercised by `apps/web/app/forecast/demo/page.tsx`. CSP and security headers were also done: `apps/web/next.config.ts`'s `headers()` attaches a self-only `Content-Security-Policy` plus `X-Content-Type-Options`/`X-Frame-Options`/`Referrer-Policy`/`Permissions-Policy`/`X-Permitted-Cross-Domain-Policies`/`Strict-Transport-Security` to every response, adapted (stricter, since apps/web has no third-party origins yet) from the legacy Flask app's `_set_security_headers`; verified against a real production build/server, not just `next dev` — real headers on static/dynamic/Route-Handler responses, a full headless-Chromium interactive pass confirming zero actual CSP violations, and a fresh `axe-core` spot-check. CSRF and brute-force defense, this row's own note said, needed Better Auth (sprint 28) and real mutating authenticated endpoints (sprints 36/37) to be meaningful — both now exist, so this closes out: brute-force defense is Better Auth's own per-action rate limiting (verified live in sprint 28 — 7 rapid sign-in attempts, exactly 5 allowed before a real `429`). CSRF gets two independent layers on every BFF route with real per-user data (`lib/require-session-user-id.ts`, shared by `app/api/preferences/route.ts` and `app/api/saved-locations/route.ts`): the session cookie's own `SameSite=Lax` policy, and a new explicit `Origin` header check (`403` on mismatch) added as defense-in-depth per ADR-005's literal "state-changing web routes enforce origin and CSRF validation." Verified live, not just configured: a real cross-site `<form>` POST (the actual CSRF vector, not a CORS-only claim) got no session cookie at all and was rejected; a second test manually attached a valid session cookie with a forged `Origin` header and got an explicit `403 origin mismatch`, proving the new check is a real second layer, not redundant with the cookie policy alone; a legitimate same-origin request still succeeds normally. `docs/THREAT_MODEL.md` is the last named piece — a boundary-by-boundary (browser↔BFF, BFF↔FastAPI, FastAPI↔providers, database) threat/mitigation/evidence table citing the real file or test behind each mitigation, plus an explicit accepted-residual-risk section (CAPTCHA gap, no WAF/DDoS layer, no continuous dependency scanning, live-upstream threats untestable in this sandboxed environment) rather than only listing what's covered |
 | 45 | Privacy and deletion | **Required for v1 launch** (public product, real accounts): self-service export and account deletion/anonymization proof; legal pages | **Partially complete** — self-service export and account deletion, the round-2 product decision's explicit v1-required carve-out, are both done. `apps/api`: a new `app/api/v1/account.py` router, `GET /v1/me/export` (the literal stored rows for the caller — preferences fields, saved locations' `location_id`/`saved_at` — not re-derived data; a saved location's name/state is public curated data, not personal data this account holds) and `DELETE /v1/me` (clears both tables this service owns for that user, `user_preferences` and `saved_location`). `apps/web`: `lib/auth.ts` enables Better Auth's built-in `user.deleteUser` (off by default), confirmed via the current password rather than an email-verification-token flow that would add a second, SMTP-dependent path for no real gain; its `beforeDelete` hook calls apps/api's `DELETE /v1/me` before Better Auth removes the `auth`-schema account row, so no `forecast`-schema data outlives a deleted account — the two schemas ADR-006 splits between apps have no shared foreign key to cascade this automatically. New `/account` page (session-gated like `/preferences`, linked from the account menu): a plain download link to a new BFF export route (merging Better Auth's own account fields with apps/api's export, `Content-Disposition: attachment`) and a two-step delete-confirmation form (password, then an explicit second button) rather than a one-click path for an irreversible action. Verified end-to-end against real running `next start`/`uvicorn`/local-Postgres servers, not just wired: registered, set real preferences, saved a real location, downloaded and confirmed the real merged export content, confirmed a wrong password is rejected, then deleted the account for real with the correct password — confirmed via direct SQL against *both* Postgres schemas that every row was actually gone afterward (not just that a subsequent login failed), and confirmed re-login with the same credentials is rejected. A fresh `axe-core` sweep (desktop/mobile × light/dark, delete-confirmation form open) found 0 violations and no overflow; the account menu's now-four items still fit at 360px. Full check suites clean on both apps (`ruff`/`ruff format`/`mypy`/`pytest` — 380 passed; `npm run lint`/`build`). **Legal pages** (real Terms of Service/Privacy Policy copy) remain open — needs real legal review this session can't supply, flagged the same way sprint 28's CAPTCHA credentials gap is, not guessed at |
-| 46 | Database resilience | Migrations, constraints, indexes, pooling, backups, blank restore drill | Not accepted |
+| 46 | Database resilience | Migrations, constraints, indexes, pooling, backups, blank restore drill | **Partially complete** — see `docs/DB_RESILIENCE.md` and the Live checkpoint's session note below for the full account. Found and fixed a real migration bug (missing `search_path`, `migrations/env.py`), added a DB-layer `CHECK` constraint on `user_preferences.units`, reviewed indexes (adequate, one minor redundancy noted), configured connection pooling (`pool_pre_ping`/`pool_recycle`/`pool_size`/`max_overflow`), and ran a real backup/restore drill against local Postgres (dump restored into a separate blank database, data/constraints/`alembic_version` all verified intact). **Not done**: automated production backups (blocked on sprints 9/10's not-yet-provisioned Neon project) and a CI/CD migration gate (sprint 48's job) |
 | 47 | Degraded-mode UX | Database/API/email/upstream chaos yields actionable UI | Not accepted |
 | 48 | Release controls | Promotion, migration gate, smoke, rollback and staging drill | Not accepted |
 | 49 | SEO and sharing | **Required for v1**, not just later phase-4 sequencing: public non-personal forecast pages (organic-growth surface); private dashboards | **Complete** — the "public non-personal forecast pages" half originally shipped at `apps/web/app/forecast/[locationId]/page.tsx`'s own URLs; sprint 29 ("account-required routing") gated that route behind a session, so this sprint's public surface **moved to `app/share/[locationId]/page.tsx`** instead of being lost — same real per-location `generateMetadata` (title, description, canonical URL, OpenGraph tags — static copy, never live score/warning text), same `internalApiFetch` call (now shared via `lib/get-forecast.ts` rather than copied), same visual layout (shared via `app/components/forecast-page-body.tsx`/`forecast-loading-body.tsx`, since the authenticated and public pages differ only in their back-link and an added sign-up call to action on the public one). `app/page.tsx`'s "Popular spots" links point at `/share/*` now, not the since-gated `/forecast/*`. `app/layout.tsx` gains `metadataBase`/a title template/OpenGraph+Twitter defaults; `app/opengraph-image.tsx` generates a real 1200×630 PNG link-preview card via `next/og` (design-system palette, no new branding decision). The "private dashboards" half is real: `app/robots.ts` disallows `/locations`, `/forecast/`, `/preferences`, `/saved` (sprint 37's session-gated dashboard, a real gap found and fixed closing this row out — it postdated this list's last review), and `/api/`, while keeping `/` and `/share/*` allowed. This row's one remaining named piece, a real `sitemap.xml`, closes out now too: `apps/api`'s new `GET /v1/locations` (an unfiltered enumeration `/v1/locations/search`'s query-based shape couldn't give) backs `apps/web/app/sitemap.ts`, one URL per curated location's `/share/*` page plus the home page, referenced from `robots.ts`'s `sitemap` field. Verified against real running servers — `curl` for the metadata/robots/sitemap shape (`/sitemap.xml` returns exactly 102 entries, matching the curated dataset's real 101-location size plus the home page; two sampled `/share/*` URLs from it both resolve `200`), a real browser for the share page's rendered content and its sign-up CTA — plus a fresh `axe-core` spot-check, zero violations. Full check suites clean on both apps (`ruff`/`ruff format`/`mypy`/`pytest` — 373 passed; `npm run lint`/`build`) |
@@ -445,6 +445,68 @@ Before switching from Codex to Claude, Claude to Codex, or to a human:
    silently choosing a different architecture.
 
 ## Live checkpoint
+
+**Repository note (this repo, `ConnnnerDay/saltline`):** this repo is a
+fresh import of the working tree described by the rest of this
+checkpoint (single commit `b75b634`, "Import surf-pier-forecast codebase
+as the SaltLine application"), not a fork with continued PR history from
+`ConnnnerDay/surf-pier-forecast`. Every PR number cited below (`#380`
+through `#385` and earlier) refers to that other repository's history,
+predates this repo's own `git log`, and cannot be looked up here — they
+document how the imported code came to be, not something re-verifiable
+in this repo's own PR trail. Master issue #318, linked throughout this
+document, likewise lives in `surf-pier-forecast`, outside this session's
+repository scope; this session cannot update it. Treat the sprint ledger
+table above as the authoritative current state (it matches the actual
+`apps/web`/`apps/api` code in this repo, spot-checked against several
+rows below before starting new work), and record this repo's own
+handoffs as new session notes here, at the top of this section.
+
+**Session note (unmerged, this branch, `claude/ecstatic-rubin-mj5c0k`):**
+sprint 46 (database resilience — migrations, constraints, indexes,
+pooling, backups, blank-restore drill), previously **Not accepted**,
+advances to **Partially complete**. Full account, evidence, and what's
+still blocked (production backups depend on sprints 9/10's not-yet-
+provisioned Neon project; a CI/CD migration gate is sprint 48's job) in
+the new `docs/DB_RESILIENCE.md`, cited from `apps/api/README.md`'s
+Status and "Local dev" sections. Short version: running the two existing
+migrations from a genuinely blank database (not an already-migrated one,
+which had been masking this) surfaced a real bug — `migrations/env.py`'s
+engine had no `search_path`, so its DDL landed against `public` and hit
+`permission denied for schema public` against exactly the least-
+privilege role the README's own setup commands create; fixed by giving
+the migration engine the same `search_path=forecast` connect arg
+`app.infra.database.create_engine` already uses. Added a `CHECK`
+constraint on `user_preferences.units` as DB-layer defense-in-depth
+(migration `600375436618`, hand-written since Alembic's autogenerate
+doesn't detect Postgres `CHECK` constraint additions — confirmed by
+running it and inspecting the empty diff it actually produced) and
+`create_engine` gained `pool_pre_ping`/`pool_recycle`/`pool_size`/
+`max_overflow` (previously entirely unconfigured), reasoned from Neon's
+documented idle-connection-drop behavior even though Neon itself isn't
+provisioned yet to test against directly. Existing indexes reviewed
+against both tables' actual query patterns and found adequate; one minor
+redundancy (`saved_location`'s standalone `user_id` index versus its
+`(user_id, location_id)` unique constraint's own index) noted but left
+alone as out of this sprint's scope. All of the above verified against a
+real local Postgres 16, not just unit-tested: the migration bug's fix,
+the constraint rejecting a raw `psql` insert of an invalid value, and a
+full backup/restore drill — real data in, `pg_dump`'d, restored into a
+**separate freshly created blank database** (chosen over a destructive
+drop-and-recreate of the working database, which this session's own
+safety tooling correctly declined to run), confirming the restored
+data, the `CHECK` constraint, and `alembic_version`'s head state
+(`alembic current`/`upgrade head` against the restored database: clean,
+already at head) all came back intact. 3 new tests
+(`apps/api/tests/test_database.py`); full suite 383 passed (was 380).
+`ruff`/`ruff format`/`mypy` all clean. **Next action** for whichever
+agent picks this up after it merges: sprint 30 (onboarding shell) or
+sprint 38 (PWA baseline) are the next self-contained, credential-free
+candidates — both currently "Candidate in `/v2`," needing a real
+reconciliation-and-port pass rather than a blocked external dependency;
+sprints 9/10/28's CAPTCHA/31's map search/45's legal pages remain
+flagged, not attempted, pending real third-party credentials or legal
+review this session doesn't have.
 
 **Session note (unmerged, this branch):** five more rows advance —
 sprint 32 (the multi-location dashboard), sprint 49 (a real

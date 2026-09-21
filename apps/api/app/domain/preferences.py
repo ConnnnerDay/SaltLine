@@ -33,7 +33,7 @@ from __future__ import annotations
 from enum import Enum
 
 from pydantic import BaseModel, Field
-from sqlalchemy import Float, String
+from sqlalchemy import CheckConstraint, Float, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.infra.database import Base
@@ -52,6 +52,17 @@ class UserPreferences(Base):
     """
 
     __tablename__ = "user_preferences"
+    __table_args__ = (
+        # Sprint 46 (database resilience): `PreferencesUpdate.units` is
+        # already a closed `DisplayUnits` enum at the API layer, but
+        # that only guards requests that go through this router -- a
+        # future script or migration writing this table directly has
+        # no such guard. A CHECK constraint is defense-in-depth, not a
+        # duplicate of the Pydantic validation it mirrors.
+        CheckConstraint(
+            "units IN ('imperial', 'metric')", name="ck_user_preferences_units"
+        ),
+    )
 
     user_id: Mapped[str] = mapped_column(String, primary_key=True)
     units: Mapped[str] = mapped_column(String, default=DisplayUnits.IMPERIAL.value)

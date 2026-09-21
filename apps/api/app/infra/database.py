@@ -49,6 +49,25 @@ def create_engine(database_url: str) -> AsyncEngine:
     return create_async_engine(
         database_url,
         connect_args={"server_settings": {"search_path": "forecast"}},
+        # Sprint 46 (database resilience): this service runs as an
+        # always-on process (canonical contract -- Render, not a
+        # serverless function per request), so a persistent pool is
+        # correct, not NullPool. pool_pre_ping issues a cheap
+        # SELECT 1 before handing out a pooled connection and
+        # transparently reconnects on failure -- needed because the
+        # target Neon project (sprints 9/10, not yet provisioned)
+        # silently drops idle server-side connections, which would
+        # otherwise surface as a random mid-request
+        # "connection was closed" error picked up from the pool.
+        # pool_recycle forces a periodic reconnect well under that kind
+        # of idle-close window even if pre_ping's probe race loses.
+        # pool_size/max_overflow are conservative for a single small
+        # API instance talking to a pooled (PgBouncer-fronted) Neon
+        # endpoint, which itself caps concurrent server connections.
+        pool_pre_ping=True,
+        pool_recycle=1800,
+        pool_size=5,
+        max_overflow=10,
     )
 
 

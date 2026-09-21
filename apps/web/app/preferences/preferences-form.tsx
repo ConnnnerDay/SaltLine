@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button, Card, Field } from '@/app/components/ui'
 import { cx } from '@/app/components/ui/cx'
 import type { Preferences } from '@/app/api/preferences/route'
@@ -27,30 +27,48 @@ export function PreferencesForm() {
   const [preferences, setPreferences] = useState<Preferences>(EMPTY)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  // Sprint 47 ("Degraded-mode UX"): a failed *load* and a failed *save*
+  // used to share one `error` string, rendered as if it were a
+  // validation message on the last field ("Default location ID") --
+  // actively misleading for a load failure, which has nothing to do
+  // with that field, and which left the form silently showing `EMPTY`
+  // defaults a user could submit and overwrite their real saved
+  // preferences with, with no warning that's what "Save" would do.
+  // Split into two distinct states instead: a load failure replaces
+  // the whole form with a retryable error state (never renders `EMPTY`
+  // as if it were real data), a save failure stays attached to the
+  // field it's shown next to, same as before.
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  const requestIdRef = useRef(0)
 
-  useEffect(() => {
-    let cancelled = false
+  const load = useCallback(() => {
+    const requestId = ++requestIdRef.current
+    setIsLoading(true)
+    setLoadError(null)
     fetch('/api/preferences')
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error('load failed'))))
       .then((data: Preferences) => {
-        if (!cancelled) setPreferences(data)
+        if (requestId === requestIdRef.current) setPreferences(data)
       })
       .catch(() => {
-        if (!cancelled) setError('Could not load your preferences.')
+        if (requestId === requestIdRef.current) {
+          setLoadError('Could not load your preferences.')
+        }
       })
       .finally(() => {
-        if (!cancelled) setIsLoading(false)
+        if (requestId === requestIdRef.current) setIsLoading(false)
       })
-    return () => {
-      cancelled = true
-    }
   }, [])
+
+  useEffect(() => {
+    load()
+  }, [load])
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
-    setError(null)
+    setSaveError(null)
     setSaved(false)
     setIsSaving(true)
     const response = await fetch('/api/preferences', {
@@ -60,7 +78,7 @@ export function PreferencesForm() {
     })
     setIsSaving(false)
     if (!response.ok) {
-      setError('Could not save your preferences.')
+      setSaveError('Could not save your preferences.')
       return
     }
     setPreferences(await response.json())
@@ -68,6 +86,19 @@ export function PreferencesForm() {
   }
 
   if (isLoading) return null
+
+  if (loadError) {
+    return (
+      <Card>
+        <p className="text-sm text-danger-text" role="alert">
+          {loadError}
+        </p>
+        <Button type="button" variant="primary" className="mt-3" onClick={load}>
+          Try again
+        </Button>
+      </Card>
+    )
+  }
 
   return (
     <Card>
@@ -144,10 +175,18 @@ export function PreferencesForm() {
               default_location_id: event.target.value || null,
             }))
           }
-          error={error ?? undefined}
         />
 
-        {saved && !error && (
+        {/* Sprint 47: a save failure is a whole-form outcome (the PATCH
+            either applied or it didn't), not a validation error on
+            whichever field happens to be last -- shown as its own
+            status line instead of Field's per-field error slot. */}
+        {saveError && (
+          <p className="mb-4 text-sm text-danger-text" role="alert">
+            {saveError}
+          </p>
+        )}
+        {saved && !saveError && (
           <p className="mb-4 text-sm text-go-text" role="status">
             Saved.
           </p>

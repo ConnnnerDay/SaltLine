@@ -79,9 +79,39 @@ async def log_requests(
     """
     request_id = request.headers.get(_HEADER_REQUEST_ID) or str(uuid.uuid4())
     started = time.perf_counter()
-    response = await call_next(request)
-    duration_ms = round((time.perf_counter() - started) * 1000, 1)
 
+    # Sprint 47 ("Degraded-mode UX"): an unhandled exception (a database
+    # connection failure being the concrete case that surfaced this)
+    # propagates *up through* this middleware's own `call_next` rather
+    # than returning a Response -- checked directly against a real
+    # installed Starlette version, not assumed: `app.exception_handler
+    # (Exception)` registers into `ServerErrorMiddleware`, which wraps
+    # this middleware from the *outside* (see app.main's own comment on
+    # `handle_unexpected_error`), not `ExceptionMiddleware` nested
+    # inside it. Without this `try`/`except`, exactly the request that
+    # failed hardest would be the one with no trace line at all. Logged
+    # with a hardcoded 500 (what `handle_unexpected_error` always
+    # returns) and re-raised unchanged so that handler still produces
+    # the actual client response -- this middleware only ever adds a
+    # log line, never changes response behavior.
+    try:
+        response = await call_next(request)
+    except Exception:
+        duration_ms = round((time.perf_counter() - started) * 1000, 1)
+        logger.info(
+            json.dumps(
+                {
+                    "request_id": request_id,
+                    "method": request.method,
+                    "path": request.url.path,
+                    "status_code": 500,
+                    "duration_ms": duration_ms,
+                }
+            )
+        )
+        raise
+
+    duration_ms = round((time.perf_counter() - started) * 1000, 1)
     logger.info(
         json.dumps(
             {

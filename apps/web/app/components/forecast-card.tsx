@@ -1,4 +1,4 @@
-import { Badge, type BadgeVariant, Card } from './ui'
+import { Badge, type BadgeVariant, Button, Card } from './ui'
 import { cx } from './ui/cx'
 
 export type ForecastVerdict = 'Excellent' | 'Good' | 'Fair' | 'Challenging' | 'Poor' | 'Unknown'
@@ -751,16 +751,54 @@ export function ForecastCard({ forecast }: { forecast: ForecastEnvelope }) {
 }
 
 /** The "couldn't load" state, shared the same way. */
-export function ForecastErrorCard({ message }: { message: string }) {
+/**
+ * Sprint 47 ("Degraded-mode UX"): this used to dump `err.message`
+ * (a raw fetch/`InternalApiError` message -- e.g. `fetch failed` for a
+ * plain network error, or apps/api's own Starlette default 500 body
+ * text) straight into the page, plus an unconditional dev-only
+ * troubleshooting paragraph naming internal service/env-var details
+ * ("Is apps/api running (`uvicorn app.main:app`)...") -- fine advice
+ * for a developer running `next dev`, actively confusing (and a real
+ * internal-implementation disclosure) for an actual visitor hitting a
+ * genuine production outage. Production now gets one honest, generic
+ * message and a real retry action; the raw message and dev
+ * troubleshooting text are gated on `NODE_ENV` -- a Server Component
+ * reading its own process's env, not something a visitor can spoof.
+ */
+export function ForecastErrorCard({
+  message,
+  retryHref,
+}: {
+  message: string
+  /** Omit to hide the retry button (no sensible URL to retry from). */
+  retryHref?: string
+}) {
+  const isDev = process.env.NODE_ENV !== 'production'
+
   return (
     <Card>
       <h2 className="font-semibold text-text">Couldn&apos;t load the forecast</h2>
-      <p className="mt-1 break-words text-sm text-danger-text">{message}</p>
-      <p className="mt-3 break-words text-sm text-text-muted">
-        Is apps/api running (<code>uvicorn app.main:app</code>) with a matching{' '}
-        <code>INTERNAL_SIGNING_KEY_ID</code>/<code>INTERNAL_SIGNING_KEY_SECRET</code>? See
-        apps/web/README.md.
+      <p className="mt-1 text-sm text-text-muted">
+        This is usually temporary -- live tide, wind, and wave data couldn&apos;t be reached
+        just now. Try again in a moment.
       </p>
+      {isDev && (
+        <>
+          <p className="mt-3 break-words text-sm text-danger-text">{message}</p>
+          <p className="mt-3 break-words text-sm text-text-muted">
+            Dev only: is apps/api running (<code>uvicorn app.main:app</code>) with a matching{' '}
+            <code>INTERNAL_SIGNING_KEY_ID</code>/<code>INTERNAL_SIGNING_KEY_SECRET</code>? See
+            apps/web/README.md.
+          </p>
+        </>
+      )}
+      {retryHref && (
+        <div className="mt-4">
+          <Button variant="primary" href={retryHref}>
+            Try again
+          </Button>
+        </div>
+      )}
     </Card>
   )
 }

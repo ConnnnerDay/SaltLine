@@ -8,6 +8,72 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Sprint 47 ("Degraded-mode UX")**: "Database/API/email/upstream chaos
+yields actionable UI." Found three real gaps by actually breaking each
+dependency this session had the means to break (a stopped local
+Postgres, a stopped `apps/api`), not by inspection alone, and fixed
+each:
+
+- `app/components/forecast-card.tsx`'s `ForecastErrorCard` used to dump
+  the raw caught error (`err.message` -- e.g. plain `fetch failed` for
+  a network error apps/api never even got to respond to) straight into
+  the page, plus an *unconditional* dev-only troubleshooting paragraph
+  naming internal implementation details ("Is apps/api running
+  (`uvicorn app.main:app`)...", env var names, a link to this README)
+  to every visitor, in every failure case -- confusing at best, a real
+  internal-implementation disclosure at worst, for an actual visitor
+  hitting a genuine production outage rather than a developer running
+  `next dev`. Now gated on `process.env.NODE_ENV` (a Server Component
+  reading its own process's env, not visitor-controlled): production
+  gets one honest, generic message and a real "Try again" retry link
+  (a new `retryHref` prop threaded through `ForecastPageBody` from both
+  `app/forecast/[locationId]/page.tsx` and `app/share/[locationId]/
+  page.tsx`, each pointing at its own URL); the raw message and dev
+  troubleshooting text still show in development, unchanged from
+  before for that audience.
+- `app/preferences/preferences-form.tsx` used to share one `error`
+  string between a *load* failure and a *save* failure, rendered as if
+  it were a validation message on the last field ("Default location
+  ID") -- actively misleading for a load failure, unrelated to that
+  field, and worse: the form still rendered normally with `EMPTY`
+  defaults a user could unknowingly submit and overwrite their real
+  saved preferences with, no warning that's what "Save" would do. Split
+  into distinct `loadError`/`saveError` state: a load failure now
+  replaces the whole form with a retryable error card (never renders
+  `EMPTY` as if it were real data), a save failure shows as its own
+  form-level status line rather than attached to an unrelated field.
+- `lib/auth.ts`'s `sendResetPassword`/`emailVerification
+  .sendVerificationEmail` hooks called `lib/email.ts`'s SMTP send with
+  no `try`/`catch` -- a transient SMTP outage would have failed the
+  registration or password-reset *request itself*, even though the
+  account operation it's attached to had already succeeded. Wrapped in
+  `try`/`catch`, logged server-side, never rethrown: Better Auth's own
+  forgot-password client flow already shows the same generic "check
+  your email" message regardless of real delivery (an account-
+  enumeration precaution, not something this changes), so swallowing a
+  send failure here doesn't hide anything a successful send would have
+  told the visitor either.
+
+Upstream (NWS/NOAA/CO-OPS/NDBC) chaos was checked too, using this
+sandbox's own always-blocked network to those domains as free, live
+evidence rather than simulating it -- already solid from sprints 21-26,
+rendering honest per-source `unavailable` labels via the existing
+`SourceStatus`/confidence machinery, not a crash or invented data nor
+anything this sprint needed to touch. `apps/api`'s own half of this
+sprint (a global unhandled-exception handler, so this app's error
+surfaces above have a small, safe, predictable body to work with
+instead of Starlette's raw default) is in that service's own README.
+
+Verified live, not just by reading the diff: registered a real account
+against real local Postgres/apps/api servers, stopped `apps/api`, and
+confirmed the production-build forecast/share pages show the new clean
+message with a working retry link and no leaked internal details (a
+parallel `next dev` run confirmed the dev-only detail still shows
+there); loaded `/preferences` with `apps/api` down and confirmed the
+retryable error card, not a silently-editable empty form; restarted
+`apps/api` and confirmed both the retry path and a fresh page load
+recover normally. `npm run lint`/`build` both clean.
+
 **Sprint 38 ("PWA baseline")**: full offline app-shell navigation with
 graceful degradation, not just last-cached-forecast viewing -- and
 authenticated forecasts aren't cached forever. `docs/

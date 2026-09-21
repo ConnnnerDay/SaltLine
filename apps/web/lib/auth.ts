@@ -82,12 +82,30 @@ export const auth = betterAuth({
     requireEmailVerification: smtpConfigured,
     minPasswordLength: 8,
     sendResetPassword: async ({ user, url }) => {
-      await sendResetPasswordEmail(user.email, url)
+      // Sprint 47 ("Degraded-mode UX"): a transient SMTP outage must
+      // not fail the reset *request* itself -- Better Auth's own
+      // forgot-password client flow already shows the same generic
+      // "check your email" message regardless of real delivery (an
+      // account-enumeration precaution, not something this changes),
+      // so swallowing a send failure here doesn't hide anything a
+      // successful send would have told the visitor either.
+      try {
+        await sendResetPasswordEmail(user.email, url)
+      } catch (error) {
+        console.error('Failed to send password-reset email:', error)
+      }
     },
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
-      await sendVerificationEmail(user.email, url)
+      // Same reasoning as sendResetPassword above: the account must
+      // still get created even if this specific email can't be sent
+      // right now.
+      try {
+        await sendVerificationEmail(user.email, url)
+      } catch (error) {
+        console.error('Failed to send verification email:', error)
+      }
     },
     sendOnSignUp: smtpConfigured,
     autoSignInAfterVerification: true,

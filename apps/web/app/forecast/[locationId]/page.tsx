@@ -62,6 +62,7 @@ export default async function ForecastPage({ params }: Props) {
     <ForecastPageBody
       forecast={forecast}
       error={error}
+      retryHref={`/forecast/${encodeURIComponent(locationId)}`}
       backHref="/locations"
       backLabel="Back to search"
     >

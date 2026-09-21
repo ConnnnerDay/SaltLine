@@ -14,12 +14,17 @@ import { ForecastCard, ForecastErrorCard, type ForecastEnvelope } from './foreca
 export function ForecastPageBody({
   forecast,
   error,
+  retryHref,
   backHref,
   backLabel,
   children,
 }: {
   forecast: ForecastEnvelope | null
   error: string | null
+  /** Sprint 47: the current page's own URL, so a failed fetch gets a
+   * real "Try again" action (see ForecastErrorCard) instead of only a
+   * "back" link that leaves the failure unresolved. */
+  retryHref?: string
   backHref: string
   backLabel: string
   /** Rendered after the card/error, inside the same Container -- the
@@ -61,7 +66,7 @@ export function ForecastPageBody({
 
       <Container>
         <div className="py-6 pb-16">
-          {error && <ForecastErrorCard message={error} />}
+          {error && <ForecastErrorCard message={error} retryHref={retryHref} />}
           {forecast && <ForecastCard forecast={forecast} />}
           {children}
         </div>

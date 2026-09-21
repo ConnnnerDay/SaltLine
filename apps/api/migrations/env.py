@@ -91,6 +91,14 @@ async def run_async_migrations() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        # Matches app.infra.database.create_engine: without this, the
+        # connection's search_path defaults to "$user", public, so
+        # CREATE TABLE lands in (and needs privileges on) public --
+        # exactly what ADR-006's REVOKE ALL ON SCHEMA public FROM
+        # saltline_api (see README's own setup commands) denies.
+        # version_table_schema below only relocates alembic_version
+        # itself; it doesn't affect where a migration's own DDL runs.
+        connect_args={"server_settings": {"search_path": "forecast"}},
     )
 
     async with connectable.connect() as connection:

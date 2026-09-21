@@ -670,6 +670,28 @@ still succeeds, per-user isolation, and 401 on both routes with no
 session. `ruff`/`ruff format`/`mypy`/`pytest` (380 passed) all clean;
 OpenAPI snapshot regenerated and reviewed (new schemas/paths only).
 
+Database resilience (sprint 46) — see
+[`docs/DB_RESILIENCE.md`](../../docs/DB_RESILIENCE.md) for the full
+account, evidence, and what's still blocked: a real migration bug
+(`migrations/env.py` was missing the `search_path=forecast` connect arg
+`app.infra.database.create_engine` already sets, so `alembic upgrade
+head` 500'd with `permission denied for schema public` against exactly
+the least-privilege role this README's own setup commands create) found
+and fixed by running the migrations from a genuinely blank database
+instead of an already-migrated one; a `CHECK` constraint on
+`user_preferences.units` as DB-layer defense-in-depth alongside the
+existing Pydantic enum validation (migration `600375436618`, hand-
+written since Alembic's autogenerate doesn't detect Postgres `CHECK`
+constraint additions); `app.infra.database.create_engine` gained
+`pool_pre_ping`/`pool_recycle`/`pool_size`/`max_overflow` (previously
+unconfigured, i.e. whatever SQLAlchemy's bare defaults happened to be)
+so a dropped idle connection to a pooled Neon endpoint reconnects
+transparently instead of surfacing as a random request failure; and a
+real backup/restore drill (below) — an actual `pg_dump` of real data
+restored into a separate freshly created blank database, not just a
+documented procedure, confirming the restored data, indexes,
+constraints, and Alembic migration state all match.
+
 If you change a model in `app/domain/models.py`, its schema snapshot test
 will fail — regenerate deliberately and review the diff:
 
@@ -760,6 +782,32 @@ worked example):
 DATABASE_URL="postgresql+asyncpg://saltline_api:dev-password-please-change@localhost:5432/saltline" \
   alembic revision --autogenerate -m "describe the change"
 ```
+
+Autogenerate doesn't reliably detect every kind of schema change —
+`CHECK` constraint additions in particular produce no diff at all
+against Postgres (`migrations/versions/
+600375436618_add_units_check_constraint.py` is hand-written for exactly
+this reason). Always review the generated (or written) migration before
+committing, not just run it once successfully.
+
+### Backup and restore
+
+```bash
+# backup: a plain-SQL dump of the forecast schema only
+PGPASSWORD=dev-password-please-change pg_dump -h localhost -U saltline_api \
+  -d saltline -n forecast --no-owner --no-privileges -f forecast_backup.sql
+
+# restore: into a blank database that already has the same role/schema
+# setup the "Local dev" commands above create (a fresh Neon branch or
+# database in production, once sprints 9/10 provision one)
+PGPASSWORD=dev-password-please-change psql -h localhost -U saltline_api \
+  -d <target-db> -f forecast_backup.sql
+```
+
+See [`docs/DB_RESILIENCE.md`](../../docs/DB_RESILIENCE.md) for a real
+worked drill of this procedure (real data in, dump, restore into a
+separate blank database, verify data/constraints/`alembic_version` all
+came back correctly) rather than just the commands above.
 
 ## Checks
 

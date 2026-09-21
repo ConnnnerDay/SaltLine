@@ -191,9 +191,20 @@ class BoundedHTTPClient:
                         status_code=response.status_code,
                     )
                 # Rebuild a non-streaming Response so .json()/.text work normally.
+                # `body` came from `aiter_bytes()`, which already undid any
+                # Content-Encoding (gzip/deflate/br) while streaming. Carrying
+                # that header over verbatim would make httpx try to
+                # decode the now-plain bytes a second time on `.text`/`.json()`
+                # access, failing with e.g. "Error -3 while decompressing
+                # data: incorrect header check". Content-Length is dropped
+                # for the same reason: it described the original
+                # (possibly compressed) body, not `body`'s actual length.
+                headers = response.headers.copy()
+                headers.pop("content-encoding", None)
+                headers.pop("content-length", None)
                 return httpx.Response(
                     status_code=response.status_code,
-                    headers=response.headers,
+                    headers=headers,
                     content=bytes(body),
                     request=response.request,
                 )

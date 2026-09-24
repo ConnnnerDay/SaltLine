@@ -230,17 +230,37 @@ record; they do not reopen or contradict R0.
   an explicitly labeled placeholder pattern, never an AI-generated
   stand-in, per direct instruction on that point.
 
+## Product decisions on record (2026-09-24)
+
+- **Hosting.** The product owner directed a switch from the original
+  Vercel + Render + Neon target to self-hosting the entire stack (web,
+  API, and Postgres) in Docker on home hardware, published to the public
+  internet via a Cloudflare Tunnel against a domain already on Cloudflare
+  (`reelgoodday.com`), for cost reasons -- this repo's own "near-free is
+  a target" cost principle, taken further than a free cloud tier. This
+  supersedes the "Deployment" row of the canonical technical contract and
+  "Current repository reality" table below; it does not reopen or change
+  ADR-006's database ownership model (separate least-privilege roles/
+  schemas per app), which self-hosted Postgres still implements
+  unchanged. See `docs/SELF_HOSTING.md` for the runbook and
+  `docker-compose.yml`/`apps/api/Dockerfile`/`apps/web/Dockerfile`/
+  `deploy/postgres/init-roles.sh` for the implementation. Known trade-off
+  accepted by the product owner: no managed backups, autoscaling, or
+  multi-region failover the way Neon/Render/Vercel would have provided --
+  `docs/SELF_HOSTING.md`'s "Backups" section makes that operational
+  burden explicit rather than silently dropping it.
+
 ## Canonical technical contract
 
 | Area | Required product architecture |
 |---|---|
 | Repository | Monorepo with `apps/web`, `apps/api`, and generated shared OpenAPI schemas |
-| Web | Next.js, mobile-first, deployed to Vercel |
+| Web | Next.js, mobile-first, self-hosted in Docker on home hardware, published via Cloudflare Tunnel (see "Product decisions on record (2026-09-24)") |
 | Browser path | Browser calls the Next.js backend-for-frontend only |
 | Internal path | Next.js authenticates the user and signs internal FastAPI requests |
-| API | FastAPI with versioned `/v1` endpoints, deployed on an always-on entry Render service |
+| API | FastAPI with versioned `/v1` endpoints, self-hosted in Docker on the same home hardware, not published to the internet |
 | Authentication | Better Auth email/password, verification, reset, secure HTTP-only cookies, PostgreSQL sessions |
-| Database | Fresh PostgreSQL on pooled Neon; no legacy account or catch-data migration |
+| Database | Self-hosted PostgreSQL in Docker on the same home hardware (was: pooled Neon); no legacy account or catch-data migration |
 | Background work | No Redis and no job queue in v1 |
 | Forecast core | Port Python logic only after characterization tests capture defensible behavior |
 | Availability | Bounded provider calls, independent source results, immutable snapshots, documented stale fallback |
@@ -267,7 +287,7 @@ structured warnings.
 | Frontend | Next.js BFF | React/Vite PWA calling the API | Audit reusable UI; establish Next.js path |
 | Authentication | Better Auth cookie sessions | Custom JWT plus OAuth/passkeys/2FA | Replace core auth; defer non-v1 extras |
 | Database | PostgreSQL/Neon | SQLite-oriented implementation | Design and migrate to fresh PostgreSQL |
-| Deployment | Vercel + Render + Neon | Self-host/placeholder assumptions | Add canonical environments and runbooks |
+| Deployment | Docker Compose (Postgres + apps/api + apps/web + Cloudflare Tunnel) on home hardware (was: Vercel + Render + Neon; see "Product decisions on record (2026-09-24)") | Self-host/placeholder assumptions | **Addressed** -- `docker-compose.yml`, `apps/api/Dockerfile`, `apps/web/Dockerfile`, `deploy/postgres/init-roles.sh`, and `docs/SELF_HOSTING.md` (this PR) give a real runbook; still needs live production verification once actually deployed |
 | API | Versioned FastAPI | FastAPI prototype exists | Keep or adapt only after contract audit |
 | Providers and scoring | Characterized Python core | Large legacy port exists | Keep candidates that pass fixture-based tests |
 | End-to-end tests | Deterministic launch journey | Some tests depend on live upstreams | Replace live CI dependence with controlled fixtures |
@@ -461,6 +481,29 @@ table above as the authoritative current state (it matches the actual
 `apps/web`/`apps/api` code in this repo, spot-checked against several
 rows below before starting new work), and record this repo's own
 handoffs as new session notes here, at the top of this section.
+
+**Session note (unmerged, this branch, `claude/stoic-davinci-12ldjb`):**
+product owner directed a hosting-decision change: self-host on home
+hardware (Docker Compose + Cloudflare Tunnel) instead of Vercel/Render/
+Neon, domain `reelgoodday.com` already on Cloudflare. See this section's
+new "Product decisions on record (2026-09-24)" entry above and
+`docs/SELF_HOSTING.md`. Delivered in this PR: `docker-compose.yml`,
+`apps/api/Dockerfile`, `apps/web/Dockerfile`, `deploy/postgres/
+init-roles.sh` (mirrors the exact ADR-006 role/schema setup both apps'
+READMEs already document for local dev), `deploy/.env.example`, and the
+runbook. `apps/api` and Postgres have no published container ports --
+only `apps/web` is reachable, and only via the tunnel, matching (and
+arguably strengthening) the "browser calls the BFF only" contract.
+**Not done in this PR, and this session had no means to do it:**
+actually running this on the product owner's real hardware, creating
+the real Cloudflare Tunnel, or verifying a real public request end to
+end -- this session has no access to that machine. **Next action** for
+whichever agent or the product owner picks this up: follow `docs/
+SELF_HOSTING.md` on the real box, verify `https://reelgoodday.com`
+actually serves the app end to end (register a real account, load a
+real forecast), then update this checkpoint with that evidence and
+close out the "Deployment" row's "still needs live production
+verification" caveat.
 
 **Session note (unmerged, this branch, `claude/ecstatic-rubin-mj5c0k`):**
 sprint 43 (privacy-safe analytics), previously **Not accepted**,

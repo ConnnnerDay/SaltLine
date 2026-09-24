@@ -514,12 +514,29 @@ apex, which has no route and won't resolve. `deploy/.env.example`'s
 `www.reelgoodday.com` to match; the apex can get its own route later if
 wanted, but isn't required to launch.
 
+The product owner then asked for the secret/password setup itself to be
+automatic rather than manual copy-paste. Added `deploy/setup.sh`: creates
+`.env` from the template if missing, generates every blank secret with
+`openssl rand -hex 32` (falling back to `/dev/urandom` if `openssl` isn't
+on `PATH`), then runs `docker compose up -d --build` -- one command,
+idempotent (never overwrites a secret `.env` already has). Also added
+`.gitattributes` pinning `*.sh` to LF line endings, since a CRLF
+`deploy/setup.sh` on a Windows checkout with `core.autocrlf=true` would
+otherwise silently break its own blank-secret detection; verified this
+concretely by feeding the script a CRLF-encoded env template in a
+sandbox test and confirming the normalization step strips it before the
+blank-variable regex runs, and separately confirmed re-running the
+script against an already-filled `.env` leaves existing secrets
+untouched. `docs/SELF_HOSTING.md` restructured around this script as the
+primary path (tunnel creation, then one script, then verify) rather than
+the original multi-step manual secret generation.
+
 **Not done in this PR, and this session had no means to do it:** actually
-starting `docker compose up` on the product owner's real machine or
+running `deploy/setup.sh` on the product owner's real machine or
 verifying a real public request end to end -- this session has no access
 to that machine or Cloudflare account. **Next action** for whichever
-agent or the product owner picks this up: run
-`docker compose up -d --build` (step 5 of `docs/SELF_HOSTING.md`), verify
+agent or the product owner picks this up: run `bash deploy/setup.sh`
+(step 3 of `docs/SELF_HOSTING.md`), verify
 `https://www.reelgoodday.com` actually serves the app end to end
 (register a real account, load a real forecast), then update this
 checkpoint with

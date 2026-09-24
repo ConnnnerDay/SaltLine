@@ -1,0 +1,89 @@
+# Self-hosted stack for one home machine with Docker: Postgres, the
+# FastAPI service, the Next.js BFF, and the Cloudflare Tunnel connector
+# itself all run as containers on the same compose network. cloudflared
+# reaches apps/web by its Docker DNS name (web:3000), never through the
+# host's localhost -- this is deliberate: an earlier version ran
+# cloudflared as a native Windows service reaching into Docker's
+# published port, which hit a real Windows-specific bug (localhost
+# resolving to ::1 first, which nothing was listening on) and meant two
+# different install mechanisms to keep running. Keeping everything in
+# one docker-compose.yml avoids both problems and is the only thing that
+# needs to be running: `docker compose up -d`. Neither `apps/api` nor
+# `postgres` is port-published at all -- the browser must only ever talk
+# to the Next.js BFF (docs/CANONICAL_ROADMAP.md), and on this network
+# topology "never" is enforced by apps/api having no published port,
+# not just by convention. See docs/SELF_HOSTING.md for the full setup
+# runbook and docs/CANONICAL_ROADMAP.md's "Product decisions on record
+# (2026-09-24)" entry for why this replaces the original Vercel/Render/
+# Neon target.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: saltline
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?set POSTGRES_SUPERUSER_PASSWORD in .env}
+      SALTLINE_WEB_DB_PASSWORD: ${SALTLINE_WEB_DB_PASSWORD:?set SALTLINE_WEB_DB_PASSWORD in .env}
+      SALTLINE_API_DB_PASSWORD: ${SALTLINE_API_DB_PASSWORD:?set SALTLINE_API_DB_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deploy/postgres/init-roles.sh:/docker-entrypoint-initdb.d/init-roles.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./apps/api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://saltline_api:${SALTLINE_API_DB_PASSWORD}@postgres:5432/saltline
+      INTERNAL_SIGNING_KEY_ID: ${INTERNAL_SIGNING_KEY_ID:?set INTERNAL_SIGNING_KEY_ID in .env}
+      INTERNAL_SIGNING_KEY_SECRET: ${INTERNAL_SIGNING_KEY_SECRET:?set INTERNAL_SIGNING_KEY_SECRET in .env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "8000"
+
+  web:
+    build:
+      context: ./apps/web
+      args:
+        BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET in .env}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://saltline_web:${SALTLINE_WEB_DB_PASSWORD}@postgres:5432/saltline
+      NEXT_PUBLIC_SITE_URL: https://${DOMAIN:?set DOMAIN in .env}
+      INTERNAL_API_BASE_URL: http://api:8000
+      INTERNAL_SIGNING_KEY_ID: ${INTERNAL_SIGNING_KEY_ID}
+      INTERNAL_SIGNING_KEY_SECRET: ${INTERNAL_SIGNING_KEY_SECRET}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_started
+    expose:
+      - "3000"
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?set CLOUDFLARE_TUNNEL_TOKEN in .env}
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:

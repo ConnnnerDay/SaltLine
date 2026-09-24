@@ -230,17 +230,37 @@ record; they do not reopen or contradict R0.
   an explicitly labeled placeholder pattern, never an AI-generated
   stand-in, per direct instruction on that point.
 
+## Product decisions on record (2026-09-24)
+
+- **Hosting.** The product owner directed a switch from the original
+  Vercel + Render + Neon target to self-hosting the entire stack (web,
+  API, and Postgres) in Docker on home hardware, published to the public
+  internet via a Cloudflare Tunnel against a domain already on Cloudflare
+  (`reelgoodday.com`), for cost reasons -- this repo's own "near-free is
+  a target" cost principle, taken further than a free cloud tier. This
+  supersedes the "Deployment" row of the canonical technical contract and
+  "Current repository reality" table below; it does not reopen or change
+  ADR-006's database ownership model (separate least-privilege roles/
+  schemas per app), which self-hosted Postgres still implements
+  unchanged. See `docs/SELF_HOSTING.md` for the runbook and
+  `docker-compose.yml`/`apps/api/Dockerfile`/`apps/web/Dockerfile`/
+  `deploy/postgres/init-roles.sh` for the implementation. Known trade-off
+  accepted by the product owner: no managed backups, autoscaling, or
+  multi-region failover the way Neon/Render/Vercel would have provided --
+  `docs/SELF_HOSTING.md`'s "Backups" section makes that operational
+  burden explicit rather than silently dropping it.
+
 ## Canonical technical contract
 
 | Area | Required product architecture |
 |---|---|
 | Repository | Monorepo with `apps/web`, `apps/api`, and generated shared OpenAPI schemas |
-| Web | Next.js, mobile-first, deployed to Vercel |
+| Web | Next.js, mobile-first, self-hosted in Docker on home hardware, published via Cloudflare Tunnel (see "Product decisions on record (2026-09-24)") |
 | Browser path | Browser calls the Next.js backend-for-frontend only |
 | Internal path | Next.js authenticates the user and signs internal FastAPI requests |
-| API | FastAPI with versioned `/v1` endpoints, deployed on an always-on entry Render service |
+| API | FastAPI with versioned `/v1` endpoints, self-hosted in Docker on the same home hardware, not published to the internet |
 | Authentication | Better Auth email/password, verification, reset, secure HTTP-only cookies, PostgreSQL sessions |
-| Database | Fresh PostgreSQL on pooled Neon; no legacy account or catch-data migration |
+| Database | Self-hosted PostgreSQL in Docker on the same home hardware (was: pooled Neon); no legacy account or catch-data migration |
 | Background work | No Redis and no job queue in v1 |
 | Forecast core | Port Python logic only after characterization tests capture defensible behavior |
 | Availability | Bounded provider calls, independent source results, immutable snapshots, documented stale fallback |
@@ -267,7 +287,7 @@ structured warnings.
 | Frontend | Next.js BFF | React/Vite PWA calling the API | Audit reusable UI; establish Next.js path |
 | Authentication | Better Auth cookie sessions | Custom JWT plus OAuth/passkeys/2FA | Replace core auth; defer non-v1 extras |
 | Database | PostgreSQL/Neon | SQLite-oriented implementation | Design and migrate to fresh PostgreSQL |
-| Deployment | Vercel + Render + Neon | Self-host/placeholder assumptions | Add canonical environments and runbooks |
+| Deployment | Docker Compose (Postgres + apps/api + apps/web + a containerized Cloudflare Tunnel connector, all four in one docker-compose.yml) on the product owner's home Windows machine (was: Vercel + Render + Neon; see "Product decisions on record (2026-09-24)") | Self-host/placeholder assumptions | **Addressed, pending a real end-to-end check** -- `docker-compose.yml`, `apps/api/Dockerfile`, `apps/web/Dockerfile`, `deploy/postgres/init-roles.sh`, `deploy/setup.sh`, and `docs/SELF_HOSTING.md` (this PR) give a real, product-owner-verified-at-the-Docker-layer runbook (see the session note below for the two real bugs found and fixed in the native-connector design this replaced); the containerized tunnel itself still needs a real public request verified end to end |
 | API | Versioned FastAPI | FastAPI prototype exists | Keep or adapt only after contract audit |
 | Providers and scoring | Characterized Python core | Large legacy port exists | Keep candidates that pass fixture-based tests |
 | End-to-end tests | Deterministic launch journey | Some tests depend on live upstreams | Replace live CI dependence with controlled fixtures |
@@ -461,6 +481,111 @@ table above as the authoritative current state (it matches the actual
 `apps/web`/`apps/api` code in this repo, spot-checked against several
 rows below before starting new work), and record this repo's own
 handoffs as new session notes here, at the top of this section.
+
+**Session note (unmerged, this branch, `claude/stoic-davinci-12ldjb`):**
+product owner directed a hosting-decision change: self-host on home
+hardware instead of Vercel/Render/Neon, domain `reelgoodday.com` already
+on Cloudflare. See this section's new "Product decisions on record
+(2026-09-24)" entry above and `docs/SELF_HOSTING.md`. Delivered in this
+PR: `docker-compose.yml` (Postgres + `apps/api` + `apps/web`),
+`apps/api/Dockerfile`, `apps/web/Dockerfile`, `deploy/postgres/
+init-roles.sh` (mirrors the exact ADR-006 role/schema setup both apps'
+READMEs already document for local dev), `deploy/.env.example`, and the
+runbook. `apps/api` and Postgres have no published container ports;
+`apps/web` publishes to `127.0.0.1:3000` only, matching (and arguably
+strengthening) the "browser calls the BFF only" contract.
+
+Revised mid-session once the product owner reported back: the actual
+host machine is Windows (Docker Desktop), and they created the
+Cloudflare Tunnel through the dashboard using its **native Windows
+connector** (not the Docker-container connector this PR originally
+assumed) -- confirmed healthy with one active replica in a real
+dashboard screenshot. `docker-compose.yml` no longer runs a `cloudflared`
+service at all (would have meant two connectors racing for the same
+tunnel); `apps/web`'s port is published to `127.0.0.1:3000` instead so
+the native connector can reach it, and `docs/SELF_HOSTING.md` documents
+the Public Hostname route as `localhost:3000`, not `web:3000`.
+
+Revised again once the product owner added the route: it's a **Published
+application** route for `www.reelgoodday.com` specifically (Cloudflare
+auto-created the CNAME to the tunnel), not the bare `reelgoodday.com`
+apex, which has no route and won't resolve. `deploy/.env.example`'s
+`DOMAIN` and every URL in `docs/SELF_HOSTING.md` now say
+`www.reelgoodday.com` to match; the apex can get its own route later if
+wanted, but isn't required to launch.
+
+The product owner then asked for the secret/password setup itself to be
+automatic rather than manual copy-paste. Added `deploy/setup.sh`: creates
+`.env` from the template if missing, generates every blank secret with
+`openssl rand -hex 32` (falling back to `/dev/urandom` if `openssl` isn't
+on `PATH`), then runs `docker compose up -d --build` -- one command,
+idempotent (never overwrites a secret `.env` already has). Also added
+`.gitattributes` pinning `*.sh` to LF line endings, since a CRLF
+`deploy/setup.sh` on a Windows checkout with `core.autocrlf=true` would
+otherwise silently break its own blank-secret detection; verified this
+concretely by feeding the script a CRLF-encoded env template in a
+sandbox test and confirming the normalization step strips it before the
+blank-variable regex runs, and separately confirmed re-running the
+script against an already-filled `.env` leaves existing secrets
+untouched. `docs/SELF_HOSTING.md` restructured around this script as the
+primary path (tunnel creation, then one script, then verify) rather than
+the original multi-step manual secret generation.
+
+The product owner then actually ran it. `bash deploy/setup.sh` worked
+exactly as designed: secrets generated, both images built, all three
+containers came up (`postgres` healthy, `api` completed its Alembic
+migrations and started Uvicorn, `web` completed its Better Auth
+migration -- creating the `auth` schema tables for the first time, whose
+initial "Database schema mismatch" log line is Better Auth noticing the
+tables don't exist yet, not a real error -- and started Next.js). That
+confirmed the Docker/build/migration side of this PR is correct.
+
+What didn't work was the tunnel path, and it surfaced two real, distinct
+bugs in the native-Windows-connector design this PR shipped with:
+
+1. Cloudflare returned a 502 even though `http://localhost:3000` loaded
+   fine in a browser on the same machine. Root cause: on Windows,
+   `localhost` resolves to `::1` (IPv6) before `127.0.0.1`; Docker
+   Desktop's port publishing only listens on the IPv4 loopback; browsers
+   silently retry IPv4 when IPv6 fails but cloudflared's native Windows
+   connector doesn't, so it saw connection-refused. Changing the route's
+   URL to the literal `127.0.0.1:3000` was the documented fix.
+2. After that edit, the route's hostname stopped resolving in DNS
+   entirely (confirmed independently from this session via `getent
+   hosts`, not just trusting the product owner's browser) -- the
+   Published application route's edit flow appears to have dropped the
+   auto-created CNAME record for `www.reelgoodday.com` in this instance.
+
+Rather than keep patching a native-service design that had already
+produced two distinct real bugs from the Windows/Docker/Cloudflare
+three-way boundary, the product owner asked to fold cloudflared into
+Docker Compose instead -- removing that boundary altogether. `cloudflared`
+is now a `docker-compose.yml` service reaching `apps/web` via Docker's
+own internal DNS (`web:3000`), never through the host's network stack,
+which structurally can't hit either bug again. `apps/web`'s port is back
+to `expose`-only (no host publish at all, tightening the "browser calls
+the BFF only" contract even further -- there's now no host port for
+anything to reach `apps/web` except the `cloudflared` container itself).
+`deploy/.env.example` has `CLOUDFLARE_TUNNEL_TOKEN` back;
+`deploy/setup.sh` deliberately does not auto-generate it, since it must
+come from a real Cloudflare tunnel. `docs/SELF_HOSTING.md` rewritten
+around this: stop the native Windows service, get a Docker-connector
+token (rotating the existing tunnel's token works fine), re-add the
+route pointing at `web:3000`, then `bash deploy/setup.sh` as before.
+
+**Not done in this PR, and this session had no means to do it:** actually
+running the consolidated stack on the product owner's real machine or
+verifying a real public request end to end through the containerized
+tunnel -- this session has no access to that machine or Cloudflare
+account. **Next action** for whichever agent or the product owner picks
+this up: stop the native `cloudflared` Windows service, get a fresh
+Docker-connector tunnel token, re-add the `www.reelgoodday.com` ->
+`web:3000` route (deleting the old `127.0.0.1:3000` one rather than
+editing it, given the edit-drops-the-CNAME behavior observed above), run
+`bash deploy/setup.sh`, verify `https://www.reelgoodday.com` actually
+serves the app end to end (register a real account, load a real
+forecast), then update this checkpoint with that evidence and close out
+the "Deployment" row's remaining caveat.
 
 **Session note (unmerged, this branch, `claude/ecstatic-rubin-mj5c0k`):**
 sprint 43 (privacy-safe analytics), previously **Not accepted**,

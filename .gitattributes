@@ -1,0 +1,4 @@
+# Shell scripts must keep LF endings even on a Windows checkout with
+# core.autocrlf=true -- a CRLF shebang line or CRLF-terminated variable
+# assignment silently breaks bash/sed on scripts like deploy/setup.sh.
+*.sh text eol=lf

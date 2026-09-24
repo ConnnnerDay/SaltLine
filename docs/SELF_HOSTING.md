@@ -71,10 +71,16 @@ In the [Cloudflare Zero Trust dashboard](https://one.dash.cloudflare.com/):
    - Subdomain: `www`
    - Domain: `reelgoodday.com`
    - Service type: `HTTP`
-   - URL: `localhost:3000`
+   - URL: `127.0.0.1:3000` (use the literal IPv4 address, not
+     `localhost` -- on Windows, `localhost` often resolves to `::1`
+     first, which nothing is listening on since Docker only publishes
+     the IPv4 loopback; that mismatch surfaces as a Cloudflare 502 Bad
+     Gateway even though `http://localhost:3000` loads fine in a
+     browser on the same machine, since browsers silently retry IPv4
+     when IPv6 fails and cloudflared doesn't)
 
    Do **not** add a route for `apps/api` -- it should stay unreachable
-   from the internet. `localhost:3000` won't actually answer until step
+   from the internet. `127.0.0.1:3000` won't actually answer until step
    3 below starts the app stack, but the route can be saved now.
 
 Only `www.reelgoodday.com` resolves through the tunnel this way -- the

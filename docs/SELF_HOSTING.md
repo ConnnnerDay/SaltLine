@@ -48,7 +48,9 @@ hostname" route, then step 5 to start the app stack.
   installed (WSL2 backend) so `docker compose version` works from a
   terminal.
 - A domain name with its DNS managed by Cloudflare (free tier is fine).
-  This runbook uses `reelgoodday.com`.
+  This runbook uses `www.reelgoodday.com` -- the tunnel's Published
+  application route was created for that hostname specifically, not the
+  bare `reelgoodday.com` apex, so that's the one that resolves.
 - No router/firewall changes needed -- the tunnel is an outbound
   connection from your machine to Cloudflare, not an inbound one.
 
@@ -78,7 +80,8 @@ openssl rand -hex 32
 
 Fill in `.env`:
 
-- `DOMAIN=reelgoodday.com`
+- `DOMAIN=www.reelgoodday.com` (must exactly match the tunnel route's
+  hostname, not just the registered domain)
 - `POSTGRES_SUPERUSER_PASSWORD`, `SALTLINE_WEB_DB_PASSWORD`,
   `SALTLINE_API_DB_PASSWORD` -- three separate generated values.
 - `INTERNAL_SIGNING_KEY_SECRET` -- one generated value (`INTERNAL_SIGNING_KEY_ID`
@@ -106,17 +109,24 @@ In the [Cloudflare Zero Trust dashboard](https://one.dash.cloudflare.com/):
 
 ## 4. Add the public hostname route
 
-Still in that tunnel's page in the dashboard, go to **Routes** (currently
-empty) and add a public hostname:
+Add a **Published application** route:
 
-- Subdomain: (blank, or `www`)
+- Subdomain: `www`
 - Domain: `reelgoodday.com`
 - Service type: `HTTP`
 - URL: `localhost:3000`
 
-Save. Do **not** add a route for `apps/api` -- it should stay unreachable
-from the internet. `localhost:3000` won't actually answer until step 5
-starts the app stack, but the route can be saved now.
+(This step is already done if you're picking up from a completed
+`www.reelgoodday.com` route with a Cloudflare-created CNAME to
+`<tunnel-id>.cfargotunnel.com`.) Do **not** add a route for `apps/api`
+-- it should stay unreachable from the internet. `localhost:3000` won't
+actually answer until step 5 starts the app stack, but the route can be
+saved now.
+
+Only `www.reelgoodday.com` resolves through the tunnel this way -- the
+bare `reelgoodday.com` apex has no route and won't load. That's fine for
+now; add a second **Published application** route (same steps, blank
+subdomain) later if the apex should work too.
 
 ## 5. Start the stack
 
@@ -141,7 +151,7 @@ docker compose logs -f web api
 
 ## 6. Verify
 
-- `https://reelgoodday.com` should load the app over a real Cloudflare
+- `https://www.reelgoodday.com` should load the app over a real Cloudflare
   TLS certificate.
 - Register an account, confirm you land on the dashboard/forecast flow.
 - `docker compose exec api curl -s http://localhost:8000/health/ready`

@@ -506,15 +506,23 @@ tunnel); `apps/web`'s port is published to `127.0.0.1:3000` instead so
 the native connector can reach it, and `docs/SELF_HOSTING.md` documents
 the Public Hostname route as `localhost:3000`, not `web:3000`.
 
+Revised again once the product owner added the route: it's a **Published
+application** route for `www.reelgoodday.com` specifically (Cloudflare
+auto-created the CNAME to the tunnel), not the bare `reelgoodday.com`
+apex, which has no route and won't resolve. `deploy/.env.example`'s
+`DOMAIN` and every URL in `docs/SELF_HOSTING.md` now say
+`www.reelgoodday.com` to match; the apex can get its own route later if
+wanted, but isn't required to launch.
+
 **Not done in this PR, and this session had no means to do it:** actually
-starting `docker compose up` on the product owner's real machine, adding
-the Public Hostname route in the dashboard, or verifying a real public
-request end to end -- this session has no access to that machine or
-Cloudflare account. **Next action** for whichever agent or the product
-owner picks this up: add the Route (step 4 of `docs/SELF_HOSTING.md`),
-run `docker compose up -d --build` (step 5), verify
-`https://reelgoodday.com` actually serves the app end to end (register a
-real account, load a real forecast), then update this checkpoint with
+starting `docker compose up` on the product owner's real machine or
+verifying a real public request end to end -- this session has no access
+to that machine or Cloudflare account. **Next action** for whichever
+agent or the product owner picks this up: run
+`docker compose up -d --build` (step 5 of `docs/SELF_HOSTING.md`), verify
+`https://www.reelgoodday.com` actually serves the app end to end
+(register a real account, load a real forecast), then update this
+checkpoint with
 that evidence and close out the "Deployment" row's remaining caveat.
 
 **Session note (unmerged, this branch, `claude/ecstatic-rubin-mj5c0k`):**

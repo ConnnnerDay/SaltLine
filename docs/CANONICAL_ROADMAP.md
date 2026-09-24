@@ -287,7 +287,7 @@ structured warnings.
 | Frontend | Next.js BFF | React/Vite PWA calling the API | Audit reusable UI; establish Next.js path |
 | Authentication | Better Auth cookie sessions | Custom JWT plus OAuth/passkeys/2FA | Replace core auth; defer non-v1 extras |
 | Database | PostgreSQL/Neon | SQLite-oriented implementation | Design and migrate to fresh PostgreSQL |
-| Deployment | Docker Compose (Postgres + apps/api + apps/web) plus a natively-running Cloudflare Tunnel connector, both on the product owner's home Windows machine (was: Vercel + Render + Neon; see "Product decisions on record (2026-09-24)") | Self-host/placeholder assumptions | **Addressed** -- `docker-compose.yml`, `apps/api/Dockerfile`, `apps/web/Dockerfile`, `deploy/postgres/init-roles.sh`, and `docs/SELF_HOSTING.md` (this PR) give a real runbook; tunnel already created and healthy per the product owner's own verification, app stack still needs to actually be started and checked end to end |
+| Deployment | Docker Compose (Postgres + apps/api + apps/web + a containerized Cloudflare Tunnel connector, all four in one docker-compose.yml) on the product owner's home Windows machine (was: Vercel + Render + Neon; see "Product decisions on record (2026-09-24)") | Self-host/placeholder assumptions | **Addressed, pending a real end-to-end check** -- `docker-compose.yml`, `apps/api/Dockerfile`, `apps/web/Dockerfile`, `deploy/postgres/init-roles.sh`, `deploy/setup.sh`, and `docs/SELF_HOSTING.md` (this PR) give a real, product-owner-verified-at-the-Docker-layer runbook (see the session note below for the two real bugs found and fixed in the native-connector design this replaced); the containerized tunnel itself still needs a real public request verified end to end |
 | API | Versioned FastAPI | FastAPI prototype exists | Keep or adapt only after contract audit |
 | Providers and scoring | Characterized Python core | Large legacy port exists | Keep candidates that pass fixture-based tests |
 | End-to-end tests | Deterministic launch journey | Some tests depend on live upstreams | Replace live CI dependence with controlled fixtures |
@@ -531,16 +531,61 @@ untouched. `docs/SELF_HOSTING.md` restructured around this script as the
 primary path (tunnel creation, then one script, then verify) rather than
 the original multi-step manual secret generation.
 
+The product owner then actually ran it. `bash deploy/setup.sh` worked
+exactly as designed: secrets generated, both images built, all three
+containers came up (`postgres` healthy, `api` completed its Alembic
+migrations and started Uvicorn, `web` completed its Better Auth
+migration -- creating the `auth` schema tables for the first time, whose
+initial "Database schema mismatch" log line is Better Auth noticing the
+tables don't exist yet, not a real error -- and started Next.js). That
+confirmed the Docker/build/migration side of this PR is correct.
+
+What didn't work was the tunnel path, and it surfaced two real, distinct
+bugs in the native-Windows-connector design this PR shipped with:
+
+1. Cloudflare returned a 502 even though `http://localhost:3000` loaded
+   fine in a browser on the same machine. Root cause: on Windows,
+   `localhost` resolves to `::1` (IPv6) before `127.0.0.1`; Docker
+   Desktop's port publishing only listens on the IPv4 loopback; browsers
+   silently retry IPv4 when IPv6 fails but cloudflared's native Windows
+   connector doesn't, so it saw connection-refused. Changing the route's
+   URL to the literal `127.0.0.1:3000` was the documented fix.
+2. After that edit, the route's hostname stopped resolving in DNS
+   entirely (confirmed independently from this session via `getent
+   hosts`, not just trusting the product owner's browser) -- the
+   Published application route's edit flow appears to have dropped the
+   auto-created CNAME record for `www.reelgoodday.com` in this instance.
+
+Rather than keep patching a native-service design that had already
+produced two distinct real bugs from the Windows/Docker/Cloudflare
+three-way boundary, the product owner asked to fold cloudflared into
+Docker Compose instead -- removing that boundary altogether. `cloudflared`
+is now a `docker-compose.yml` service reaching `apps/web` via Docker's
+own internal DNS (`web:3000`), never through the host's network stack,
+which structurally can't hit either bug again. `apps/web`'s port is back
+to `expose`-only (no host publish at all, tightening the "browser calls
+the BFF only" contract even further -- there's now no host port for
+anything to reach `apps/web` except the `cloudflared` container itself).
+`deploy/.env.example` has `CLOUDFLARE_TUNNEL_TOKEN` back;
+`deploy/setup.sh` deliberately does not auto-generate it, since it must
+come from a real Cloudflare tunnel. `docs/SELF_HOSTING.md` rewritten
+around this: stop the native Windows service, get a Docker-connector
+token (rotating the existing tunnel's token works fine), re-add the
+route pointing at `web:3000`, then `bash deploy/setup.sh` as before.
+
 **Not done in this PR, and this session had no means to do it:** actually
-running `deploy/setup.sh` on the product owner's real machine or
-verifying a real public request end to end -- this session has no access
-to that machine or Cloudflare account. **Next action** for whichever
-agent or the product owner picks this up: run `bash deploy/setup.sh`
-(step 3 of `docs/SELF_HOSTING.md`), verify
-`https://www.reelgoodday.com` actually serves the app end to end
-(register a real account, load a real forecast), then update this
-checkpoint with
-that evidence and close out the "Deployment" row's remaining caveat.
+running the consolidated stack on the product owner's real machine or
+verifying a real public request end to end through the containerized
+tunnel -- this session has no access to that machine or Cloudflare
+account. **Next action** for whichever agent or the product owner picks
+this up: stop the native `cloudflared` Windows service, get a fresh
+Docker-connector tunnel token, re-add the `www.reelgoodday.com` ->
+`web:3000` route (deleting the old `127.0.0.1:3000` one rather than
+editing it, given the edit-drops-the-CNAME behavior observed above), run
+`bash deploy/setup.sh`, verify `https://www.reelgoodday.com` actually
+serves the app end to end (register a real account, load a real
+forecast), then update this checkpoint with that evidence and close out
+the "Deployment" row's remaining caveat.
 
 **Session note (unmerged, this branch, `claude/ecstatic-rubin-mj5c0k`):**
 sprint 43 (privacy-safe analytics), previously **Not accepted**,

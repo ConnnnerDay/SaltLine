@@ -2,21 +2,26 @@
 
 This is the deployment target recorded in `docs/CANONICAL_ROADMAP.md`'s
 "Product decisions on record (2026-09-24)" entry, replacing the original
-Vercel + Render + Neon target: Postgres, `apps/api`, and `apps/web` run
-in Docker (Docker Desktop, on Windows) on one home machine, with a
-Cloudflare Tunnel connector running natively on that same machine
-publishing only the Next.js app to the internet. No port-forwarding, no
-exposed home IP, no cloud hosting bill.
+Vercel + Render + Neon target: Postgres, `apps/api`, `apps/web`, and the
+Cloudflare Tunnel connector itself all run as containers in one
+`docker-compose.yml` on a home machine. No port-forwarding, no exposed
+home IP, no cloud hosting bill, and only one tool to have running
+(Docker Desktop) -- no separate native install for anything.
+
+An earlier version of this setup ran the tunnel connector as a native
+Windows service instead of a container, reaching into Docker's published
+port from outside Docker entirely. That hit a real Windows-specific bug
+(`localhost` resolving to the IPv6 `::1` first, which nothing was
+listening on, surfacing as a Cloudflare 502) and meant two different
+things to keep running and update. Keeping the connector in Docker
+avoids both problems: it reaches `apps/web` by Docker's own internal DNS
+(`web:3000`), never through the host machine's network stack at all.
 
 ## Architecture
 
 ```
-Internet --> Cloudflare (TLS, DNS) --> cloudflared (native Windows connector,
-                                        outbound-only tunnel)
-                                              |
-                                              v
-                                    localhost:3000 (published by Docker)
-                                              |
+Internet --> Cloudflare (TLS, DNS) --> cloudflared (container, outbound-only tunnel)
+                                              |  Docker-internal network (web:3000)
                                               v
                                         apps/web (Next.js BFF)
                                               |  signed internal requests
@@ -27,74 +32,88 @@ Internet --> Cloudflare (TLS, DNS) --> cloudflared (native Windows connector,
                                          Postgres (auth + forecast schemas)
 ```
 
-`apps/api` and `postgres` have no published ports at all -- only reachable
-from other containers on the compose network. `apps/web` is published
-only to `127.0.0.1:3000`, reachable from the tunnel connector on the same
-machine but not from the LAN or internet directly. The browser only ever
-talks to `apps/web` (through the tunnel), matching the canonical "browser
+`apps/api` and `postgres` have no published ports at all -- only
+reachable from other containers on the compose network. `apps/web` is
+`expose`d (container-network-only, not published to the host), reachable
+only from `cloudflared` on that same network. The browser only ever
+talks to `apps/web` through the tunnel, matching the canonical "browser
 calls the BFF only" contract. This is arguably a stricter enforcement of
 that rule than the original Vercel/Render setup, since there's no public
-URL for `apps/api` to (mis)route to.
+URL for `apps/api` to (mis)route to, and no host port for `apps/web`
+either.
 
 ## Prerequisites
 
 - A Windows machine at home, on and reachable, with Docker Desktop
   installed (WSL2 backend) so `docker compose version` works from a
-  terminal (Git Bash is what the commands below assume).
+  terminal (Git Bash is what the commands below assume). Docker Desktop
+  is the only thing that needs to be running -- nothing else installed
+  natively.
 - A domain name with its DNS managed by Cloudflare (free tier is fine).
-  This runbook uses `www.reelgoodday.com` -- the tunnel's Published
-  application route was created for that hostname specifically, not the
-  bare `reelgoodday.com` apex, so that's the one that resolves.
+  This runbook uses `www.reelgoodday.com`.
 - No router/firewall changes needed -- the tunnel is an outbound
-  connection from your machine to Cloudflare, not an inbound one.
+  connection to Cloudflare, not an inbound one.
 
 ## 1. Get the code onto the machine
 
 ```bash
-git clone https://github.com/ConnnnerDay/saltline.git
-cd saltline
+git clone https://github.com/ConnnnerDay/SaltLine.git
+cd SaltLine
 ```
 
 (Or `git pull` if it's already cloned there.)
 
-## 2. Create the Cloudflare Tunnel (skip if already done)
+## 2. If you previously ran cloudflared as a native Windows service, stop it
 
-In the [Cloudflare Zero Trust dashboard](https://one.dash.cloudflare.com/):
+Skip this if you're starting fresh. Otherwise: open **Services**
+(Win+R -> `services.msc`), find `cloudflared`, stop it, and set its
+startup type to **Disabled** (or uninstall it outright). Two connectors
+racing for the same tunnel causes flaky, unpredictable routing.
 
-1. **Networks -> Tunnels -> Create a tunnel -> Cloudflared.** Name it
-   (e.g. `ReelGoodDay`).
-2. On "Install and run a connector," choose **Windows** and run the
-   install command it shows in a terminal on this machine. Once it
-   connects, the tunnel's Overview page shows it **Healthy** with an
-   active replica.
-3. Add a **Published application** route:
-   - Subdomain: `www`
-   - Domain: `reelgoodday.com`
-   - Service type: `HTTP`
-   - URL: `127.0.0.1:3000` (use the literal IPv4 address, not
-     `localhost` -- on Windows, `localhost` often resolves to `::1`
-     first, which nothing is listening on since Docker only publishes
-     the IPv4 loopback; that mismatch surfaces as a Cloudflare 502 Bad
-     Gateway even though `http://localhost:3000` loads fine in a
-     browser on the same machine, since browsers silently retry IPv4
-     when IPv6 fails and cloudflared doesn't)
+## 3. Create (or reuse) the Cloudflare Tunnel, as a Docker connector
 
-   Do **not** add a route for `apps/api` -- it should stay unreachable
-   from the internet. `127.0.0.1:3000` won't actually answer until step
-   3 below starts the app stack, but the route can be saved now.
+In the [Cloudflare Zero Trust dashboard](https://one.dash.cloudflare.com/)
+-> **Networks -> Tunnels**:
 
-Only `www.reelgoodday.com` resolves through the tunnel this way -- the
-bare `reelgoodday.com` apex has no route and won't load. That's fine for
-now; add a second **Published application** route (same steps, blank
-subdomain) later if the apex should work too.
+- **Starting fresh:** Create a tunnel -> Cloudflared -> name it (e.g.
+  `ReelGoodDay`) -> on "Install and run a connector," choose **Docker**
+  and copy the token from the `tunnel run --token ...` command shown
+  (you don't need to run that command yourself -- `docker-compose.yml`'s
+  `cloudflared` service does).
+- **Reusing an existing tunnel** (e.g. one previously set up with the
+  Windows connector): open that tunnel -> **Rotate token** -> copy the
+  new token. Rotating invalidates the old native-service token, which is
+  fine since that service is now stopped.
 
-## 3. Run the setup script
+Paste the token into `.env` as `CLOUDFLARE_TUNNEL_TOKEN` (step 4 creates
+that file if it doesn't exist yet).
+
+Then add (or re-add) the **Published application** route:
+
+- Subdomain: `www`
+- Domain: `reelgoodday.com`
+- Service type: `HTTP`
+- URL: `web:3000` (the container's Docker DNS name, not `localhost` or
+  `127.0.0.1` -- there's no Windows loopback in this path anymore)
+
+If you had an old route pointing at `localhost:3000` or `127.0.0.1:3000`
+from a previous attempt, delete it first rather than editing in place --
+editing was observed to sometimes silently drop the route's DNS record
+in this exact setup. After adding it, confirm in the main Cloudflare
+dashboard (not Zero Trust) -> `reelgoodday.com` -> **DNS** -> **Records**
+that a `CNAME` for `www` pointing to `<tunnel-id>.cfargotunnel.com`
+actually exists.
+
+Do **not** add a route for `apps/api` -- it should stay unreachable from
+the internet.
+
+## 4. Run the setup script
 
 ```bash
 bash deploy/setup.sh
 ```
 
-This one command does everything else:
+This does everything else:
 
 - creates `.env` from `deploy/.env.example` if it doesn't exist yet
   (`DOMAIN` already set to `www.reelgoodday.com`);
@@ -102,13 +121,15 @@ This one command does everything else:
   (`POSTGRES_SUPERUSER_PASSWORD`, `SALTLINE_WEB_DB_PASSWORD`,
   `SALTLINE_API_DB_PASSWORD`, `INTERNAL_SIGNING_KEY_SECRET`,
   `BETTER_AUTH_SECRET`) with a freshly generated random value;
-- builds and starts the whole stack (`docker compose up -d --build`).
+- builds and starts the whole stack, including `cloudflared`
+  (`docker compose up -d --build`).
 
-There is no `CLOUDFLARE_TUNNEL_TOKEN` variable to fill in -- the tunnel
-connector runs natively (step 2 above), not from this `.env`. `SMTP_*`
-is deliberately left blank: accounts auto-confirm and no verification/
-reset emails send until you fill those in later, same as the legacy
-app's documented behavior with SMTP unset.
+`CLOUDFLARE_TUNNEL_TOKEN` is **not** auto-generated -- paste in the real
+value from step 3 before running this, or `docker compose up` will fail
+with a clear "set CLOUDFLARE_TUNNEL_TOKEN in .env" error. `SMTP_*` is
+deliberately left blank: accounts auto-confirm and no verification/reset
+emails send until you fill those in later, same as the legacy app's
+documented behavior with SMTP unset.
 
 Safe to re-run any time -- it never overwrites a secret `.env` already
 has, and starting an already-running stack is a no-op. First run takes a
@@ -124,16 +145,27 @@ Check everything came up:
 
 ```bash
 docker compose ps
-docker compose logs -f web api
+docker compose logs -f web api cloudflared
 ```
 
-## 4. Verify
+## 5. Verify
 
-- `https://www.reelgoodday.com` should load the app over a real Cloudflare
-  TLS certificate.
+- `https://www.reelgoodday.com` should load the app over a real
+  Cloudflare TLS certificate.
 - Register an account, confirm you land on the dashboard/forecast flow.
 - `docker compose exec api curl -s http://localhost:8000/health/ready`
   should return `{"status":"ok"}`.
+
+## After a machine restart
+
+Docker Desktop needs to be running, and (if it isn't set to launch
+automatically) the containers need to come back up -- all of them have
+`restart: unless-stopped`, so once Docker's daemon is up they restart on
+their own, `cloudflared` included. From PowerShell:
+
+```powershell
+Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"; for ($i=0; $i -lt 60 -and -not (docker info 2>$null); $i++) { Start-Sleep 2 }; Set-Location "$env:USERPROFILE\SaltLine"; docker compose up -d; docker compose ps
+```
 
 ## Updating
 

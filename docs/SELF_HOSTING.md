@@ -2,14 +2,20 @@
 
 This is the deployment target recorded in `docs/CANONICAL_ROADMAP.md`'s
 "Product decisions on record (2026-09-24)" entry, replacing the original
-Vercel + Render + Neon target: everything runs in Docker on one Linux box
-at home, with Cloudflare Tunnel publishing only the Next.js app to the
-internet. No port-forwarding, no exposed home IP, no cloud hosting bill.
+Vercel + Render + Neon target: Postgres, `apps/api`, and `apps/web` run
+in Docker (Docker Desktop, on Windows) on one home machine, with a
+Cloudflare Tunnel connector running natively on that same machine
+publishing only the Next.js app to the internet. No port-forwarding, no
+exposed home IP, no cloud hosting bill.
 
 ## Architecture
 
 ```
-Internet --> Cloudflare (TLS, DNS) --> cloudflared (outbound-only tunnel)
+Internet --> Cloudflare (TLS, DNS) --> cloudflared (native Windows connector,
+                                        outbound-only tunnel)
+                                              |
+                                              v
+                                    localhost:3000 (published by Docker)
                                               |
                                               v
                                         apps/web (Next.js BFF)
@@ -22,22 +28,31 @@ Internet --> Cloudflare (TLS, DNS) --> cloudflared (outbound-only tunnel)
 ```
 
 `apps/api` and `postgres` have no published ports at all -- only reachable
-from other containers on the compose network. The browser only ever talks
-to `apps/web`, matching the canonical "browser calls the BFF only"
-contract. This is arguably a stricter enforcement of that rule than the
-original Vercel/Render setup, since there's no public URL for `apps/api`
-to (mis)route to.
+from other containers on the compose network. `apps/web` is published
+only to `127.0.0.1:3000`, reachable from the tunnel connector on the same
+machine but not from the LAN or internet directly. The browser only ever
+talks to `apps/web` (through the tunnel), matching the canonical "browser
+calls the BFF only" contract. This is arguably a stricter enforcement of
+that rule than the original Vercel/Render setup, since there's no public
+URL for `apps/api` to (mis)route to.
+
+cloudflared runs as a native Windows connector (installed via the
+Cloudflare Zero Trust dashboard's tunnel setup), not as a container --
+if you already created the tunnel and see it listed as "Healthy" in the
+dashboard, that part is done; skip straight to step 4 for the "Public
+hostname" route, then step 5 to start the app stack.
 
 ## Prerequisites
 
-- A Linux machine at home, on and reachable on your LAN, with Docker and
-  the Docker Compose plugin installed (`docker compose version`).
+- A Windows machine at home, on and reachable, with Docker Desktop
+  installed (WSL2 backend) so `docker compose version` works from a
+  terminal.
 - A domain name with its DNS managed by Cloudflare (free tier is fine).
   This runbook uses `reelgoodday.com`.
 - No router/firewall changes needed -- the tunnel is an outbound
-  connection from your server to Cloudflare, not an inbound one.
+  connection from your machine to Cloudflare, not an inbound one.
 
-## 1. Get the code onto the server
+## 1. Get the code onto the machine
 
 ```bash
 git clone https://github.com/ConnnnerDay/saltline.git
@@ -73,31 +88,37 @@ Fill in `.env`:
   accounts will auto-confirm and no verification/reset emails will send,
   same as the legacy app's documented behavior with SMTP unset. Fill
   these in later to turn on real email.
-- `CLOUDFLARE_TUNNEL_TOKEN` -- from step 3 below.
 
-## 3. Create the Cloudflare Tunnel
+There is no `CLOUDFLARE_TUNNEL_TOKEN` variable -- the tunnel connector
+runs natively (step 3), not from this `.env`.
+
+## 3. Create the Cloudflare Tunnel (skip if already done)
 
 In the [Cloudflare Zero Trust dashboard](https://one.dash.cloudflare.com/):
 
 1. **Networks -> Tunnels -> Create a tunnel -> Cloudflared.**
-2. Name it (e.g. `saltline-home`).
-3. On the "Install and run a connector" step, choose **Docker** -- copy
-   the token shown after `tunnel run --token ...` and paste it into
-   `.env` as `CLOUDFLARE_TUNNEL_TOKEN`. You do not need to run the
-   command Cloudflare shows; `docker-compose.yml`'s `cloudflared`
-   service runs it for you.
-4. On the "Public hostnames" step, add one hostname:
-   - Subdomain: (blank, or `www`)
-   - Domain: `reelgoodday.com`
-   - Service type: `HTTP`
-   - URL: `web:3000`
+2. Name it (e.g. `ReelGoodDay`).
+3. On the "Install and run a connector" step, choose **Windows** and run
+   the install command it shows in a terminal on this machine. Once it
+   connects, the tunnel's Overview page shows it as **Healthy** with an
+   active replica (this is the same step you already completed if you're
+   picking up from here).
 
-   (`web` resolves via Docker's internal DNS once the stack is up --
-   it doesn't need to exist yet when you save this.)
-5. Save. Do **not** add a public hostname for `apps/api` -- it should
-   stay unreachable from the internet.
+## 4. Add the public hostname route
 
-## 4. Start the stack
+Still in that tunnel's page in the dashboard, go to **Routes** (currently
+empty) and add a public hostname:
+
+- Subdomain: (blank, or `www`)
+- Domain: `reelgoodday.com`
+- Service type: `HTTP`
+- URL: `localhost:3000`
+
+Save. Do **not** add a route for `apps/api` -- it should stay unreachable
+from the internet. `localhost:3000` won't actually answer until step 5
+starts the app stack, but the route can be saved now.
+
+## 5. Start the stack
 
 ```bash
 docker compose up -d --build
@@ -108,6 +129,8 @@ First boot: Postgres initializes and creates the `saltline_web`/
 init-roles.sh`, mirroring `apps/web/README.md` and `apps/api/README.md`'s
 local-dev instructions exactly), then `api` runs `alembic upgrade head`
 and `web` runs `npm run migrate:auth` before either starts serving.
+`web` publishes to `127.0.0.1:3000`, which is what the tunnel route in
+step 4 forwards to -- no other config needed on the app side.
 
 Check everything came up:
 
@@ -116,7 +139,7 @@ docker compose ps
 docker compose logs -f web api
 ```
 
-## 5. Verify
+## 6. Verify
 
 - `https://reelgoodday.com` should load the app over a real Cloudflare
   TLS certificate.

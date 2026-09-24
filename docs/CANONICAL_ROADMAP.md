@@ -287,7 +287,7 @@ structured warnings.
 | Frontend | Next.js BFF | React/Vite PWA calling the API | Audit reusable UI; establish Next.js path |
 | Authentication | Better Auth cookie sessions | Custom JWT plus OAuth/passkeys/2FA | Replace core auth; defer non-v1 extras |
 | Database | PostgreSQL/Neon | SQLite-oriented implementation | Design and migrate to fresh PostgreSQL |
-| Deployment | Docker Compose (Postgres + apps/api + apps/web + Cloudflare Tunnel) on home hardware (was: Vercel + Render + Neon; see "Product decisions on record (2026-09-24)") | Self-host/placeholder assumptions | **Addressed** -- `docker-compose.yml`, `apps/api/Dockerfile`, `apps/web/Dockerfile`, `deploy/postgres/init-roles.sh`, and `docs/SELF_HOSTING.md` (this PR) give a real runbook; still needs live production verification once actually deployed |
+| Deployment | Docker Compose (Postgres + apps/api + apps/web) plus a natively-running Cloudflare Tunnel connector, both on the product owner's home Windows machine (was: Vercel + Render + Neon; see "Product decisions on record (2026-09-24)") | Self-host/placeholder assumptions | **Addressed** -- `docker-compose.yml`, `apps/api/Dockerfile`, `apps/web/Dockerfile`, `deploy/postgres/init-roles.sh`, and `docs/SELF_HOSTING.md` (this PR) give a real runbook; tunnel already created and healthy per the product owner's own verification, app stack still needs to actually be started and checked end to end |
 | API | Versioned FastAPI | FastAPI prototype exists | Keep or adapt only after contract audit |
 | Providers and scoring | Characterized Python core | Large legacy port exists | Keep candidates that pass fixture-based tests |
 | End-to-end tests | Deterministic launch journey | Some tests depend on live upstreams | Replace live CI dependence with controlled fixtures |
@@ -484,26 +484,38 @@ handoffs as new session notes here, at the top of this section.
 
 **Session note (unmerged, this branch, `claude/stoic-davinci-12ldjb`):**
 product owner directed a hosting-decision change: self-host on home
-hardware (Docker Compose + Cloudflare Tunnel) instead of Vercel/Render/
-Neon, domain `reelgoodday.com` already on Cloudflare. See this section's
-new "Product decisions on record (2026-09-24)" entry above and
-`docs/SELF_HOSTING.md`. Delivered in this PR: `docker-compose.yml`,
+hardware instead of Vercel/Render/Neon, domain `reelgoodday.com` already
+on Cloudflare. See this section's new "Product decisions on record
+(2026-09-24)" entry above and `docs/SELF_HOSTING.md`. Delivered in this
+PR: `docker-compose.yml` (Postgres + `apps/api` + `apps/web`),
 `apps/api/Dockerfile`, `apps/web/Dockerfile`, `deploy/postgres/
 init-roles.sh` (mirrors the exact ADR-006 role/schema setup both apps'
 READMEs already document for local dev), `deploy/.env.example`, and the
-runbook. `apps/api` and Postgres have no published container ports --
-only `apps/web` is reachable, and only via the tunnel, matching (and
-arguably strengthening) the "browser calls the BFF only" contract.
-**Not done in this PR, and this session had no means to do it:**
-actually running this on the product owner's real hardware, creating
-the real Cloudflare Tunnel, or verifying a real public request end to
-end -- this session has no access to that machine. **Next action** for
-whichever agent or the product owner picks this up: follow `docs/
-SELF_HOSTING.md` on the real box, verify `https://reelgoodday.com`
-actually serves the app end to end (register a real account, load a
-real forecast), then update this checkpoint with that evidence and
-close out the "Deployment" row's "still needs live production
-verification" caveat.
+runbook. `apps/api` and Postgres have no published container ports;
+`apps/web` publishes to `127.0.0.1:3000` only, matching (and arguably
+strengthening) the "browser calls the BFF only" contract.
+
+Revised mid-session once the product owner reported back: the actual
+host machine is Windows (Docker Desktop), and they created the
+Cloudflare Tunnel through the dashboard using its **native Windows
+connector** (not the Docker-container connector this PR originally
+assumed) -- confirmed healthy with one active replica in a real
+dashboard screenshot. `docker-compose.yml` no longer runs a `cloudflared`
+service at all (would have meant two connectors racing for the same
+tunnel); `apps/web`'s port is published to `127.0.0.1:3000` instead so
+the native connector can reach it, and `docs/SELF_HOSTING.md` documents
+the Public Hostname route as `localhost:3000`, not `web:3000`.
+
+**Not done in this PR, and this session had no means to do it:** actually
+starting `docker compose up` on the product owner's real machine, adding
+the Public Hostname route in the dashboard, or verifying a real public
+request end to end -- this session has no access to that machine or
+Cloudflare account. **Next action** for whichever agent or the product
+owner picks this up: add the Route (step 4 of `docs/SELF_HOSTING.md`),
+run `docker compose up -d --build` (step 5), verify
+`https://reelgoodday.com` actually serves the app end to end (register a
+real account, load a real forecast), then update this checkpoint with
+that evidence and close out the "Deployment" row's remaining caveat.
 
 **Session note (unmerged, this branch, `claude/ecstatic-rubin-mj5c0k`):**
 sprint 43 (privacy-safe analytics), previously **Not accepted**,

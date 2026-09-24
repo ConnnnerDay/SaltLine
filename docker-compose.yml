@@ -1,8 +1,10 @@
-# Self-hosted stack for one home Linux box with Docker: Postgres, the
-# FastAPI service, the Next.js BFF, and a Cloudflare Tunnel that publishes
-# only apps/web to the internet. apps/api is never port-published -- the
-# browser must only ever talk to the Next.js BFF (docs/CANONICAL_ROADMAP.md),
-# and on this network topology "never" is enforced by apps/api having no
+# Self-hosted stack for one home machine with Docker: Postgres, the
+# FastAPI service, and the Next.js BFF. Cloudflare Tunnel runs natively
+# on the host (Windows, via the cloudflared Windows connector -- not a
+# container here), pointed at web's published localhost:3000 -- see
+# docs/SELF_HOSTING.md. apps/api is never port-published -- the browser
+# must only ever talk to the Next.js BFF (docs/CANONICAL_ROADMAP.md), and
+# on this network topology "never" is enforced by apps/api having no
 # published port at all, not just by convention. See docs/SELF_HOSTING.md
 # for the full setup runbook and docs/CANONICAL_ROADMAP.md's "Product
 # decisions on record (2026-09-24)" entry for why this replaces the
@@ -64,17 +66,11 @@ services:
         condition: service_healthy
       api:
         condition: service_started
-    expose:
-      - "3000"
-
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    restart: unless-stopped
-    command: tunnel run
-    environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?set CLOUDFLARE_TUNNEL_TOKEN in .env}
-    depends_on:
-      - web
+    ports:
+      # Bound to localhost only: the natively-running cloudflared
+      # connector on this same host reaches it here, but nothing on the
+      # LAN or internet can -- that's the tunnel's job, not this port.
+      - "127.0.0.1:3000:3000"
 
 volumes:
   postgres_data:

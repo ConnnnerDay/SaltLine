@@ -462,6 +462,37 @@ table above as the authoritative current state (it matches the actual
 rows below before starting new work), and record this repo's own
 handoffs as new session notes here, at the top of this section.
 
+**Session note (this repo, branch `claude/serene-gates-ahrkve`):** two
+product-owner-requested changes.
+
+1. **Merged as ConnnnerDay/SaltLine#9 -- original look restored.** The
+   product owner rejected sprint 27's oklch "photographic" rebrand and
+   asked for the original Saltline look back on the canonical Next.js
+   app (architecture unchanged). `apps/web` now uses the legacy palette
+   (navy/ocean blue/coral, dark default with a light toggle), self-hosted
+   Manrope + Instrument Serif (CSP now fully self-only), a navy header and
+   location bar, the original landing hero, and an original-dashboard
+   `ForecastCard`. Full account: `apps/web/README.md`, "Original look
+   restored". The same PR fixed two CI-drift failures that would have hit
+   `main` too: ruff 0.17.5's RUF100 on an `apps/api` test, and new npm
+   advisories (lockfile-only `npm audit fix`).
+2. **This PR -- sprint 35 (fishing guidance), Not started -> Complete.**
+   Scope check with the product owner done: a limited, region-gated
+   catalogue (26 targets), not the deferred 851-species experience.
+   Ledger row and both READMEs' sprint-35 entries have the detail.
+   apps/api suite 422 passed (was 393).
+
+Deliberately not done, each needing a product decision: legacy's
+wind/wave/time-of-day species modifiers, the species calendar, and
+species photos (still deferred per "Product decisions on record").
+
+**Next action** after this merges: unchanged from the sprint-43 note
+below -- the remaining self-contained rows are exhausted; sprints
+9/10/28/31/45 wait on real credentials or legal review, sprint 42 on a
+monitoring-vendor choice, and the rest on live production traffic or
+hosting. Master issue #318 is outside this repo's scope (see the
+repository note above) and was not updated.
+
 **Session note (unmerged, this branch, `claude/ecstatic-rubin-mj5c0k`):**
 sprint 43 (privacy-safe analytics), previously **Not accepted**,
 advances to **Complete**. Full account in `apps/api/README.md` and

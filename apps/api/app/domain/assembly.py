@@ -320,6 +320,9 @@ async def _fetch_marine_zone(
         value = await fetch_marine_zone_conditions(client, zone)
     except ProviderError as exc:
         return _FetchResult(value=None, error=str(exc))
+    except Exception as exc:  # a parser bug must not 500 the whole forecast
+        _logger.exception("unexpected provider failure")
+        return _FetchResult(value=None, error=f"unexpected {type(exc).__name__}")
     return _FetchResult(value=value, error=None)
 
 
@@ -335,6 +338,9 @@ async def _fetch_water_temp(
         value = await fetch_water_temperature(client, station_id)
     except ProviderError as exc:
         return _FetchResult(value=None, error=str(exc))
+    except Exception as exc:  # a parser bug must not 500 the whole forecast
+        _logger.exception("unexpected provider failure")
+        return _FetchResult(value=None, error=f"unexpected {type(exc).__name__}")
     return _FetchResult(value=value, error=None)
 
 
@@ -347,6 +353,9 @@ async def _fetch_buoy(
         value = await fetch_buoy_observation(client, station_ids[0])
     except ProviderError as exc:
         return _FetchResult(value=None, error=str(exc))
+    except Exception as exc:  # a parser bug must not 500 the whole forecast
+        _logger.exception("unexpected provider failure")
+        return _FetchResult(value=None, error=f"unexpected {type(exc).__name__}")
     return _FetchResult(value=value, error=None)
 
 
@@ -366,6 +375,9 @@ async def _fetch_tides(
         )
     except ProviderError as exc:
         return _FetchResult(value=None, error=str(exc))
+    except Exception as exc:  # a parser bug must not 500 the whole forecast
+        _logger.exception("unexpected provider failure")
+        return _FetchResult(value=None, error=f"unexpected {type(exc).__name__}")
     return _FetchResult(value=value, error=None)
 
 

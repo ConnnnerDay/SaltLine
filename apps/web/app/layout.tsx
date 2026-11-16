@@ -41,17 +41,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  // Without this, the browser renders native UI (scrollbars, form
-  // control chrome) in its light-only default even on the dark theme
-  // (globals.css's `@media (prefers-color-scheme: dark)` block), which
-  // clashes visibly -- a light scrollbar/select on an otherwise dark
-  // page. Declaring both tells the browser it can pick either to match
-  // the same prefers-color-scheme query the app's own CSS already uses.
-  colorScheme: 'light dark',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f2f6f7' },
-    { media: '(prefers-color-scheme: dark)', color: '#0d2530' },
-  ],
+  // Dark is the default theme (as in the original Saltline); light is
+  // opt-in via the header toggle, so native UI defaults to dark too.
+  colorScheme: 'dark light',
+  themeColor: '#07131f',
 }
 
 export default function RootLayout({
@@ -60,22 +53,19 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      {/*
-        Space Grotesk / Public Sans load via a plain stylesheet link, not
-        next/font/google -- that API fetches the font files at *build*
-        time, which fails wherever outbound network access is
-        restricted (this sandbox included). A <link> loads client-side
-        at runtime instead, works identically once actually deployed,
-        and is the one external stylesheet host apps/web's CSP already
-        allows (next.config.ts's style-src).
-      */}
+    <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Public+Sans:wght@400;500;600;700&display=swap"
+        {/*
+          Applies a saved light-theme choice before first paint so the
+          page never flashes dark first. Dark needs no attribute -- it's
+          globals.css's default. Inline is allowed by next.config.ts's
+          script-src 'unsafe-inline'.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(localStorage.getItem('theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}",
+          }}
         />
       </head>
       <body>

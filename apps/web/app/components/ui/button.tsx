@@ -5,15 +5,15 @@ import { cx } from './cx'
 type ButtonVariant = 'primary' | 'secondary' | 'ghost'
 
 const BASE_CLASSES =
-  'inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 font-semibold ' +
+  'inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 text-sm font-bold uppercase tracking-wider ' +
   'transition-colors focus-visible:outline-none focus-visible:ring-2 ' +
   'focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg ' +
   'disabled:cursor-not-allowed disabled:opacity-60'
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: 'bg-primary text-primary-contrast hover:bg-primary-hover',
-  secondary: 'border border-border bg-transparent text-primary hover:bg-surface',
-  ghost: 'bg-transparent text-text hover:bg-surface',
+  primary: 'bg-accent text-accent-contrast shadow-card hover:brightness-110',
+  secondary: 'border border-border bg-surface-raised text-text hover:border-primary',
+  ghost: 'bg-transparent text-text hover:bg-surface-raised',
 }
 
 type CommonProps = {

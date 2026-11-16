@@ -24,7 +24,7 @@ export function Badge({ variant = 'neutral', className, children, ...props }: Ba
   return (
     <span
       className={cx(
-        'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-medium',
+        'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide',
         VARIANT_CLASSES[variant],
         className,
       )}

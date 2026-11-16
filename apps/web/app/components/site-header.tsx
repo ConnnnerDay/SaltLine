@@ -1,46 +1,40 @@
 import Link from 'next/link'
 import { BrandMark } from './brand-mark'
-import { Container } from './ui'
 import { AuthStatus } from './auth-status'
+import { ThemeToggle } from './theme-toggle'
 
 /**
- * The one piece of the Saltline rebrand every other page was still
- * missing: a persistent header. Sprint 27's rework gave the landing
- * page (app/page.tsx), the forecast page, and the search page each
- * their own bespoke layout, but none of them -- nor app/not-found.tsx,
- * nor app/design-system/page.tsx -- shared any wayfinding back to the
- * brand or to search. Rendered once from app/layout.tsx so every route
- * gets it for free, rather than re-added per page.
- *
- * Sprint 28 ("Authentication") adds `AuthStatus` -- the one part of
- * this otherwise server-rendered header that depends on the visitor's
- * session, isolated into its own Client Component rather than making
- * the whole header one.
+ * Persistent header, in the original Saltline style: a solid navy bar
+ * (navy in both themes, like the legacy app's `header`), white
+ * wordmark, light links. Rendered once from app/layout.tsx so every
+ * route gets it. `AuthStatus` is the one session-dependent piece,
+ * isolated into its own Client Component.
  */
 export function SiteHeader() {
   return (
-    <header className="border-b border-border bg-surface">
-      <Container>
-        <div className="flex h-16 items-center justify-between gap-4">
+    <header className="border-b border-header-border bg-header text-white">
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+        <div className="flex h-14 items-center justify-between gap-4">
           <Link
             href="/"
             aria-label="Saltline home"
-            className="flex items-center gap-2 text-text no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface rounded-sm"
+            className="flex items-center gap-2 rounded-sm text-white no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-header"
           >
             <BrandMark />
-            <span className="font-display text-lg font-bold">Saltline</span>
+            <span className="text-[1.05rem] font-bold tracking-tight">Saltline</span>
           </Link>
           <div className="flex items-center gap-3 sm:gap-4">
             <Link
               href="/locations"
-              className="whitespace-nowrap text-sm font-semibold text-primary no-underline hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface rounded-sm"
+              className="hidden whitespace-nowrap rounded-sm text-sm font-semibold text-white/85 no-underline hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-header sm:inline"
             >
               Find your spot
             </Link>
             <AuthStatus />
+            <ThemeToggle />
           </div>
         </div>
-      </Container>
+      </div>
     </header>
   )
 }

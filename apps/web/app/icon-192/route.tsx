@@ -26,7 +26,7 @@ export async function GET() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#1c4a56',
+          background: '#0d2240',
           borderRadius: 42,
         }}
       >
@@ -34,7 +34,7 @@ export async function GET() {
           <path d="M2 11 L22 11" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
           <path
             d="M6 11 A6 6 0 0 1 18 11"
-            stroke="#ff8552"
+            stroke="#ff6b4a"
             strokeWidth="2"
             strokeLinecap="round"
           />

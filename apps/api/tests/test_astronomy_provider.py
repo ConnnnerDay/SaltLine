@@ -58,7 +58,7 @@ def test_compute_sun_times_summer_day_longer_than_winter_day() -> None:
 
 def test_compute_sun_times_naive_datetime_is_localized() -> None:
     lat, lng, tz_name = _ATLANTIC
-    naive = datetime(2024, 7, 15)  # noqa: DTZ001 - deliberately naive to test localization
+    naive = datetime(2024, 7, 15)  # deliberately naive to test localization
 
     result = compute_sun_times(naive, lat, lng, tz_name)
 

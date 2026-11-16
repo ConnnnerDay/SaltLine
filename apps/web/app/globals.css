@@ -1,111 +1,145 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens for the Saltline rebrand (docs/CANONICAL_ROADMAP.md
- * sprint 27's branding decision, made after the "Surf & Pier Forecast"
- * placeholder identity sat unresolved through Phase 3). A bright,
- * photographic, Surfline-adjacent coastal palette in oklch -- same
- * lightness/chroma across the teal/coral accent pair (varying only
- * hue), semantic go/marginal/no-go tokens tuned separately per theme
- * rather than a naive light-palette inversion.
+ * Design tokens: the original Saltline ("Surf & Pier") look, restored
+ * from the legacy Flask app's static/style.css palette -- deep navy
+ * dashboard, ocean blue, coral accent, sand-toned light theme --
+ * after the oklch "photographic" rebrand was rejected by the product
+ * owner. Like the original, dark is the default theme; light is opt-in
+ * via the header's theme toggle (html[data-theme="light"], persisted in
+ * localStorage and applied before first paint by app/layout.tsx's
+ * inline bootstrap script).
  *
- * Declared via Tailwind v4's @theme so every token also becomes a utility
- * class (bg-primary, text-go-text, ...); dark-mode values below override
- * the same custom properties by media query, which the generated
- * utilities pick up automatically since they reference var(--color-*).
+ * Declared via Tailwind v4's @theme so every token also becomes a
+ * utility class (bg-primary, text-go-text, ...); the light block below
+ * overrides the same custom properties, which the generated utilities
+ * pick up automatically since they reference var(--color-*).
+ *
+ * Contrast: every text/background pairing used by the components
+ * (text, text-muted, primary-as-text, primary-contrast on primary,
+ * *-text on its own *-bg, danger-text on bg/surface) was checked for
+ * WCAG AA (>= 4.5:1) in both themes.
  */
 @theme {
-  --color-bg: oklch(97% 0.012 200);
-  --color-surface: oklch(99% 0.006 200);
-  --color-text: oklch(22% 0.03 240);
-  --color-text-muted: oklch(46% 0.03 240);
-  --color-border: oklch(88% 0.02 220);
+  /* Dark (default) -- legacy [data-theme="dark"] values */
+  --color-bg: #0a1520;
+  --color-surface: #122035;
+  --color-surface-raised: #172438;
+  --color-text: #d8ebf8;
+  --color-text-muted: #7aa3be;
+  --color-border: #1d3550;
+  --color-header: #07131f;
+  --color-header-border: #13263a;
 
-  /* L=48% is a deliberate compromise, not the palette's initial 58%:
-   * --color-primary does double duty as a button *background* (paired
-   * with white text) and as bare *text* directly on --color-bg/surface
-   * (Button's "secondary" variant, eyebrow labels) -- 58% cleared 4.5:1
-   * for white-on-primary but fell to 3.6-3.8:1 for primary-as-text,
-   * caught by axe-core. Verified by computing real WCAG contrast ratios
-   * (canvas-rendered oklch -> sRGB, not eyeballed): 48% gives ~5.3:1
-   * white-on-primary and ~5.4-5.7:1 primary-as-text, comfortable AA
-   * margin on both uses at once. */
-  --color-primary: oklch(48% 0.14 220);
-  --color-primary-hover: oklch(40% 0.15 220);
-  --color-primary-contrast: oklch(99% 0.006 200);
-  --color-accent: oklch(68% 0.17 40);
-  --color-focus-ring: oklch(48% 0.14 220);
+  --color-primary: #38c0ff;
+  --color-primary-hover: #7dd3fc;
+  --color-primary-contrast: #07131f;
+  --color-accent: #ff6b4a;
+  --color-accent-contrast: #07131f;
+  --color-amber: #fbbf24;
+  --color-focus-ring: #38c0ff;
 
-  /* Light tints of --color-primary/--color-accent, for a callout or a
-   * selected-row background where a solid fill would be too loud --
-   * distinct roles: primary-tint marks interactive selection (the
-   * search dropdown's active option), accent-tint marks an emphasized
-   * callout (the best-window card). Contrast-checked the same way as
-   * --color-primary above: --color-text on either tint clears AA in
-   * both themes. */
-  --color-primary-tint: oklch(93% 0.035 220);
-  --color-accent-tint: oklch(94% 0.05 40);
+  --color-primary-tint: #13304a;
+  --color-accent-tint: #2a1a1c;
 
-  --color-go-bg: oklch(94% 0.05 145);
-  --color-go-text: oklch(32% 0.1 145);
-  --color-go-border: oklch(78% 0.1 145);
-  --color-marginal-bg: oklch(95% 0.05 80);
-  --color-marginal-text: oklch(38% 0.09 80);
-  --color-marginal-border: oklch(80% 0.1 80);
-  --color-nogo-bg: oklch(94% 0.05 25);
-  --color-nogo-text: oklch(40% 0.13 25);
-  --color-nogo-border: oklch(78% 0.12 25);
+  --color-go-bg: #0f2a22;
+  --color-go-text: #6ee7b7;
+  --color-go-border: #1f5c47;
+  --color-marginal-bg: #2a1e0a;
+  --color-marginal-text: #fbbf24;
+  --color-marginal-border: #6b4a12;
+  --color-nogo-bg: #2a1520;
+  --color-nogo-text: #fca5a5;
+  --color-nogo-border: #7a2a35;
+  --color-danger-text: #f87171;
 
-  /* Deliberately distinct from --color-nogo-text: that token pairs with
-   * --color-nogo-bg inside Badge's own pill (always a light tint, by
-   * design theme-invariant -- see the dark-mode block below), so it
-   * always has enough contrast regardless of page theme. This token is
-   * for bare status text directly on the page background (Field's
-   * error message, ForecastErrorCard), which *does* need to adapt per
-   * theme -- axe-core caught the previous palette's danger-text failing
-   * WCAG AA (2.6:1) against the dark background before this token
-   * existed, so it stays theme-specific here too rather than reusing
-   * --color-nogo-text as-is. */
-  --color-danger-text: oklch(40% 0.13 25);
+  /* Activity-chart tiers (legend-labeled; the hourly table carries the
+   * same data as text, so color is never the only channel). */
+  --color-tier-prime: #ff6b4a;
+  --color-tier-high: #0ea5e9;
+  --color-tier-med: #f59e0b;
+  --color-tier-low: #1d3550;
 
   --font-sans:
-    'Public Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif;
+    'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
   --font-display:
-    'Space Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif;
+    'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
 
-  --radius-md: 0.875rem;
-  --radius-lg: 1.25rem;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 35%);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: oklch(20% 0.03 235);
-    --color-surface: oklch(26% 0.03 235);
-    --color-text: oklch(95% 0.01 220);
-    --color-text-muted: oklch(72% 0.02 220);
-    --color-border: oklch(36% 0.03 235);
+/* Light -- legacy :root values (sand body, navy header kept) */
+:root[data-theme='light'] {
+  --color-bg: #ede8df;
+  --color-surface: #fafaf8;
+  --color-surface-raised: #f1eee8;
+  --color-text: #1c3245;
+  --color-text-muted: #4f6578;
+  --color-border: #d8e3ec;
+  --color-header: #0d2240;
+  --color-header-border: #0d2240;
 
-    --color-primary: oklch(74% 0.12 205);
-    --color-primary-hover: oklch(82% 0.11 205);
-    --color-primary-contrast: oklch(20% 0.03 235);
-    --color-accent: oklch(75% 0.15 45);
-    --color-focus-ring: oklch(74% 0.12 205);
-    --color-primary-tint: oklch(30% 0.05 205);
-    --color-accent-tint: oklch(32% 0.06 45);
+  --color-primary: #0069a3;
+  --color-primary-hover: #023e8a;
+  --color-primary-contrast: #fafaf8;
+  --color-accent: #c4351d;
+  --color-accent-contrast: #ffffff;
+  --color-amber: #b45309;
+  --color-focus-ring: #0069a3;
 
-    --color-go-bg: oklch(30% 0.06 150);
-    --color-go-text: oklch(88% 0.06 150);
-    --color-go-border: oklch(45% 0.09 150);
-    --color-marginal-bg: oklch(32% 0.05 85);
-    --color-marginal-text: oklch(88% 0.05 85);
-    --color-marginal-border: oklch(48% 0.08 85);
-    --color-nogo-bg: oklch(32% 0.07 25);
-    --color-nogo-text: oklch(88% 0.07 25);
-    --color-nogo-border: oklch(48% 0.1 25);
-    --color-danger-text: oklch(80% 0.1 25);
-  }
+  --color-primary-tint: #d6eaf5;
+  --color-accent-tint: #fde6e1;
+
+  --color-go-bg: #e3f5ec;
+  --color-go-text: #05603f;
+  --color-go-border: #7fd1ae;
+  --color-marginal-bg: #fdf1dc;
+  --color-marginal-text: #8a4b04;
+  --color-marginal-border: #f3c27a;
+  --color-nogo-bg: #fde7e5;
+  --color-nogo-text: #a11d1d;
+  --color-nogo-border: #f2a49b;
+  --color-danger-text: #b91c1c;
+
+  --color-tier-prime: #f4543b;
+  --color-tier-high: #0077b6;
+  --color-tier-med: #d97706;
+  --color-tier-low: #c9d6e2;
+
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 6%), 0 1px 2px rgb(0 0 0 / 4%);
+}
+
+/* Self-hosted fonts (copied from the legacy app's static/fonts) --
+ * no external font request, so no build- or run-time dependency on
+ * Google Fonts. Manrope is a variable font covering 200-800. */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url('/fonts/manrope-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/instrument-serif-normal-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/instrument-serif-italic-latin.woff2') format('woff2');
 }
 
 * {
@@ -113,7 +147,11 @@
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: dark;
+}
+
+html[data-theme='light'] {
+  color-scheme: light;
 }
 
 body {
@@ -124,55 +162,50 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Headlines/verdicts carry the display face site-wide; body copy, form
- * fields, and tables stay on --font-sans. A global element selector
- * (rather than a utility class on every heading) so existing headings
- * across forecast-card.tsx/location-search.tsx pick this up for free. */
 h1,
 h2,
 h3,
 h4 {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
-/* Repeating-stripe placeholder for a real photo not yet shot (see
- * apps/web/README.md's rebrand paragraph) -- deliberately not a fake
- * AI-generated image, and unmistakable as a placeholder rather than a
- * broken image. .ph-photo-label names the real shot that belongs there. */
-.ph-photo {
-  position: relative;
-  background-image: repeating-linear-gradient(
-    135deg,
-    var(--color-primary) 0px,
-    var(--color-primary) 14px,
-    color-mix(in oklch, var(--color-primary) 55%, var(--color-surface)) 14px,
-    color-mix(in oklch, var(--color-primary) 55%, var(--color-surface)) 28px
-  );
-  overflow: hidden;
-}
-
-.ph-photo::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgb(10 20 25 / 72%),
-    rgb(10 20 25 / 5%) 55%
-  );
-}
-
-.ph-photo-label {
-  position: relative;
-  z-index: 2;
+/* The legacy app's small uppercase, letter-spaced section label
+ * ("TODAY'S FORECAST", "WHEN TO FISH", ...). */
+.section-label {
+  font-family: var(--font-sans);
   font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: white;
-  background: rgb(0 0 0 / 35%);
-  padding: 0.375rem 0.625rem;
-  border-radius: 0.5rem;
-  width: fit-content;
+  color: var(--color-text-muted);
+}
+
+/* Collapsible section row (legacy "PACK FOR TODAY" / "TODAY'S TIDES"
+ * rows): a hairline-separated <details> with a chevron that flips. */
+.collapsible > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.collapsible > summary::-webkit-details-marker {
+  display: none;
+}
+
+.collapsible > summary .chevron {
+  transition: transform 0.15s ease;
+}
+
+.collapsible[open] > summary .chevron {
+  transform: rotate(180deg);
+}
+
+/* The legacy landing page's deep-ocean gradient, also used as the
+ * location band on forecast pages. */
+.ocean-hero {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgb(14 165 233 / 10%), transparent 60%),
+    linear-gradient(180deg, #050f1c 0%, #0a1f3a 55%, #0d2e52 100%);
+  color: #ffffff;
 }

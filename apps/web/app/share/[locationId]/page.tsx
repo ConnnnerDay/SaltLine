@@ -88,7 +88,7 @@ export default async function SharedForecastPage({ params }: Props) {
       backHref="/"
       backLabel="Back to Saltline"
     >
-      <div className="mt-4 flex flex-col items-center gap-3 rounded-[1.25rem] border border-border bg-surface px-5 py-6 text-center">
+      <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-surface shadow-card px-5 py-6 text-center">
         <p className="text-sm text-text">
           Want a straight go/no-go answer for your own spot?
         </p>

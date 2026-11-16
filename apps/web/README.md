@@ -1477,6 +1477,41 @@ forecast (state `partial`, confidence `low`, real warning messages) —
 that's the signed path and the degradation path both working, not a
 bug. Against real network access the same page renders a live forecast.
 
+### Running both apps on one machine (home server)
+
+On a Debian/Ubuntu machine, one command installs and runs everything:
+
+```bash
+./install.sh
+```
+
+It sets up PostgreSQL (database, roles, schemas), apps/api's virtualenv and
+migrations, apps/web's dependencies, auth migration and production build,
+and a git-ignored `saltline.env` with random secrets shared by both apps.
+It also stops the retired Flask service and any old Saltline process on
+the port, and installs a `saltline` systemd service (both apps, starts on
+boot, restarts on failure). It finishes by checking `/api/health`. Re-run it
+after `git pull` to update.
+
+Things that broke a plain-http LAN install, now handled:
+
+- **Every forecast page saying "Couldn't load the forecast"**: apps/api not
+  running, or a signing-key mismatch. The service runs both from one
+  settings file. `/api/health` names the cause: `api_unreachable`,
+  `signature_rejected`, `missing_signing_keys` or `api_error`. Each failed
+  forecast also logs a `forecast_fetch_failed` line to the server output.
+- **Unstyled, non-interactive pages over `http://<LAN IP>`**: the CSP's
+  `upgrade-insecure-requests` made browsers fetch every script and
+  stylesheet over https. It's now only sent when `NEXT_PUBLIC_SITE_URL` is
+  https (or on Vercel).
+- **Sign-in or saving failing when opened by another address**: Better
+  Auth and the BFF's Origin check now trust `NEXT_PUBLIC_SITE_URL` plus
+  `SALTLINE_TRUSTED_ORIGINS`. install.sh fills in localhost, 127.0.0.1 and
+  the hostname.
+
+`scripts/run-saltline.sh` is what the service runs; it can also be run by
+hand.
+
 ### Authentication locally
 
 `/register`, `/login`, `/forgot-password`, and `/reset-password` need a

@@ -60,3 +60,6 @@ venv/
 .env
 
 # Workbench Project Layout
+# scripts/run-saltline.sh settings (secrets)
+saltline.env
+saltline.log

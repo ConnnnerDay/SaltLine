@@ -1,3 +1,7 @@
+import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { auth } from '@/lib/auth'
+import { homeLocationId } from '@/lib/home-location'
 import { Button, Container } from './components/ui'
 
 /**
@@ -9,6 +13,10 @@ import { Button, Container } from './components/ui'
  * forecast behind it would be exactly the kind of invented data this
  * product's own Integrity rule (docs/product-definition.md) argues
  * against; these are plain links to real curated locations.
+ *
+ * Signed-in visitors never see this marketing page: like the original
+ * app, "/" is their dashboard -- their home spot's forecast
+ * (`homeLocationId`), or search when they haven't picked one yet.
  */
 const FEATURES = [
   {
@@ -46,7 +54,13 @@ const POPULAR_SPOTS = [
   { id: 'cocoa-beach-fl', label: 'Cocoa Beach / Port Canaveral, FL' },
 ]
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (session) {
+    const home = await homeLocationId(session.user.id)
+    redirect(home ? `/forecast/${encodeURIComponent(home)}` : '/locations')
+  }
+
   return (
     <main>
       <section className="ocean-hero px-4 pb-14 pt-14 text-center sm:pt-20">

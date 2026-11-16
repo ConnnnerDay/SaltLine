@@ -34,6 +34,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_db_session, require_authenticated_user_id
 from app.api.internal_auth import require_internal_signature
+from app.domain.alerts import AlertRule
 from app.domain.catches import CatchEntry
 from app.domain.preferences import UserPreferences
 from app.domain.saved_locations import SavedLocation
@@ -70,10 +71,18 @@ class ExportedCatch(BaseModel):
     conditions: dict[str, Any] | None
 
 
+class ExportedAlert(BaseModel):
+    location_id: str
+    min_verdict: str
+    email: str
+    enabled: bool
+
+
 class AccountExport(BaseModel):
     preferences: ExportedPreferences | None
     saved_locations: list[ExportedSavedLocation]
     catches: list[ExportedCatch] = []
+    alerts: list[ExportedAlert] = []
 
 
 @router.get("/export")
@@ -102,6 +111,12 @@ async def export_account_data(
                 .order_by(CatchEntry.caught_at)
             )
         )
+        .scalars()
+        .all()
+    )
+
+    alert_rows = (
+        (await session.execute(select(AlertRule).where(AlertRule.user_id == user_id)))
         .scalars()
         .all()
     )
@@ -136,6 +151,15 @@ async def export_account_data(
             )
             for row in catch_rows
         ],
+        alerts=[
+            ExportedAlert(
+                location_id=row.location_id,
+                min_verdict=row.min_verdict,
+                email=row.email,
+                enabled=row.enabled,
+            )
+            for row in alert_rows
+        ],
     )
 
 
@@ -144,6 +168,7 @@ async def delete_account_data(
     user_id: str = Depends(require_authenticated_user_id),
     session: AsyncSession = Depends(get_db_session),  # noqa: B008
 ) -> None:
+    await session.execute(delete(AlertRule).where(AlertRule.user_id == user_id))
     await session.execute(delete(CatchEntry).where(CatchEntry.user_id == user_id))
     await session.execute(delete(SavedLocation).where(SavedLocation.user_id == user_id))
     await session.execute(

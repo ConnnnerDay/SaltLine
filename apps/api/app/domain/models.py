@@ -17,7 +17,7 @@ unsupported invention this project is recovering from. `conditions`
 (`app.domain.timing.HourlyOutlook`) are now designed and populated by
 those modules; this field stays an opaque `dict` here regardless, since
 the typed shape belongs to the module that owns it, not this one.
-`recommendations` remains unpopulated, sprint 35's job.
+`recommendations` is sprint 35's `app.domain.guidance.FishingGuidance`.
 """
 
 from __future__ import annotations

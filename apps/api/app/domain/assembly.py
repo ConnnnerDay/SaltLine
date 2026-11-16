@@ -12,7 +12,8 @@ docs/CANONICAL_ROADMAP.md's product contract's Reliability bullet.
 **This sprint designs `ForecastEnvelope.conditions`**, per sprint 11's
 domain-models docstring, which named sprints 21/22/34/35 as the owners
 of `conditions`/`tides`/`hourly_outlook`/`recommendations`.
-`recommendations` stays opaque for its owning sprint (35). `tides` was
+`recommendations` is sprint 35's `app.domain.guidance.FishingGuidance`,
+built from the same water temperature/wave range as the score. `tides` was
 originally deferred here too -- the legacy
 architecture and the roadmap's sprint 34 ("Tides and timing") both
 treat tide predictions as a distinct time-series/schedule concern from
@@ -163,6 +164,7 @@ from typing import Generic, TypeVar
 from pydantic import BaseModel
 
 from app.domain.confidence import AgedObservation, StationDistance, assess_confidence
+from app.domain.guidance import build_fishing_guidance, local_month
 from app.domain.models import (
     ForecastEnvelope,
     ForecastState,
@@ -664,6 +666,14 @@ async def assemble_forecast(
         tz_name=location.timezone,
     )
 
+    guidance = build_fishing_guidance(
+        region=location.conditions_region,
+        water_temp_f=water_temperature.value,
+        water_temp_is_fallback=water_temperature.is_fallback,
+        month=local_month(now, location.timezone),
+        wave_range_ft=wave_range,
+    )
+
     return ForecastEnvelope(
         location=_to_domain_location(location),
         generated_at=now,
@@ -674,5 +684,5 @@ async def assemble_forecast(
         conditions=conditions.model_dump(mode="json"),
         tides=tides,
         hourly_outlook=hourly_outlook.model_dump(mode="json"),
-        recommendations=None,
+        recommendations=guidance.model_dump(mode="json"),
     )

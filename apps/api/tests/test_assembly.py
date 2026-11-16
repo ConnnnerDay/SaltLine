@@ -19,6 +19,7 @@ import pytest
 
 from app.domain.assembly import ForecastConditions, assemble_forecast
 from app.domain.confidence import AgedObservation, assess_confidence
+from app.domain.guidance import FishingGuidance
 from app.domain.models import ConfidenceLevel, ForecastState, SourceState, SourceStatus
 from app.domain.scoring import ScoreVerdict
 from app.infra.http_client import BoundedHTTPClient
@@ -311,10 +312,10 @@ async def test_location_domain_fields_mapped_correctly() -> None:
 
 
 @pytest.mark.asyncio
-async def test_tides_and_hourly_outlook_populated_recommendations_left_none() -> None:
-    """`tides` (sprint 34's backend half) and `hourly_outlook`
-    (`app.domain.timing`, sprint 34's remaining "timing" scope) are both
-    populated now; `recommendations` remains deferred to sprint 35.
+async def test_tides_hourly_outlook_and_recommendations_populated() -> None:
+    """`tides` (sprint 34's backend half), `hourly_outlook`
+    (`app.domain.timing`) and `recommendations` (sprint 35's
+    `app.domain.guidance`) are all populated.
     """
     client = _make_client(nws_ok=True, coops_ok=True, ndbc_ok=True)
     async with client:
@@ -325,7 +326,11 @@ async def test_tides_and_hourly_outlook_populated_recommendations_left_none() ->
     assert envelope.tides is not None
     assert envelope.hourly_outlook is not None
     assert len(envelope.hourly_outlook["hours"]) == 24
-    assert envelope.recommendations is None
+    guidance = FishingGuidance.model_validate(envelope.recommendations)
+    assert guidance.basis.month == 7
+    assert guidance.basis.region == _WRIGHTSVILLE_BEACH.conditions_region
+    assert guidance.species, "a July Wrightsville forecast should have picks"
+    assert all(pick.reasons for pick in guidance.species)
 
 
 @pytest.mark.asyncio

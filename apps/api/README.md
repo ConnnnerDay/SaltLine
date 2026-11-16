@@ -8,6 +8,34 @@ never directly from a browser.
 
 ## Status
 
+**Sprint 35 ("Fishing guidance")**: "Limited supported suggestions;
+every recommendation explains why." Product-owner scope check done
+(2026-11-16): a limited, region-gated catalogue, not the deferred
+851-species experience. `app/domain/guidance.py` designs
+`ForecastEnvelope.recommendations` (the last of sprint 11's four opaque
+payloads) as `FishingGuidance`: up to 6 ranked `SpeciesPick`s with
+bait, rig, hook, sinker, lures, a cold/warm explanation and plain-
+language `reasons`, plus the `basis` (water temperature, whether it's
+the monthly fallback, local month, region), a rough-surf `tackle_note`
+and a regulations disclaimer.
+
+- Catalogue: `app/data/guidance_species.json`, 26 common surf/pier
+  targets copied field-for-field from the legacy
+  `storage/species_data.json` by `scripts/generate_guidance_catalogue.py`,
+  each offered only in the `conditions_region`s it lives in (4-13 per
+  region). apps/api does not ship the full provisional dataset.
+- Scoring ports legacy `_score_species`'s condition-independent parts
+  unchanged (temperature fit 0-50 with survivable-range exclusion,
+  season 0-30, threshold 30) and legacy's 65°F cold/warm explanation
+  split. Not ported: the wind/wave/time-of-day modifier tables (product
+  judgment not yet characterized) and seasonal explanation overrides.
+- `tests/test_guidance.py` (28 tests) characterizes the ported scoring
+  against legacy values, region gating, fallback labeling, the tackle
+  note and timezone-correct month. Full suite 422 passed (was 393);
+  `ruff`/`ruff format`/`mypy` clean; OpenAPI snapshot unchanged
+  (`recommendations` stays an opaque object in the envelope schema,
+  like `conditions`/`tides`/`hourly_outlook`).
+
 Boots, has real CI, and now has:
 
 - The canonical typed domain models (`app/domain/models.py` —

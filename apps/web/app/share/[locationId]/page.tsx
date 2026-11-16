@@ -1,10 +1,13 @@
 import { cache } from 'react'
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { ForecastPageBody } from '@/app/components/forecast-page-body'
 import { Button } from '@/app/components/ui'
 import type { ForecastEnvelope } from '@/app/components/forecast-card'
+import { auth } from '@/lib/auth'
 import { fetchForecast } from '@/lib/get-forecast'
+import { logForecastFailure } from '@/lib/diagnose-api'
 import { InternalApiError } from '@/lib/internal-api-client'
 
 export const dynamic = 'force-dynamic'
@@ -67,6 +70,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  */
 export default async function SharedForecastPage({ params }: Props) {
   const { locationId } = await params
+  // Signed-in visitors don't need the sign-up prompt (and "/" already
+  // opens their own spot).
+  const session = await auth.api.getSession({ headers: await headers() })
 
   let forecast: ForecastEnvelope | null = null
   let error: string | null = null
@@ -77,6 +83,7 @@ export default async function SharedForecastPage({ params }: Props) {
     if (err instanceof InternalApiError && err.status === 404) {
       notFound()
     }
+    logForecastFailure(locationId, err)
     error = err instanceof Error ? err.message : 'Unknown error'
   }
 
@@ -88,14 +95,16 @@ export default async function SharedForecastPage({ params }: Props) {
       backHref="/"
       backLabel="Back to Saltline"
     >
-      <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-surface shadow-card px-5 py-6 text-center">
-        <p className="text-sm text-text">
-          Want a straight go/no-go answer for your own spot?
-        </p>
-        <Button variant="primary" href="/register">
-          Create a free account
-        </Button>
-      </div>
+      {!session && (
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-surface shadow-card px-5 py-6 text-center">
+          <p className="text-sm text-text">
+            Want a straight go/no-go answer for your own spot?
+          </p>
+          <Button variant="primary" href="/register">
+            Create a free account
+          </Button>
+        </div>
+      )}
     </ForecastPageBody>
   )
 }

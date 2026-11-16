@@ -6,6 +6,7 @@ import { SaveLocationButton } from '@/app/components/save-location-button'
 import type { ForecastEnvelope } from '@/app/components/forecast-card'
 import { auth } from '@/lib/auth'
 import { fetchForecast } from '@/lib/get-forecast'
+import { logForecastFailure } from '@/lib/diagnose-api'
 import { InternalApiError } from '@/lib/internal-api-client'
 
 // Forecasts are live, per-request data -- never build-time content. See
@@ -55,6 +56,7 @@ export default async function ForecastPage({ params }: Props) {
     if (err instanceof InternalApiError && err.status === 404) {
       notFound()
     }
+    logForecastFailure(locationId, err)
     error = err instanceof Error ? err.message : 'Unknown error'
   }
 

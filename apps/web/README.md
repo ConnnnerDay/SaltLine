@@ -1477,6 +1477,28 @@ forecast (state `partial`, confidence `low`, real warning messages) —
 that's the signed path and the degradation path both working, not a
 bug. Against real network access the same page renders a live forecast.
 
+### Running both apps on one machine (home server)
+
+Every forecast page is apps/web asking apps/api over a signed request, so
+both must be running **with the same `INTERNAL_SIGNING_KEY_ID`/`_SECRET`**.
+If either is missing, the page shows "Couldn't load the forecast" (the
+visitor-facing message is deliberately generic). `scripts/run-saltline.sh`
+(repo root) starts both from one git-ignored `saltline.env`, which it
+creates with fresh random secrets on first run. Fill in the two database
+URLs and set `NEXT_PUBLIC_SITE_URL` to the address you browse to (e.g.
+`http://192.168.1.100:5757`; Better Auth only trusts that origin), then:
+
+```bash
+scripts/run-saltline.sh
+```
+
+To see why a forecast won't load, open `/api/health`. It makes the same
+signed call a forecast does and answers `{"web":"ok","api":"ok"}`, or names
+the problem: `api_unreachable`, `signature_rejected`,
+`missing_signing_keys` or `api_error`, each with a hint. Each failed
+forecast also logs one `forecast_fetch_failed` JSON line with the same
+classification to apps/web's server output.
+
 ### Authentication locally
 
 `/register`, `/login`, `/forgot-password`, and `/reset-password` need a

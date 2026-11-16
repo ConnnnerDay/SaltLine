@@ -56,28 +56,35 @@ privacy posture (no email/name/IP, an opaque user id only for a
 registration event), and why recording is deliberately best-effort.
 """
 
+import asyncio
 import json
 import logging
 import os
 import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from app.api.deps import AppState
+from app.api.deps import AppState, resolve_location_id
 from app.api.v1.account import router as account_router
+from app.api.v1.alerts import router as alerts_router
 from app.api.v1.analytics import router as analytics_router
 from app.api.v1.catches import router as catches_router
 from app.api.v1.forecasts import router as forecasts_router
 from app.api.v1.locations import router as locations_router
 from app.api.v1.preferences import router as preferences_router
 from app.api.v1.saved_locations import router as saved_locations_router
+from app.domain.alerts import POLL_SECONDS_DEFAULT, run_alert_check, smtp_configured
+from app.domain.forecast_cache import get_or_assemble_forecast
 from app.infra.database import create_engine, create_sessionmaker
 from app.infra.http_client import BoundedHTTPClient
 from app.infra.request_logging import log_requests
 from app.infra.snapshot_cache import SnapshotCache
+from app.providers.locations import load_water_temp_profiles
 from app.providers.stations import StationCatalogCache
 
 
@@ -94,11 +101,50 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             forecast_cache=SnapshotCache(),
             db_sessionmaker=create_sessionmaker(engine) if engine else None,
         )
+        poller = (
+            asyncio.create_task(_alert_poller(app.state.app_state))
+            if engine is not None and os.environ.get("ALERTS_ENABLED", "1") != "0"
+            else None
+        )
         try:
             yield
         finally:
+            if poller is not None:
+                poller.cancel()
             if engine is not None:
                 await engine.dispose()
+
+
+async def _alert_poller(state: AppState) -> None:
+    """Email alerts (`app.domain.alerts`): one check every
+    ALERT_POLL_SECONDS (default 30 min) while SMTP is configured. Any
+    failure is logged and the loop keeps going."""
+    interval = int(os.environ.get("ALERT_POLL_SECONDS", POLL_SECONDS_DEFAULT))
+    site_url = os.environ.get("NEXT_PUBLIC_SITE_URL", "http://localhost:3000")
+
+    async def lookup(location_id: str) -> tuple[str, str, dict[str, Any]]:
+        location = await resolve_location_id(location_id, state)
+        envelope = await get_or_assemble_forecast(
+            state.forecast_cache,
+            location,
+            state.http_client,
+            load_water_temp_profiles(),
+            now=datetime.now(UTC),
+        )
+        return location.name, location.timezone, envelope.model_dump(mode="json")
+
+    while True:
+        await asyncio.sleep(interval)
+        if not smtp_configured() or state.db_sessionmaker is None:
+            continue
+        try:
+            sent = await run_alert_check(
+                state.db_sessionmaker, lookup, now=datetime.now(UTC), site_url=site_url
+            )
+            if sent:
+                logging.getLogger(__name__).info("sent %d forecast alert(s)", sent)
+        except Exception:
+            logging.getLogger(__name__).exception("alert check failed")
 
 
 # Sprint 47 ("Degraded-mode UX"): without this, an unhandled exception
@@ -150,6 +196,7 @@ app.include_router(forecasts_router)
 app.include_router(preferences_router)
 app.include_router(saved_locations_router)
 app.include_router(catches_router)
+app.include_router(alerts_router)
 app.include_router(account_router)
 app.include_router(analytics_router)
 

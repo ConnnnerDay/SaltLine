@@ -2,6 +2,7 @@ import { cache } from 'react'
 import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import { ForecastPageBody } from '@/app/components/forecast-page-body'
+import { AlertControl } from '@/app/components/alert-control'
 import { SaveLocationButton } from '@/app/components/save-location-button'
 import { Button } from '@/app/components/ui'
 import type { ForecastEnvelope } from '@/app/components/forecast-card'
@@ -73,7 +74,9 @@ export default async function ForecastPage({ params }: Props) {
       backLabel="Back to search"
     >
       {forecast && (
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex flex-col gap-3">
+          <AlertControl locationId={forecast.location.id} />
+          <div className="flex flex-col gap-3 sm:flex-row">
           <SaveLocationButton locationId={forecast.location.id} />
           <Button
             variant="secondary"
@@ -81,6 +84,7 @@ export default async function ForecastPage({ params }: Props) {
           >
             Log a catch here
           </Button>
+          </div>
         </div>
       )}
     </ForecastPageBody>

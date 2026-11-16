@@ -8,6 +8,18 @@ never directly from a browser.
 
 ## Status
 
+**Email alerts (original feature restored).** `app/domain/alerts.py` +
+`/v1/me/alerts` (list with `email_configured`, `PUT` upsert one rule per
+spot, `DELETE`), `alert_rule` table (migration `9a4d6e1f2c73`). A
+background task started in `lifespan` (only when a database is
+configured, and `ALERTS_ENABLED` isn't `0`) runs `run_alert_check` every
+`ALERT_POLL_SECONDS` (default 1800) while `SMTP_HOST` is set. It emails
+each rule at most once per local day, only 5 AM-8 PM at the spot, and only
+when the verdict meets the rule (`should_alert`, pure). Failed sends are
+retried on the next check, and one bad location or send never stops the
+others. Mail reuses apps/web's `SMTP_*` settings. Rules are included in
+account export and removed by account deletion. 23 new tests; suite 481.
+
 **Limits, conditions-aware ranking, catch log (original features restored).**
 
 - *Size/bag limits*: each `SpeciesPick` carries a `Regulation` for the

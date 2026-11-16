@@ -8,6 +8,15 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Email alerts (original feature restored).** Each signed-in forecast page
+has an "Email alerts" control (Off / Good or better / Excellent only),
+which shows where alerts go and the once-a-day, waking-hours limits, and
+warns when the server has no mail settings. `app/api/alerts` always sends
+the session's own address, never one from the browser. `install.sh` asks
+for SMTP settings once (Gmail app-password example) and, when email gets
+turned on, marks accounts created while verification was off as verified,
+so their owners aren't locked out of sign-in.
+
 **Limits, conditions-aware ranking, catch log (original features restored).**
 "What's biting" cards show a one-line state limit, and "Rigs & tips" shows
 the full limits with their age, an "may be out of date" flag and the

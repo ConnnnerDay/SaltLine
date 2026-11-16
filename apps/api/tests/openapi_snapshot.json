@@ -3,6 +3,14 @@
     "schemas": {
       "AccountExport": {
         "properties": {
+          "alerts": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ExportedAlert"
+            },
+            "title": "Alerts",
+            "type": "array"
+          },
           "catches": {
             "default": [],
             "items": {
@@ -34,6 +42,110 @@
           "saved_locations"
         ],
         "title": "AccountExport",
+        "type": "object"
+      },
+      "AlertRuleIn": {
+        "properties": {
+          "email": {
+            "maxLength": 254,
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+            "title": "Email",
+            "type": "string"
+          },
+          "location_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Location Id",
+            "type": "string"
+          },
+          "min_verdict": {
+            "$ref": "#/components/schemas/AlertThreshold"
+          }
+        },
+        "required": [
+          "location_id",
+          "min_verdict",
+          "email"
+        ],
+        "title": "AlertRuleIn",
+        "type": "object"
+      },
+      "AlertRuleOut": {
+        "properties": {
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "last_sent_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Sent On"
+          },
+          "location_id": {
+            "title": "Location Id",
+            "type": "string"
+          },
+          "location_name": {
+            "title": "Location Name",
+            "type": "string"
+          },
+          "min_verdict": {
+            "$ref": "#/components/schemas/AlertThreshold"
+          }
+        },
+        "required": [
+          "id",
+          "location_id",
+          "location_name",
+          "min_verdict",
+          "email",
+          "enabled",
+          "last_sent_on"
+        ],
+        "title": "AlertRuleOut",
+        "type": "object"
+      },
+      "AlertThreshold": {
+        "enum": [
+          "Good",
+          "Excellent"
+        ],
+        "title": "AlertThreshold",
+        "type": "string"
+      },
+      "AlertsOut": {
+        "properties": {
+          "email_configured": {
+            "title": "Email Configured",
+            "type": "boolean"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/AlertRuleOut"
+            },
+            "title": "Rules",
+            "type": "array"
+          }
+        },
+        "required": [
+          "email_configured",
+          "rules"
+        ],
+        "title": "AlertsOut",
         "type": "object"
       },
       "AnalyticsEventIn": {
@@ -484,6 +596,34 @@
         ],
         "title": "DisplayUnits",
         "type": "string"
+      },
+      "ExportedAlert": {
+        "properties": {
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "location_id": {
+            "title": "Location Id",
+            "type": "string"
+          },
+          "min_verdict": {
+            "title": "Min Verdict",
+            "type": "string"
+          }
+        },
+        "required": [
+          "location_id",
+          "min_verdict",
+          "email",
+          "enabled"
+        ],
+        "title": "ExportedAlert",
+        "type": "object"
       },
       "ExportedCatch": {
         "properties": {
@@ -1543,6 +1683,101 @@
         "summary": "Delete Account Data",
         "tags": [
           "account"
+        ]
+      }
+    },
+    "/v1/me/alerts": {
+      "get": {
+        "operationId": "list_alerts_v1_me_alerts_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Alerts",
+        "tags": [
+          "alerts"
+        ]
+      },
+      "put": {
+        "operationId": "upsert_alert_v1_me_alerts_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertRuleIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRuleOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upsert Alert",
+        "tags": [
+          "alerts"
+        ]
+      }
+    },
+    "/v1/me/alerts/{alert_id}": {
+      "delete": {
+        "operationId": "delete_alert_v1_me_alerts__alert_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "alert_id",
+            "required": true,
+            "schema": {
+              "title": "Alert Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Alert",
+        "tags": [
+          "alerts"
         ]
       }
     },

@@ -15,6 +15,8 @@
 #     page say "Couldn't load the forecast")
 #   - a `saltline` systemd service that runs both apps, starts on boot and
 #     restarts on failure; the retired Flask service is stopped and disabled
+#   - optionally, email settings (asked once) for forecast alerts and
+#     password resets
 # It finishes by calling /api/health, which confirms the website can really
 # get forecasts from the API.
 
@@ -96,6 +98,38 @@ source "${ENV_FILE}"
 set +a
 
 # ---------------------------------------------------------------------------
+# 2b. Email (forecast alerts + password resets) -- asked once, interactively
+# ---------------------------------------------------------------------------
+if [[ -z "${SMTP_HOST:-}" && -z "${SALTLINE_SMTP_ASKED:-}" && -t 0 ]]; then
+    echo ""
+    info "Optional: email for forecast alerts and password resets."
+    echo "    Gmail example: host smtp.gmail.com, port 587, your Gmail address,"
+    echo "    and an app password (Google Account > Security > App passwords)."
+    read -r -p "    SMTP host (leave blank to skip): " smtp_host
+    if [[ -n "${smtp_host}" ]]; then
+        read -r -p "    SMTP port [587]: " smtp_port
+        read -r -p "    SMTP username (usually your email address): " smtp_user
+        read -r -s -p "    SMTP password / app password: " smtp_pass
+        echo ""
+        read -r -p "    From address [Saltline <${smtp_user}>]: " smtp_from
+        {
+            echo ""
+            echo "# Email (alerts, password resets) -- written by install.sh"
+            echo "SMTP_HOST=${smtp_host}"
+            echo "SMTP_PORT=${smtp_port:-587}"
+            echo "SMTP_USER=${smtp_user}"
+            echo "SMTP_PASS='${smtp_pass//\'/\'\\\'\'}'"
+            echo "SMTP_FROM='${smtp_from:-Saltline <${smtp_user}>}'"
+        } >> "${ENV_FILE}"
+    fi
+    echo "SALTLINE_SMTP_ASKED=1" >> "${ENV_FILE}"
+    set -a
+    # shellcheck disable=SC1090
+    source "${ENV_FILE}"
+    set +a
+fi
+
+# ---------------------------------------------------------------------------
 # 3. Database: roles, schemas (idempotent; passwords follow saltline.env)
 # ---------------------------------------------------------------------------
 info "Setting up the PostgreSQL database..."
@@ -141,6 +175,15 @@ npm ci --no-audit --no-fund --loglevel=error
 DATABASE_URL="${WEB_DATABASE_URL}" npm run --silent migrate:auth
 DATABASE_URL="${WEB_DATABASE_URL}" npm run --silent build
 cd "${ROOT}"
+
+# Turning email on also turns on sign-in email verification (lib/auth.ts).
+# Accounts created while it was off were never sent a link, so mark them
+# verified once rather than locking their owners out.
+if [[ -n "${SMTP_HOST:-}" && -z "${SALTLINE_VERIFIED_EXISTING:-}" ]]; then
+    info "Email is on: marking existing accounts as verified so nobody gets locked out..."
+    psql_admin -d saltline -c 'UPDATE auth."user" SET "emailVerified" = true WHERE "emailVerified" = false' >/dev/null
+    echo "SALTLINE_VERIFIED_EXISTING=1" >> "${ENV_FILE}"
+fi
 
 # ---------------------------------------------------------------------------
 # 6. Free the port: retire the old Flask service / stray Saltline processes

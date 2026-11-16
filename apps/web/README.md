@@ -8,6 +8,16 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Limits, conditions-aware ranking, catch log (original features restored).**
+"What's biting" cards show a one-line state limit, and "Rigs & tips" shows
+the full limits with their age, an "may be out of date" flag and the
+official state link. Pick reasons now include wind/surf/time-of-day
+effects. The new `/log` page (account menu "Catch log", and "Log a catch
+here" on forecast pages) logs species, time, length/weight, kept or
+released, bait and notes; it lists entries with the saved conditions and
+can delete them. BFF routes: `app/api/catches/route.ts` and `[id]`.
+Verified end to end at 390px with live data.
+
 **Species calendar (original feature restored).** A "Species calendar"
 collapsible row on the forecast page shows every region species from
 sprint 35's catalogue month by month: peak, good or off. It's a real

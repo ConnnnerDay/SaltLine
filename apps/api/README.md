@@ -8,6 +8,29 @@ never directly from a browser.
 
 ## Status
 
+**Limits, conditions-aware ranking, catch log (original features restored).**
+
+- *Size/bag limits*: each `SpeciesPick` carries a `Regulation` for the
+  location's state (min size, bag, season, notes, the state agency's
+  official URL, snapshot month). It comes from
+  `app/data/guidance_regulations.json`, which the generator cuts from the
+  legacy snapshot down to catalogue species. It's flagged
+  `possibly_outdated` past 6 months (legacy's `_STALE_MONTHS`), and no
+  limit is ever borrowed from another state. The disclaimer now uses the
+  roadmap's required wording, "Informational only — verify with official
+  sources".
+- *Conditions-aware ranking*: legacy `_conditions_modifier` (-5..+15 for
+  onshore/offshore wind, wind speed, surf height and time of day), driven
+  by condition tags the generator copies from legacy's species sets with
+  `ast`. Every adjustment adds its own reason to the pick.
+- *Catch log*: `/v1/me/catches` (list newest first, log, delete, species
+  suggestions), `catch_entry` table (migration `7c1e5d2a9b40`). Each entry
+  stores a best-effort conditions snapshot from the forecast at log time;
+  it's never refused when upstream data is down. Catches are included in
+  account export and removed by account deletion.
+
+Suite 458 passed; OpenAPI snapshot regenerated (new catch paths only).
+
 **Species calendar.** `FishingGuidance.calendar` (`app/domain/guidance.py`,
 `build_species_calendar`) ports the legacy `build_species_calendar` over
 the sprint-35 catalogue. Each region species gets 12 months of

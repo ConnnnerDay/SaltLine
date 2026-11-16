@@ -3,6 +3,14 @@
     "schemas": {
       "AccountExport": {
         "properties": {
+          "catches": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ExportedCatch"
+            },
+            "title": "Catches",
+            "type": "array"
+          },
           "preferences": {
             "anyOf": [
               {
@@ -92,6 +100,283 @@
         ],
         "title": "AnalyticsEventType",
         "type": "string"
+      },
+      "CatchConditions": {
+        "description": "What the forecast said at the spot when the catch was logged.",
+        "properties": {
+          "score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "verdict": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verdict"
+          },
+          "water_temp_f": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Temp F"
+          },
+          "water_temp_is_fallback": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Temp Is Fallback"
+          },
+          "wave_range_ft": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wave Range Ft"
+          },
+          "wind_direction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wind Direction"
+          },
+          "wind_range_kt": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wind Range Kt"
+          }
+        },
+        "title": "CatchConditions",
+        "type": "object"
+      },
+      "CatchIn": {
+        "properties": {
+          "bait": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bait"
+          },
+          "caught_at": {
+            "format": "date-time",
+            "title": "Caught At",
+            "type": "string"
+          },
+          "kept": {
+            "default": false,
+            "title": "Kept",
+            "type": "boolean"
+          },
+          "length_in": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "maximum": 120.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Length In"
+          },
+          "location_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Location Id",
+            "type": "string"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "species": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Species",
+            "type": "string"
+          },
+          "weight_lb": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "maximum": 500.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Lb"
+          }
+        },
+        "required": [
+          "location_id",
+          "species",
+          "caught_at"
+        ],
+        "title": "CatchIn",
+        "type": "object"
+      },
+      "CatchOut": {
+        "properties": {
+          "bait": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bait"
+          },
+          "caught_at": {
+            "format": "date-time",
+            "title": "Caught At",
+            "type": "string"
+          },
+          "conditions": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CatchConditions"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kept": {
+            "title": "Kept",
+            "type": "boolean"
+          },
+          "length_in": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Length In"
+          },
+          "location_id": {
+            "title": "Location Id",
+            "type": "string"
+          },
+          "location_name": {
+            "title": "Location Name",
+            "type": "string"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "species": {
+            "title": "Species",
+            "type": "string"
+          },
+          "weight_lb": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Lb"
+          }
+        },
+        "required": [
+          "id",
+          "location_id",
+          "location_name",
+          "species",
+          "caught_at",
+          "length_in",
+          "weight_lb",
+          "kept",
+          "bait",
+          "notes",
+          "conditions",
+          "created_at"
+        ],
+        "title": "CatchOut",
+        "type": "object"
       },
       "Confidence": {
         "properties": {
@@ -199,6 +484,96 @@
         ],
         "title": "DisplayUnits",
         "type": "string"
+      },
+      "ExportedCatch": {
+        "properties": {
+          "bait": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bait"
+          },
+          "caught_at": {
+            "format": "date-time",
+            "title": "Caught At",
+            "type": "string"
+          },
+          "conditions": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conditions"
+          },
+          "kept": {
+            "title": "Kept",
+            "type": "boolean"
+          },
+          "length_in": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Length In"
+          },
+          "location_id": {
+            "title": "Location Id",
+            "type": "string"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "species": {
+            "title": "Species",
+            "type": "string"
+          },
+          "weight_lb": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Lb"
+          }
+        },
+        "required": [
+          "location_id",
+          "species",
+          "caught_at",
+          "length_in",
+          "weight_lb",
+          "kept",
+          "bait",
+          "notes",
+          "conditions"
+        ],
+        "title": "ExportedCatch",
+        "type": "object"
       },
       "ExportedPreferences": {
         "properties": {
@@ -1168,6 +1543,131 @@
         "summary": "Delete Account Data",
         "tags": [
           "account"
+        ]
+      }
+    },
+    "/v1/me/catches": {
+      "get": {
+        "operationId": "list_catches_v1_me_catches_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CatchOut"
+                  },
+                  "title": "Response List Catches V1 Me Catches Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Catches",
+        "tags": [
+          "catches"
+        ]
+      },
+      "post": {
+        "operationId": "log_catch_v1_me_catches_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatchIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Log Catch",
+        "tags": [
+          "catches"
+        ]
+      }
+    },
+    "/v1/me/catches/species": {
+      "get": {
+        "description": "Suggested species names for the log form (the guidance catalogue);\nthe form still accepts any name.",
+        "operationId": "species_options_v1_me_catches_species_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Response Species Options V1 Me Catches Species Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Species Options",
+        "tags": [
+          "catches"
+        ]
+      }
+    },
+    "/v1/me/catches/{catch_id}": {
+      "delete": {
+        "operationId": "delete_catch_v1_me_catches__catch_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "catch_id",
+            "required": true,
+            "schema": {
+              "title": "Catch Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Catch",
+        "tags": [
+          "catches"
         ]
       }
     },

@@ -25,6 +25,7 @@ account.
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
@@ -33,6 +34,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_db_session, require_authenticated_user_id
 from app.api.internal_auth import require_internal_signature
+from app.domain.catches import CatchEntry
 from app.domain.preferences import UserPreferences
 from app.domain.saved_locations import SavedLocation
 
@@ -56,9 +58,22 @@ class ExportedSavedLocation(BaseModel):
     saved_at: datetime
 
 
+class ExportedCatch(BaseModel):
+    location_id: str
+    species: str
+    caught_at: datetime
+    length_in: float | None
+    weight_lb: float | None
+    kept: bool
+    bait: str | None
+    notes: str | None
+    conditions: dict[str, Any] | None
+
+
 class AccountExport(BaseModel):
     preferences: ExportedPreferences | None
     saved_locations: list[ExportedSavedLocation]
+    catches: list[ExportedCatch] = []
 
 
 @router.get("/export")
@@ -73,6 +88,18 @@ async def export_account_data(
                 select(SavedLocation)
                 .where(SavedLocation.user_id == user_id)
                 .order_by(SavedLocation.saved_at)
+            )
+        )
+        .scalars()
+        .all()
+    )
+
+    catch_rows = (
+        (
+            await session.execute(
+                select(CatchEntry)
+                .where(CatchEntry.user_id == user_id)
+                .order_by(CatchEntry.caught_at)
             )
         )
         .scalars()
@@ -95,6 +122,20 @@ async def export_account_data(
             ExportedSavedLocation(location_id=row.location_id, saved_at=row.saved_at)
             for row in saved_rows
         ],
+        catches=[
+            ExportedCatch(
+                location_id=row.location_id,
+                species=row.species,
+                caught_at=row.caught_at,
+                length_in=row.length_in,
+                weight_lb=row.weight_lb,
+                kept=row.kept,
+                bait=row.bait,
+                notes=row.notes,
+                conditions=row.conditions,
+            )
+            for row in catch_rows
+        ],
     )
 
 
@@ -103,6 +144,7 @@ async def delete_account_data(
     user_id: str = Depends(require_authenticated_user_id),
     session: AsyncSession = Depends(get_db_session),  # noqa: B008
 ) -> None:
+    await session.execute(delete(CatchEntry).where(CatchEntry.user_id == user_id))
     await session.execute(delete(SavedLocation).where(SavedLocation.user_id == user_id))
     await session.execute(
         delete(UserPreferences).where(UserPreferences.user_id == user_id)

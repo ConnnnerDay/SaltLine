@@ -694,6 +694,12 @@ async def assemble_forecast(
             monthly_temps=monthly_water_temps_for_region(
                 location.temp_region, location.temp_offset, water_temp_profiles
             ),
+            state=location.state,
+            today=now.astimezone(safe_zone(location.timezone)).date(),
+            coast=wind_orientation_for_region(location.conditions_region),
+            wind_direction=wind_direction,
+            wind_range_kt=wind_range,
+            hour=now.astimezone(safe_zone(location.timezone)).hour,
         ).model_dump(mode="json")
     except Exception:
         _logger.exception("fishing guidance failed for %s", location.id)

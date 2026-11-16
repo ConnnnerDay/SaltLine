@@ -233,3 +233,154 @@ def test_guidance_includes_calendar() -> None:
     guidance = _guidance()
     assert guidance.calendar
     assert all(len(row.months) == 12 for row in guidance.calendar)
+
+
+# --- regulations (legacy snapshot, provisional) ----------------------------
+
+
+def test_regulation_for_known_species_and_state() -> None:
+    from datetime import date
+
+    from app.domain.guidance import regulation_for
+
+    reg = regulation_for("red-drum", "NC", date(2026, 5, 1))
+    assert reg is not None
+    assert reg.state == "NC"
+    assert reg.min_size and reg.bag_limit
+    assert reg.source_url and reg.source_url.startswith("https://")
+    assert reg.possibly_outdated is False  # one month after the snapshot
+
+
+def test_regulation_is_flagged_outdated_after_six_months() -> None:
+    from datetime import date
+
+    from app.domain.guidance import load_regulations, regulation_for
+
+    year, month = (int(p) for p in load_regulations()["as_of"].split("-"))
+    later = date(year + 1, month, 1)
+    reg = regulation_for("red-drum", "NC", later)
+    assert reg is not None and reg.possibly_outdated is True
+
+
+def test_no_regulation_is_invented_for_a_missing_state() -> None:
+    from datetime import date
+
+    from app.domain.guidance import regulation_for
+
+    assert regulation_for("red-drum", "ZZ", date(2026, 5, 1)) is None
+    assert regulation_for("ulua-giant-trevally", "NC", date(2026, 5, 1)) is None
+
+
+def test_picks_carry_their_state_regulation() -> None:
+    from datetime import date
+
+    guidance = _guidance(state="NC", today=date(2026, 5, 1))
+    red_drum = next(pick for pick in guidance.species if pick.id == "red-drum")
+    assert red_drum.regulation is not None
+    assert red_drum.regulation.state == "NC"
+
+
+def test_picks_have_no_regulation_without_a_state() -> None:
+    assert all(pick.regulation is None for pick in _guidance().species)
+
+
+def test_disclaimer_uses_roadmap_wording() -> None:
+    assert DISCLAIMER.startswith("Informational only — verify with official sources")
+
+
+# --- conditions modifier (legacy _conditions_modifier) ---------------------
+
+
+def test_onshore_wind_species_gain_on_onshore_and_lose_on_offshore() -> None:
+    from app.domain.guidance import _conditions_modifier
+
+    on, on_reasons = _conditions_modifier(
+        ["onshore_wind"],
+        coast="east",
+        wind_direction="NE",
+        wind_range_kt=None,
+        wave_range_ft=None,
+        hour=None,
+    )
+    off, _ = _conditions_modifier(
+        ["onshore_wind"],
+        coast="east",
+        wind_direction="W",
+        wind_range_kt=None,
+        wave_range_ft=None,
+        hour=None,
+    )
+    assert (on, off) == (5, -3)
+    assert "Onshore NE wind" in on_reasons[0]
+
+
+def test_calm_water_species_prefer_offshore_light_wind_and_flat_surf() -> None:
+    from app.domain.guidance import _conditions_modifier
+
+    points, reasons = _conditions_modifier(
+        ["calm_water"],
+        coast="east",
+        wind_direction="W",
+        wind_range_kt=(3, 6),
+        wave_range_ft=(0.5, 1.5),
+        hour=None,
+    )
+    assert points == 5 + 3 + 4
+    assert len(reasons) == 3
+
+
+def test_rough_surf_species_like_moderate_wind_and_surf() -> None:
+    from app.domain.guidance import _conditions_modifier
+
+    points, _ = _conditions_modifier(
+        ["rough_surf"],
+        coast="east",
+        wind_direction=None,
+        wind_range_kt=(10, 15),
+        wave_range_ft=(2, 4),
+        hour=None,
+    )
+    assert points == 3 + 4
+
+
+def test_time_of_day_modifier() -> None:
+    from app.domain.guidance import _conditions_modifier
+
+    def at(tags: list[str], hour: int) -> float:
+        return _conditions_modifier(
+            tags,
+            coast=None,
+            wind_direction=None,
+            wind_range_kt=None,
+            wave_range_ft=None,
+            hour=hour,
+        )[0]
+
+    assert (at(["low_light"], 6), at(["low_light"], 12), at(["low_light"], 8)) == (
+        3,
+        -1,
+        0,
+    )
+    assert (at(["daytime"], 12), at(["daytime"], 20)) == (3, -1)
+
+
+def test_hawaii_has_no_wind_direction_effect() -> None:
+    from app.domain.guidance import _conditions_modifier
+
+    points, reasons = _conditions_modifier(
+        ["onshore_wind"],
+        coast="hawaii",
+        wind_direction="NE",
+        wind_range_kt=None,
+        wave_range_ft=None,
+        hour=None,
+    )
+    assert (points, reasons) == (0, [])
+
+
+def test_conditions_reasons_appear_on_picks() -> None:
+    guidance = _guidance(coast="east", wind_direction="NE", wind_range_kt=(10.0, 15.0))
+    red_drum = next(pick for pick in guidance.species if pick.id == "red-drum")
+    assert red_drum.score == 50 + 30 + 5 + 3  # temp + peak month + onshore + wind
+    assert any("Onshore NE wind" in reason for reason in red_drum.reasons)
+    assert "Moderate wind stirs up bait" in red_drum.reasons

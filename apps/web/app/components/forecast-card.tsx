@@ -49,6 +49,17 @@ export type Observation = {
 
 export type GuidanceTier = 'prime' | 'good' | 'fair'
 
+export type Regulation = {
+  state: string
+  min_size: string | null
+  bag_limit: string | null
+  season: string | null
+  notes: string | null
+  source_url: string | null
+  as_of: string
+  possibly_outdated: boolean
+}
+
 export type SpeciesPick = {
   id: string
   name: string
@@ -61,6 +72,7 @@ export type SpeciesPick = {
   hook_size: string
   sinker: string
   lures: string
+  regulation?: Regulation | null
 }
 
 /** Sprint 35's `app.domain.guidance.FishingGuidance`. */
@@ -737,6 +749,14 @@ function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
                 {capitalize(pick.tier)}
               </span>
               <p className="line-clamp-2 text-sm text-text-muted">{pick.bait}</p>
+              {pick.regulation && (
+                <p className="text-xs text-text-muted">
+                  <span className="font-bold text-text">{pick.regulation.state}:</span>{' '}
+                  {[pick.regulation.min_size, pick.regulation.bag_limit]
+                    .filter(Boolean)
+                    .join(' · ') || 'see state rules'}
+                </p>
+              )}
               <p className="font-serif text-sm italic text-text-muted">
                 {pick.reasons.join(' · ')}
               </p>
@@ -841,6 +861,13 @@ function SpeciesCalendar({
   )
 }
 
+/** "2026-04" -> "Apr 2026" (the regulations snapshot month). */
+function formatAsOf(asOf: string): string {
+  const [year, month] = asOf.split('-').map(Number)
+  if (!year || !month) return asOf
+  return `${_MONTH_NAMES[month - 1].slice(0, 3)} ${year}`
+}
+
 /** Sprint 35's per-pick tackle detail (the original "Rigs & tips" row). */
 function RigsAndTips({ guidance }: { guidance: FishingGuidance }) {
   return (
@@ -863,6 +890,42 @@ function RigsAndTips({ guidance }: { guidance: FishingGuidance }) {
               <dd className="text-text">{pick.lures}</dd>
               <dt className="section-label pt-0.5">Why</dt>
               <dd className="text-text-muted">{pick.reasons.join(' · ')}</dd>
+              {pick.regulation && (
+                <>
+                  <dt className="section-label pt-0.5">Limits ({pick.regulation.state})</dt>
+                  <dd className="flex flex-col gap-0.5 text-text">
+                    <span>
+                      {[
+                        pick.regulation.min_size && `Min ${pick.regulation.min_size}`,
+                        pick.regulation.bag_limit,
+                        pick.regulation.season,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </span>
+                    {pick.regulation.notes && (
+                      <span className="text-text-muted">{pick.regulation.notes}</span>
+                    )}
+                    <span className="text-xs text-text-muted">
+                      As of {formatAsOf(pick.regulation.as_of)}
+                      {pick.regulation.possibly_outdated && ' — may be out of date'}
+                      {pick.regulation.source_url && (
+                        <>
+                          {' · '}
+                          <a
+                            href={pick.regulation.source_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-semibold text-primary underline-offset-2 hover:underline"
+                          >
+                            Official {pick.regulation.state} rules
+                          </a>
+                        </>
+                      )}
+                    </span>
+                  </dd>
+                </>
+              )}
             </dl>
           </li>
         ))}

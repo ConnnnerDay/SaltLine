@@ -7,6 +7,7 @@ import { Button } from '@/app/components/ui'
 import type { ForecastEnvelope } from '@/app/components/forecast-card'
 import { auth } from '@/lib/auth'
 import { fetchForecast } from '@/lib/get-forecast'
+import { fetchNearbyCams } from '@/lib/get-cams'
 import { logForecastFailure, userFacingReason } from '@/lib/diagnose-api'
 import { InternalApiError } from '@/lib/internal-api-client'
 
@@ -77,6 +78,7 @@ export default async function SharedForecastPage({ params }: Props) {
   let forecast: ForecastEnvelope | null = null
   let error: string | null = null
   let errorReason: string | null = null
+  const camsPromise = fetchNearbyCams(locationId)
 
   try {
     forecast = await getForecast(locationId)
@@ -94,6 +96,7 @@ export default async function SharedForecastPage({ params }: Props) {
       forecast={forecast}
       error={error}
       errorReason={errorReason}
+      cams={await camsPromise}
       retryHref={`/share/${encodeURIComponent(locationId)}`}
       backHref="/"
       backLabel="Back to Saltline"

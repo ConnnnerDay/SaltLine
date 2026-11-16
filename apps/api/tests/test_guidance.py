@@ -384,3 +384,58 @@ def test_conditions_reasons_appear_on_picks() -> None:
     assert red_drum.score == 50 + 30 + 5 + 3  # temp + peak month + onshore + wind
     assert any("Onshore NE wind" in reason for reason in red_drum.reasons)
     assert "Moderate wind stirs up bait" in red_drum.reasons
+
+
+# --- pack for today (legacy build_trip_setup) --------------------------------
+
+
+def _pack(**overrides: object):  # type: ignore[no-untyped-def]
+    kwargs: dict[str, object] = {
+        "region": "atlantic_mid",
+        "water_temp_f": 64.0,
+        "water_temp_is_fallback": False,
+        "month": 11,
+    }
+    kwargs.update(overrides)
+    guidance = build_fishing_guidance(**kwargs)  # type: ignore[arg-type]
+    assert guidance.pack is not None
+    return guidance.pack
+
+
+def test_pack_lists_tackle_for_up_to_three_working_species() -> None:
+    pack = _pack()
+    assert pack.headline.startswith("Tackle for ")
+    assert pack.headline.count(",") + pack.headline.count("&") <= 2
+    kinds = [row.kind for row in pack.rows]
+    for kind in ("lure", "bait", "rig", "hook", "weight"):
+        assert kind in kinds
+
+
+def test_pack_murky_water_adjusts_color_and_weight() -> None:
+    pack = _pack(wave_range_ft=(3.0, 5.0))
+    rows = {row.kind: row.value for row in pack.rows}
+    assert rows["color"].startswith("Chartreuse")
+    assert rows["weight"].endswith("go heavier in rough surf")
+
+
+def test_pack_cold_water_tip() -> None:
+    pack = _pack(region="atlantic_north", water_temp_f=52.0, month=12)
+    rows = {row.kind: row.value for row in pack.rows}
+    assert "cold water" in rows.get("color", "")
+
+
+def test_pack_skips_non_lure_phrases() -> None:
+    from app.domain.guidance import _NOT_A_LURE
+
+    pack = _pack()
+    lures = next(row.value for row in pack.rows if row.kind == "lure").lower()
+    assert not any(phrase in lures for phrase in _NOT_A_LURE)
+
+
+def test_no_pack_without_picks() -> None:
+    assert (
+        build_fishing_guidance(
+            region="nowhere", water_temp_f=64.0, water_temp_is_fallback=False, month=11
+        ).pack
+        is None
+    )

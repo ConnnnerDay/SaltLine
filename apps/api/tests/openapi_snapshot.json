@@ -1002,6 +1002,53 @@
         "title": "LocationResolveRequest",
         "type": "object"
       },
+      "NearbyCam": {
+        "properties": {
+          "cam_type": {
+            "enum": [
+              "beach",
+              "pier"
+            ],
+            "title": "Cam Type",
+            "type": "string"
+          },
+          "distance_miles": {
+            "title": "Distance Miles",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "lat": {
+            "title": "Lat",
+            "type": "number"
+          },
+          "lng": {
+            "title": "Lng",
+            "type": "number"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "cam_type",
+          "lat",
+          "lng",
+          "url",
+          "distance_miles"
+        ],
+        "title": "NearbyCam",
+        "type": "object"
+      },
       "PreferencesOut": {
         "description": "Response shape. Always returns a full object, even for a user with\nno row yet (sprint 36's endpoint creates one with these same\ndefaults on first read) -- a `404` for \"no preferences set yet\" would\nmake every new user's first `GET` an error case for no real reason.",
         "properties": {
@@ -1667,6 +1714,65 @@
           }
         },
         "summary": "Search Locations",
+        "tags": [
+          "locations"
+        ]
+      }
+    },
+    "/v1/locations/{location_id}/cams": {
+      "get": {
+        "description": "Public live-cam links near a location, closest first (the original\napp's \"Live Cams\"). Empty when none are within *radius_miles*.",
+        "operationId": "nearby_cams_v1_locations__location_id__cams_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "location_id",
+            "required": true,
+            "schema": {
+              "title": "Location Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "radius_miles",
+            "required": false,
+            "schema": {
+              "default": 15.0,
+              "exclusiveMinimum": 0,
+              "maximum": 50,
+              "title": "Radius Miles",
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NearbyCam"
+                  },
+                  "title": "Response Nearby Cams V1 Locations  Location Id  Cams Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Nearby Cams",
         "tags": [
           "locations"
         ]

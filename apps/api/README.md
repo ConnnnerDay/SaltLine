@@ -8,6 +8,15 @@ never directly from a browser.
 
 ## Status
 
+**Pack for today and live cams (original features restored).**
+`FishingGuidance.pack` ports the legacy `build_trip_setup` (without the
+per-user gear profile): lures, a color/action tip (murky, cold or
+low-light warm water), bait, rig, hook and weight for up to three working
+species, with "go heavier in rough surf". `GET /v1/locations/{id}/cams`
+returns the legacy curated public cam links within 15 miles (default),
+closest first, from `app/data/live_cams.json` (generated). Links only,
+nothing embedded. 11 new tests; suite 492.
+
 **Email alerts (original feature restored).** `app/domain/alerts.py` +
 `/v1/me/alerts` (list with `email_configured`, `PUT` upsert one rule per
 spot, `DELETE`), `alert_rule` table (migration `9a4d6e1f2c73`). A

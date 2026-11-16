@@ -50,6 +50,7 @@ from app.api.deps import AppState, get_app_state, resolve_location_id
 from app.api.internal_auth import require_internal_signature
 from app.domain.analytics import AnalyticsEventIn, AnalyticsEventType, try_record_event
 from app.providers.coastal_bounds import is_valid_coordinate
+from app.providers.live_cams import DEFAULT_RADIUS_MILES, NearbyCam, find_nearby_cams
 from app.providers.locations import (
     CuratedLocation,
     ResolvedLocation,
@@ -116,3 +117,15 @@ async def resolve_location(
         now=datetime.now(UTC),
     )
     return location
+
+
+@router.get("/{location_id}/cams")
+async def nearby_cams(
+    location_id: str,
+    radius_miles: float = Query(DEFAULT_RADIUS_MILES, gt=0, le=50),
+    state: AppState = Depends(get_app_state),  # noqa: B008
+) -> list[NearbyCam]:
+    """Public live-cam links near a location, closest first (the original
+    app's "Live Cams"). Empty when none are within *radius_miles*."""
+    location = await resolve_location_id(location_id, state)
+    return find_nearby_cams(location.lat, location.lng, radius_miles)

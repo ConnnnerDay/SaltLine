@@ -8,6 +8,14 @@ never directly from a browser.
 
 ## Status
 
+**Species calendar.** `FishingGuidance.calendar` (`app/domain/guidance.py`,
+`build_species_calendar`) ports the legacy `build_species_calendar` over
+the sprint-35 catalogue. Each region species gets 12 months of
+peak/good/off from its catalogue months, blanked where the region's
+monthly average water temperature is more than 5°F outside its
+survivable range (legacy's same slack). `assemble_forecast` passes the
+location's monthly climatology. 4 new tests; suite 432 passed.
+
 **Sprint 35 ("Fishing guidance")**: "Limited supported suggestions;
 every recommendation explains why." Product-owner scope check done
 (2026-11-16): a limited, region-gated catalogue, not the deferred

@@ -193,3 +193,43 @@ def test_local_month_uses_location_timezone() -> None:
     now = datetime(2024, 11, 1, 4, 0, tzinfo=UTC)
     assert local_month(now, "America/Los_Angeles") == 10
     assert local_month(now, "America/New_York") == 11
+
+
+# --- species calendar (legacy build_species_calendar) ----------------------
+
+
+def test_calendar_lists_every_region_species_with_12_months() -> None:
+    from app.domain.guidance import build_species_calendar
+
+    rows = build_species_calendar("atlantic_mid")
+    region_ids = [s["id"] for s in load_catalogue() if "atlantic_mid" in s["regions"]]
+    assert [row.id for row in rows] == region_ids
+    assert all(len(row.months) == 12 for row in rows)
+
+
+def test_calendar_marks_peak_and_good_months_from_catalogue() -> None:
+    from app.domain.guidance import CalendarLevel, build_species_calendar
+
+    red_drum = next(
+        r for r in build_species_calendar("atlantic_mid") if r.id == "red-drum"
+    )
+    assert red_drum.months[9] is CalendarLevel.PEAK  # October
+    assert red_drum.months[6] is CalendarLevel.GOOD  # July
+
+
+def test_calendar_blanks_months_too_far_outside_survivable_range() -> None:
+    from app.domain.guidance import CalendarLevel, build_species_calendar
+
+    # Red drum min is 45°F; legacy allows 5°F slack, so 39°F blanks the month.
+    temps = {month: 65.0 for month in range(1, 13)} | {10: 39.0}
+    red_drum = next(
+        r for r in build_species_calendar("atlantic_mid", temps) if r.id == "red-drum"
+    )
+    assert red_drum.months[9] is CalendarLevel.NONE
+    assert red_drum.months[3] is CalendarLevel.PEAK  # April unaffected
+
+
+def test_guidance_includes_calendar() -> None:
+    guidance = _guidance()
+    assert guidance.calendar
+    assert all(len(row.months) == 12 for row in guidance.calendar)

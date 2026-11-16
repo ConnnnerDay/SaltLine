@@ -8,6 +8,13 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Species calendar (original feature restored).** A "Species calendar"
+collapsible row on the forecast page shows every region species from
+sprint 35's catalogue month by month: peak, good or off. It's a real
+table with a text label per cell, the current month is outlined, and it
+scrolls inside its card on phones. Data comes from apps/api's
+`FishingGuidance.calendar`.
+
 **Sign-up lands on a forecast (product-owner bug report, 2026-11-16).**
 "I can create an account but it's not showing a forecast": reproduced
 end to end against local Postgres/`apps/api`/`next dev` with a

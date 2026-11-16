@@ -110,10 +110,26 @@ class GuidanceBasis(BaseModel):
     region: str
 
 
+class CalendarLevel(str, Enum):
+    PEAK = "peak"
+    GOOD = "good"
+    NONE = ""
+
+
+class CalendarRow(BaseModel):
+    id: str
+    name: str
+    months: list[CalendarLevel]
+    """12 entries, January first."""
+
+
 class FishingGuidance(BaseModel):
     basis: GuidanceBasis
     species: list[SpeciesPick]
     tackle_note: str | None = None
+    calendar: list[CalendarRow] = []
+    """Every catalogue species offered in the region, month by month --
+    the legacy "Species Calendar" (`build_species_calendar`)."""
     disclaimer: str = DISCLAIMER
 
 
@@ -184,6 +200,38 @@ def _tackle_note(wave_range: tuple[float, float] | None) -> str | None:
     )
 
 
+_CALENDAR_TEMP_SLACK_F = 5.0
+
+
+def build_species_calendar(
+    region: str, monthly_temps: dict[int, float] | None = None
+) -> list[CalendarRow]:
+    """Port of legacy `build_species_calendar` over this catalogue: each
+    region species' peak/good months, blanked for any month whose regional
+    average water temperature sits more than 5°F outside the species'
+    survivable range (legacy's same slack). Catalogue order is kept."""
+    rows: list[CalendarRow] = []
+    for species in load_catalogue():
+        if region not in species["regions"]:
+            continue
+        months: list[CalendarLevel] = []
+        for month in range(1, 13):
+            temp = (monthly_temps or {}).get(month)
+            if temp is not None and (
+                temp < species["temp_min"] - _CALENDAR_TEMP_SLACK_F
+                or temp > species["temp_max"] + _CALENDAR_TEMP_SLACK_F
+            ):
+                months.append(CalendarLevel.NONE)
+            elif month in species["peak_months"]:
+                months.append(CalendarLevel.PEAK)
+            elif month in species["good_months"]:
+                months.append(CalendarLevel.GOOD)
+            else:
+                months.append(CalendarLevel.NONE)
+        rows.append(CalendarRow(id=species["id"], name=species["name"], months=months))
+    return rows
+
+
 def build_fishing_guidance(
     *,
     region: str,
@@ -191,6 +239,7 @@ def build_fishing_guidance(
     water_temp_is_fallback: bool,
     month: int,
     wave_range_ft: tuple[float, float] | None = None,
+    monthly_temps: dict[int, float] | None = None,
     max_picks: int = MAX_PICKS,
 ) -> FishingGuidance:
     picks: list[tuple[float, SpeciesPick]] = []
@@ -244,6 +293,7 @@ def build_fishing_guidance(
         ),
         species=[pick for _, pick in picks[:max_picks]],
         tackle_note=_tackle_note(wave_range_ft),
+        calendar=build_species_calendar(region, monthly_temps),
     )
 
 

@@ -73,6 +73,8 @@ export type FishingGuidance = {
   }
   species: SpeciesPick[]
   tackle_note: string | null
+  /** 12 levels per species, January first; absent on older envelopes. */
+  calendar?: { id: string; name: string; months: ('peak' | 'good' | '')[] }[]
   disclaimer: string
 }
 
@@ -653,7 +655,7 @@ function CollapsibleSection({
   children: React.ReactNode
 }) {
   return (
-    <details className="collapsible border-t border-border">
+    <details className="collapsible min-w-0 border-t border-border">
       <summary className="flex items-center justify-between gap-3 px-1 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">
         <span className="flex flex-wrap items-center gap-3">
           <span className="text-xs font-bold uppercase tracking-widest text-text">{title}</span>
@@ -663,7 +665,7 @@ function CollapsibleSection({
           <path d="M6 9 L12 15 L18 9" />
         </svg>
       </summary>
-      <div className="flex flex-col gap-4 px-1 pb-5">{children}</div>
+      <div className="flex min-w-0 flex-col gap-4 px-1 pb-5">{children}</div>
     </details>
   )
 }
@@ -752,6 +754,93 @@ function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
   )
 }
 
+const _MONTH_INITIALS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
+const _MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+]
+
+/**
+ * The original "Species calendar": every target species for the region,
+ * month by month -- peak (coral), good (blue) or off. A real table, so
+ * screen readers get each cell's level as text (the colored block is
+ * decorative); the current month's column is outlined.
+ */
+function SpeciesCalendar({
+  rows,
+  currentMonth,
+}: {
+  rows: NonNullable<FishingGuidance['calendar']>
+  currentMonth: number
+}) {
+  return (
+    <div className="flex min-w-0 flex-col gap-3">
+      <div className="relative max-w-full overflow-x-auto">
+        <table className="w-full min-w-[520px] border-separate border-spacing-y-1 text-left text-sm">
+          <caption className="sr-only">Peak and good months for each species in this area</caption>
+          <thead>
+            <tr className="text-text-muted">
+              <th scope="col" className="py-1 pr-3 font-medium">
+                Species
+              </th>
+              {_MONTH_INITIALS.map((initial, index) => (
+                <th
+                  key={index}
+                  scope="col"
+                  className={cx(
+                    'w-7 py-1 text-center text-xs font-bold',
+                    index + 1 === currentMonth && 'text-accent',
+                  )}
+                >
+                  <abbr title={_MONTH_NAMES[index]} className="no-underline">
+                    {initial}
+                  </abbr>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.id}>
+                <th scope="row" className="whitespace-nowrap py-0.5 pr-3 font-semibold text-text">
+                  {row.name}
+                </th>
+                {row.months.map((level, index) => (
+                  <td key={index} className="px-0.5 py-0.5">
+                    <span
+                      className={cx(
+                        'block h-5 rounded-sm',
+                        level === 'peak' && 'bg-tier-prime',
+                        level === 'good' && 'bg-tier-high',
+                        level === '' && 'bg-tier-low',
+                        index + 1 === currentMonth && 'ring-2 ring-text',
+                      )}
+                    />
+                    <span className="sr-only">
+                      {_MONTH_NAMES[index]}: {level === 'peak' ? 'peak' : level === 'good' ? 'good' : 'off'}
+                    </span>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="flex flex-wrap gap-4 text-xs text-text-muted">
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-sm bg-tier-prime" /> Peak
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-sm bg-tier-high" /> Good
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-sm bg-tier-low" /> Off season
+        </span>
+      </div>
+    </div>
+  )
+}
+
 /** Sprint 35's per-pick tackle detail (the original "Rigs & tips" row). */
 function RigsAndTips({ guidance }: { guidance: FishingGuidance }) {
   return (
@@ -794,7 +883,8 @@ function RigsAndTips({ guidance }: { guidance: FishingGuidance }) {
  * 2. "Fishing activity & day timeline" -- the tier-colored hourly chart.
  * 3. "When to fish" -- `deriveBestWindow`'s best window as a tile.
  * 4. "What's biting" -- sprint 35's ranked picks, each with its reasons.
- * 5. Collapsible rows for rigs & tips (sprint 35's tackle detail), tides, the hour-by-hour table (the chart's
+ * 5. Collapsible rows for rigs & tips (sprint 35's tackle detail), the
+ *    species calendar, tides, the hour-by-hour table (the chart's
  *    accessible text alternative), sprint 33's per-source status, and
  *    warnings.
  *
@@ -823,7 +913,7 @@ export function ForecastCard({ forecast }: { forecast: ForecastEnvelope }) {
   const sourcesDown = forecast.sources.filter((source) => source.state !== 'ok').length
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex min-w-0 flex-col gap-4">
       <Card className="overflow-hidden p-0!">
         <div className="flex flex-col gap-1.5 px-5 pb-4 pt-5">
           <h2 className="section-label">Today&apos;s forecast</h2>
@@ -909,10 +999,19 @@ export function ForecastCard({ forecast }: { forecast: ForecastEnvelope }) {
 
       {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} />}
 
-      <div className="flex flex-col border-b border-border">
+      <div className="flex min-w-0 flex-col border-b border-border">
         {forecast.recommendations && forecast.recommendations.species.length > 0 && (
           <CollapsibleSection title="Rigs & tips">
             <RigsAndTips guidance={forecast.recommendations} />
+          </CollapsibleSection>
+        )}
+
+        {forecast.recommendations?.calendar && forecast.recommendations.calendar.length > 0 && (
+          <CollapsibleSection title="Species calendar">
+            <SpeciesCalendar
+              rows={forecast.recommendations.calendar}
+              currentMonth={forecast.recommendations.basis.month}
+            />
           </CollapsibleSection>
         )}
 

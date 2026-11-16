@@ -691,6 +691,9 @@ async def assemble_forecast(
             water_temp_is_fallback=water_temperature.is_fallback,
             month=local_month(now, location.timezone),
             wave_range_ft=wave_range,
+            monthly_temps=monthly_water_temps_for_region(
+                location.temp_region, location.temp_offset, water_temp_profiles
+            ),
         ).model_dump(mode="json")
     except Exception:
         _logger.exception("fishing guidance failed for %s", location.id)

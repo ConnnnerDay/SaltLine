@@ -146,10 +146,26 @@ class CalendarRow(BaseModel):
     """12 entries, January first."""
 
 
+class PackRow(BaseModel):
+    kind: str
+    """lure | color | bait | rig | hook | weight"""
+    label: str
+    value: str
+
+
+class PackForToday(BaseModel):
+    """The original "Pack for Today" card: one short tackle list for the
+    day's working species, adjusted for conditions."""
+
+    headline: str
+    rows: list[PackRow]
+
+
 class FishingGuidance(BaseModel):
     basis: GuidanceBasis
     species: list[SpeciesPick]
     tackle_note: str | None = None
+    pack: PackForToday | None = None
     calendar: list[CalendarRow] = []
     """Every catalogue species offered in the region, month by month --
     the legacy "Species Calendar" (`build_species_calendar`)."""
@@ -348,6 +364,89 @@ def _tackle_note(wave_range: tuple[float, float] | None) -> str | None:
     )
 
 
+_NOT_A_LURE = ("not a primary", "rarely taken", "not typically")
+
+
+def _tokens(values: list[str]) -> list[str]:
+    """Unique comma/semicolon-separated entries across *values*, in order."""
+    seen: list[str] = []
+    for value in values:
+        for raw in value.replace(";", ",").split(","):
+            token = raw.strip().rstrip(".")
+            if token and token.lower() not in {t.lower() for t in seen}:
+                seen.append(token)
+    return seen
+
+
+def _join_names(names: list[str]) -> str:
+    return names[0] if len(names) == 1 else ", ".join(names[:-1]) + " & " + names[-1]
+
+
+def build_pack_for_today(
+    picks: list[SpeciesPick],
+    *,
+    water_temp_f: float,
+    wind_range_kt: tuple[float, float] | None,
+    wave_range_ft: tuple[float, float] | None,
+    hour: int | None,
+) -> PackForToday | None:
+    """Port of legacy `domain/forecast.py:build_trip_setup` (without the
+    per-user gear profile): tackle for up to three working species, with
+    its murky-water / cold-water / low-light adjustments."""
+    if not picks:
+        return None
+    working = [pick for pick in picks if pick.tier is not GuidanceTier.FAIR][
+        :3
+    ] or picks[:2]
+
+    max_wave = wave_range_ft[1] if wave_range_ft else 0.0
+    max_wind = wind_range_kt[1] if wind_range_kt else 0.0
+    murky = max_wave >= 3 or max_wind >= 18
+    cold = water_temp_f < 58
+    warm = water_temp_f > 72
+    low_light = hour is not None and (hour < 8 or hour >= 18)
+
+    rows: list[PackRow] = []
+    lures = [
+        lure
+        for lure in _tokens([pick.lures for pick in working])
+        if not any(phrase in lure.lower() for phrase in _NOT_A_LURE)
+    ][:4]
+    if lures:
+        if low_light and warm and not any("topwater" in lure.lower() for lure in lures):
+            lures = ["Topwater plugs (early/late)", *lures[:3]]
+        rows.append(PackRow(kind="lure", label="Lures", value=", ".join(lures)))
+    if murky:
+        color = "Chartreuse, white or bright orange — murky water today"
+    elif cold:
+        color = "Natural colors, slow-roll or dead-stick — cold water slows them down"
+    elif warm and low_light:
+        color = "Dark silhouettes (black/purple) for low-light topwater"
+    else:
+        color = ""
+    if color and lures:
+        rows.append(PackRow(kind="color", label="Color/action", value=color))
+    baits = _tokens([pick.bait for pick in working])[:4]
+    if baits:
+        rows.append(PackRow(kind="bait", label="Bait", value=", ".join(baits)))
+    rigs = _tokens([pick.rig for pick in working])[:2]
+    if rigs:
+        rows.append(PackRow(kind="rig", label="Rig", value=", ".join(rigs)))
+    primary = working[0]
+    if primary.hook_size:
+        rows.append(PackRow(kind="hook", label="Hook", value=primary.hook_size))
+    if primary.sinker:
+        sinker = primary.sinker
+        if murky and "pyramid" not in sinker.lower():
+            sinker += " — go heavier in rough surf"
+        rows.append(PackRow(kind="weight", label="Weight", value=sinker))
+
+    return PackForToday(
+        headline="Tackle for " + _join_names([pick.name for pick in working]),
+        rows=rows,
+    )
+
+
 _CALENDAR_TEMP_SLACK_F = 5.0
 
 
@@ -452,6 +551,7 @@ def build_fishing_guidance(
     # Stable: ties keep catalogue order (roughly most-targeted first).
     picks.sort(key=lambda item: item[0], reverse=True)
 
+    top_picks = [pick for _, pick in picks[:max_picks]]
     return FishingGuidance(
         basis=GuidanceBasis(
             water_temp_f=water_temp_f,
@@ -459,8 +559,15 @@ def build_fishing_guidance(
             month=month,
             region=region,
         ),
-        species=[pick for _, pick in picks[:max_picks]],
+        species=top_picks,
         tackle_note=_tackle_note(wave_range_ft),
+        pack=build_pack_for_today(
+            top_picks,
+            water_temp_f=water_temp_f,
+            wind_range_kt=wind_range_kt,
+            wave_range_ft=wave_range_ft,
+            hour=hour,
+        ),
         calendar=build_species_calendar(region, monthly_temps),
     )
 

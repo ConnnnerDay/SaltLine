@@ -1,5 +1,6 @@
 import { Badge, type BadgeVariant, Button, Card } from './ui'
 import { cx } from './ui/cx'
+import type { NearbyCam } from '@/lib/get-cams'
 
 export type ForecastVerdict = 'Excellent' | 'Good' | 'Fair' | 'Challenging' | 'Poor' | 'Unknown'
 
@@ -85,6 +86,8 @@ export type FishingGuidance = {
   }
   species: SpeciesPick[]
   tackle_note: string | null
+  /** The original "Pack for today" card; absent on older envelopes. */
+  pack?: { headline: string; rows: { kind: string; label: string; value: string }[] } | null
   /** 12 levels per species, January first; absent on older envelopes. */
   calendar?: { id: string; name: string; months: ('peak' | 'good' | '')[] }[]
   disclaimer: string
@@ -946,7 +949,7 @@ function RigsAndTips({ guidance }: { guidance: FishingGuidance }) {
  * 2. "Fishing activity & day timeline" -- the tier-colored hourly chart.
  * 3. "When to fish" -- `deriveBestWindow`'s best window as a tile.
  * 4. "What's biting" -- sprint 35's ranked picks, each with its reasons.
- * 5. Collapsible rows for rigs & tips (sprint 35's tackle detail), the
+ * 5. Collapsible rows for pack for today, rigs & tips (sprint 35's tackle detail), the
  *    species calendar, tides, the hour-by-hour table (the chart's
  *    accessible text alternative), sprint 33's per-source status, and
  *    warnings.
@@ -955,7 +958,14 @@ function RigsAndTips({ guidance }: { guidance: FishingGuidance }) {
  * `VERDICT_TO_BADGE`/`deriveBestWindow`/`formatBestWindowRange` stay
  * exported for `app/saved/saved-locations-list.tsx`'s compact rows.
  */
-export function ForecastCard({ forecast }: { forecast: ForecastEnvelope }) {
+export function ForecastCard({
+  forecast,
+  cams = [],
+}: {
+  forecast: ForecastEnvelope
+  /** Nearby public live-cam links (lib/get-cams.ts). */
+  cams?: NearbyCam[]
+}) {
   const score = forecast.conditions?.score
   const bestWindow = forecast.hourly_outlook ? deriveBestWindow(forecast.hourly_outlook) : null
   // Every other timestamp in this card (tides, hourly outlook, the best-
@@ -1063,6 +1073,26 @@ export function ForecastCard({ forecast }: { forecast: ForecastEnvelope }) {
       {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} />}
 
       <div className="flex min-w-0 flex-col border-b border-border">
+        {forecast.recommendations?.pack && (
+          <CollapsibleSection
+            title="Pack for today"
+            aside={
+              <span className="font-serif text-sm italic text-text-muted">
+                {forecast.recommendations.pack.headline}
+              </span>
+            }
+          >
+            <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
+              {forecast.recommendations.pack.rows.map((row) => (
+                <div key={row.kind} className="contents">
+                  <dt className="section-label pt-0.5">{row.label}</dt>
+                  <dd className="text-text">{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </CollapsibleSection>
+        )}
+
         {forecast.recommendations && forecast.recommendations.species.length > 0 && (
           <CollapsibleSection title="Rigs & tips">
             <RigsAndTips guidance={forecast.recommendations} />
@@ -1075,6 +1105,36 @@ export function ForecastCard({ forecast }: { forecast: ForecastEnvelope }) {
               rows={forecast.recommendations.calendar}
               currentMonth={forecast.recommendations.basis.month}
             />
+          </CollapsibleSection>
+        )}
+
+        {cams.length > 0 && (
+          <CollapsibleSection
+            title="Live cams"
+            aside={<span className="text-xs text-text-muted">{cams.length} nearby</span>}
+          >
+            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {cams.map((cam) => (
+                <li
+                  key={cam.id}
+                  className="flex flex-col gap-1 rounded-md border border-border bg-surface-raised px-4 py-3"
+                >
+                  <span className="text-[0.6875rem] font-bold uppercase tracking-widest text-primary">
+                    {cam.cam_type} cam
+                  </span>
+                  <span className="font-bold text-text">{cam.name}</span>
+                  <span className="text-xs text-text-muted">{cam.distance_miles} miles away</span>
+                  <a
+                    href={cam.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 text-sm font-semibold text-primary underline-offset-2 hover:underline"
+                  >
+                    Open live cam<span className="sr-only"> (opens the cam&apos;s own site in a new tab)</span> ↗
+                  </a>
+                </li>
+              ))}
+            </ul>
           </CollapsibleSection>
         )}
 

@@ -8,6 +8,13 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Pack for today and live cams (original features restored).** Two
+collapsible rows on the forecast page. "Pack for today" shows the
+day's tackle list for the top species. "Live cams" lists nearby public cam
+links (type, distance, opens the cam's own site in a new tab); both
+forecast pages fetch these through `lib/get-cams.ts`, and any failure just
+hides the row.
+
 **Email alerts (original feature restored).** Each signed-in forecast page
 has an "Email alerts" control (Off / Good or better / Excellent only),
 which shows where alerts go and the once-a-day, waking-hours limits, and

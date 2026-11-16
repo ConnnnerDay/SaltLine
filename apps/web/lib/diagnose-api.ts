@@ -52,3 +52,26 @@ export function logForecastFailure(locationId: string, err: unknown): void {
     JSON.stringify({ event: 'forecast_fetch_failed', location_id: locationId, kind, hint }),
   )
 }
+
+/**
+ * A short, plain-language reason for the forecast error card, safe to
+ * show any visitor: a cause and a code, never URLs, keys or response
+ * bodies. Self-hosters see what's wrong on the page itself instead of
+ * having to dig through server logs.
+ */
+export function userFacingReason(err: unknown): string {
+  const { kind } = classifyApiFailure(err)
+  const selfHost = 'If you host this Saltline yourself, run ./install.sh to set it up and start it.'
+  switch (kind) {
+    case 'missing_signing_keys':
+      return `The website isn't configured to reach Saltline's forecast service. ${selfHost} (code: ${kind})`
+    case 'api_unreachable':
+      return `Saltline's forecast service isn't running or can't be reached. ${selfHost} (code: ${kind})`
+    case 'signature_rejected':
+      return `The website and the forecast service don't share the same keys. ${selfHost} (code: ${kind})`
+    default: {
+      const status = err instanceof InternalApiError ? ` HTTP ${err.status}` : ''
+      return `Saltline's forecast service hit an error${status}. It's logged on the server. (code: ${kind})`
+    }
+  }
+}

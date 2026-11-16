@@ -6,7 +6,7 @@ import { SaveLocationButton } from '@/app/components/save-location-button'
 import type { ForecastEnvelope } from '@/app/components/forecast-card'
 import { auth } from '@/lib/auth'
 import { fetchForecast } from '@/lib/get-forecast'
-import { logForecastFailure } from '@/lib/diagnose-api'
+import { logForecastFailure, userFacingReason } from '@/lib/diagnose-api'
 import { InternalApiError } from '@/lib/internal-api-client'
 
 // Forecasts are live, per-request data -- never build-time content. See
@@ -49,6 +49,7 @@ export default async function ForecastPage({ params }: Props) {
 
   let forecast: ForecastEnvelope | null = null
   let error: string | null = null
+  let errorReason: string | null = null
 
   try {
     forecast = await getForecast(locationId)
@@ -57,6 +58,7 @@ export default async function ForecastPage({ params }: Props) {
       notFound()
     }
     logForecastFailure(locationId, err)
+    errorReason = userFacingReason(err)
     error = err instanceof Error ? err.message : 'Unknown error'
   }
 
@@ -64,6 +66,7 @@ export default async function ForecastPage({ params }: Props) {
     <ForecastPageBody
       forecast={forecast}
       error={error}
+      errorReason={errorReason}
       retryHref={`/forecast/${encodeURIComponent(locationId)}`}
       backHref="/locations"
       backLabel="Back to search"

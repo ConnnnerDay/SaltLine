@@ -14,6 +14,7 @@ import { ForecastCard, ForecastErrorCard, type ForecastEnvelope } from './foreca
 export function ForecastPageBody({
   forecast,
   error,
+  errorReason,
   retryHref,
   backHref,
   backLabel,
@@ -21,6 +22,8 @@ export function ForecastPageBody({
 }: {
   forecast: ForecastEnvelope | null
   error: string | null
+  /** Plain-language cause for the error card (lib/diagnose-api.ts). */
+  errorReason?: string | null
   /** Sprint 47: the current page's own URL, so a failed fetch gets a
    * real "Try again" action (see ForecastErrorCard) instead of only a
    * "back" link that leaves the failure unresolved. */
@@ -44,7 +47,7 @@ export function ForecastPageBody({
 
       <Container>
         <div className="flex flex-col gap-4 py-5 pb-16">
-          {error && <ForecastErrorCard message={error} retryHref={retryHref} />}
+          {error && <ForecastErrorCard message={error} reason={errorReason} retryHref={retryHref} />}
           {forecast && <ForecastCard forecast={forecast} />}
           {children}
         </div>

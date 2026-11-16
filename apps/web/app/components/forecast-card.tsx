@@ -982,9 +982,12 @@ export function ForecastCard({ forecast }: { forecast: ForecastEnvelope }) {
  */
 export function ForecastErrorCard({
   message,
+  reason,
   retryHref,
 }: {
   message: string
+  /** Plain-language cause, safe for any visitor (lib/diagnose-api.ts). */
+  reason?: string | null
   /** Omit to hide the retry button (no sensible URL to retry from). */
   retryHref?: string
 }) {
@@ -997,6 +1000,7 @@ export function ForecastErrorCard({
         This is usually temporary -- live tide, wind, and wave data couldn&apos;t be reached
         just now. Try again in a moment.
       </p>
+      {reason && <p className="mt-3 break-words text-sm text-text">{reason}</p>}
       {isDev && (
         <>
           <p className="mt-3 break-words text-sm text-danger-text">{message}</p>

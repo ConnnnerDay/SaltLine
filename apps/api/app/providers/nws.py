@@ -41,7 +41,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from app.infra.http_client import BoundedHTTPClient, ProviderError
+from app.infra.http_client import BoundedHTTPClient, ProviderError, ProviderParseError
 
 logger = logging.getLogger(__name__)
 
@@ -216,6 +216,23 @@ def _parse_alerts(payload: dict[str, Any], limit: int) -> list[WeatherAlert]:
     return alerts
 
 
+def _field(payload: object, name: str, source: str) -> Any:
+    """Read *name* from an NWS response in either shape it can come in.
+
+    `_NWS_HEADERS` asks for JSON-LD (`application/ld+json`), where fields
+    sit at the top level (`{"periods": [...]}`); GeoJSON nests them under
+    `properties`. The parsers here originally read only the GeoJSON shape,
+    so every live JSON-LD response raised `KeyError`, which no caller
+    caught -- a 500 for the whole forecast. Missing either way is now a
+    `ProviderParseError`, which callers already degrade on.
+    """
+    if isinstance(payload, dict):
+        body = payload.get("properties", payload)
+        if isinstance(body, dict) and name in body:
+            return body[name]
+    raise ProviderParseError(f"NWS response from {source} has no '{name}'")
+
+
 async def fetch_marine_zone_conditions(
     client: BoundedHTTPClient, zone: str = NWS_MARINE_ZONE_DEFAULT
 ) -> MarineZoneConditions:
@@ -226,7 +243,7 @@ async def fetch_marine_zone_conditions(
     """
     url = f"https://api.weather.gov/zones/forecast/{zone}/forecast"
     data = await client.get_json(url, headers=_NWS_HEADERS)
-    periods = data["properties"]["periods"]  # type: ignore[index]
+    periods = _field(data, "periods", url)
     return parse_marine_zone_conditions(periods)
 
 
@@ -242,9 +259,9 @@ async def fetch_gridpoint_wind(
         points = await client.get_json(
             f"https://api.weather.gov/points/{lat},{lng}", headers=_NWS_HEADERS
         )
-        forecast_url = points["properties"]["forecast"]  # type: ignore[index]
+        forecast_url = _field(points, "forecast", "points")
         forecast = await client.get_json(forecast_url, headers=_NWS_HEADERS)
-        periods = forecast["properties"]["periods"]  # type: ignore[index]
+        periods = _field(forecast, "periods", forecast_url)
     except ProviderError:
         logger.warning("NWS gridpoint wind forecast unavailable", exc_info=True)
         return None

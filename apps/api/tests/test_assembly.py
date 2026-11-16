@@ -718,3 +718,27 @@ async def test_guidance_failure_never_costs_the_forecast(
 
     assert envelope.recommendations is None
     assert envelope.conditions is not None
+
+
+@pytest.mark.asyncio
+async def test_unexpected_provider_exception_degrades_that_source_not_the_forecast(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A parser bug (any non-ProviderError exception) in one source marks
+    that source unavailable instead of 500ing the whole forecast -- the
+    failure mode a live NWS JSON-LD response hit in production."""
+    from app.domain import assembly
+
+    async def broken(*_: object, **__: object) -> None:
+        raise KeyError("properties")
+
+    monkeypatch.setattr(assembly, "fetch_marine_zone_conditions", broken)
+    client = _make_client(nws_ok=True, coops_ok=True, ndbc_ok=True)
+    async with client:
+        envelope = await assemble_forecast(
+            _WRIGHTSVILLE_BEACH, client, _WATER_TEMP_PROFILES, now=_NOW
+        )
+
+    marine = next(s for s in envelope.sources if s.provider == "nws:marine_zone")
+    assert marine.state is SourceState.UNAVAILABLE
+    assert envelope.conditions is not None

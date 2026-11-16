@@ -11,7 +11,11 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from app.infra.http_client import BoundedHTTPClient, ProviderHTTPStatusError
+from app.infra.http_client import (
+    BoundedHTTPClient,
+    ProviderHTTPStatusError,
+    ProviderParseError,
+)
 from app.providers.nws import (
     GridpointWindForecast,
     MarineZoneConditions,
@@ -346,3 +350,70 @@ async def test_fetch_state_alerts_uppercases_state_code() -> None:
         alerts = await fetch_state_alerts(client, "nc")
 
     assert alerts == []
+
+
+# --- JSON-LD shape (what `_NWS_HEADERS`' `Accept: application/ld+json`
+# actually returns live: fields at the top level, no `properties`). The
+# GeoJSON-only parsing this replaced raised KeyError on every live call,
+# which 500'd the whole forecast on a real deployment.
+
+
+@pytest.mark.asyncio
+async def test_fetch_marine_zone_conditions_parses_json_ld_shape() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "@context": {"@version": "1.1"},
+                "zone": "https://api.weather.gov/zones/forecast/AMZ158",
+                "periods": [_period("SW wind 10 to 15 kt. Seas 2 to 3 ft.")],
+            },
+        )
+
+    async with BoundedHTTPClient(transport=httpx.MockTransport(handler)) as client:
+        result = await fetch_marine_zone_conditions(client, zone="AMZ158")
+
+    assert result.wind_low_kt == 10.0
+    assert result.wave_high_ft == 3.0
+
+
+@pytest.mark.asyncio
+async def test_fetch_marine_zone_conditions_unexpected_shape_is_a_provider_error() -> (
+    None
+):
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"@context": {}, "unexpected": True})
+
+    async with BoundedHTTPClient(transport=httpx.MockTransport(handler)) as client:
+        with pytest.raises(ProviderParseError):
+            await fetch_marine_zone_conditions(client, zone="AMZ158")
+
+
+@pytest.mark.asyncio
+async def test_fetch_gridpoint_wind_parses_json_ld_shape() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/points/34.21,-77.8":
+            return httpx.Response(
+                200,
+                json={
+                    "forecast": "https://api.weather.gov/gridpoints/ILM/1,1/forecast"
+                },
+            )
+        return httpx.Response(
+            200, json={"periods": [_gridpoint_period("10 mph", "SW")]}
+        )
+
+    async with BoundedHTTPClient(transport=httpx.MockTransport(handler)) as client:
+        result = await fetch_gridpoint_wind(client, 34.21, -77.8)
+
+    assert result is not None
+    assert result.wind_direction == "SW"
+
+
+@pytest.mark.asyncio
+async def test_fetch_gridpoint_wind_unexpected_shape_degrades_to_none() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"@context": {}})
+
+    async with BoundedHTTPClient(transport=httpx.MockTransport(handler)) as client:
+        assert await fetch_gridpoint_wind(client, 34.21, -77.8) is None

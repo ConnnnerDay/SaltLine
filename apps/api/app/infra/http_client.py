@@ -77,6 +77,10 @@ class ProviderResponseTooLargeError(ProviderError):
     """The provider's response exceeded the configured byte limit."""
 
 
+class ProviderParseError(ProviderError):
+    """The provider answered, but not in the shape the parser expects."""
+
+
 class BoundedHTTPClient:
     """An async context manager wrapping httpx.AsyncClient with the policy
     described in the module docstring.

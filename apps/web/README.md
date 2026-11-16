@@ -8,6 +8,31 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Sign-up lands on a forecast (product-owner bug report, 2026-11-16).**
+"I can create an account but it's not showing a forecast": reproduced
+end to end against local Postgres/`apps/api`/`next dev` with a
+Playwright-driven 390px browser. Sign-up ended on an empty search page,
+picking a result only showed a confirm card that needed a second "View
+forecast" tap, and "/" always showed the marketing page, so a signed-in
+user never had a dashboard. Now:
+
+- `app/page.tsx` redirects a signed-in visitor to their home spot's
+  forecast (`lib/home-location.ts`: preferences' `default_location_id`,
+  else the first saved spot), or to `/locations` if they have none,
+  falling back to search on any apps/api error.
+- `/locations` goes straight to the forecast when a result is picked,
+  and the first spot picked (search or device location) becomes the
+  home spot via `lib/remember-home.ts`, which never overwrites an
+  existing choice.
+- Search copy now matches the real catalogue (Atlantic, Gulf, Pacific,
+  Hawaii, not "Texas to New Jersey").
+- The hourly activity chart keeps a 560px minimum width and scrolls
+  sideways inside its card on phones, instead of shrinking to
+  unreadable bars.
+
+Verified: register → onboarding → search → forecast, then "/" reopens
+that forecast.
+
 **Sprint 35 ("Fishing guidance")**: `ForecastCard` renders
 `recommendations` in the original dashboard style: a "What's biting"
 card of ranked picks (name, rank, tier, bait, and apps/api's own

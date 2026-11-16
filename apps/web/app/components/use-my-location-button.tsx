@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { rememberHomeIfUnset } from '@/lib/remember-home'
 import { useRouter } from 'next/navigation'
 import { Button } from './ui'
 import type { ResolvedLocation } from '@/app/api/locations/resolve/route'
@@ -61,6 +62,7 @@ export function UseMyLocationButton() {
             return
           }
           const resolved = (await response.json()) as ResolvedLocation
+          await rememberHomeIfUnset(resolved.id)
           router.push(`/forecast/${encodeURIComponent(resolved.id)}`)
         } catch {
           setStatus('error')

@@ -379,10 +379,13 @@ const TIER_LEGEND: { tag: ActivityTag; label: string; swatch: string }[] = [
 function HourlyOutlookChart({ outlook }: { outlook: HourlyOutlook }) {
   return (
     <div aria-hidden="true" className="flex flex-col gap-1">
+      {/* Below ~560px the 24 bars get too thin to read, so the chart
+          keeps a minimum width and scrolls sideways inside its card. */}
+      <div className="-mx-1 overflow-x-auto px-1">
       <svg
         viewBox={`0 0 ${_CHART_WIDTH} ${_CHART_HEIGHT}`}
         role="presentation"
-        className="w-full"
+        className="w-full min-w-[560px]"
       >
         <line
           x1={0}
@@ -444,6 +447,7 @@ function HourlyOutlookChart({ outlook }: { outlook: HourlyOutlook }) {
           ) : null,
         )}
       </svg>
+      </div>
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-text-muted">
         {TIER_LEGEND.map((item) => (
           <span key={item.tag} className="flex items-center gap-1.5">

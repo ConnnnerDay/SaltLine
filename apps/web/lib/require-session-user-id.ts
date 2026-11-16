@@ -1,9 +1,6 @@
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { auth } from './auth'
-
-// Same convention app/layout.tsx/app/sitemap.ts use.
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+import { auth, TRUSTED_ORIGINS } from './auth'
 
 /**
  * Shared by every BFF route that owns real per-user data
@@ -28,13 +25,16 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
  * weakened that guarantee. A request with no `Origin` header at all
  * (not every legitimate caller sends one, e.g. a same-site top-level
  * form navigation) is left to the session check below rather than
- * rejected here.
+ * rejected here. "Allowed" is lib/auth.ts's `TRUSTED_ORIGINS` (the site
+ * URL plus `SALTLINE_TRUSTED_ORIGINS`), the same list Better Auth itself
+ * trusts for sign-in, so a self-hosted site opened by LAN IP and by
+ * hostname works both ways.
  */
 export async function requireSessionUserId(): Promise<string | NextResponse> {
   const requestHeaders = await headers()
 
   const origin = requestHeaders.get('origin')
-  if (origin && origin !== SITE_URL) {
+  if (origin && !TRUSTED_ORIGINS.includes(origin)) {
     return NextResponse.json({ error: 'origin mismatch' }, { status: 403 })
   }
 

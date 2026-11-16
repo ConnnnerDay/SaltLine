@@ -68,10 +68,23 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
+// Self-hosting (install.sh): the same server is often opened by LAN IP,
+// hostname and localhost. Better Auth rejects sign-in/sign-up from any
+// origin it doesn't trust, so extra addresses can be listed here,
+// comma-separated, e.g. "http://saltline.local:5757,http://localhost:5757".
+const EXTRA_TRUSTED_ORIGINS = (process.env.SALTLINE_TRUSTED_ORIGINS ?? '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean)
+
+/** Every origin allowed to make signed-in, state-changing requests: shared
+ * by Better Auth and lib/require-session-user-id.ts's Origin check. */
+export const TRUSTED_ORIGINS = [SITE_URL, ...EXTRA_TRUSTED_ORIGINS]
+
 export const auth = betterAuth({
   appName: 'Saltline',
   baseURL: SITE_URL,
-  trustedOrigins: [SITE_URL],
+  trustedOrigins: TRUSTED_ORIGINS,
   database: {
     dialect: new PostgresDialect({ pool }),
     type: 'postgres',

@@ -33,6 +33,17 @@ import type { NextConfig } from 'next'
 // this app uses either.
 const isDev = process.env.NODE_ENV === 'development'
 
+// Only a site actually served over TLS may tell browsers to upgrade its
+// requests to https. A self-hosted install on a plain-http LAN address
+// (install.sh, http://192.168.x.x:5757) that sent
+// `upgrade-insecure-requests` had every same-origin script and stylesheet
+// rewritten to https://, which nothing serves -- the page rendered as bare,
+// unstyled, non-interactive HTML (no search, no sign-up flow, no forecast
+// navigation). Read at build time, when this config's headers() is
+// evaluated; Vercel is always TLS.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+const servedOverHttps = SITE_URL.startsWith('https://') || process.env.VERCEL === '1'
+
 const CSP_DIRECTIVES = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
@@ -44,12 +55,12 @@ const CSP_DIRECTIVES = [
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'none'",
-  // Upgrading insecure requests only makes sense once this app is
-  // actually served over TLS (Vercel, per docs/CANONICAL_ROADMAP.md's
-  // technical contract) — in dev it would make the browser try to
-  // re-fetch every same-origin asset over https://localhost, which
-  // nothing is listening on, breaking the page.
-  ...(isDev ? [] : ['upgrade-insecure-requests']),
+  // Upgrading insecure requests only makes sense when this app is
+  // actually served over TLS (see `servedOverHttps` above) -- in dev or
+  // on a plain-http self-hosted install it makes the browser re-fetch
+  // every same-origin asset over https://, which nothing is listening
+  // on, breaking the page.
+  ...(!isDev && servedOverHttps ? ['upgrade-insecure-requests'] : []),
 ]
 
 const nextConfig: NextConfig = {

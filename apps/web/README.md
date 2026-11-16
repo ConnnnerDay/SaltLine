@@ -1479,25 +1479,38 @@ bug. Against real network access the same page renders a live forecast.
 
 ### Running both apps on one machine (home server)
 
-Every forecast page is apps/web asking apps/api over a signed request, so
-both must be running **with the same `INTERNAL_SIGNING_KEY_ID`/`_SECRET`**.
-If either is missing, the page shows "Couldn't load the forecast" (the
-visitor-facing message is deliberately generic). `scripts/run-saltline.sh`
-(repo root) starts both from one git-ignored `saltline.env`, which it
-creates with fresh random secrets on first run. Fill in the two database
-URLs and set `NEXT_PUBLIC_SITE_URL` to the address you browse to (e.g.
-`http://192.168.1.100:5757`; Better Auth only trusts that origin), then:
+On a Debian/Ubuntu machine, one command installs and runs everything:
 
 ```bash
-scripts/run-saltline.sh
+./install.sh
 ```
 
-To see why a forecast won't load, open `/api/health`. It makes the same
-signed call a forecast does and answers `{"web":"ok","api":"ok"}`, or names
-the problem: `api_unreachable`, `signature_rejected`,
-`missing_signing_keys` or `api_error`, each with a hint. Each failed
-forecast also logs one `forecast_fetch_failed` JSON line with the same
-classification to apps/web's server output.
+It sets up PostgreSQL (database, roles, schemas), apps/api's virtualenv and
+migrations, apps/web's dependencies, auth migration and production build,
+and a git-ignored `saltline.env` with random secrets shared by both apps.
+It also stops the retired Flask service and any old Saltline process on
+the port, and installs a `saltline` systemd service (both apps, starts on
+boot, restarts on failure). It finishes by checking `/api/health`. Re-run it
+after `git pull` to update.
+
+Things that broke a plain-http LAN install, now handled:
+
+- **Every forecast page saying "Couldn't load the forecast"**: apps/api not
+  running, or a signing-key mismatch. The service runs both from one
+  settings file. `/api/health` names the cause: `api_unreachable`,
+  `signature_rejected`, `missing_signing_keys` or `api_error`. Each failed
+  forecast also logs a `forecast_fetch_failed` line to the server output.
+- **Unstyled, non-interactive pages over `http://<LAN IP>`**: the CSP's
+  `upgrade-insecure-requests` made browsers fetch every script and
+  stylesheet over https. It's now only sent when `NEXT_PUBLIC_SITE_URL` is
+  https (or on Vercel).
+- **Sign-in or saving failing when opened by another address**: Better
+  Auth and the BFF's Origin check now trust `NEXT_PUBLIC_SITE_URL` plus
+  `SALTLINE_TRUSTED_ORIGINS`. install.sh fills in localhost, 127.0.0.1 and
+  the hostname.
+
+`scripts/run-saltline.sh` is what the service runs; it can also be run by
+hand.
 
 ### Authentication locally
 

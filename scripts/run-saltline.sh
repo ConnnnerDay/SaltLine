@@ -8,7 +8,9 @@
 # forecast page shows "Couldn't load the forecast". This script starts
 # both from ONE settings file so they always match.
 #
-# First run creates saltline.env (git-ignored) with fresh random secrets;
+# Normally run by the `saltline` systemd service that ../install.sh sets up.
+# Run by hand, the first run creates saltline.env (git-ignored) with fresh
+# random secrets;
 # fill in the two database URLs (see apps/web/README.md "Authentication
 # locally" and apps/api/README.md "/v1/me/preferences locally"), then run
 # again. Requires: Python deps for apps/api, `npm ci` done in apps/web.
@@ -56,6 +58,10 @@ if grep -q CHANGE_ME "${ENV_FILE}"; then
   exit 1
 fi
 
+# apps/api's own virtualenv (created by install.sh), else the system python.
+PYTHON="${ROOT}/apps/api/.venv/bin/python"
+[[ -x "${PYTHON}" ]] || PYTHON=python3
+
 pids=()
 cleanup() { kill "${pids[@]}" 2>/dev/null || true; }
 trap cleanup EXIT INT TERM
@@ -64,7 +70,7 @@ echo "[saltline] starting apps/api on ${INTERNAL_API_BASE_URL}"
 (
   cd "${ROOT}/apps/api"
   DATABASE_URL="${API_DATABASE_URL}" \
-    python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+    "${PYTHON}" -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ) &
 pids+=($!)
 

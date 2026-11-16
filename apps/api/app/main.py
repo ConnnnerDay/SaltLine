@@ -69,6 +69,7 @@ from fastapi.responses import JSONResponse
 from app.api.deps import AppState
 from app.api.v1.account import router as account_router
 from app.api.v1.analytics import router as analytics_router
+from app.api.v1.catches import router as catches_router
 from app.api.v1.forecasts import router as forecasts_router
 from app.api.v1.locations import router as locations_router
 from app.api.v1.preferences import router as preferences_router
@@ -148,6 +149,7 @@ app.include_router(locations_router)
 app.include_router(forecasts_router)
 app.include_router(preferences_router)
 app.include_router(saved_locations_router)
+app.include_router(catches_router)
 app.include_router(account_router)
 app.include_router(analytics_router)
 

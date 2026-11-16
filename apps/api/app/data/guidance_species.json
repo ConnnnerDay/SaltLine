@@ -36,7 +36,12 @@
       "sinker": "2-4 oz egg sinker",
       "lures": "Gold/copper spoons, paddle-tail swimbaits (3-5\"), Z-Man soft plastics on 1/4-3/8 oz jighead, topwater plugs at dawn/dusk",
       "explanation_cold": "Winter red drum congregate in deeper marsh channels and holes, foraging along the bottom for shrimp, crabs and small fish.",
-      "explanation_warm": "Red drum actively feed in the surf zone and around inlets, chasing mullet, menhaden and crabs in warmer water."
+      "explanation_warm": "Red drum actively feed in the surf zone and around inlets, chasing mullet, menhaden and crabs in warmer water.",
+      "conditions": [
+        "onshore_wind",
+        "rough_surf",
+        "low_light"
+      ]
     },
     {
       "id": "black-drum",
@@ -70,7 +75,11 @@
       "sinker": "2-4 oz pyramid or bank sinker",
       "lures": "Not a primary lure target; slow-rolled paddle-tail swimbaits near oyster structure occasionally work",
       "explanation_cold": "Black drum are bottom feeders that locate prey with chin barbels; they prefer mollusks, shrimp and crab pieces in cooler water.",
-      "explanation_warm": "Black drum move through inlets and along structure, actively rooting for crabs, clams and shrimp in warming water."
+      "explanation_warm": "Black drum move through inlets and along structure, actively rooting for crabs, clams and shrimp in warming water.",
+      "conditions": [
+        "onshore_wind",
+        "rough_surf"
+      ]
     },
     {
       "id": "bluefish",
@@ -104,7 +113,11 @@
       "sinker": "2-4 oz pyramid sinker",
       "lures": "Metal spoons (Hopkins, Kastmaster), topwater poppers, Clarkspoons, metal jigs; bluefish hit almost any fast-moving lure",
       "explanation_cold": "Smaller bluefish (snappers/tailors) roam nearshore waters and readily hit cut bait; wire or heavy leaders are essential.",
-      "explanation_warm": "Bluefish schools are actively chasing baitfish along the surf line and around piers; cut menhaden and mullet draw explosive strikes."
+      "explanation_warm": "Bluefish schools are actively chasing baitfish along the surf line and around piers; cut menhaden and mullet draw explosive strikes.",
+      "conditions": [
+        "onshore_wind",
+        "rough_surf"
+      ]
     },
     {
       "id": "speckled-trout",
@@ -139,7 +152,11 @@
       "sinker": "1-2 oz",
       "lures": "MirrOlure (MR17, 52M), soft plastic tails (Gulp shrimp, DOA Terror Eyz) on 1/4 oz jighead, topwater walk-the-dog lures",
       "explanation_cold": "Speckled trout hold in deeper holes and backwater creeks; live shrimp or finger mullet entice sluggish winter fish.",
-      "explanation_warm": "Speckled trout are aggressively feeding on shrimp and small baitfish in the shallows and around grass flats."
+      "explanation_warm": "Speckled trout are aggressively feeding on shrimp and small baitfish in the shallows and around grass flats.",
+      "conditions": [
+        "calm_water",
+        "low_light"
+      ]
     },
     {
       "id": "whiting-sea-mullet",
@@ -173,7 +190,11 @@
       "sinker": "1-3 oz pyramid sinker",
       "lures": "Small jigs (1/16-1/8 oz) tipped with Fishbites; not a primary lure target",
       "explanation_cold": "Whiting patrol sandy bottoms along beaches and piers; they feed on shrimp, mole crabs and worms in the winter surf.",
-      "explanation_warm": "Whiting are schooling up along the beach and biting aggressively on shrimp and sand fleas in the wash zone."
+      "explanation_warm": "Whiting are schooling up along the beach and biting aggressively on shrimp and sand fleas in the wash zone.",
+      "conditions": [
+        "onshore_wind",
+        "rough_surf"
+      ]
     },
     {
       "id": "spot",
@@ -205,7 +226,11 @@
       "sinker": "1-2 oz pyramid sinker",
       "lures": "Rarely taken on lures; not a primary lure target",
       "explanation_cold": "Spot are mostly offshore or in deeper channels during winter; occasional catches from piers on warmer days.",
-      "explanation_warm": "Spot are schooling along the beach and around piers, biting aggressively on bloodworms and shrimp pieces."
+      "explanation_warm": "Spot are schooling along the beach and around piers, biting aggressively on bloodworms and shrimp pieces.",
+      "conditions": [
+        "onshore_wind",
+        "rough_surf"
+      ]
     },
     {
       "id": "atlantic-croaker",
@@ -237,7 +262,11 @@
       "sinker": "1-3 oz pyramid sinker",
       "lures": "Not typically lure-caught; small jigs occasionally work",
       "explanation_cold": "Croaker move to deeper channels and offshore in winter; occasional catches from piers on mild days.",
-      "explanation_warm": "Croaker are schooling along the surf and around piers, making their signature croaking sound; they hit shrimp and worms aggressively."
+      "explanation_warm": "Croaker are schooling along the surf and around piers, making their signature croaking sound; they hit shrimp and worms aggressively.",
+      "conditions": [
+        "onshore_wind",
+        "rough_surf"
+      ]
     },
     {
       "id": "sheepshead",
@@ -268,7 +297,10 @@
       "sinker": "1-3 oz egg sinker",
       "lures": "Rarely taken on lures; small jigs with soft crab imitations near pilings occasionally work",
       "explanation_cold": "Sheepshead feed around pilings and rock structures, nibbling barnacles and crustaceans; bites are subtle and require fishing straight down.",
-      "explanation_warm": "Sheepshead stack up around nearshore structure and pilings, picking at barnacles and crabs before moving offshore for spawning."
+      "explanation_warm": "Sheepshead stack up around nearshore structure and pilings, picking at barnacles and crabs before moving offshore for spawning.",
+      "conditions": [
+        "calm_water"
+      ]
     },
     {
       "id": "flounder",
@@ -302,7 +334,11 @@
       "sinker": "1-3 oz egg sinker",
       "lures": "Bucktail jig (1/4-1/2 oz) with paddle tail, Gulp Nemesis or shrimp, Carolina-rigged swimming grub bounced on bottom",
       "explanation_cold": "Flounder are mostly offshore in cold water; stragglers around inlets may bite live mullet drifted slowly along the bottom.",
-      "explanation_warm": "Flounder are ambushing baitfish in the surf, around inlets and near pier pilings; live finger mullet is the top producer."
+      "explanation_warm": "Flounder are ambushing baitfish in the surf, around inlets and near pier pilings; live finger mullet is the top producer.",
+      "conditions": [
+        "onshore_wind",
+        "low_light"
+      ]
     },
     {
       "id": "pompano",
@@ -333,7 +369,11 @@
       "sinker": "2-3 oz pyramid sinker",
       "lures": "Pompano jigs (1/4-3/8 oz, yellow/orange/chartreuse), Silly Willy jigs, Clouser minnows near breaking waves",
       "explanation_cold": "Pompano are scarce inshore during cold months; occasional catches occur on warmer days near the surf zone.",
-      "explanation_warm": "Pompano are running the surf line feeding on sand fleas and small crustaceans; target the troughs and holes along the beach."
+      "explanation_warm": "Pompano are running the surf line feeding on sand fleas and small crustaceans; target the troughs and holes along the beach.",
+      "conditions": [
+        "onshore_wind",
+        "rough_surf"
+      ]
     },
     {
       "id": "spanish-mackerel",
@@ -365,7 +405,11 @@
       "sinker": "None or 1/2 oz split shot",
       "lures": "Clarkspoon (1/0-3/0) on inline spinner or planer, small metal jigs, silver or gold spoons; fast retrieve",
       "explanation_cold": "Spanish mackerel have migrated south; they are not present in nearshore NC waters during cold months.",
-      "explanation_warm": "Spanish mackerel are blitzing baitfish just behind the breakers and around piers; they hit flashy spoons and small baits."
+      "explanation_warm": "Spanish mackerel are blitzing baitfish just behind the breakers and around piers; they hit flashy spoons and small baits.",
+      "conditions": [
+        "onshore_wind",
+        "daytime"
+      ]
     },
     {
       "id": "snook",
@@ -394,7 +438,10 @@
       "sinker": "1-2 oz egg sinker or none",
       "lures": "Large soft plastic jerkbaits, DOA Baitbuster, topwater walk-the-dog plugs, Rapala X-Rap; target structure and inlet edges",
       "explanation_cold": "Snook are a tropical species not found in NC during cold months.",
-      "explanation_warm": "Snook are rare visitors to NC during unusually warm summers; they are prized gamefish that ambush bait around inlets, docks and structure."
+      "explanation_warm": "Snook are rare visitors to NC during unusually warm summers; they are prized gamefish that ambush bait around inlets, docks and structure.",
+      "conditions": [
+        "calm_water"
+      ]
     },
     {
       "id": "striped-bass",
@@ -425,7 +472,12 @@
       "sinker": "3-5 oz pyramid or bank sinker",
       "lures": "Bucktail jigs (1-3 oz), soft plastic swimbaits, topwater plugs (Rapala X-Rap, Bomber), metal jigs at night under lights",
       "explanation_cold": "Striped bass are found around piers, jetties and surf troughs; winter surf anglers use cut or live bait on heavy tackle.",
-      "explanation_warm": "Striped bass push through inlets chasing schools of mullet and menhaden; they are most active at dawn and dusk."
+      "explanation_warm": "Striped bass push through inlets chasing schools of mullet and menhaden; they are most active at dawn and dusk.",
+      "conditions": [
+        "onshore_wind",
+        "rough_surf",
+        "low_light"
+      ]
     },
     {
       "id": "tautog",
@@ -456,7 +508,10 @@
       "sinker": "2-4 oz bank or egg sinker",
       "lures": "Not a strong lure target; slow-rolled swimbaits near rocky structure occasionally work",
       "explanation_cold": "Tautog cling to jetties and rock piles in winter, feeding on crustaceans; they require strong tackle and small, strong hooks.",
-      "explanation_warm": "Tautog become less active as water warms and move to deeper structure; early spring offers a window before they thin out."
+      "explanation_warm": "Tautog become less active as water warms and move to deeper structure; early spring offers a window before they thin out.",
+      "conditions": [
+        "calm_water"
+      ]
     },
     {
       "id": "black-sea-bass",
@@ -487,7 +542,8 @@
       "sinker": "3-4 oz pyramid or bank sinker",
       "lures": "Small jigs (1-2 oz bucktail), soft plastic crabs/shrimp on drop-shot rigs, small diamond jigs near structure",
       "explanation_cold": "Inshore black sea bass inhabit wrecks and hard bottom, feeding on crabs, shrimp and small fish; bottom-fish with squid or cut bait.",
-      "explanation_warm": "Black sea bass are abundant over nearshore reefs and wrecks, aggressively hitting squid strips and cut bait."
+      "explanation_warm": "Black sea bass are abundant over nearshore reefs and wrecks, aggressively hitting squid strips and cut bait.",
+      "conditions": []
     },
     {
       "id": "barred-surfperch",
@@ -519,7 +575,11 @@
       "sinker": "1-2 oz egg sinker",
       "lures": "Small paddle-tail swimbaits (2-3\"), Berkley Gulp Sand Crab, tube jigs in the surf zone",
       "explanation_cold": "Barred surfperch are actively spawning and feeding aggressively in the winter surf zone -- this is peak season on the Pacific Coast.",
-      "explanation_warm": "Barred surfperch are present but less concentrated; they move to deeper water as surf warms."
+      "explanation_warm": "Barred surfperch are present but less concentrated; they move to deeper water as surf warms.",
+      "conditions": [
+        "onshore_wind",
+        "rough_surf"
+      ]
     },
     {
       "id": "redtail-surfperch",
@@ -551,7 +611,11 @@
       "sinker": "1-3 oz pyramid sinker",
       "lures": "Small paddle tails, Gulp Sand Crab in the surf; same tactics as barred surfperch",
       "explanation_cold": "Redtail surfperch school up in the surf zone during winter and early spring, feeding heavily on sand crabs in the wash.",
-      "explanation_warm": "Redtail surfperch are less common in the surf during warmer months; try rocky areas and jetties."
+      "explanation_warm": "Redtail surfperch are less common in the surf during warmer months; try rocky areas and jetties.",
+      "conditions": [
+        "onshore_wind",
+        "rough_surf"
+      ]
     },
     {
       "id": "california-halibut",
@@ -583,7 +647,10 @@
       "sinker": "1-3 oz sliding egg or banana sinker",
       "lures": "Live bait-style swimbaits, paddle tails on 3/8-3/4 oz jighead, Berkley Gulp grubs drifted on bottom",
       "explanation_cold": "California halibut are in deeper water during cold months and less accessible from shore.",
-      "explanation_warm": "California halibut move into shallow sandy areas near piers, jetties, and in the surf zone to ambush baitfish; cast parallel to shore and retrieve slowly along the bottom."
+      "explanation_warm": "California halibut move into shallow sandy areas near piers, jetties, and in the surf zone to ambush baitfish; cast parallel to shore and retrieve slowly along the bottom.",
+      "conditions": [
+        "calm_water"
+      ]
     },
     {
       "id": "corbina",
@@ -612,7 +679,11 @@
       "sinker": "1-2 oz egg sinker",
       "lures": "Berkley Gulp Sand Crab, small swimbaits, Yamamoto Senko-style worms in the surf",
       "explanation_cold": "Corbina move to deeper water and are hard to reach from shore in winter.",
-      "explanation_warm": "Corbina cruise the SoCal surf zone rooting for sand crabs and worms in the wash; they are the prized surf species of Southern California."
+      "explanation_warm": "Corbina cruise the SoCal surf zone rooting for sand crabs and worms in the wash; they are the prized surf species of Southern California.",
+      "conditions": [
+        "onshore_wind",
+        "rough_surf"
+      ]
     },
     {
       "id": "yellowfin-croaker",
@@ -641,7 +712,11 @@
       "sinker": "1-2 oz egg sinker",
       "lures": "Small swimbaits, Gulp lures",
       "explanation_cold": "Yellowfin croaker are deeper and less active during cold months.",
-      "explanation_warm": "Yellowfin croaker are common in the SoCal and central CA surf zone; they school up and feed aggressively on sand crabs."
+      "explanation_warm": "Yellowfin croaker are common in the SoCal and central CA surf zone; they school up and feed aggressively on sand crabs.",
+      "conditions": [
+        "onshore_wind",
+        "rough_surf"
+      ]
     },
     {
       "id": "black-rockfish",
@@ -673,7 +748,8 @@
       "sinker": "1-4 oz egg or rubber-core sinker",
       "lures": "Tube jigs in black/purple, soft plastic paddle tails, metal jigs (Crippled Herring), and Buzz Bombs \u2014 black rockfish readily hit surface lures",
       "explanation_cold": "Black rockfish hold near rocky reefs and kelp at 30-150 ft year-round; they are less active in winter but can be found schooling tight to structure.",
-      "explanation_warm": "Spring and summer are prime for black rockfish along the Pacific coast; they school near the surface around kelp beds and rocky points and aggressively hit surface poppers, tube jigs, and cut herring."
+      "explanation_warm": "Spring and summer are prime for black rockfish along the Pacific coast; they school near the surface around kelp beds and rocky points and aggressively hit surface poppers, tube jigs, and cut herring.",
+      "conditions": []
     },
     {
       "id": "lingcod",
@@ -703,7 +779,10 @@
       "sinker": "4-8 oz depending on current",
       "lures": "Large swimbaits (5-8\"), heavy jigs (4-8 oz), plastic eels; very aggressive; retrieve with erratic action",
       "explanation_cold": "Lingcod move into shallower rocky reefs during fall and winter to spawn; they are aggressive ambush predators accessible from jetties and rocky points.",
-      "explanation_warm": "Lingcod retreat to deeper water offshore during warm months; less accessible from shore."
+      "explanation_warm": "Lingcod retreat to deeper water offshore during warm months; less accessible from shore.",
+      "conditions": [
+        "low_light"
+      ]
     },
     {
       "id": "ulua-giant-trevally",
@@ -734,7 +813,11 @@
       "sinker": "6-16 oz pyramid or breakaway sinker",
       "lures": "Large poppers, stickbaits (GT poppers), heavy swimbaits; very powerful fighter",
       "explanation_cold": "Giant trevally are present year-round in Hawaii but slightly less active during cooler months.",
-      "explanation_warm": "Giant trevally (ulua) are the ultimate shore-fishing trophy in Hawaii; they're powerful predators caught from rocky shores and piers on heavy tackle."
+      "explanation_warm": "Giant trevally (ulua) are the ultimate shore-fishing trophy in Hawaii; they're powerful predators caught from rocky shores and piers on heavy tackle.",
+      "conditions": [
+        "onshore_wind",
+        "low_light"
+      ]
     },
     {
       "id": "papio",
@@ -766,7 +849,10 @@
       "sinker": "1-3 oz egg sinker",
       "lures": "Small jigs, spoons, swimbaits; juvenile jacks are aggressive",
       "explanation_cold": "Papio are present year-round in Hawaii; smaller jacks are always near shore.",
-      "explanation_warm": "Papio are the most popular shore-fishing target in Hawaii; these juvenile jacks roam reefs and harbors and are a great family fishing species."
+      "explanation_warm": "Papio are the most popular shore-fishing target in Hawaii; these juvenile jacks roam reefs and harbors and are a great family fishing species.",
+      "conditions": [
+        "daytime"
+      ]
     },
     {
       "id": "oio-bonefish",
@@ -797,7 +883,10 @@
       "sinker": "1/2-1 oz egg sinker",
       "lures": "Clouser minnows, shrimp fly imitations, Crazy Charlie flies; almost exclusively sight-fished with lures/flies",
       "explanation_cold": "Bonefish are present year-round in Hawaii flats but slightly less active in winter.",
-      "explanation_warm": "Bonefish (oio) feed on shallow sand flats in Hawaii; they are the ghosts of the flats -- fast, wary, and an incredible fight on light tackle."
+      "explanation_warm": "Bonefish (oio) feed on shallow sand flats in Hawaii; they are the ghosts of the flats -- fast, wary, and an incredible fight on light tackle.",
+      "conditions": [
+        "onshore_wind"
+      ]
     },
     {
       "id": "moi",
@@ -827,7 +916,10 @@
       "sinker": "2-4 oz pyramid sinker",
       "lures": "Small jigs, soft plastics; delicate fighters",
       "explanation_cold": "Moi are present in cooler months but less concentrated in the shallows.",
-      "explanation_warm": "Moi (Pacific threadfin) is Hawaii's most revered eating fish; once reserved for royalty, they feed in the sandy surf zone and are caught from beaches and piers."
+      "explanation_warm": "Moi (Pacific threadfin) is Hawaii's most revered eating fish; once reserved for royalty, they feed in the sandy surf zone and are caught from beaches and piers.",
+      "conditions": [
+        "onshore_wind"
+      ]
     }
   ]
 }

@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import { ForecastPageBody } from '@/app/components/forecast-page-body'
 import { SaveLocationButton } from '@/app/components/save-location-button'
+import { Button } from '@/app/components/ui'
 import type { ForecastEnvelope } from '@/app/components/forecast-card'
 import { auth } from '@/lib/auth'
 import { fetchForecast } from '@/lib/get-forecast'
@@ -72,8 +73,14 @@ export default async function ForecastPage({ params }: Props) {
       backLabel="Back to search"
     >
       {forecast && (
-        <div className="mt-4">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <SaveLocationButton locationId={forecast.location.id} />
+          <Button
+            variant="secondary"
+            href={`/log?location=${encodeURIComponent(forecast.location.id)}`}
+          >
+            Log a catch here
+          </Button>
         </div>
       )}
     </ForecastPageBody>

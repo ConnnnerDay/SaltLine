@@ -7,7 +7,7 @@ import { Button } from '@/app/components/ui'
 import type { ForecastEnvelope } from '@/app/components/forecast-card'
 import { auth } from '@/lib/auth'
 import { fetchForecast } from '@/lib/get-forecast'
-import { logForecastFailure } from '@/lib/diagnose-api'
+import { logForecastFailure, userFacingReason } from '@/lib/diagnose-api'
 import { InternalApiError } from '@/lib/internal-api-client'
 
 export const dynamic = 'force-dynamic'
@@ -76,6 +76,7 @@ export default async function SharedForecastPage({ params }: Props) {
 
   let forecast: ForecastEnvelope | null = null
   let error: string | null = null
+  let errorReason: string | null = null
 
   try {
     forecast = await getForecast(locationId)
@@ -84,6 +85,7 @@ export default async function SharedForecastPage({ params }: Props) {
       notFound()
     }
     logForecastFailure(locationId, err)
+    errorReason = userFacingReason(err)
     error = err instanceof Error ? err.message : 'Unknown error'
   }
 
@@ -91,6 +93,7 @@ export default async function SharedForecastPage({ params }: Props) {
     <ForecastPageBody
       forecast={forecast}
       error={error}
+      errorReason={errorReason}
       retryHref={`/share/${encodeURIComponent(locationId)}`}
       backHref="/"
       backLabel="Back to Saltline"

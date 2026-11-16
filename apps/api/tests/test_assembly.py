@@ -696,3 +696,25 @@ async def test_coops_wind_rescues_forecast_when_both_primary_sources_down() -> N
     assert by_provider["noaa_coops:wind"].state == SourceState.OK
     assert "nws:gridpoint_wind" not in by_provider
     assert any(w.code == "fallback:coops_wind" for w in envelope.warnings)
+
+
+@pytest.mark.asyncio
+async def test_guidance_failure_never_costs_the_forecast(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Sprint 35's guidance is enrichment: if it raises, the envelope
+    still comes back (recommendations None) instead of a 500."""
+    from app.domain import assembly
+
+    def boom(**_: object) -> None:
+        raise RuntimeError("guidance bug")
+
+    monkeypatch.setattr(assembly, "build_fishing_guidance", boom)
+    client = _make_client(nws_ok=True, coops_ok=True, ndbc_ok=True)
+    async with client:
+        envelope = await assemble_forecast(
+            _WRIGHTSVILLE_BEACH, client, _WATER_TEMP_PROFILES, now=_NOW
+        )
+
+    assert envelope.recommendations is None
+    assert envelope.conditions is not None

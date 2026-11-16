@@ -157,9 +157,10 @@ source, the fallback chain included.
 from __future__ import annotations
 
 import asyncio
+import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel
 
@@ -214,6 +215,8 @@ from app.providers.nws import (
     fetch_marine_zone_conditions,
     fetch_point_alerts,
 )
+
+_logger = logging.getLogger(__name__)
 
 _SOURCE_NWS_MARINE_ZONE = "nws:marine_zone"
 _SOURCE_NOAA_COOPS_WATER_TEMP = "noaa_coops:water_temperature"
@@ -666,13 +669,20 @@ async def assemble_forecast(
         tz_name=location.timezone,
     )
 
-    guidance = build_fishing_guidance(
-        region=location.conditions_region,
-        water_temp_f=water_temperature.value,
-        water_temp_is_fallback=water_temperature.is_fallback,
-        month=local_month(now, location.timezone),
-        wave_range_ft=wave_range,
-    )
+    # Enrichment only: a guidance bug must never cost the visitor the
+    # forecast itself, so a failure here drops `recommendations` and logs.
+    recommendations: dict[str, Any] | None
+    try:
+        recommendations = build_fishing_guidance(
+            region=location.conditions_region,
+            water_temp_f=water_temperature.value,
+            water_temp_is_fallback=water_temperature.is_fallback,
+            month=local_month(now, location.timezone),
+            wave_range_ft=wave_range,
+        ).model_dump(mode="json")
+    except Exception:
+        _logger.exception("fishing guidance failed for %s", location.id)
+        recommendations = None
 
     return ForecastEnvelope(
         location=_to_domain_location(location),
@@ -684,5 +694,5 @@ async def assemble_forecast(
         conditions=conditions.model_dump(mode="json"),
         tides=tides,
         hourly_outlook=hourly_outlook.model_dump(mode="json"),
-        recommendations=guidance.model_dump(mode="json"),
+        recommendations=recommendations,
     )

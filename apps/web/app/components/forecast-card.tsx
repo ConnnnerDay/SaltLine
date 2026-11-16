@@ -47,6 +47,35 @@ export type Observation = {
   is_fallback: boolean
 }
 
+export type GuidanceTier = 'prime' | 'good' | 'fair'
+
+export type SpeciesPick = {
+  id: string
+  name: string
+  score: number
+  tier: GuidanceTier
+  reasons: string[]
+  explanation: string
+  bait: string
+  rig: string
+  hook_size: string
+  sinker: string
+  lures: string
+}
+
+/** Sprint 35's `app.domain.guidance.FishingGuidance`. */
+export type FishingGuidance = {
+  basis: {
+    water_temp_f: number
+    water_temp_is_fallback: boolean
+    month: number
+    region: string
+  }
+  species: SpeciesPick[]
+  tackle_note: string | null
+  disclaimer: string
+}
+
 export type ForecastEnvelope = {
   location: { id: string; label: string; timezone: string }
   generated_at: string
@@ -63,6 +92,7 @@ export type ForecastEnvelope = {
   } | null
   tides: ForecastTides | null
   hourly_outlook: HourlyOutlook | null
+  recommendations?: FishingGuidance | null
 }
 
 export const VERDICT_TO_BADGE: Record<ForecastVerdict, BadgeVariant> = {
@@ -648,6 +678,107 @@ function formatRange(range: [number, number]): string {
   return low === high ? `${low}` : `${low}–${high}`
 }
 
+const GUIDANCE_TIER_TEXT: Record<GuidanceTier, string> = {
+  prime: 'text-accent',
+  good: 'text-primary',
+  fair: 'text-text-muted',
+}
+
+/**
+ * Sprint 35's "What's biting" -- the original dashboard's ranked species
+ * cards. Each card shows apps/api's own `reasons` (the exact numbers the
+ * pick was scored on) so no recommendation appears without its "why".
+ */
+function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
+  return (
+    <Card className="flex flex-col gap-4 border-l-2 border-l-tier-prime p-5!">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="section-label">What&apos;s biting</h2>
+        {guidance.basis.water_temp_is_fallback && (
+          <span className="text-xs text-text-muted">
+            Based on the monthly average water temperature
+          </span>
+        )}
+      </div>
+
+      {guidance.species.length === 0 ? (
+        <p className="text-sm text-text-muted">
+          None of the common surf and pier targets for this area are in range at{' '}
+          {Math.round(guidance.basis.water_temp_f)}°F right now.
+        </p>
+      ) : (
+        <ol className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {guidance.species.map((pick, index) => (
+            <li
+              key={pick.id}
+              className="flex flex-col gap-1.5 rounded-md border border-border bg-surface-raised px-4 py-3"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <span className="font-bold leading-tight text-text">{pick.name}</span>
+                <span
+                  aria-label={`Rank ${index + 1}`}
+                  className="flex h-5 min-w-5 items-center justify-center rounded-full bg-border px-1.5 text-[0.6875rem] font-bold text-text"
+                >
+                  {index + 1}
+                </span>
+              </div>
+              <span
+                className={cx(
+                  'text-[0.6875rem] font-bold uppercase tracking-widest',
+                  GUIDANCE_TIER_TEXT[pick.tier],
+                )}
+              >
+                {capitalize(pick.tier)}
+              </span>
+              <p className="line-clamp-2 text-sm text-text-muted">{pick.bait}</p>
+              <p className="font-serif text-sm italic text-text-muted">
+                {pick.reasons.join(' · ')}
+              </p>
+            </li>
+          ))}
+        </ol>
+      )}
+
+      {guidance.tackle_note && (
+        <p className="rounded-md border border-marginal-border bg-marginal-bg px-3 py-2 text-sm text-marginal-text">
+          {guidance.tackle_note}
+        </p>
+      )}
+    </Card>
+  )
+}
+
+/** Sprint 35's per-pick tackle detail (the original "Rigs & tips" row). */
+function RigsAndTips({ guidance }: { guidance: FishingGuidance }) {
+  return (
+    <>
+      <ul className="flex flex-col gap-4">
+        {guidance.species.map((pick) => (
+          <li key={pick.id} className="flex flex-col gap-2 border-b border-border pb-4 last:border-b-0 last:pb-0">
+            <h3 className="text-base font-bold text-text">{pick.name}</h3>
+            <p className="font-serif text-base italic text-text-muted">{pick.explanation}</p>
+            <dl className="grid grid-cols-1 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-[auto_1fr]">
+              <dt className="section-label pt-0.5">Rig</dt>
+              <dd className="text-text">{pick.rig}</dd>
+              <dt className="section-label pt-0.5">Hook</dt>
+              <dd className="text-text">{pick.hook_size}</dd>
+              <dt className="section-label pt-0.5">Sinker</dt>
+              <dd className="text-text">{pick.sinker}</dd>
+              <dt className="section-label pt-0.5">Bait</dt>
+              <dd className="text-text">{pick.bait}</dd>
+              <dt className="section-label pt-0.5">Lures</dt>
+              <dd className="text-text">{pick.lures}</dd>
+              <dt className="section-label pt-0.5">Why</dt>
+              <dd className="text-text-muted">{pick.reasons.join(' · ')}</dd>
+            </dl>
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs text-text-muted">{guidance.disclaimer}</p>
+    </>
+  )
+}
+
 /**
  * Presentational rendering of a `ForecastEnvelope`, laid out like the
  * original Saltline dashboard and shared by both forecast pages:
@@ -658,7 +789,8 @@ function formatRange(range: [number, number]): string {
  *    already-reconciled ranges, shown verbatim) and confidence/freshness.
  * 2. "Fishing activity & day timeline" -- the tier-colored hourly chart.
  * 3. "When to fish" -- `deriveBestWindow`'s best window as a tile.
- * 4. Collapsible rows for tides, the hour-by-hour table (the chart's
+ * 4. "What's biting" -- sprint 35's ranked picks, each with its reasons.
+ * 5. Collapsible rows for rigs & tips (sprint 35's tackle detail), tides, the hour-by-hour table (the chart's
  *    accessible text alternative), sprint 33's per-source status, and
  *    warnings.
  *
@@ -771,7 +903,15 @@ export function ForecastCard({ forecast }: { forecast: ForecastEnvelope }) {
         </Card>
       )}
 
+      {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} />}
+
       <div className="flex flex-col border-b border-border">
+        {forecast.recommendations && forecast.recommendations.species.length > 0 && (
+          <CollapsibleSection title="Rigs & tips">
+            <RigsAndTips guidance={forecast.recommendations} />
+          </CollapsibleSection>
+        )}
+
         {forecast.tides && (
           <CollapsibleSection title="Today's tides">
             <TideChart tides={forecast.tides} timezone={forecast.location.timezone} />

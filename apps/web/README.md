@@ -8,6 +8,16 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Sprint 35 ("Fishing guidance")**: `ForecastCard` renders
+`recommendations` in the original dashboard style: a "What's biting"
+card of ranked picks (name, rank, tier, bait, and apps/api's own
+`reasons` on every card, plus a note when the ranking is based on the
+monthly-average water temperature) and a "Rigs & tips" collapsible row
+with each pick's explanation, rig, hook, sinker, bait, lures, why, and
+the regulations disclaimer. Rough surf shows apps/api's tackle note.
+Verified against running `next dev`/`uvicorn` at 1280px and 390px in
+both themes; `tsc`/`oxlint` clean.
+
 **Sprint 43 ("Privacy-safe analytics")**: "Registration, resolution,
 forecast state, latency, return use." `docs/CANONICAL_ROADMAP.md`'s own
 guidance for this row explicitly allows a pragmatic, no-vendor-decision

@@ -10,11 +10,9 @@ import type { NextConfig } from 'next'
 // (app.py) rather than ported verbatim: apps/web has no third-party
 // scripts or non-self image origins (unlike the legacy app's map
 // tiles/CDN allowances), so this CSP is otherwise self-only, no
-// allow-listed external hosts to grow stale — except Google Fonts
-// (style-src/font-src), the one deliberate external allowance, needed
-// for the Saltline rebrand's Space Grotesk/Public Sans (loaded via a
-// <link> in app/layout.tsx, not next/font/google, which fetches at
-// build time and would fail wherever outbound network is restricted).
+// allow-listed external hosts to grow stale. Fonts (Manrope/Instrument
+// Serif, the original Saltline look) are self-hosted from public/fonts,
+// so no Google Fonts allowance is needed either.
 // `'unsafe-inline'` on `script-src`/`style-src` is
 // still required without a nonce: Next.js inlines its hydration payload
 // and (in dev) React's error-overlay styles, per
@@ -38,9 +36,9 @@ const isDev = process.env.NODE_ENV === 'development'
 const CSP_DIRECTIVES = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data:",
-  "font-src 'self' https://fonts.gstatic.com",
+  "font-src 'self'",
   "connect-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",

@@ -818,6 +818,31 @@ implementation with the already-verified `error.tsx`, using the same
 without changes throughout the sprint 27 rebrand. `npm run lint`/
 `npm run build` both pass clean, no new warnings.
 
+**Original look restored (supersedes the sprint 27 visual direction
+below).** The product owner rejected the bright oklch "photographic"
+rebrand and asked for the original Saltline look back. The Next.js app
+keeps its architecture; only the presentation changed:
+
+- `app/globals.css` tokens now carry the legacy Flask app's palette
+  (`static/style.css`): deep navy, ocean blue, coral accent, sand-toned
+  light theme. Dark is the default, as it was originally; light is
+  opt-in via the header's `ThemeToggle` (`html[data-theme="light"]`,
+  saved in localStorage and applied before first paint by an inline
+  script in `app/layout.tsx`). Every text/background pairing was
+  re-checked for WCAG AA in both themes.
+- Type is Manrope + Instrument Serif (italic), self-hosted from
+  `public/fonts` (copied from the legacy `static/fonts`). The Google
+  Fonts `<link>` and its CSP allowances are gone, so the CSP is now
+  fully self-only.
+- Navy header and location bar (`LocationBar`) replace the striped
+  photo placeholders. The landing page uses the original centered
+  ocean hero, and `ForecastCard` follows the original dashboard: a big
+  colored verdict headline with an italic summary, stat tiles, a
+  tier-colored activity timeline, a "When to fish" tile, and
+  collapsible rows for tides, hour-by-hour, data sources and warnings.
+- Not yet restored, because `apps/api` doesn't produce the data:
+  species ("What's biting"), rigs/tackle, and the species calendar.
+
 Sprint 27 ("Design system"), the branding decision: the app is now
 **Saltline** -- a full visual rebrand in a Surfline-style bright/coastal
 direction, replacing the "Surf & Pier Forecast" placeholder identity.

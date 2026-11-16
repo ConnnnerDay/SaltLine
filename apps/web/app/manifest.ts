@@ -21,10 +21,10 @@ export default function manifest(): MetadataRoute.Manifest {
     // Matches app/layout.tsx's light-mode viewport.themeColor -- the
     // manifest spec has no dark-mode variant, so this is the one value
     // used for the splash-screen background before anything paints.
-    background_color: '#f2f6f7',
+    background_color: '#0a1520',
     // The Saltline logomark's own dark-teal tile background (app/icon.tsx),
     // used here as the install/splash-screen chrome color.
-    theme_color: '#1c4a56',
+    theme_color: '#0d2240',
     icons: [
       { src: '/icon', sizes: '32x32', type: 'image/png' },
       { src: '/icon-192', sizes: '192x192', type: 'image/png' },

@@ -30,14 +30,14 @@ export default function OpengraphImage() {
           alignItems: 'center',
           justifyContent: 'center',
           gap: 32,
-          background: '#0d2530',
+          background: '#0d2240',
         }}
       >
         <svg width="120" height="120" viewBox="0 0 24 24" fill="none">
           <path d="M2 11 L22 11" stroke="#ffffff" strokeWidth="1.6" strokeLinecap="round" />
           <path
             d="M6 11 A6 6 0 0 1 18 11"
-            stroke="#ff8552"
+            stroke="#ff6b4a"
             strokeWidth="1.6"
             strokeLinecap="round"
           />

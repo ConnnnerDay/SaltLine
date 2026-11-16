@@ -128,7 +128,6 @@ function capitalize(value: string): string {
 function SourceStatusList({ sources }: { sources: SourceStatus[] }) {
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-sm font-medium text-text">Data sources</h3>
       <ul className="flex flex-col gap-2">
         {sources.map((source) => (
           <li key={source.provider} className="flex flex-col gap-1 text-sm">
@@ -274,7 +273,6 @@ function TideTable({
 
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-sm font-medium text-text">Upcoming tides</h3>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <caption className="sr-only">
@@ -325,39 +323,29 @@ const _CHART_WIDTH = _CHART_SLOT * 24
 const _CHART_HEIGHT = 128
 
 /**
- * Sprint 34's hourly-outlook visual chart -- the "accessible charts"
- * half of the acceptance bar, paired with `HourlyOutlookTable`'s
- * already-complete text-alternative half. This is deliberately *not*
- * the accessible representation itself: `aria-hidden="true"` removes
- * it from the accessibility tree entirely, since `HourlyOutlookTable`
- * (rendered alongside it, not replaced by it) already carries the same
- * data as real text -- a chart re-announcing a table a screen-reader
- * user just read is noise, not a service. Per the design system's
- * `dataviz` skill: this is a single-metric magnitude series (one
- * activity level per hour, not a categorical identity to color-key),
- * so it gets a single-hue sequential encoding -- `--color-primary`
- * at variable opacity (bar height *and* opacity both track `level`,
- * a deliberately redundant pair of channels since this chart carries
- * no information the table doesn't already have) -- rather than
- * inventing new discrete color tokens for `ActivityTag`'s four tiers.
- * `--color-go-text`/`--color-marginal-text` (used elsewhere for
- * *paired* badge pills) were considered and rejected for a bar fill:
- * per `app/globals.css`'s own comment on `--color-danger-text`, those
- * tokens are theme-invariant, tuned only for pairing with their own
- * light-tint badge background -- not for a solid fill against the
- * card surface, where they'd risk the exact dark-mode contrast bug
- * the sprint-27 `axe-core` pass already found and fixed once for
- * `--color-nogo-text`. `--color-primary`/`--color-accent` are already
- * theme-aware (separate light/dark values), so reusing them sidesteps
- * that risk entirely instead of adding new tokens to re-solve it.
- * The current hour gets an accent-colored ring; the day's peak
- * hour(s) get an accent dot. Each bar carries a native SVG `<title>`
- * (mouse-hover tooltip) but no `tabindex`/focus handling -- an
- * `aria-hidden` subtree must never contain a keyboard-focusable
- * element (axe-core's `aria-hidden-focus` rule), and every value a
- * hover tooltip could show is already a keyboard/screen-reader-
- * reachable table cell one section down.
+ * Sprint 34's hourly-outlook visual chart, drawn in the original
+ * Saltline style: one bar per hour, colored by activity tier (prime
+ * coral, high blue, med amber, low navy) with a text legend, and the
+ * current hour labeled "Now". It's `aria-hidden`: `HourlyOutlookTable`
+ * carries the same data as real text, and the legend plus bar height
+ * mean color is never the only channel. Each bar has a native SVG
+ * `<title>` tooltip but nothing focusable (axe-core's
+ * `aria-hidden-focus` rule).
  */
+const TIER_FILL: Record<ActivityTag, string> = {
+  prime: 'fill-tier-prime',
+  high: 'fill-tier-high',
+  med: 'fill-tier-med',
+  low: 'fill-tier-low',
+}
+
+const TIER_LEGEND: { tag: ActivityTag; label: string; swatch: string }[] = [
+  { tag: 'prime', label: 'Prime', swatch: 'bg-tier-prime' },
+  { tag: 'high', label: 'High', swatch: 'bg-tier-high' },
+  { tag: 'med', label: 'Good', swatch: 'bg-tier-med' },
+  { tag: 'low', label: 'Low', swatch: 'bg-tier-low' },
+]
+
 function HourlyOutlookChart({ outlook }: { outlook: HourlyOutlook }) {
   return (
     <div aria-hidden="true" className="flex flex-col gap-1">
@@ -385,10 +373,9 @@ function HourlyOutlookChart({ outlook }: { outlook: HourlyOutlook }) {
                 y={y}
                 width={_CHART_BAR_WIDTH}
                 height={barHeight}
-                rx={3}
+                rx={2}
                 strokeWidth={hour.is_now ? 2 : 0}
-                className={cx('fill-primary', hour.is_now && 'stroke-accent')}
-                style={{ opacity: 0.25 + 0.75 * (hour.level / 100) }}
+                className={cx(TIER_FILL[hour.tag], hour.is_now && 'stroke-text')}
               >
                 <title>{`${_SHORT_HOURS[hour.hour]}: ${hour.level}/100 (${hour.tag})`}</title>
               </rect>
@@ -397,14 +384,24 @@ function HourlyOutlookChart({ outlook }: { outlook: HourlyOutlook }) {
                   cx={x + _CHART_BAR_WIDTH / 2}
                   cy={y - 6}
                   r={3}
-                  className="fill-accent"
+                  className="fill-amber"
                 />
+              )}
+              {hour.is_now && (
+                <text
+                  x={x + _CHART_BAR_WIDTH / 2}
+                  y={_CHART_HEIGHT - 6}
+                  textAnchor="middle"
+                  className="fill-accent text-[9px] font-bold"
+                >
+                  Now
+                </text>
               )}
             </g>
           )
         })}
         {outlook.hours.map((hour, index) =>
-          index % 3 === 0 ? (
+          index % 3 === 0 && !hour.is_now ? (
             <text
               key={`label-${hour.hour}`}
               x={index * _CHART_SLOT + _CHART_SLOT / 2}
@@ -417,10 +414,18 @@ function HourlyOutlookChart({ outlook }: { outlook: HourlyOutlook }) {
           ) : null,
         )}
       </svg>
-      <p className="text-xs text-text-muted">
-        Taller, brighter bars mean better estimated activity; the dot marks the
-        day&apos;s peak.
-      </p>
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-text-muted">
+        {TIER_LEGEND.map((item) => (
+          <span key={item.tag} className="flex items-center gap-1.5">
+            <span className={cx('h-2.5 w-2.5 rounded-sm', item.swatch)} />
+            {item.label}
+          </span>
+        ))}
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-amber" />
+          Day&apos;s peak
+        </span>
+      </div>
     </div>
   )
 }
@@ -450,7 +455,6 @@ function HourlyOutlookTable({
 
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-sm font-medium text-text">Hourly activity outlook</h3>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <caption className="sr-only">
@@ -536,40 +540,6 @@ export function deriveBestWindow(outlook: HourlyOutlook): BestWindow | null {
 }
 
 /**
- * Sprint 32's "conditions" summary -- the wind/wave/water-temperature
- * line the acceptance bar names between "best window" and
- * "confidence, freshness." Shows `app.domain.assembly`'s own
- * already-reconciled `wind_range_kt`/`wave_range_ft`/`wind_direction`
- * (the exact numbers `score_conditions` was computed from) verbatim,
- * rather than re-deriving that NWS-marine-zone-over-NDBC-buoy
- * source-preference policy from the per-source fields on the frontend
- * a second time.
- */
-function ConditionsSummary({
-  conditions,
-}: {
-  conditions: NonNullable<ForecastEnvelope['conditions']>
-}) {
-  const parts: string[] = []
-  if (conditions.wind_range_kt) {
-    const [low, high] = conditions.wind_range_kt
-    const range = low === high ? `${low}` : `${low}–${high}`
-    parts.push(`Wind ${range} kt${conditions.wind_direction ? ` ${conditions.wind_direction}` : ''}`)
-  }
-  if (conditions.wave_range_ft) {
-    const [low, high] = conditions.wave_range_ft
-    const range = low === high ? `${low}` : `${low}–${high}`
-    parts.push(`Waves ${range} ft`)
-  }
-  const waterTemp = conditions.water_temperature
-  parts.push(
-    `Water ${Math.round(waterTemp.value)}°F${waterTemp.is_fallback ? ' (monthly avg)' : ''}`,
-  )
-
-  return <p className="text-sm text-text">{parts.join(' · ')}</p>
-}
-
-/**
  * Shared by `BestWindowCallout` (the full forecast card) and
  * `app/saved/saved-locations-list.tsx`'s compact per-location row
  * (sprint 32's multi-location dashboard) -- one place formats a
@@ -591,64 +561,110 @@ export function formatBestWindowRange(window: BestWindow, timezone: string): str
 
 function BestWindowCallout({ window, timezone }: { window: BestWindow; timezone: string }) {
   const rangeLabel = formatBestWindowRange(window, timezone)
+  const reasons = Array.from(new Set(window.hours.flatMap((hour) => hour.reasons)))
 
   return (
-    <div className="flex flex-col gap-1 rounded-[1.25rem] bg-accent-tint px-4 py-3.5">
-      <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-text-muted">
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 7 L12 12 L15.5 14" />
-        </svg>
-        Best window
-      </div>
-      <p className="flex flex-wrap items-center gap-2 text-text">
-        <span className="font-display text-lg">{rangeLabel}</span>
-        <Badge variant={ACTIVITY_TAG_TO_BADGE[window.tag]}>{capitalize(window.tag)}</Badge>
-      </p>
+    <div
+      className={cx(
+        'flex min-w-[12rem] flex-col items-center gap-1 rounded-md border border-border border-t-2 bg-surface-raised px-5 py-3.5 text-center',
+        window.tag === 'prime' ? 'border-t-tier-prime' : 'border-t-tier-high',
+      )}
+    >
+      <span
+        className={cx(
+          'text-[0.6875rem] font-bold uppercase tracking-widest',
+          window.tag === 'prime' ? 'text-accent' : 'text-primary',
+        )}
+      >
+        {capitalize(window.tag)}
+      </span>
+      <span className="text-lg font-bold text-text">{rangeLabel}</span>
+      {reasons.length > 0 && (
+        <span className="font-serif text-sm italic text-text-muted">{reasons.join(' · ')}</span>
+      )}
     </div>
   )
 }
 
+/** One stat tile in the "Today's forecast" strip (legacy `.stat-card`):
+ * colored top rule, uppercase label, big value, small muted note. */
+function StatTile({
+  label,
+  value,
+  note,
+  rule,
+}: {
+  label: string
+  value: string
+  note?: string
+  rule: string
+}) {
+  return (
+    <div className={cx('flex flex-col gap-1 border-t-2 bg-surface-raised/60 px-4 py-3', rule)}>
+      <dt className="section-label">{label}</dt>
+      <dd className="text-2xl font-bold tracking-tight text-text">{value}</dd>
+      {note && <dd className="text-xs text-text-muted">{note}</dd>}
+    </div>
+  )
+}
+
+/** A legacy-style collapsible section row ("TODAY'S TIDES ⌄"). */
+function CollapsibleSection({
+  title,
+  aside,
+  children,
+}: {
+  title: string
+  aside?: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <details className="collapsible border-t border-border">
+      <summary className="flex items-center justify-between gap-3 px-1 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">
+        <span className="flex flex-wrap items-center gap-3">
+          <span className="text-xs font-bold uppercase tracking-widest text-text">{title}</span>
+          {aside}
+        </span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="chevron shrink-0 text-text-muted">
+          <path d="M6 9 L12 15 L18 9" />
+        </svg>
+      </summary>
+      <div className="flex flex-col gap-4 px-1 pb-5">{children}</div>
+    </details>
+  )
+}
+
+const VERDICT_TEXT: Record<ForecastVerdict, string> = {
+  Excellent: 'text-go-text',
+  Good: 'text-go-text',
+  Fair: 'text-marginal-text',
+  Challenging: 'text-accent',
+  Poor: 'text-danger-text',
+  Unknown: 'text-text-muted',
+}
+
+function formatRange(range: [number, number]): string {
+  const [low, high] = range
+  return low === high ? `${low}` : `${low}–${high}`
+}
+
 /**
- * Presentational rendering of a `ForecastEnvelope` -- shared by
- * app/forecast/[locationId]/page.tsx (the real per-location lookup) so
- * there's one place this shape gets rendered, not one per page.
+ * Presentational rendering of a `ForecastEnvelope`, laid out like the
+ * original Saltline dashboard and shared by both forecast pages:
  *
- * Sprint 32's "go/no-go as a simple traffic-light headline (score/
- * narrative expandable, not primary); best window, conditions,
- * confidence, freshness first": the verdict `Badge` is the primary
- * headline (enlarged, first), `deriveBestWindow`'s callout sits right
- * beneath it, `ConditionsSummary` renders the wind/wave/water-temperature
- * line next, and the numeric score plus its plain-language narrative
- * move into a `<details>` -- present, but demoted, not the first thing
- * a reader sees. Confidence/state/freshness stay in the summary strip
- * below. `VERDICT_TO_BADGE`/`deriveBestWindow`/`formatBestWindowRange`
- * are exported so `app/saved/saved-locations-list.tsx`'s compact
- * per-location row (the multi-location dashboard this sprint's own
- * docstring deferred, closed out once sprint 37's saved locations
- * existed to list) reuses this exact verdict/best-window mapping rather
- * than re-deriving it.
- * `ConditionsSummary` shows apps/api's own already-reconciled
- * `wind_range_kt`/`wave_range_ft`/`wind_direction` (added to
- * `ForecastConditions` post-sprint-32 for exactly this) verbatim,
- * rather than re-deriving `app.domain.assembly`'s NWS-marine-zone-
- * over-NDBC-buoy source-preference policy from the per-source fields
- * on the frontend a second time.
+ * 1. "Today's forecast" -- the verdict as a big colored headline
+ *    ("CHALLENGING · 42/100") over apps/api's plain-language summary in
+ *    italic serif, then stat tiles for water temp, wind, waves (apps/api's
+ *    already-reconciled ranges, shown verbatim) and confidence/freshness.
+ * 2. "Fishing activity & day timeline" -- the tier-colored hourly chart.
+ * 3. "When to fish" -- `deriveBestWindow`'s best window as a tile.
+ * 4. Collapsible rows for tides, the hour-by-hour table (the chart's
+ *    accessible text alternative), sprint 33's per-source status, and
+ *    warnings.
  *
- * The `State` badge and `SourceStatusList` below are sprint 33's
- * "full/partial/stale/unavailable source-attributed snapshots" --
- * apps/api's `ForecastState`/`SourceState` vocabulary rendered
- * directly, not reinterpreted.
+ * The verdict is always visible text, never color alone.
+ * `VERDICT_TO_BADGE`/`deriveBestWindow`/`formatBestWindowRange` stay
+ * exported for `app/saved/saved-locations-list.tsx`'s compact rows.
  */
 export function ForecastCard({ forecast }: { forecast: ForecastEnvelope }) {
   const score = forecast.conditions?.score
@@ -665,88 +681,143 @@ export function ForecastCard({ forecast }: { forecast: ForecastEnvelope }) {
     minute: '2-digit',
   }).format(new Date(forecast.generated_at))
 
+  const verdict = score?.verdict ?? 'Unknown'
+  const conditions = forecast.conditions
+  const waterTemp = conditions?.water_temperature
+  const sourcesDown = forecast.sources.filter((source) => source.state !== 'ok').length
+
   return (
-    <Card className="flex flex-col gap-4">
-      <h2 className="text-sm font-medium text-text-muted">{forecast.location.label}</h2>
-
-      <div className="flex flex-col gap-2">
-        <Badge
-          variant={VERDICT_TO_BADGE[score?.verdict ?? 'Unknown']}
-          className="w-fit px-4 py-2 text-base"
-        >
-          {score?.verdict ?? 'Unknown'}
-        </Badge>
-        {bestWindow && (
-          <BestWindowCallout window={bestWindow} timezone={forecast.location.timezone} />
-        )}
-      </div>
-
-      {(forecast.conditions || score?.summary) && (
-        <div className="flex flex-col gap-2 rounded-[1.25rem] bg-bg px-4 py-3.5">
-          {forecast.conditions && <ConditionsSummary conditions={forecast.conditions} />}
-
+    <div className="flex flex-col gap-4">
+      <Card className="overflow-hidden p-0!">
+        <div className="flex flex-col gap-1.5 px-5 pb-4 pt-5">
+          <h2 className="section-label">Today&apos;s forecast</h2>
+          <p
+            className={cx(
+              'text-4xl font-extrabold uppercase leading-none tracking-tight sm:text-5xl',
+              VERDICT_TEXT[verdict],
+            )}
+          >
+            {verdict}
+            {score && score.score !== null && (
+              <span className="whitespace-nowrap"> · {score.score}/100</span>
+            )}
+          </p>
           {score?.summary && (
-            <details className="text-sm">
-              <summary className="cursor-pointer text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">
-                Score details{score.score !== null ? ` (${score.score}/100)` : ''}
-              </summary>
-              <p className="mt-2 text-text-muted">{score.summary}</p>
-            </details>
+            <p className="font-serif text-base italic text-text-muted">{score.summary}</p>
           )}
         </div>
-      )}
 
-      <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
-        <div>
-          <dt className="text-text-muted">State</dt>
-          <dd className="mt-1">
-            <Badge variant={FORECAST_STATE_TO_BADGE[forecast.state]}>
-              {capitalize(forecast.state)}
-            </Badge>
-          </dd>
-        </div>
-        <div>
-          <dt className="text-text-muted">Confidence</dt>
-          <dd className="font-medium text-text">{capitalize(forecast.confidence.level)}</dd>
-        </div>
-        <div>
-          <dt className="text-text-muted">Generated</dt>
-          <dd className="font-medium text-text">{generatedAtLabel}</dd>
-        </div>
-      </dl>
-
-      {forecast.sources.length > 0 && <SourceStatusList sources={forecast.sources} />}
-
-      {forecast.tides && (
-        <>
-          <TideChart tides={forecast.tides} timezone={forecast.location.timezone} />
-          <TideTable tides={forecast.tides} timezone={forecast.location.timezone} />
-        </>
-      )}
+        <dl className="grid grid-cols-2 gap-px border-t border-border bg-border sm:grid-cols-4">
+          {waterTemp && (
+            <div className="bg-surface">
+              <StatTile
+                label="Water temp"
+                value={`${waterTemp.value.toFixed(1)}°F`}
+                note={waterTemp.is_fallback ? 'monthly avg' : 'live reading'}
+                rule="border-t-tier-high"
+              />
+            </div>
+          )}
+          <div className="bg-surface">
+            <StatTile
+              label="Wind"
+              value={
+                conditions?.wind_range_kt
+                  ? `${conditions.wind_direction ? `${conditions.wind_direction} ` : ''}${formatRange(conditions.wind_range_kt)} kt`
+                  : '—'
+              }
+              note={conditions?.wind_range_kt ? 'next 24 h' : 'unavailable'}
+              rule="border-t-border"
+            />
+          </div>
+          <div className="bg-surface">
+            <StatTile
+              label="Waves"
+              value={conditions?.wave_range_ft ? `${formatRange(conditions.wave_range_ft)} ft` : '—'}
+              note={conditions?.wave_range_ft ? 'next 24 h' : 'unavailable'}
+              rule="border-t-border"
+            />
+          </div>
+          <div className="bg-surface">
+            <StatTile
+              label="Confidence"
+              value={capitalize(forecast.confidence.level)}
+              note={`Updated ${generatedAtLabel}`}
+              rule={
+                forecast.state === 'fresh'
+                  ? 'border-t-go-border'
+                  : forecast.state === 'unavailable'
+                    ? 'border-t-nogo-border'
+                    : 'border-t-marginal-border'
+              }
+            />
+          </div>
+        </dl>
+      </Card>
 
       {forecast.hourly_outlook && (
-        <>
+        <Card className="flex flex-col gap-4 border-t-2 border-t-tier-prime p-5!">
+          <h2 className="section-label">Fishing activity &amp; day timeline</h2>
           <HourlyOutlookChart outlook={forecast.hourly_outlook} />
-          <HourlyOutlookTable
-            outlook={forecast.hourly_outlook}
-            timezone={forecast.location.timezone}
-          />
-        </>
+        </Card>
       )}
 
-      {forecast.warnings.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <h3 className="text-sm font-medium text-text">Warnings</h3>
-          <ul className="flex flex-col gap-1 text-sm text-text-muted">
-            {forecast.warnings.map((warning) => (
-              <li key={warning.code} className="break-words">
-                {warning.message}
-              </li>
-            ))}
-          </ul>
-        </div>
+      {bestWindow && (
+        <Card className="flex flex-col gap-4 p-5!">
+          <h2 className="section-label">When to fish</h2>
+          <div className="flex flex-wrap justify-center gap-3">
+            <BestWindowCallout window={bestWindow} timezone={forecast.location.timezone} />
+          </div>
+        </Card>
       )}
-    </Card>
+
+      <div className="flex flex-col border-b border-border">
+        {forecast.tides && (
+          <CollapsibleSection title="Today's tides">
+            <TideChart tides={forecast.tides} timezone={forecast.location.timezone} />
+            <TideTable tides={forecast.tides} timezone={forecast.location.timezone} />
+          </CollapsibleSection>
+        )}
+
+        {forecast.hourly_outlook && (
+          <CollapsibleSection title="Hour by hour">
+            <HourlyOutlookTable
+              outlook={forecast.hourly_outlook}
+              timezone={forecast.location.timezone}
+            />
+          </CollapsibleSection>
+        )}
+
+        {forecast.sources.length > 0 && (
+          <CollapsibleSection
+            title="Data sources"
+            aside={
+              <Badge variant={FORECAST_STATE_TO_BADGE[forecast.state]}>
+                {capitalize(forecast.state)}
+                {sourcesDown > 0 && ` · ${sourcesDown} down`}
+              </Badge>
+            }
+          >
+            <SourceStatusList sources={forecast.sources} />
+          </CollapsibleSection>
+        )}
+
+        {forecast.warnings.length > 0 && (
+          <CollapsibleSection
+            title="Warnings"
+            aside={<Badge variant="marginal">{forecast.warnings.length}</Badge>}
+          >
+            <ul className="flex flex-col gap-1 text-sm text-text-muted">
+              {forecast.warnings.map((warning) => (
+                <li key={warning.code} className="break-words">
+                  {warning.message}
+                </li>
+              ))}
+            </ul>
+          </CollapsibleSection>
+        )}
+      </div>
+    </div>
   )
 }
 

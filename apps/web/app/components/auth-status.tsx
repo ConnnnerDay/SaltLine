@@ -22,13 +22,13 @@ export function AuthStatus() {
       <div className="flex items-center gap-3 sm:gap-4">
         <Link
           href="/login"
-          className="whitespace-nowrap text-sm font-semibold text-primary no-underline hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface rounded-sm"
+          className="whitespace-nowrap text-sm font-semibold text-white/85 no-underline hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-header rounded-sm"
         >
           Log in
         </Link>
         <Link
           href="/register"
-          className="whitespace-nowrap text-sm font-semibold text-primary no-underline hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface rounded-sm"
+          className="whitespace-nowrap rounded-md bg-[#d63c23] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white no-underline hover:bg-[#b8301b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-header"
         >
           Sign up
         </Link>
@@ -91,7 +91,7 @@ function AccountMenu({ name }: { name: string }) {
         aria-haspopup="true"
         aria-expanded={open}
         aria-label={`Account menu, ${name}`}
-        className="flex items-center gap-1.5 rounded-sm text-sm font-semibold text-primary no-underline hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        className="flex items-center gap-1.5 rounded-sm text-sm font-semibold text-white/85 no-underline hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-header"
       >
         <svg
           width="18"
@@ -121,7 +121,7 @@ function AccountMenu({ name }: { name: string }) {
         <div
           role="menu"
           aria-label="Account menu"
-          className="absolute right-0 top-full z-20 mt-2 w-48 rounded-lg border border-border bg-surface py-1.5 shadow-lg"
+          className="absolute right-0 top-full z-20 mt-2 w-48 rounded-lg border border-border bg-surface py-1.5 shadow-[0_8px_28px_rgb(0_0_0/45%)]"
         >
           <Link
             ref={firstItemRef}

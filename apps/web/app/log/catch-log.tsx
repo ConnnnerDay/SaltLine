@@ -4,6 +4,7 @@ import { useId, useState, type FormEvent } from 'react'
 import { Button, Card } from '@/app/components/ui'
 import type { CatchEntry } from '@/app/api/catches/route'
 import { compassLabel, formatRange } from '@/app/components/forecast-card'
+import { CatchInsights } from './catch-insights'
 
 export type LocationOption = { id: string; label: string }
 
@@ -36,6 +37,9 @@ function conditionsLine(entry: CatchEntry): string | null {
       `wind ${c.wind_direction ? `${compassLabel(c.wind_direction)} ` : ''}${formatRange(c.wind_range_kt)} kt`,
     )
   if (c.wave_range_ft) parts.push(`waves ${formatRange(c.wave_range_ft, 0.5)} ft`)
+  if (c.tide) parts.push(`${c.tide} tide`)
+  if (c.moon_phase) parts.push(c.moon_phase.toLowerCase())
+  if (c.solunar) parts.push(`${c.solunar} solunar`)
   return parts.length ? parts.join(' · ') : null
 }
 
@@ -209,6 +213,8 @@ export function CatchLog({
           {error}
         </p>
       )}
+
+      <CatchInsights catches={catches} />
 
       <section aria-labelledby="log-heading" className="flex flex-col gap-3">
         <h2 id="log-heading" className="section-label">

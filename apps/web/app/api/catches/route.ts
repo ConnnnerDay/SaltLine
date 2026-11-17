@@ -12,6 +12,10 @@ export type CatchConditions = {
   wave_range_ft: [number, number] | null
   verdict: string | null
   score: number | null
+  /** At the moment of the catch; absent on catches logged before these existed. */
+  tide?: 'incoming' | 'outgoing' | null
+  moon_phase?: string | null
+  solunar?: 'major' | 'minor' | null
 }
 
 export type CatchEntry = {

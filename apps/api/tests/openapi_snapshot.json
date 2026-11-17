@@ -216,6 +216,17 @@
       "CatchConditions": {
         "description": "What the forecast said at the spot when the catch was logged.",
         "properties": {
+          "moon_phase": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Moon Phase"
+          },
           "score": {
             "anyOf": [
               {
@@ -226,6 +237,28 @@
               }
             ],
             "title": "Score"
+          },
+          "solunar": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Solunar"
+          },
+          "tide": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tide"
           },
           "verdict": {
             "anyOf": [

@@ -1,5 +1,6 @@
 import { Badge, Button, Card, Container, Field } from '../components/ui'
 import { RigDiagram } from '../components/rig-diagram'
+import { WeatherAlerts } from '../components/sky'
 import { SpotDiagram, SPOTS } from '../components/spot-diagram'
 import type { Water } from '@/lib/fishing-style'
 import { RIGS, type RigId } from '@/lib/rigs'
@@ -32,6 +33,19 @@ export default function DesignSystemPage() {
           <h2 id="gallery-heading" className="text-2xl font-semibold text-text">
             Components
           </h2>
+
+          <div className="flex flex-col gap-3">
+            <h3 className="text-lg font-medium text-text">Weather alerts</h3>
+            <p className="text-sm text-text-muted">Sample NWS alerts at each severity (not live data).</p>
+            <WeatherAlerts
+              timezone="America/New_York"
+              alerts={[
+                { event: 'Gale Warning', severity: 'Severe', headline: 'Sample: Gale Warning until Wednesday morning', description: 'Sample text. Northeast winds 25 to 35 kt with gusts to 40 kt. Seas 8 to 12 ft.', expires: '2026-11-18T11:00:00-05:00' },
+                { event: 'Small Craft Advisory', severity: 'Moderate', headline: 'Sample: Small Craft Advisory until 6 PM', description: 'Sample text. Winds 20 to 25 kt. Seas 5 to 7 ft.', expires: '2026-11-17T18:00:00-05:00' },
+                { event: 'Rip Current Statement', severity: 'Minor', headline: 'Sample: High rip current risk', description: 'Sample text. Dangerous rip currents expected.' },
+              ]}
+            />
+          </div>
 
           <div className="flex flex-col gap-3">
             <h3 className="text-lg font-medium text-text">Where-to-fish cross-sections</h3>

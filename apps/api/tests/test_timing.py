@@ -220,3 +220,11 @@ class TestWind:
         calm = _outlook(wind_range=None)
         light = _outlook(wind_range=(2.0, 5.0))
         assert [h.level for h in calm.hours] == [h.level for h in light.hours]
+
+
+def test_in_window_handles_midnight_wrap() -> None:
+    from app.domain.timing import _in_window
+
+    assert _in_window(23, 22.5, 0.5) and _in_window(0, 22.5, 0.5)
+    assert not _in_window(12, 22.5, 0.5)
+    assert _in_window(11, 10.5, 12.5) and not _in_window(13, 10.5, 12.5)

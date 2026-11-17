@@ -117,7 +117,9 @@ async def log_catch(
             load_water_temp_profiles(),
             now=datetime.now(UTC),
         )
-        snapshot = conditions_snapshot(envelope.conditions)
+        snapshot = conditions_snapshot(
+            envelope.conditions, envelope.tides, body.caught_at
+        )
     except Exception:  # best-effort: never refuse a catch over weather data
         _logger.warning("no conditions snapshot for catch", exc_info=True)
 

@@ -310,6 +310,8 @@ def compute_solunar_times(
     def window(center: float, half_width_hours: float) -> SolunarPeriod:
         start = _hour_to_datetime(day, center - half_width_hours, tz)
         end = _hour_to_datetime(day, center + half_width_hours, tz)
+        if end <= start:  # the window crosses midnight: it ends tomorrow
+            end += timedelta(days=1)
         return SolunarPeriod(start=start, end=end)
 
     major_periods = sorted(

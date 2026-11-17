@@ -14,7 +14,7 @@ or a fresh assemble at log time, and is `None` when neither is available
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -62,6 +62,10 @@ class CatchConditions(BaseModel):
     wave_range_ft: list[float] | None = None
     verdict: str | None = None
     score: int | None = None
+    # At the moment of the catch (older catches lack these):
+    tide: str | None = None  # "incoming" | "outgoing"
+    moon_phase: str | None = None
+    solunar: str | None = None  # "major" | "minor" | None (outside both)
 
 
 class CatchOut(BaseModel):
@@ -81,13 +85,19 @@ class CatchOut(BaseModel):
 
 def conditions_snapshot(
     envelope_conditions: dict[str, Any] | None,
+    tides: dict[str, Any] | None = None,
+    caught_at: datetime | None = None,
 ) -> CatchConditions | None:
     """Pick the few decision-relevant fields out of a forecast envelope's
-    `conditions` payload (`app.domain.assembly.ForecastConditions`)."""
+    `conditions` payload (`app.domain.assembly.ForecastConditions`), plus
+    -- given the envelope's `tides` and the catch time -- the tide
+    direction, moon phase and solunar period at that moment, which the
+    catch log's "your patterns" view groups catches by."""
     if not envelope_conditions:
         return None
     water = envelope_conditions.get("water_temperature") or {}
     score = envelope_conditions.get("score") or {}
+    solunar = envelope_conditions.get("solunar") or {}
     return CatchConditions(
         water_temp_f=water.get("value"),
         water_temp_is_fallback=water.get("is_fallback"),
@@ -96,4 +106,67 @@ def conditions_snapshot(
         wave_range_ft=envelope_conditions.get("wave_range_ft"),
         verdict=score.get("verdict"),
         score=score.get("score"),
+        tide=_tide_at(tides, caught_at),
+        moon_phase=solunar.get("moon_phase") if _same_day(solunar, caught_at) else None,
+        solunar=_solunar_at(solunar, caught_at)
+        if _same_day(solunar, caught_at)
+        else None,
     )
+
+
+def _when(value: Any) -> datetime | None:
+    try:
+        moment = datetime.fromisoformat(str(value))
+    except ValueError:
+        return None
+    return moment if moment.tzinfo else moment.replace(tzinfo=UTC)
+
+
+def _tide_at(tides: dict[str, Any] | None, moment: datetime | None) -> str | None:
+    """Incoming when the next predicted extreme after *moment* is a high,
+    outgoing when it's a low. Only when the predictions bracket *moment*
+    (one before, one after): a catch logged days later falls outside the
+    forecast's tide window and gets no tide rather than a wrong one."""
+    if not tides or moment is None:
+        return None
+    times = sorted(
+        (when, prediction.get("kind"))
+        for prediction in tides.get("predictions", [])
+        if (when := _when(prediction.get("time"))) is not None
+    )
+    before = [entry for entry in times if entry[0] <= moment]
+    after = [entry for entry in times if entry[0] > moment]
+    if not before or not after:
+        return None
+    return "incoming" if after[0][1] == "high" else "outgoing"
+
+
+def _same_day(solunar: dict[str, Any], moment: datetime | None) -> bool:
+    """Whether *moment* falls within the day the solunar periods describe
+    (from 6 hours before the first period to 6 hours after the last), so
+    a backdated catch doesn't get today's moon."""
+    if moment is None:
+        return False
+    bounds = [
+        when
+        for kind in ("major", "minor")
+        for period in solunar.get(f"{kind}_periods", [])
+        for key in ("start", "end")
+        if (when := _when(period.get(key))) is not None
+    ]
+    if not bounds:
+        return False
+    return (
+        min(bounds) - timedelta(hours=6) <= moment <= max(bounds) + timedelta(hours=6)
+    )
+
+
+def _solunar_at(solunar: dict[str, Any], moment: datetime | None) -> str | None:
+    if moment is None:
+        return None
+    for kind in ("major", "minor"):
+        for period in solunar.get(f"{kind}_periods", []):
+            start, end = _when(period.get("start")), _when(period.get("end"))
+            if start and end and start <= moment <= end:
+                return kind
+    return None

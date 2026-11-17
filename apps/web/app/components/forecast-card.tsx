@@ -6,6 +6,9 @@ import { RIGS, rigsFor, type RigId } from '@/lib/rigs'
 import { RIG_FIT, RIG_WATER_TIPS, WATER_NOUN, WATER_PHRASE, watersFor } from '@/lib/fishing-style'
 import type { Preferences } from '@/app/api/preferences/route'
 import { WhereToFish, YourDay } from './your-day'
+import { SunAndMoon, WeatherAlerts, type SkyConditions } from './sky'
+import { NextDays } from './next-days'
+import { currentTime } from '@/lib/clock'
 import type { NearbyCam } from '@/lib/get-cams'
 import speciesPhotos from '@/lib/species-photos.json'
 
@@ -1220,6 +1223,10 @@ export function ForecastCard({
 
   return (
     <div className="rise-in flex min-w-0 flex-col gap-4 sm:gap-5">
+      <WeatherAlerts
+        alerts={(forecast.conditions as SkyConditions | null)?.alerts ?? []}
+        timezone={forecast.location.timezone}
+      />
       <Card className="overflow-hidden p-0!">
         <div className="flex flex-col gap-2 px-5 pb-5 pt-5 sm:px-6 sm:pt-6">
           <div className="flex items-start justify-between gap-4">
@@ -1302,6 +1309,8 @@ export function ForecastCard({
 
       <YourDay forecast={forecast} profile={profile} />
 
+      <NextDays forecast={forecast} profile={profile} />
+
       {forecast.hourly_outlook && (
         <Card className="flex flex-col gap-4">
           <SectionHeader title="Fishing activity today" aside="0–100, by hour" />
@@ -1325,6 +1334,8 @@ export function ForecastCard({
           </div>
         </Card>
       )}
+
+      <SunAndMoon forecast={forecast} now={currentTime()} />
 
       {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} />}
 

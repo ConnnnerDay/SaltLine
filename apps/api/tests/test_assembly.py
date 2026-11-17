@@ -742,3 +742,55 @@ async def test_unexpected_provider_exception_degrades_that_source_not_the_foreca
     marine = next(s for s in envelope.sources if s.provider == "nws:marine_zone")
     assert marine.state is SourceState.UNAVAILABLE
     assert envelope.conditions is not None
+
+
+@pytest.mark.asyncio
+async def test_buoy_falls_back_to_the_next_listed_station(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A decommissioned first buoy (NDBC 404) no longer blanks the
+    wave/wind readings: the next listed buoy is used instead."""
+    from app.domain import assembly
+    from app.infra.http_client import ProviderHTTPStatusError
+
+    real_fetch = assembly.fetch_buoy_observation
+    tried: list[str] = []
+
+    async def first_one_gone(client: BoundedHTTPClient, station_id: str) -> object:
+        tried.append(station_id)
+        if station_id == _WRIGHTSVILLE_BEACH.ndbc_stations[0]:
+            raise ProviderHTTPStatusError("404", status_code=404)
+        return await real_fetch(client, station_id)
+
+    monkeypatch.setattr(assembly, "fetch_buoy_observation", first_one_gone)
+    client = _make_client(nws_ok=True, coops_ok=True, ndbc_ok=True)
+    async with client:
+        envelope = await assemble_forecast(
+            _WRIGHTSVILLE_BEACH, client, _WATER_TEMP_PROFILES, now=_NOW
+        )
+
+    assert tried == _WRIGHTSVILLE_BEACH.ndbc_stations[:2]
+    buoy = next(s for s in envelope.sources if s.provider == "ndbc:buoy")
+    assert buoy.state is SourceState.OK
+
+
+@pytest.mark.asyncio
+async def test_buoy_unavailable_only_when_every_listed_station_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from app.domain import assembly
+    from app.infra.http_client import ProviderHTTPStatusError
+
+    async def all_gone(client: BoundedHTTPClient, station_id: str) -> object:
+        raise ProviderHTTPStatusError(f"{station_id} 404", status_code=404)
+
+    monkeypatch.setattr(assembly, "fetch_buoy_observation", all_gone)
+    client = _make_client(nws_ok=True, coops_ok=True, ndbc_ok=True)
+    async with client:
+        envelope = await assemble_forecast(
+            _WRIGHTSVILLE_BEACH, client, _WATER_TEMP_PROFILES, now=_NOW
+        )
+
+    buoy = next(s for s in envelope.sources if s.provider == "ndbc:buoy")
+    assert buoy.state is SourceState.UNAVAILABLE
+    assert buoy.detail == f"{_WRIGHTSVILLE_BEACH.ndbc_stations[0]} 404"

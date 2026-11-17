@@ -135,30 +135,35 @@ class BoundedHTTPClient:
     ) -> None:
         await self._client.aclose()
 
-    async def get_json(self, url: str, **kwargs: object) -> object:
+    async def get_json(
+        self, url: str, *, max_bytes: int | None = None, **kwargs: object
+    ) -> object:
         """GET `url`, retrying transient failures, and return the parsed
         JSON body. Raises a ProviderError subclass on any failure that
-        survives retries.
+        survives retries. *max_bytes* overrides the client-wide response
+        size limit for this one request (the station catalogs need more).
         """
-        response = await self._request_with_retries("GET", url, **kwargs)
+        response = await self._request_with_retries("GET", url, max_bytes, **kwargs)
         return response.json()
 
-    async def get_text(self, url: str, **kwargs: object) -> str:
+    async def get_text(
+        self, url: str, *, max_bytes: int | None = None, **kwargs: object
+    ) -> str:
         """GET `url`, retrying transient failures, and return the decoded
         response body as text (e.g. NDBC's fixed-width realtime2 format,
         which is not JSON). Raises a ProviderError subclass on any
-        failure that survives retries.
+        failure that survives retries. *max_bytes* as for `get_json`.
         """
-        response = await self._request_with_retries("GET", url, **kwargs)
+        response = await self._request_with_retries("GET", url, max_bytes, **kwargs)
         return response.text
 
     async def _request_with_retries(
-        self, method: str, url: str, **kwargs: object
+        self, method: str, url: str, max_bytes: int | None = None, **kwargs: object
     ) -> httpx.Response:
         attempt = 0
         while True:
             try:
-                return await self._request_once(method, url, **kwargs)
+                return await self._request_once(method, url, max_bytes, **kwargs)
             except (
                 ProviderConnectionError,
                 ProviderTimeoutError,
@@ -178,16 +183,17 @@ class BoundedHTTPClient:
                 attempt += 1
 
     async def _request_once(
-        self, method: str, url: str, **kwargs: object
+        self, method: str, url: str, max_bytes: int | None = None, **kwargs: object
     ) -> httpx.Response:
+        limit = max_bytes if max_bytes is not None else self._max_response_bytes
         try:
             async with self._client.stream(method, url, **kwargs) as response:  # type: ignore[arg-type]
                 body = bytearray()
                 async for chunk in response.aiter_bytes():
                     body.extend(chunk)
-                    if len(body) > self._max_response_bytes:
+                    if len(body) > limit:
                         raise ProviderResponseTooLargeError(
-                            f"{url} exceeded {self._max_response_bytes} byte limit"
+                            f"{url} exceeded {limit} byte limit"
                         )
                 if response.status_code >= 400:
                     raise ProviderHTTPStatusError(

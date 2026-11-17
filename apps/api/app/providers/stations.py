@@ -63,6 +63,12 @@ _NDBC_URL = "https://www.ndbc.noaa.gov/activestations.xml"
 
 _EARTH_RADIUS_MILES = 3958.8
 
+# The station catalogs outgrow BoundedHTTPClient's 2 MB default: CO-OPS'
+# tide-prediction catalog alone was 2.04 MB in Nov 2026, so every fetch
+# failed and dynamic points silently fell back to a curated neighbor's
+# stations. Catalogs get their own, roomier cap.
+CATALOG_MAX_BYTES = 10_000_000
+
 
 class CoopsStationCatalogEntry(BaseModel):
     id: str
@@ -220,7 +226,9 @@ async def _fetch_coops_catalog(
     client: BoundedHTTPClient, url: str, *, label: str
 ) -> list[CoopsStationCatalogEntry]:
     try:
-        data = cast("dict[str, Any]", await client.get_json(url))
+        data = cast(
+            "dict[str, Any]", await client.get_json(url, max_bytes=CATALOG_MAX_BYTES)
+        )
     except ProviderError:
         logger.warning("CO-OPS %s station catalog unavailable", label, exc_info=True)
         return []
@@ -249,7 +257,7 @@ async def fetch_ndbc_catalog(
     any provider failure or malformed XML — see the module docstring.
     """
     try:
-        text = await client.get_text(_NDBC_URL)
+        text = await client.get_text(_NDBC_URL, max_bytes=CATALOG_MAX_BYTES)
     except ProviderError:
         logger.warning("NDBC station catalog unavailable", exc_info=True)
         return []

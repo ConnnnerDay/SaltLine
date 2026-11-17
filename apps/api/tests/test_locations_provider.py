@@ -41,7 +41,7 @@ def test_load_curated_locations_golden_montauk() -> None:
         lng=-71.9544,
         timezone="America/New_York",
         coops_station="8510560",
-        ndbc_stations=["44025", "44017"],
+        ndbc_stations=["44025", "44097"],
         nws_zone="ANZ338",
         temp_region="northeast",
         conditions_region="atlantic_north",

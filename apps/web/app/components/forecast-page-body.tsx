@@ -2,6 +2,7 @@ import { LocationBar } from './location-bar'
 import type { NearbyCam } from '@/lib/get-cams'
 import { Container } from './ui'
 import { ForecastCard, ForecastErrorCard, type ForecastEnvelope } from './forecast-card'
+import type { Preferences } from '@/app/api/preferences/route'
 
 /**
  * The photo-hero-band-plus-card layout both forecast surfaces share:
@@ -17,6 +18,7 @@ export function ForecastPageBody({
   error,
   errorReason,
   cams,
+  profile = null,
   retryHref,
   backHref,
   backLabel,
@@ -28,6 +30,8 @@ export function ForecastPageBody({
   errorReason?: string | null
   /** Nearby public live-cam links (lib/get-cams.ts). */
   cams?: NearbyCam[]
+  /** The signed-in user's fishing profile (personalizes the card). */
+  profile?: Preferences | null
   /** Sprint 47: the current page's own URL, so a failed fetch gets a
    * real "Try again" action (see ForecastErrorCard) instead of only a
    * "back" link that leaves the failure unresolved. */
@@ -52,7 +56,7 @@ export function ForecastPageBody({
       <Container>
         <div className="flex flex-col gap-4 py-5 pb-16">
           {error && <ForecastErrorCard message={error} reason={errorReason} retryHref={retryHref} />}
-          {forecast && <ForecastCard forecast={forecast} cams={cams} />}
+          {forecast && <ForecastCard forecast={forecast} cams={cams} profile={profile} />}
           {children}
         </div>
       </Container>

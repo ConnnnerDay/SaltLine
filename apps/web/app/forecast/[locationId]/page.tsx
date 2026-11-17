@@ -7,6 +7,7 @@ import { SaveLocationButton } from '@/app/components/save-location-button'
 import { Button } from '@/app/components/ui'
 import type { ForecastEnvelope } from '@/app/components/forecast-card'
 import { auth } from '@/lib/auth'
+import type { Preferences } from '@/app/api/preferences/route'
 import { fetchForecast } from '@/lib/get-forecast'
 import { fetchNearbyCams } from '@/lib/get-cams'
 import { logForecastFailure, userFacingReason } from '@/lib/diagnose-api'
@@ -53,16 +54,15 @@ export default async function ForecastPage({ params }: Props) {
   let forecast: ForecastEnvelope | null = null
   let error: string | null = null
   let errorReason: string | null = null
-  const camsPromise = Promise.all([
-    fetchNearbyCams(locationId),
-    internalApiFetch<{ fishing_types: string[] | null }>('/v1/me/preferences', {
-      userId: session.user.id,
-    }).catch(() => null),
-  ]).then(([cams, prefs]) =>
-    // As in the original app: someone who doesn't fish piers isn't shown pier cams.
-    prefs?.fishing_types?.length && !prefs.fishing_types.includes('pier')
-      ? cams.filter((cam) => cam.cam_type !== 'pier')
-      : cams,
+  const profilePromise = internalApiFetch<Preferences>('/v1/me/preferences', {
+    userId: session.user.id,
+  }).catch(() => null)
+  const camsPromise = Promise.all([fetchNearbyCams(locationId), profilePromise]).then(
+    ([cams, prefs]) =>
+      // As in the original app: someone who doesn't fish piers isn't shown pier cams.
+      prefs?.fishing_types?.length && !prefs.fishing_types.includes('pier')
+        ? cams.filter((cam) => cam.cam_type !== 'pier')
+        : cams,
   )
 
   try {
@@ -82,6 +82,7 @@ export default async function ForecastPage({ params }: Props) {
       error={error}
       errorReason={errorReason}
       cams={await camsPromise}
+      profile={await profilePromise}
       retryHref={`/forecast/${encodeURIComponent(locationId)}`}
       backHref="/locations"
       backLabel="Back to search"

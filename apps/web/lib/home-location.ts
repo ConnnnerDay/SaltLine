@@ -1,6 +1,6 @@
 import { internalApiFetch } from './internal-api-client'
 
-type PreferencesSlice = { default_location_id: string | null }
+type PreferencesSlice = { default_location_id: string | null; profile_completed?: boolean }
 type SavedLocationSlice = { location_id: string }
 
 /**
@@ -21,5 +21,19 @@ export async function homeLocationId(userId: string): Promise<string | null> {
     return saved[0]?.location_id ?? null
   } catch {
     return null
+  }
+}
+
+/** Whether the signed-in user still needs the profile-setup wizard (never
+ * finished or skipped it). Any apps/api failure counts as "no", so a
+ * backend hiccup never traps someone in setup. */
+export async function needsProfileSetup(userId: string): Promise<boolean> {
+  try {
+    const preferences = await internalApiFetch<PreferencesSlice>('/v1/me/preferences', {
+      userId,
+    })
+    return preferences.profile_completed === false
+  } catch {
+    return false
   }
 }

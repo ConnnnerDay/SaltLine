@@ -102,7 +102,15 @@ export type ForecastEnvelope = {
   confidence: { level: string; reasons: string[] }
   warnings: { code: string; message: string; severity: string }[]
   conditions: {
-    score?: { score: number | null; verdict: ForecastVerdict; summary: string } | null
+    score?: {
+      score: number | null
+      verdict: ForecastVerdict
+      summary: string
+      /** Set when the signed-in user's comfort limits downgraded the verdict. */
+      personalized_from?: ForecastVerdict
+    } | null
+    /** Set when the day exceeds the signed-in user's comfort limits. */
+    comfort?: { over_limit: boolean; reasons: string[] } | null
     water_temperature: Observation
     wind_range_kt: [number, number] | null
     wave_range_ft: [number, number] | null
@@ -1041,15 +1049,24 @@ export function ForecastCard({
           <h2 className="section-label">Today&apos;s forecast</h2>
           <p
             className={cx(
-              'text-4xl font-extrabold uppercase leading-none tracking-tight sm:text-5xl',
+              'text-[2rem] font-extrabold uppercase leading-none tracking-tight break-words sm:text-5xl',
               VERDICT_TEXT[verdict],
             )}
           >
             {verdict}
             {score && score.score !== null && (
-              <span className="whitespace-nowrap"> · {score.score}/100</span>
+              <>
+                {' '}
+                <span className="whitespace-nowrap">· {score.score}/100</span>
+              </>
             )}
           </p>
+          {forecast.conditions?.comfort?.over_limit && (
+            <p className="w-fit rounded-md border border-marginal-border bg-marginal-bg px-2.5 py-1 text-xs font-semibold text-marginal-text">
+              Over your comfort limits
+              {score?.personalized_from && ` · ${score.personalized_from} for most anglers`}
+            </p>
+          )}
           {score?.summary && (
             <p className="font-serif text-base italic text-text-muted">{score.summary}</p>
           )}

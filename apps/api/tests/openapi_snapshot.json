@@ -608,6 +608,15 @@
         "title": "DisplayUnits",
         "type": "string"
       },
+      "Experience": {
+        "enum": [
+          "beginner",
+          "intermediate",
+          "experienced"
+        ],
+        "title": "Experience",
+        "type": "string"
+      },
       "ExportedAlert": {
         "properties": {
           "email": {
@@ -806,6 +815,21 @@
         "title": "ExportedSavedLocation",
         "type": "object"
       },
+      "FishingType": {
+        "description": "How someone fishes -- the original app's profile choices.",
+        "enum": [
+          "surf",
+          "pier",
+          "jetty",
+          "bridge",
+          "wade",
+          "kayak",
+          "inshore",
+          "offshore"
+        ],
+        "title": "FishingType",
+        "type": "string"
+      },
       "ForecastEnvelope": {
         "description": "The top-level response shape named in docs/CANONICAL_ROADMAP.md's\n\"Required API surface\" section. `conditions`, `tides`, `hourly_outlook`,\nand `recommendations` are opaque here on purpose \u2014 see module docstring.",
         "properties": {
@@ -904,6 +928,15 @@
           "unavailable"
         ],
         "title": "ForecastState",
+        "type": "string"
+      },
+      "GearUse": {
+        "enum": [
+          "yes",
+          "sometimes",
+          "no"
+        ],
+        "title": "GearUse",
         "type": "string"
       },
       "HTTPValidationError": {
@@ -1074,6 +1107,16 @@
             ],
             "title": "Default Location Id"
           },
+          "experience": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Experience"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "fishing_style": {
             "anyOf": [
               {
@@ -1084,6 +1127,25 @@
               }
             ],
             "title": "Fishing Style"
+          },
+          "fishing_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FishingType"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fishing Types"
+          },
+          "profile_completed": {
+            "default": false,
+            "title": "Profile Completed",
+            "type": "boolean"
           },
           "surf_threshold_ft": {
             "anyOf": [
@@ -1099,6 +1161,36 @@
           "units": {
             "$ref": "#/components/schemas/DisplayUnits",
             "default": "imperial"
+          },
+          "uses_cut_bait": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GearUse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uses_live_bait": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GearUse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uses_lures": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GearUse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "wind_threshold_kt": {
             "anyOf": [
@@ -1129,6 +1221,16 @@
             ],
             "title": "Default Location Id"
           },
+          "experience": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Experience"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "fishing_style": {
             "anyOf": [
               {
@@ -1139,6 +1241,32 @@
               }
             ],
             "title": "Fishing Style"
+          },
+          "fishing_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FishingType"
+                },
+                "maxItems": 8,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fishing Types"
+          },
+          "profile_completed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Completed"
           },
           "surf_threshold_ft": {
             "anyOf": [
@@ -1157,6 +1285,36 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/DisplayUnits"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uses_cut_bait": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GearUse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uses_live_bait": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GearUse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uses_lures": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GearUse"
               },
               {
                 "type": "null"

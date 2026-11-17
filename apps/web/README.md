@@ -8,6 +8,27 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Profile setup after sign-up (original wizard restored).** `/onboarding`
+is now a five-step, skippable setup (signed-in only):
+1. home spot (location search)
+2. how you fish (surf, pier, jetty, bridge, wade, kayak, inshore, offshore)
+3. gear (lures, live bait, cut bait: yes/sometimes/no)
+4. comfort limits (calm/moderate/rough presets, or exact wind/surf)
+5. experience
+
+"Finish" saves it all in one PATCH and opens the home spot's forecast.
+"/" sends signed-in users who haven't finished or skipped setup there,
+which covers accounts made before the wizard existed. With email
+verification on, registration shows "Check your email" and the link opens
+the wizard signed in.
+
+The forecast page requests a personalized forecast (`fetchForecast(id,
+userId)`), shows an "Over your comfort limits · <original> for most
+anglers" note, and hides pier cams for people who don't fish piers.
+Preferences now edits the same profile, with a location picker for the
+home spot. Also fixed: long verdict + score headlines overflowed at phone
+width.
+
 **Species photos (original feature restored).** "What's biting" cards and
 "Rigs & tips" show a photo of each species with its credit and license,
 linked to the Commons source page, as those licenses require. Photos are

@@ -8,6 +8,26 @@ never directly from a browser.
 
 ## Status
 
+**Fishing profile + personalized forecasts (original setup restored).**
+`UserPreferences` adds `fishing_types`, `uses_lures`/`uses_live_bait`/
+`uses_cut_bait` (yes/sometimes/no), `experience` and `profile_completed`
+(migration `b5e2c8d4f106`). This supersedes the narrower v1 field list at
+the product owner's request.
+
+`app/domain/personalize.py` overlays the signed-in user's profile on a
+copy of the shared, cached envelope; `GET /v1/forecasts/{id}` applies it
+when the signed request carries a user id:
+- A day over the user's wind/surf limit (high end of the range) gets an
+  `over_comfort_limit` warning, `conditions.comfort`, and its verdict drops
+  one level, with `score.personalized_from` and the reason added to the
+  summary. The score number is unchanged.
+- "Pack for today" drops lure rows for "no lures", and bait rows when both
+  live and cut bait are "no".
+- Anonymous requests, users without a profile, and any failure loading it
+  all get the shared envelope unchanged.
+
+Suite 508 passed.
+
 **Live data sources repaired.** A live scan of all 101 curated spots found
 only 47 with every source working. The legacy station ids had drifted:
 - 32 tide stations had no water-temperature sensor

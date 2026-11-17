@@ -35,19 +35,47 @@ function RegisterForm() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [checkEmail, setCheckEmail] = useState(false)
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
     setError(null)
     setIsSubmitting(true)
-    const { error: signUpError } = await signUp.email({ name, email, password })
+    const onboarding = `/onboarding?next=${encodeURIComponent(next)}`
+    const { data, error: signUpError } = await signUp.email({
+      name,
+      email,
+      password,
+      // Where the verification link lands (signed in, via lib/auth.ts's
+      // autoSignInAfterVerification) when this server requires one.
+      callbackURL: onboarding,
+    })
     setIsSubmitting(false)
     if (signUpError) {
       setError(signUpError.message ?? 'Could not create your account.')
       return
     }
-    router.push(`/onboarding?next=${encodeURIComponent(next)}`)
+    if (!data?.token) {
+      // Email verification is on (SMTP configured): no session until the
+      // link in the email is clicked, so say so instead of sending them to
+      // a sign-in-only setup page.
+      setCheckEmail(true)
+      return
+    }
+    router.push(onboarding)
     router.refresh()
+  }
+
+  if (checkEmail) {
+    return (
+      <Card role="status">
+        <h2 className="text-lg font-bold text-text">Check your email</h2>
+        <p className="mt-2 text-sm text-text-muted">
+          We sent a confirmation link to <span className="font-semibold text-text">{email}</span>.
+          Click it to finish creating your account and set up your fishing profile.
+        </p>
+      </Card>
+    )
   }
 
   return (

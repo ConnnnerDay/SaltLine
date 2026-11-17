@@ -65,7 +65,10 @@ async def update_preferences(
         row = UserPreferences(user_id=user_id)
         session.add(row)
 
-    for field, value in body.model_dump(exclude_unset=True).items():
+    # mode="json": store enums as their plain string values.
+    for field, value in body.model_dump(exclude_unset=True, mode="json").items():
+        if field == "profile_completed" and value is None:
+            continue  # NOT NULL flag: "null" means leave it alone
         setattr(row, field, value)
 
     await session.commit()

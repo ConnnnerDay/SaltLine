@@ -35,6 +35,7 @@ actual forecast request even if the write itself does.
 
 from __future__ import annotations
 
+import logging
 import time
 from datetime import UTC, datetime
 
@@ -48,6 +49,8 @@ from app.domain.forecast_cache import (
     refresh_and_assemble_forecast,
 )
 from app.domain.models import ForecastEnvelope
+from app.domain.personalize import personalize
+from app.domain.preferences import PreferencesOut, UserPreferences
 from app.providers.locations import load_water_temp_profiles
 
 router = APIRouter(
@@ -57,10 +60,35 @@ router = APIRouter(
 )
 
 
+_logger = logging.getLogger(__name__)
+
+
+async def _personalized(
+    envelope: ForecastEnvelope, user_id: str | None, state: AppState
+) -> ForecastEnvelope:
+    """Apply the signed-in user's fishing profile (app.domain.personalize).
+    Anonymous requests, or any failure loading the profile, get the shared
+    envelope unchanged -- personalization never costs anyone the forecast."""
+    if not user_id or state.db_sessionmaker is None:
+        return envelope
+    try:
+        async with state.db_sessionmaker() as session:
+            row = await session.get(UserPreferences, user_id)
+        if row is None:
+            return envelope
+        return personalize(
+            envelope, PreferencesOut.model_validate(row, from_attributes=True)
+        )
+    except Exception:
+        _logger.warning("could not personalize forecast", exc_info=True)
+        return envelope
+
+
 @router.get("/{location_id}")
 async def get_forecast(
     location_id: str,
     state: AppState = Depends(get_app_state),  # noqa: B008
+    user_id: str | None = Depends(require_internal_signature),
 ) -> ForecastEnvelope:
     started = time.perf_counter()
     location = await resolve_location_id(location_id, state)
@@ -82,7 +110,7 @@ async def get_forecast(
         ),
         now=datetime.now(UTC),
     )
-    return envelope
+    return await _personalized(envelope, user_id, state)
 
 
 @router.post("/{location_id}/refresh")

@@ -78,6 +78,12 @@ def test_get_with_no_row_returns_defaults(client: TestClient) -> None:
         "wind_threshold_kt": None,
         "surf_threshold_ft": None,
         "default_location_id": None,
+        "fishing_types": None,
+        "uses_lures": None,
+        "uses_live_bait": None,
+        "uses_cut_bait": None,
+        "experience": None,
+        "profile_completed": False,
     }
 
 
@@ -201,3 +207,47 @@ def test_missing_database_is_500_not_a_crash() -> None:
     finally:
         app.dependency_overrides.pop(get_app_state, None)
         app.dependency_overrides.pop(require_internal_signature, None)
+
+
+def test_fishing_profile_round_trips(client: TestClient) -> None:
+    resp = client.patch(
+        "/v1/me/preferences",
+        json={
+            "fishing_types": ["surf", "pier"],
+            "uses_lures": "sometimes",
+            "uses_live_bait": "yes",
+            "uses_cut_bait": "no",
+            "experience": "beginner",
+            "wind_threshold_kt": 15,
+            "surf_threshold_ft": 3,
+            "profile_completed": True,
+        },
+    )
+    assert resp.status_code == 200, resp.text
+    body = client.get("/v1/me/preferences").json()
+    assert body["fishing_types"] == ["surf", "pier"]
+    assert body["uses_cut_bait"] == "no"
+    assert body["experience"] == "beginner"
+    assert body["profile_completed"] is True
+
+
+def test_profile_completed_null_leaves_it_alone(client: TestClient) -> None:
+    client.patch("/v1/me/preferences", json={"profile_completed": True})
+    client.patch(
+        "/v1/me/preferences", json={"profile_completed": None, "units": "metric"}
+    )
+    assert client.get("/v1/me/preferences").json()["profile_completed"] is True
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [
+        {"fishing_types": ["skydiving"]},
+        {"uses_lures": "maybe"},
+        {"experience": "guru"},
+    ],
+)
+def test_invalid_profile_values_are_rejected(
+    client: TestClient, bad: dict[str, object]
+) -> None:
+    assert client.patch("/v1/me/preferences", json=bad).status_code == 422

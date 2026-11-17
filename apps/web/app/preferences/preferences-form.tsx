@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button, Card, Field } from '@/app/components/ui'
 import { cx } from '@/app/components/ui/cx'
 import type { Preferences } from '@/app/api/preferences/route'
+import { LocationSearch } from '@/app/components/location-search'
+import { FISHING_TYPES, type Gear } from '@/lib/profile-options'
 
 const EMPTY: Preferences = {
   units: 'imperial',
@@ -11,7 +13,18 @@ const EMPTY: Preferences = {
   wind_threshold_kt: null,
   surf_threshold_ft: null,
   default_location_id: null,
+  fishing_types: null,
+  uses_lures: null,
+  uses_live_bait: null,
+  uses_cut_bait: null,
+  experience: null,
+  profile_completed: false,
 }
+
+const CHOICE =
+  'rounded-md border px-3 py-2 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring'
+const CHOICE_ON = 'border-primary bg-primary text-primary-contrast'
+const CHOICE_OFF = 'border-border bg-transparent text-text-muted hover:border-primary'
 
 function toInputValue(value: number | null): string {
   return value === null ? '' : String(value)
@@ -41,6 +54,7 @@ export function PreferencesForm() {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  const [homeName, setHomeName] = useState<string | null>(null)
   const requestIdRef = useRef(0)
 
   const load = useCallback(() => {
@@ -126,21 +140,100 @@ export function PreferencesForm() {
           </div>
         </div>
 
-        <Field
-          label="Fishing style"
-          placeholder="e.g. surf, pier, kayak"
-          value={preferences.fishing_style ?? ''}
-          onChange={(event) =>
-            setPreferences((p) => ({ ...p, fishing_style: event.target.value || null }))
-          }
-        />
+        <fieldset className="mb-4 flex flex-col gap-1.5">
+          <legend className="mb-1.5 text-sm font-medium text-text">How you fish</legend>
+          <div className="flex flex-wrap gap-2">
+            {FISHING_TYPES.map((type) => {
+              const selected = preferences.fishing_types?.includes(type.value) ?? false
+              return (
+                <button
+                  key={type.value}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() =>
+                    setPreferences((p) => {
+                      const current = p.fishing_types ?? []
+                      const next = selected
+                        ? current.filter((value) => value !== type.value)
+                        : [...current, type.value]
+                      return { ...p, fishing_types: next.length ? next : null }
+                    })
+                  }
+                  className={cx(CHOICE, selected ? CHOICE_ON : CHOICE_OFF)}
+                >
+                  {type.label}
+                </button>
+              )
+            })}
+          </div>
+        </fieldset>
+
+        {(
+          [
+            ['uses_lures', 'Lures'],
+            ['uses_live_bait', 'Live bait'],
+            ['uses_cut_bait', 'Cut bait'],
+          ] as const
+        ).map(([field, label]) => (
+          <fieldset key={field} className="mb-4 flex flex-col gap-1.5">
+            <legend className="mb-1.5 text-sm font-medium text-text">{label}</legend>
+            <div className="flex gap-2">
+              {(['yes', 'sometimes', 'no'] as Gear[]).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  aria-pressed={preferences[field] === option}
+                  onClick={() =>
+                    setPreferences((p) => ({
+                      ...p,
+                      [field]: p[field] === option ? null : option,
+                    }))
+                  }
+                  className={cx(
+                    CHOICE,
+                    'capitalize',
+                    preferences[field] === option ? CHOICE_ON : CHOICE_OFF,
+                  )}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        ))}
+
+        <fieldset className="mb-4 flex flex-col gap-1.5">
+          <legend className="mb-1.5 text-sm font-medium text-text">Experience</legend>
+          <div className="flex flex-wrap gap-2">
+            {(['beginner', 'intermediate', 'experienced'] as const).map((option) => (
+              <button
+                key={option}
+                type="button"
+                aria-pressed={preferences.experience === option}
+                onClick={() =>
+                  setPreferences((p) => ({
+                    ...p,
+                    experience: p.experience === option ? null : option,
+                  }))
+                }
+                className={cx(
+                  CHOICE,
+                  'capitalize',
+                  preferences.experience === option ? CHOICE_ON : CHOICE_OFF,
+                )}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        </fieldset>
 
         <Field
           label="Max wind (kt)"
           type="number"
           min={0}
           max={100}
-          hint="Fish above this and the go/no-go leans against you."
+          hint="Days over your limits get flagged and rated a step lower."
           value={toInputValue(preferences.wind_threshold_kt)}
           onChange={(event) =>
             setPreferences((p) => ({
@@ -164,18 +257,20 @@ export function PreferencesForm() {
           }
         />
 
-        <Field
-          label="Default location ID"
-          placeholder="e.g. wrightsville-beach-nc"
-          hint="A curated location ID from /locations -- a location picker is a follow-up."
-          value={preferences.default_location_id ?? ''}
-          onChange={(event) =>
-            setPreferences((p) => ({
-              ...p,
-              default_location_id: event.target.value || null,
-            }))
-          }
-        />
+        <div className="mb-4 flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-text">Home spot</span>
+          <p className="text-sm text-text-muted">
+            {homeName ?? preferences.default_location_id ?? 'None yet'} — the forecast
+            Saltline opens to.
+          </p>
+          <LocationSearch
+            label="Change home spot"
+            onSelect={(location) => {
+              setHomeName(`${location.name}, ${location.state}`)
+              setPreferences((p) => ({ ...p, default_location_id: location.id }))
+            }}
+          />
+        </div>
 
         {/* Sprint 47: a save failure is a whole-form outcome (the PATCH
             either applied or it didn't), not a validation error on

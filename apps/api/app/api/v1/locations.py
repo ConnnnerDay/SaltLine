@@ -50,6 +50,7 @@ from app.api.deps import AppState, get_app_state, resolve_location_id
 from app.api.internal_auth import require_internal_signature
 from app.domain.analytics import AnalyticsEventIn, AnalyticsEventType, try_record_event
 from app.providers.coastal_bounds import is_valid_coordinate
+from app.providers.inaturalist import RecentSightings, fetch_recent_sightings
 from app.providers.live_cams import DEFAULT_RADIUS_MILES, NearbyCam, find_nearby_cams
 from app.providers.locations import (
     CuratedLocation,
@@ -167,3 +168,17 @@ async def nearby_spots(
         for match in matches
         if match.location.id != location.id
     ][:limit]
+
+
+@router.get("/{location_id}/sightings")
+async def recent_sightings(
+    location_id: str,
+    state: AppState = Depends(get_app_state),  # noqa: B008
+) -> RecentSightings | None:
+    """Fish recently seen near a location (iNaturalist research-grade
+    observations, last 60 days, within ~15 miles). `null` when iNaturalist
+    can't be reached -- the forecast page just leaves the section out."""
+    location = await resolve_location_id(location_id, state)
+    return await fetch_recent_sightings(
+        state.http_client, location.lat, location.lng, datetime.now(UTC)
+    )

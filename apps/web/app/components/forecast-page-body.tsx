@@ -3,6 +3,7 @@ import type { NearbyCam } from '@/lib/get-cams'
 import { Container } from './ui'
 import { ForecastCard, ForecastErrorCard, type ForecastEnvelope } from './forecast-card'
 import { NearbySpots } from './nearby-spots'
+import { SeenNearby } from './seen-nearby'
 import type { Preferences } from '@/app/api/preferences/route'
 
 /**
@@ -72,6 +73,7 @@ export function ForecastPageBody({
               userId={userId}
             />
           )}
+          {forecast && <SeenNearby locationId={forecast.location.id} />}
           {children}
         </div>
       </Container>

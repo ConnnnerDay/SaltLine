@@ -1489,6 +1489,45 @@
         "title": "PreferencesUpdate",
         "type": "object"
       },
+      "RecentSightings": {
+        "properties": {
+          "days": {
+            "title": "Days",
+            "type": "integer"
+          },
+          "radius_miles": {
+            "title": "Radius Miles",
+            "type": "number"
+          },
+          "recent": {
+            "items": {
+              "$ref": "#/components/schemas/Sighting"
+            },
+            "title": "Recent",
+            "type": "array"
+          },
+          "species": {
+            "items": {
+              "$ref": "#/components/schemas/SeenSpecies"
+            },
+            "title": "Species",
+            "type": "array"
+          },
+          "total_species": {
+            "title": "Total Species",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "radius_miles",
+          "days",
+          "total_species",
+          "species",
+          "recent"
+        ],
+        "title": "RecentSightings",
+        "type": "object"
+      },
       "ResolvedLocation": {
         "description": "A forecast-ready location \u2014 either a curated spot as-is, or an\nassembled dynamic point. `is_dynamic=False` means every field came\ndirectly from `CuratedLocation`; `is_dynamic=True` means station IDs\nwere resolved from live catalogs and the coarse regional fields were\ninherited from the nearest curated neighbor (see\n`resolve_dynamic_location`).\n\n`anchor_miles` is `None` for a curated location \u2014 it *is* the named\nspot, so there's no meaningful \"distance to the nearest real\nstation\" to report \u2014 and for a dynamic point where no anchor\n(curated neighbor, CO-OPS station, or NDBC buoy) was found at all.\nOtherwise it's `resolve_dynamic_location`'s nearest-anchor distance,\nadded so a later confidence assessment (`app.domain.confidence`) has\nreal distance data to work with instead of none at all.",
         "properties": {
@@ -1638,6 +1677,123 @@
           "saved_at"
         ],
         "title": "SavedLocationOut",
+        "type": "object"
+      },
+      "SeenSpecies": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "photo_credit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Credit"
+          },
+          "photo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Url"
+          },
+          "scientific_name": {
+            "title": "Scientific Name",
+            "type": "string"
+          },
+          "taxon_url": {
+            "title": "Taxon Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "scientific_name",
+          "count",
+          "taxon_url"
+        ],
+        "title": "SeenSpecies",
+        "type": "object"
+      },
+      "Sighting": {
+        "properties": {
+          "distance_miles": {
+            "title": "Distance Miles",
+            "type": "number"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "observed_on": {
+            "format": "date",
+            "title": "Observed On",
+            "type": "string"
+          },
+          "photo_credit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Credit"
+          },
+          "photo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Url"
+          },
+          "place": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Place"
+          },
+          "scientific_name": {
+            "title": "Scientific Name",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "scientific_name",
+          "observed_on",
+          "distance_miles",
+          "url"
+        ],
+        "title": "Sighting",
         "type": "object"
       },
       "SourceState": {
@@ -2186,6 +2342,57 @@
           }
         },
         "summary": "Nearby Spots",
+        "tags": [
+          "locations"
+        ]
+      }
+    },
+    "/v1/locations/{location_id}/sightings": {
+      "get": {
+        "description": "Fish recently seen near a location (iNaturalist research-grade\nobservations, last 60 days, within ~15 miles). `null` when iNaturalist\ncan't be reached -- the forecast page just leaves the section out.",
+        "operationId": "recent_sightings_v1_locations__location_id__sightings_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "location_id",
+            "required": true,
+            "schema": {
+              "title": "Location Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/RecentSightings"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Recent Sightings V1 Locations  Location Id  Sightings Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Recent Sightings",
         "tags": [
           "locations"
         ]

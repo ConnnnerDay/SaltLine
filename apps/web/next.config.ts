@@ -48,7 +48,9 @@ const CSP_DIRECTIVES = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data:",
+  // iNaturalist's photo hosts, for the CC-licensed photos in "Fish seen
+  // nearby lately" (app/components/seen-nearby.tsx) -- nothing else.
+  "img-src 'self' data: https://inaturalist-open-data.s3.amazonaws.com https://static.inaturalist.org",
   "font-src 'self'",
   "connect-src 'self'",
   "object-src 'none'",

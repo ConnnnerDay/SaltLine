@@ -1,7 +1,7 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
-import { homeLocationId } from '@/lib/home-location'
+import { homeLocationId, needsProfileSetup } from '@/lib/home-location'
 import { Button, Container } from './components/ui'
 
 /**
@@ -57,6 +57,7 @@ const POPULAR_SPOTS = [
 export default async function Home() {
   const session = await auth.api.getSession({ headers: await headers() })
   if (session) {
+    if (await needsProfileSetup(session.user.id)) redirect('/onboarding')
     const home = await homeLocationId(session.user.id)
     redirect(home ? `/forecast/${encodeURIComponent(home)}` : '/locations')
   }

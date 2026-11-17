@@ -33,10 +33,62 @@ from __future__ import annotations
 from enum import Enum
 
 from pydantic import BaseModel, Field
-from sqlalchemy import CheckConstraint, Float, String
+from sqlalchemy import JSON, Boolean, CheckConstraint, Float, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.infra.database import Base
+
+
+class FishingType(str, Enum):
+    """How someone fishes -- the original app's profile choices."""
+
+    SURF = "surf"
+    PIER = "pier"
+    JETTY = "jetty"
+    BRIDGE = "bridge"
+    WADE = "wade"
+    KAYAK = "kayak"
+    INSHORE = "inshore"
+    OFFSHORE = "offshore"
+
+
+class TargetGroup(str, Enum):
+    """The original profile's "What are you mostly fishing for?"."""
+
+    BOTTOM = "bottom"
+    PELAGIC = "pelagic"
+    STRUCTURE = "structure"
+    GAMEFISH = "gamefish"
+    INSHORE_SLAM = "inshore_slam"
+
+
+class FishingTime(str, Enum):
+    """The original profile's "When do you typically go fishing?"."""
+
+    DAWN = "dawn"
+    MORNING = "morning"
+    AFTERNOON = "afternoon"
+    EVENING = "evening"
+    NIGHT = "night"
+
+
+class TidePreference(str, Enum):
+    INCOMING = "incoming"
+    OUTGOING = "outgoing"
+    HIGH = "high"
+    LOW = "low"
+
+
+class GearUse(str, Enum):
+    YES = "yes"
+    SOMETIMES = "sometimes"
+    NO = "no"
+
+
+class Experience(str, Enum):
+    BEGINNER = "beginner"
+    INTERMEDIATE = "intermediate"
+    EXPERIENCED = "experienced"
 
 
 class DisplayUnits(str, Enum):
@@ -70,6 +122,18 @@ class UserPreferences(Base):
     wind_threshold_kt: Mapped[float | None] = mapped_column(Float, nullable=True)
     surf_threshold_ft: Mapped[float | None] = mapped_column(Float, nullable=True)
     default_location_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    # Fishing profile (restored from the original app's setup wizard; the
+    # product owner asked for it back, which supersedes the narrower field
+    # list above). Used to personalize forecasts: app.domain.personalize.
+    fishing_types: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    uses_lures: Mapped[str | None] = mapped_column(String, nullable=True)
+    uses_live_bait: Mapped[str | None] = mapped_column(String, nullable=True)
+    uses_cut_bait: Mapped[str | None] = mapped_column(String, nullable=True)
+    experience: Mapped[str | None] = mapped_column(String, nullable=True)
+    profile_completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    target_groups: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    fishing_times: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    tide_preference: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 class PreferencesOut(BaseModel):
@@ -84,6 +148,15 @@ class PreferencesOut(BaseModel):
     wind_threshold_kt: float | None = None
     surf_threshold_ft: float | None = None
     default_location_id: str | None = None
+    fishing_types: list[FishingType] | None = None
+    uses_lures: GearUse | None = None
+    uses_live_bait: GearUse | None = None
+    uses_cut_bait: GearUse | None = None
+    experience: Experience | None = None
+    profile_completed: bool = False
+    target_groups: list[TargetGroup] | None = None
+    fishing_times: list[FishingTime] | None = None
+    tide_preference: TidePreference | None = None
 
 
 class PreferencesUpdate(BaseModel):
@@ -101,3 +174,12 @@ class PreferencesUpdate(BaseModel):
     wind_threshold_kt: float | None = Field(default=None, ge=0, le=100)
     surf_threshold_ft: float | None = Field(default=None, ge=0, le=60)
     default_location_id: str | None = None
+    fishing_types: list[FishingType] | None = Field(default=None, max_length=8)
+    uses_lures: GearUse | None = None
+    uses_live_bait: GearUse | None = None
+    uses_cut_bait: GearUse | None = None
+    experience: Experience | None = None
+    profile_completed: bool | None = None
+    target_groups: list[TargetGroup] | None = Field(default=None, max_length=5)
+    fishing_times: list[FishingTime] | None = Field(default=None, max_length=5)
+    tide_preference: TidePreference | None = None

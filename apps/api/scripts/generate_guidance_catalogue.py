@@ -21,6 +21,9 @@ _OUT_PATH = _API_ROOT / "app" / "data" / "guidance_species.json"
 _LEGACY_REGS_PATH = _API_ROOT.parent.parent / "storage" / "regulations_data.json"
 _LEGACY_REGS_MODULE = _API_ROOT.parent.parent / "regulations.py"
 _LEGACY_SPECIES_MODULE = _API_ROOT.parent.parent / "domain" / "species.py"
+_LEGACY_CLASSIFICATIONS = (
+    _API_ROOT.parent.parent / "storage" / "species_classifications.json"
+)
 _LEGACY_LOCATIONS_MODULE = _API_ROOT.parent.parent / "locations.py"
 _CAMS_OUT_PATH = _API_ROOT / "app" / "data" / "live_cams.json"
 # Legacy `domain/species.py` condition sets -> the tag each becomes here.
@@ -112,6 +115,10 @@ def _legacy_condition_tags() -> dict[str, list[str]]:
 def main() -> None:
     legacy = {entry["name"]: entry for entry in json.loads(_LEGACY_PATH.read_text())}
     condition_tags = _legacy_condition_tags()
+    # The original profile's "What are you mostly fishing for?" groups.
+    target_groups: dict[str, list[str]] = json.loads(
+        _LEGACY_CLASSIFICATIONS.read_text()
+    )["target_categories"]
     species = []
     for legacy_name, name, regions in _PICKS:
         entry = legacy[legacy_name]
@@ -123,6 +130,9 @@ def main() -> None:
         }
         record.update({field: entry[field] for field in _COPIED_FIELDS})
         record["conditions"] = condition_tags.get(legacy_name, [])
+        record["targets"] = [
+            group for group, names in target_groups.items() if legacy_name in names
+        ]
         species.append(record)
 
     payload = {

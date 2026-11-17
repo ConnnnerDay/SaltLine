@@ -14,6 +14,15 @@ export type Preferences = {
   wind_threshold_kt: number | null
   surf_threshold_ft: number | null
   default_location_id: string | null
+  fishing_types: string[] | null
+  uses_lures: 'yes' | 'sometimes' | 'no' | null
+  uses_live_bait: 'yes' | 'sometimes' | 'no' | null
+  uses_cut_bait: 'yes' | 'sometimes' | 'no' | null
+  experience: 'beginner' | 'intermediate' | 'experienced' | null
+  profile_completed: boolean
+  target_groups: string[] | null
+  fishing_times: string[] | null
+  tide_preference: 'incoming' | 'outgoing' | 'high' | 'low' | null
 }
 
 /**

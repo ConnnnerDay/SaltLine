@@ -29,6 +29,10 @@ export default async function PreferencesPage() {
             <p className="mt-3 text-text-muted">
               Units, fishing style, and personal comfort thresholds.
             </p>
+            <p className="mt-2 text-sm">
+              <a href="/onboarding?next=/preferences">Re-run the fishing profile setup</a> to
+              change your targets, usual times, and preferred tide.
+            </p>
           </header>
           <PreferencesForm />
         </div>

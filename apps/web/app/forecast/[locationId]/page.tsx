@@ -10,7 +10,7 @@ import { auth } from '@/lib/auth'
 import { fetchForecast } from '@/lib/get-forecast'
 import { fetchNearbyCams } from '@/lib/get-cams'
 import { logForecastFailure, userFacingReason } from '@/lib/diagnose-api'
-import { InternalApiError } from '@/lib/internal-api-client'
+import { InternalApiError, internalApiFetch } from '@/lib/internal-api-client'
 
 // Forecasts are live, per-request data -- never build-time content. See
 // app/forecast/[locationId]/page.tsx's git history / the roadmap
@@ -53,10 +53,20 @@ export default async function ForecastPage({ params }: Props) {
   let forecast: ForecastEnvelope | null = null
   let error: string | null = null
   let errorReason: string | null = null
-  const camsPromise = fetchNearbyCams(locationId)
+  const camsPromise = Promise.all([
+    fetchNearbyCams(locationId),
+    internalApiFetch<{ fishing_types: string[] | null }>('/v1/me/preferences', {
+      userId: session.user.id,
+    }).catch(() => null),
+  ]).then(([cams, prefs]) =>
+    // As in the original app: someone who doesn't fish piers isn't shown pier cams.
+    prefs?.fishing_types?.length && !prefs.fishing_types.includes('pier')
+      ? cams.filter((cam) => cam.cam_type !== 'pier')
+      : cams,
+  )
 
   try {
-    forecast = await getForecast(locationId)
+    forecast = await getForecast(locationId, session.user.id)
   } catch (err) {
     if (err instanceof InternalApiError && err.status === 404) {
       notFound()

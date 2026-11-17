@@ -10,8 +10,14 @@ import type { ForecastEnvelope } from '@/app/components/forecast-card'
  * its own local `cache()` (React's request-scoped memoization) since
  * `cache()` keys are per-call-site, not shareable across modules.
  */
-export function fetchForecast(locationId: string): Promise<ForecastEnvelope> {
+export function fetchForecast(
+  locationId: string,
+  userId?: string,
+): Promise<ForecastEnvelope> {
+  // With a userId, apps/api overlays that user's fishing profile (comfort
+  // limits, gear) on the shared forecast -- apps/api's app.domain.personalize.
   return internalApiFetch<ForecastEnvelope>(
     `/v1/forecasts/${encodeURIComponent(locationId)}`,
+    userId ? { userId } : {},
   )
 }

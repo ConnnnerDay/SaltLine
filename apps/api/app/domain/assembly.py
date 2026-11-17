@@ -459,7 +459,7 @@ async def assemble_forecast(
         _fetch_buoy(client, location.ndbc_stations, now),
         fetch_point_alerts(client, location.lat, location.lng),
         _fetch_tides(client, location.coops_station, now, location.timezone),
-        fetch_point_weather(client, location.lat, location.lng),
+        fetch_point_weather(client, location.lat, location.lng, [location.name]),
     )
 
     sources = [

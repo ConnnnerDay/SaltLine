@@ -10,6 +10,7 @@ import { SunAndMoon, WeatherAlerts, type SkyConditions } from './sky'
 import { NextDays } from './next-days'
 import { WindAndWaves } from './wind-waves'
 import { PressureAndWater } from './pressure-water'
+import { SurfZone } from './surf-zone'
 import { WeatherIcon } from './weather-icon'
 import { currentTime } from '@/lib/clock'
 import type { NearbyCam } from '@/lib/get-cams'
@@ -1367,6 +1368,8 @@ export function ForecastCard({
       <SunAndMoon forecast={forecast} now={currentTime()} />
 
       <WindAndWaves forecast={forecast} />
+
+      <SurfZone forecast={forecast} />
 
       <PressureAndWater
         forecast={forecast}

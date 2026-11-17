@@ -1,6 +1,8 @@
 import { Badge, type BadgeVariant, Button, Card } from './ui'
 import { cx } from './ui/cx'
 import { HourlyChart } from './hourly-chart'
+import { RigDiagram } from './rig-diagram'
+import { RIGS, rigsFor, type RigId } from '@/lib/rigs'
 import type { NearbyCam } from '@/lib/get-cams'
 import speciesPhotos from '@/lib/species-photos.json'
 
@@ -949,71 +951,166 @@ function formatAsOf(asOf: string): string {
   return `${_MONTH_NAMES[month - 1].slice(0, 3)} ${year}`
 }
 
-/** Sprint 35's per-pick tackle detail (the original "Rigs & tips" row). */
+/**
+ * "Rigs & tips": the rigs today's picks call for, taught once each --
+ * a diagram (rig-diagram.tsx), how to tie it and how to fish it
+ * (lib/rigs.ts) -- then the exact hook, sinker and setup for each of
+ * today's fish that use it. Rigs are ordered by the best-ranked pick
+ * that uses them as its main rig; a fish that lists an alternative rig
+ * is named under that rig too ("also works for").
+ */
 function RigsAndTips({ guidance }: { guidance: FishingGuidance }) {
+  const groups = new Map<RigId, { main: SpeciesPick[]; also: SpeciesPick[] }>()
+  for (const pick of guidance.species) {
+    rigsFor(pick.rig).forEach((id, index) => {
+      const group = groups.get(id) ?? { main: [], also: [] }
+      ;(index === 0 ? group.main : group.also).push(pick)
+      groups.set(id, group)
+    })
+  }
+  const ordered = [...groups.entries()]
+    .filter(([, group]) => group.main.length > 0)
+    .concat([...groups.entries()].filter(([, group]) => group.main.length === 0))
+
   return (
     <>
-      <ul className="flex flex-col gap-4">
-        {guidance.species.map((pick) => (
-          <li key={pick.id} className="flex flex-col gap-2 border-b border-border pb-4 last:border-b-0 last:pb-0">
-            <h3 className="text-base font-bold text-text">{pick.name}</h3>
-            <SpeciesPhotoFigure id={pick.id} name={pick.name} />
-            <p className="text-sm leading-relaxed text-text-muted">{pick.explanation}</p>
-            <dl className="grid grid-cols-1 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-[auto_1fr]">
-              <dt className="section-label pt-0.5">Rig</dt>
-              <dd className="text-text">{pick.rig}</dd>
-              <dt className="section-label pt-0.5">Hook</dt>
-              <dd className="text-text">{pick.hook_size}</dd>
-              <dt className="section-label pt-0.5">Sinker</dt>
-              <dd className="text-text">{pick.sinker}</dd>
-              <dt className="section-label pt-0.5">Bait</dt>
-              <dd className="text-text">{pick.bait}</dd>
-              <dt className="section-label pt-0.5">Lures</dt>
-              <dd className="text-text">{pick.lures}</dd>
-              <dt className="section-label pt-0.5">Why</dt>
-              <dd className="text-text-muted">{pick.reasons.join(' · ')}</dd>
-              {pick.regulation && (
-                <>
-                  <dt className="section-label pt-0.5">Limits ({pick.regulation.state})</dt>
-                  <dd className="flex flex-col gap-0.5 text-text">
-                    <span>
-                      {[
-                        pick.regulation.min_size && `Min ${pick.regulation.min_size}`,
-                        pick.regulation.bag_limit,
-                        pick.regulation.season,
-                      ]
-                        .filter(Boolean)
-                        .join(' · ')}
+      <ol className="flex flex-col gap-4">
+        {ordered.map(([id, group]) => {
+          const rig = RIGS[id]
+          const fish = [...group.main, ...group.also]
+          return (
+            <li
+              key={id}
+              className="grid grid-cols-1 gap-5 rounded-md border border-border bg-surface-raised p-4 sm:p-5 md:grid-cols-[minmax(0,22rem)_1fr]"
+            >
+              <div className="flex flex-col gap-3">
+                <div className="rounded-md border border-border bg-bg/60 p-2">
+                  <RigDiagram id={id} className="h-auto w-full" />
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                  <span className="text-text-muted">For today:</span>
+                  {group.main.map((pick) => (
+                    <span key={pick.id} className="rounded-full bg-primary-tint px-2 py-0.5 font-semibold text-primary">
+                      {pick.name}
                     </span>
-                    {pick.regulation.notes && (
-                      <span className="text-text-muted">{pick.regulation.notes}</span>
-                    )}
-                    <span className="text-xs text-text-muted">
-                      As of {formatAsOf(pick.regulation.as_of)}
-                      {pick.regulation.possibly_outdated && ' — may be out of date'}
-                      {pick.regulation.source_url && (
-                        <>
-                          {' · '}
-                          <a
-                            href={pick.regulation.source_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-semibold text-primary underline-offset-2 hover:underline"
-                          >
-                            Official {pick.regulation.state} rules
-                          </a>
-                        </>
-                      )}
+                  ))}
+                  {group.also.length > 0 && (
+                    <span className="text-text-muted">
+                      {group.main.length > 0 ? 'also ' : ''}
+                      {group.also.map((pick) => pick.name).join(', ')}
                     </span>
-                  </dd>
-                </>
-              )}
-            </dl>
-          </li>
-        ))}
-      </ul>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex min-w-0 flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <h3 className="text-lg font-bold text-text">{rig.name}</h3>
+                  <p className="text-sm leading-relaxed text-text-muted">{rig.summary}</p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                  <section className="flex flex-col gap-2">
+                    <h4 className="section-label">How to tie it</h4>
+                    <ol className="flex flex-col gap-2 text-sm text-text">
+                      {rig.tie.map((step, index) => (
+                        <li key={step} className="flex gap-2.5">
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-border text-[0.6875rem] font-bold tabular-nums text-text">
+                            {index + 1}
+                          </span>
+                          <span className="leading-relaxed">{step}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </section>
+                  <section className="flex flex-col gap-2">
+                    <h4 className="section-label">Fishing it</h4>
+                    <ul className="flex flex-col gap-2 text-sm text-text">
+                      {rig.tips.map((tip) => (
+                        <li key={tip} className="flex gap-2.5">
+                          <span aria-hidden="true" className="mt-[0.55rem] h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                          <span className="leading-relaxed">{tip}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                </div>
+
+                <section className="flex flex-col gap-2 border-t border-border pt-3">
+                  <h4 className="section-label">Hook &amp; sinker for today&apos;s fish</h4>
+                  <ul className="flex flex-col gap-2.5">
+                    {fish.map((pick) => (
+                      <li key={pick.id} className="flex flex-col gap-0.5 text-sm">
+                        <span className="font-semibold text-text">{pick.name}</span>
+                        <span className="text-text">
+                          <span className="text-text-muted">Hook </span>
+                          {pick.hook_size}
+                          <span className="text-text-muted"> · Sinker </span>
+                          {pick.sinker}
+                        </span>
+                        <span className="text-xs text-text-muted">
+                          Setup: {pick.rig}
+                          {pick.lures && !/not (a |typically )?(primary )?lure|rarely taken on lures/i.test(pick.lures) && ` · Lures: ${pick.lures}`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              </div>
+            </li>
+          )
+        })}
+      </ol>
       <p className="text-xs text-text-muted">{guidance.disclaimer}</p>
     </>
+  )
+}
+
+/** "Size & bag limits": the state rules for today's picks, each with its
+ * snapshot date and a link to the official source. */
+function SizeAndBagLimits({ guidance }: { guidance: FishingGuidance }) {
+  const picks = guidance.species.filter((pick) => pick.regulation)
+  return (
+    <ul className="flex flex-col divide-y divide-border">
+      {picks.map((pick) => {
+        const regulation = pick.regulation!
+        return (
+          <li key={pick.id} className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0 text-sm">
+            <span className="flex flex-wrap items-baseline justify-between gap-x-3">
+              <span className="font-semibold text-text">{pick.name}</span>
+              <span className="text-xs text-text-muted">{regulation.state}</span>
+            </span>
+            <span className="text-text">
+              {[
+                regulation.min_size && `Min ${regulation.min_size}`,
+                regulation.bag_limit,
+                regulation.season,
+              ]
+                .filter(Boolean)
+                .join(' · ') || 'See state rules'}
+            </span>
+            {regulation.notes && <span className="text-text-muted">{regulation.notes}</span>}
+            <span className="text-xs text-text-muted">
+              As of {formatAsOf(regulation.as_of)}
+              {regulation.possibly_outdated && ' — may be out of date'}
+              {regulation.source_url && (
+                <>
+                  {' · '}
+                  <a
+                    href={regulation.source_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-primary underline-offset-2 hover:underline"
+                  >
+                    Official {regulation.state} rules
+                  </a>
+                </>
+              )}
+            </span>
+          </li>
+        )
+      })}
+    </ul>
   )
 }
 
@@ -1197,6 +1294,12 @@ export function ForecastCard({
         {forecast.recommendations && forecast.recommendations.species.length > 0 && (
           <CollapsibleSection title="Rigs & tips">
             <RigsAndTips guidance={forecast.recommendations} />
+          </CollapsibleSection>
+        )}
+
+        {forecast.recommendations?.species.some((pick) => pick.regulation) && (
+          <CollapsibleSection title="Size & bag limits">
+            <SizeAndBagLimits guidance={forecast.recommendations} />
           </CollapsibleSection>
         )}
 

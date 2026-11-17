@@ -1,4 +1,6 @@
 import { Badge, Button, Card, Container, Field } from '../components/ui'
+import { RigDiagram } from '../components/rig-diagram'
+import { RIGS, type RigId } from '@/lib/rigs'
 
 /**
  * Sprint 27's design-system gallery, moved off `/` once the Saltline
@@ -28,6 +30,23 @@ export default function DesignSystemPage() {
           <h2 id="gallery-heading" className="text-2xl font-semibold text-text">
             Components
           </h2>
+
+          <div className="flex flex-col gap-3">
+            <h3 className="text-lg font-medium text-text">Rig diagrams</h3>
+            <p className="text-sm text-text-muted">
+              Every rig the &quot;Rigs &amp; tips&quot; section can show (lib/rigs.ts).
+            </p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {(Object.keys(RIGS) as RigId[]).map((id) => (
+                <Card key={id} className="flex flex-col gap-2">
+                  <span className="text-sm font-semibold text-text">{RIGS[id].name}</span>
+                  <div className="rounded-md border border-border bg-bg/60 p-2">
+                    <RigDiagram id={id} className="h-auto w-full" />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
 
           <div className="flex flex-col gap-3">
             <h3 className="text-lg font-medium text-text">Forecast verdict</h3>

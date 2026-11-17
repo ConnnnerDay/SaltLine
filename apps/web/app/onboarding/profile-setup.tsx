@@ -15,6 +15,7 @@ import {
   type Gear,
 } from '@/lib/profile-options'
 import type { Preferences } from '@/app/api/preferences/route'
+import { SpotMap, type MapSpot } from '@/app/components/spot-map'
 
 const STEP_TITLES = [
   'Where do you fish most?',
@@ -88,7 +89,7 @@ function GearRow({
  * everything in one PATCH (marking the profile complete) and goes to the
  * home spot's forecast, or to search if no spot was picked.
  */
-export function ProfileSetup({ next }: { next: string }) {
+export function ProfileSetup({ next, spots = [] }: { next: string; spots?: MapSpot[] }) {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [home, setHome] = useState<LocationSearchResult | null>(null)
@@ -219,6 +220,20 @@ export function ProfileSetup({ next }: { next: string }) {
             Your home spot is the forecast Saltline opens to. You can change it any time.
           </p>
           <LocationSearch onSelect={setHome} label="Search for your spot" />
+          {spots.length > 0 && (
+            <>
+              <div className="flex items-center gap-3 text-xs text-text-muted">
+                <span className="h-px flex-1 bg-border" aria-hidden="true" />
+                or pick one on the map
+                <span className="h-px flex-1 bg-border" aria-hidden="true" />
+              </div>
+              <SpotMap
+                spots={spots}
+                selectedId={home?.id ?? savedHomeId}
+                onSelect={(spot) => setHome({ id: spot.id, name: spot.name, state: spot.state, lat: spot.lat, lng: spot.lng })}
+              />
+            </>
+          )}
           {home ? (
             <p className="text-sm text-text" role="status">
               Home spot: <span className="font-bold">{home.name}, {home.state}</span>

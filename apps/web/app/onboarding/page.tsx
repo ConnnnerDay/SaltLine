@@ -4,6 +4,8 @@ import type { Metadata } from 'next'
 import { Container } from '@/app/components/ui'
 import { auth } from '@/lib/auth'
 import { safeRedirectTarget } from '@/lib/safe-redirect'
+import { internalApiFetch } from '@/lib/internal-api-client'
+import type { MapSpot } from '@/app/components/spot-map'
 import { ProfileSetup } from './profile-setup'
 
 export const dynamic = 'force-dynamic'
@@ -22,12 +24,14 @@ export default async function OnboardingPage({ searchParams }: Props) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session) redirect('/login?next=/onboarding')
   const { next } = await searchParams
+  // For the home-spot map; search still works if this fails.
+  const spots = await internalApiFetch<MapSpot[]>('/v1/locations').catch(() => [])
 
   return (
     <main>
       <Container>
         <div className="mx-auto flex max-w-2xl flex-col gap-6 py-10 sm:py-14">
-          <ProfileSetup next={safeRedirectTarget(next ?? null, '/locations')} />
+          <ProfileSetup next={safeRedirectTarget(next ?? null, '/locations')} spots={spots} />
         </div>
       </Container>
     </main>

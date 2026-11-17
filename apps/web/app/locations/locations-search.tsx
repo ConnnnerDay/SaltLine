@@ -6,6 +6,7 @@ import { Card, Container } from '@/app/components/ui'
 import { rememberHomeIfUnset } from '@/lib/remember-home'
 import { LocationSearch } from '@/app/components/location-search'
 import { UseMyLocationButton } from '@/app/components/use-my-location-button'
+import { SpotMap } from '@/app/components/spot-map'
 
 /**
  * Sprint 31 (text search plus device geolocation -- see LocationSearch's
@@ -82,9 +83,18 @@ export function LocationsSearchPage({ locations = [] }: { locations?: BrowseLoca
           )}
 
           {locations.length > 0 && (
+            <section aria-labelledby="map-heading" className="flex flex-col gap-3">
+              <h2 id="map-heading" className="section-label">
+                Or pick one on the map
+              </h2>
+              <SpotMap spots={locations} selectedId={selected?.id ?? null} onSelect={(spot) => void handleSelect(spot)} />
+            </section>
+          )}
+
+          {locations.length > 0 && (
             <section aria-labelledby="browse-heading" className="flex flex-col gap-4">
               <h2 id="browse-heading" className="section-label">
-                Or browse every spot
+                Or browse the list
               </h2>
               {COASTS.map((coast) => {
                 const spots = locations

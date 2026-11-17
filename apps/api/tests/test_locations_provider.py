@@ -245,3 +245,19 @@ def test_resolve_dynamic_location_nws_zone_not_inherited_when_too_far() -> None:
 
     assert resolved.nws_zone == ""
     assert anchor_miles > 1000.0
+
+
+def test_dynamic_name_places_the_point_relative_to_the_nearest_spot() -> None:
+    from app.providers.locations import _dynamic_name
+
+    wb = next(
+        loc for loc in load_curated_locations() if loc.id == "wrightsville-beach-nc"
+    )
+    assert _dynamic_name(wb.lat, wb.lng, wb, 0.5) == "Near Wrightsville Beach"
+    # ~20 miles due north-west of the beach.
+    assert (
+        _dynamic_name(wb.lat + 0.2, wb.lng - 0.24, wb, 19.6)
+        == "20 mi NW of Wrightsville Beach"
+    )
+    assert _dynamic_name(30.0, -60.0, wb, 400.0) == "Coastal spot (30.00, -60.00)"
+    assert _dynamic_name(30.0, -60.0, None, float("inf")).startswith("Coastal spot")

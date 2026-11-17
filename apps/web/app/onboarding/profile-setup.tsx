@@ -236,7 +236,7 @@ export function ProfileSetup({ next, spots = [] }: { next: string; spots?: MapSp
           )}
           {home ? (
             <p className="text-sm text-text" role="status">
-              Home spot: <span className="font-bold">{home.name}, {home.state}</span>
+              Home spot: <span className="font-bold">{home.name}{home.state ? `, ${home.state}` : ''}</span>
             </p>
           ) : (
             savedHomeId && (

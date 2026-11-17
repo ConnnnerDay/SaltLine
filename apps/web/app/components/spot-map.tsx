@@ -6,6 +6,7 @@ import { feature, mesh } from 'topojson-client'
 import type { GeometryCollection, Topology } from 'topojson-specification'
 import usStates from 'us-atlas/states-10m.json'
 import { cx } from './ui/cx'
+import type { ResolvedLocation } from '@/app/api/locations/resolve/route'
 
 /**
  * A clickable map of the curated spots, for picking one by where it is
@@ -23,7 +24,10 @@ import { cx } from './ui/cx'
  * Tapping anywhere else drops a pin there and lists the closest spots to
  * it, with distances -- "I fish near here, what's closest?" -- and when
  * the selection changes from outside (a search, a saved home spot) the
- * map zooms to that spot's state so its neighbors are in view.
+ * map zooms to that spot's state so its neighbors are in view. "Fish
+ * right at my pin" resolves the pin itself into a spot (apps/api builds a
+ * forecast for any coastal point from its nearest NOAA stations), for
+ * anglers whose water is between the curated spots.
  */
 
 export type MapSpot = {
@@ -77,6 +81,9 @@ export function SpotMap({
   const [state, setState] = useState<string | null>(null)
   const [hovered, setHovered] = useState<MapSpot | null>(null)
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null)
+  const [pinStatus, setPinStatus] = useState<'idle' | 'resolving' | 'error'>('idle')
+  const [pinError, setPinError] = useState<string | null>(null)
+  const [custom, setCustom] = useState<MapSpot | null>(null)
   // The selection this map last zoomed for (or picked itself): when the
   // selection changes from outside -- a search, a saved home spot -- the
   // map zooms to that spot's state, so it shows among its neighbors.
@@ -87,7 +94,7 @@ export function SpotMap({
       setZoomedFor(selectedId)
       setCoast(coastOf(spot))
       setState(spot.state)
-      setPin(null)
+      movePin(null)
     }
   }
   const coasts = COASTS.filter((c) => c.key === 'all' || spots.some(c.match))
@@ -128,10 +135,46 @@ export function SpotMap({
     return { path: geoPath(projection), points, projection }
   }, [coast, spots, visible])
 
+  function movePin(next: { lat: number; lng: number } | null) {
+    setPin(next)
+    setPinStatus('idle')
+    setPinError(null)
+  }
+
   function pickCoast(key: string) {
     setCoast(key)
     setState(null)
-    setPin(null)
+    movePin(null)
+  }
+
+  async function fishAtPin() {
+    if (!pin) return
+    setPinStatus('resolving')
+    setPinError(null)
+    try {
+      const response = await fetch('/api/locations/resolve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lat: pin.lat, lng: pin.lng }),
+      })
+      if (!response.ok) {
+        setPinStatus('error')
+        setPinError(
+          response.status === 422
+            ? 'No tide or buoy station is close enough to your pin for a forecast. Move it nearer the water, or pick one of the spots above.'
+            : 'Couldn’t set up a forecast for your pin right now. Try again, or pick one of the spots above.',
+        )
+        return
+      }
+      const resolved = (await response.json()) as ResolvedLocation
+      const spot = { id: resolved.id, name: resolved.name, state: resolved.state, lat: resolved.lat, lng: resolved.lng }
+      setCustom(spot)
+      setPinStatus('idle')
+      pick(spot)
+    } catch {
+      setPinStatus('error')
+      setPinError('Couldn’t set up a forecast for your pin right now. Try again, or pick one of the spots above.')
+    }
   }
 
   function pick(spot: MapSpot) {
@@ -146,7 +189,7 @@ export function SpotMap({
     const x = ((event.clientX - box.left) / box.width) * WIDTH
     const y = ((event.clientY - box.top) / box.height) * HEIGHT
     const lngLat = projection.invert?.([x, y])
-    setPin(lngLat ? { lng: lngLat[0], lat: lngLat[1] } : null)
+    movePin(lngLat ? { lng: lngLat[0], lat: lngLat[1] } : null)
   }
 
   const nearest = pin
@@ -157,7 +200,8 @@ export function SpotMap({
     : []
   const pinXY = pin ? projection([pin.lng, pin.lat]) : null
 
-  const selected = spots.find((spot) => spot.id === selectedId) ?? null
+  const selected =
+    spots.find((spot) => spot.id === selectedId) ?? (custom?.id === selectedId ? custom : null)
   const label = hovered ?? selected
 
   return (
@@ -183,7 +227,7 @@ export function SpotMap({
           {label ? (
             <>
               <span className="font-semibold text-text">{label.name}</span>
-              <span className="text-text-muted">, {label.state}</span>
+              {label.state && <span className="text-text-muted">, {label.state}</span>}
             </>
           ) : (
             <span className="text-text-muted">Tap a dot, or anywhere to find the closest</span>
@@ -282,7 +326,7 @@ export function SpotMap({
             <h3 className="text-sm font-semibold text-text">Closest spots to your pin</h3>
             <button
               type="button"
-              onClick={() => setPin(null)}
+              onClick={() => movePin(null)}
               className="text-xs font-semibold text-text-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
               Clear pin
@@ -315,6 +359,33 @@ export function SpotMap({
               </li>
             ))}
           </ul>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <button
+              type="button"
+              onClick={() => void fishAtPin()}
+              disabled={pinStatus === 'resolving'}
+              aria-pressed={!!custom && custom.id === selectedId}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm font-semibold text-text hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring disabled:opacity-60"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
+                <circle cx="12" cy="9.5" r="2.5" />
+              </svg>
+              {pinStatus === 'resolving'
+                ? 'Finding the nearest stations…'
+                : custom && custom.id === selectedId
+                  ? `Using your pin: ${custom.name}`
+                  : 'Fish right at my pin'}
+            </button>
+            <span className="text-xs text-text-muted">
+              Uses the NOAA tide and buoy stations nearest your pin.
+            </span>
+          </div>
+          {pinError && (
+            <p role="alert" className="text-sm text-danger-text">
+              {pinError}
+            </p>
+          )}
         </div>
       )}
     </div>

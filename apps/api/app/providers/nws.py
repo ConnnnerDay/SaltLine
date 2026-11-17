@@ -44,6 +44,7 @@ from typing import Any
 from pydantic import BaseModel
 
 from app.infra.http_client import BoundedHTTPClient, ProviderError, ProviderParseError
+from app.providers.surf_zone import SurfZoneForecast, fetch_surf_zone
 
 logger = logging.getLogger(__name__)
 
@@ -167,6 +168,7 @@ class PointWeather(BaseModel):
     now: WeatherNow | None = None
     days: list[WeatherDay] = []
     barometer: Barometer | None = None
+    surf_zone: SurfZoneForecast | None = None
 
 
 class GridpointWindForecast(BaseModel):
@@ -590,8 +592,23 @@ async def _fetch_barometer(
         return None
 
 
+async def _fetch_surf_zone(
+    client: BoundedHTTPClient, points: object, names: list[str]
+) -> SurfZoneForecast | None:
+    try:
+        office = str(_field(points, "cwa", "points"))
+        zone = str(_field(points, "forecastZone", "points")).rsplit("/", 1)[-1]
+        return await fetch_surf_zone(client, _NWS_HEADERS, office, zone, names)
+    except Exception:  # enrichment only; many offices issue none
+        logger.info("NWS surf zone forecast unavailable", exc_info=True)
+        return None
+
+
 async def fetch_point_weather(
-    client: BoundedHTTPClient, lat: float, lng: float
+    client: BoundedHTTPClient,
+    lat: float,
+    lng: float,
+    names: list[str] | None = None,
 ) -> PointWeather | None:
     """The standard NWS forecast for the land grid point nearest
     (lat, lng): air temperature, sky and rain chance, plus the barometer
@@ -603,12 +620,14 @@ async def fetch_point_weather(
         )
         forecast_url = _field(points, "forecast", "points")
         stations_url = _field(points, "observationStations", "points")
-        forecast, barometer = await asyncio.gather(
+        forecast, barometer, surf_zone = await asyncio.gather(
             client.get_json(forecast_url, headers=_NWS_HEADERS),
             _fetch_barometer(client, str(stations_url)),
+            _fetch_surf_zone(client, points, names or []),
         )
         weather = parse_point_weather(_field(forecast, "periods", forecast_url))
         weather.barometer = barometer
+        weather.surf_zone = surf_zone
         return weather
     except Exception:  # enrichment only: any failure just means no weather
         logger.warning("NWS point weather forecast unavailable", exc_info=True)

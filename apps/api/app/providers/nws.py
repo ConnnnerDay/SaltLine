@@ -79,6 +79,20 @@ _GRIDPOINT_WIND_SPEED_RE = re.compile(r"(\d+)(?:\s*to\s*(\d+))?\s*mph", re.IGNOR
 _MPH_TO_KNOTS = 0.868976
 
 
+class MarineDay(BaseModel):
+    """One calendar day of an NWS marine zone forecast: its day and night
+    periods combined. `label` is NWS's own name for the day's first
+    period ("Rest Of Today", "Wed", or "Tonight" when the forecast starts
+    in the evening)."""
+
+    label: str
+    wind_low_kt: float | None = None
+    wind_high_kt: float | None = None
+    wind_direction: str | None = None
+    wave_low_ft: float | None = None
+    wave_high_ft: float | None = None
+
+
 class MarineZoneConditions(BaseModel):
     """Wind and wave ranges parsed from an NWS marine zone forecast's first
     ~24 hours (3 periods). `None` fields mean the source text didn't
@@ -90,6 +104,8 @@ class MarineZoneConditions(BaseModel):
     wind_direction: str | None = None
     wave_low_ft: float | None = None
     wave_high_ft: float | None = None
+    # The whole forecast (usually 5 days), one entry per calendar day.
+    days: list[MarineDay] = []
 
 
 class GridpointWindForecast(BaseModel):
@@ -153,7 +169,52 @@ def parse_marine_zone_conditions(periods: list[dict[str, Any]]) -> MarineZoneCon
     if wave_ranges:
         conditions.wave_low_ft = min(s[0] for s in wave_ranges)
         conditions.wave_high_ft = max(s[1] for s in wave_ranges)
+    conditions.days = parse_marine_zone_days(periods)
     return conditions
+
+
+def _is_night_period(name: str) -> bool:
+    return "night" in name.lower()
+
+
+def parse_marine_zone_days(periods: list[dict[str, Any]]) -> list[MarineDay]:
+    """Group marine forecast periods into calendar days. NWS names periods
+    "Rest Of Today", "Tonight", "Wed", "Wed Night", ...: every period after
+    the first that isn't a night period starts a new day. Each day's wind
+    and seas span all of its periods (same regexes as
+    `parse_marine_zone_conditions`); direction is the first one named."""
+    grouped: list[tuple[str, list[str]]] = []
+    for index, period in enumerate(periods):
+        name = str(period.get("name") or "")
+        text = str(period.get("detailedForecast") or "")
+        if index == 0 or not _is_night_period(name):
+            grouped.append((name, [text]))
+        else:
+            grouped[-1][1].append(text)
+
+    days: list[MarineDay] = []
+    for label, texts in grouped:
+        day = MarineDay(label=label)
+        winds: list[tuple[float, float]] = []
+        seas: list[tuple[float, float]] = []
+        for text in texts:
+            if day.wind_direction is None and (match := _WIND_DIR_RE.search(text)):
+                raw = match.group(1)
+                day.wind_direction = _DIR_MAP.get(raw.lower(), raw.upper())
+            if match := _WIND_SPEED_RE.search(text):
+                low = float(match.group(1))
+                winds.append((low, float(match.group(2)) if match.group(2) else low))
+            if match := _SEA_HEIGHT_RE.search(text):
+                low = float(match.group(1))
+                seas.append((low, float(match.group(2)) if match.group(2) else low))
+        if winds:
+            day.wind_low_kt = min(w[0] for w in winds)
+            day.wind_high_kt = max(w[1] for w in winds)
+        if seas:
+            day.wave_low_ft = min(w[0] for w in seas)
+            day.wave_high_ft = max(w[1] for w in seas)
+        days.append(day)
+    return days
 
 
 def parse_gridpoint_wind(periods: list[dict[str, Any]]) -> GridpointWindForecast:

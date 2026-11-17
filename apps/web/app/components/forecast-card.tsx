@@ -7,6 +7,7 @@ import { RIG_FIT, RIG_WATER_TIPS, WATER_NOUN, WATER_PHRASE, watersFor } from '@/
 import type { Preferences } from '@/app/api/preferences/route'
 import { WhereToFish, YourDay } from './your-day'
 import { SunAndMoon, WeatherAlerts, type SkyConditions } from './sky'
+import { NextDays } from './next-days'
 import { currentTime } from '@/lib/clock'
 import type { NearbyCam } from '@/lib/get-cams'
 import speciesPhotos from '@/lib/species-photos.json'
@@ -1307,6 +1308,8 @@ export function ForecastCard({
       </Card>
 
       <YourDay forecast={forecast} profile={profile} />
+
+      <NextDays forecast={forecast} profile={profile} />
 
       {forecast.hourly_outlook && (
         <Card className="flex flex-col gap-4">

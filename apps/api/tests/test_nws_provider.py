@@ -37,7 +37,7 @@ def test_parse_marine_zone_conditions_abbreviated_direction() -> None:
 
     result = parse_marine_zone_conditions(periods)
 
-    assert result == MarineZoneConditions(
+    assert result.model_copy(update={"days": []}) == MarineZoneConditions(
         wind_low_kt=10.0,
         wind_high_kt=15.0,
         wind_direction="SW",
@@ -82,7 +82,7 @@ def test_parse_marine_zone_conditions_missing_fields_are_none() -> None:
 
     result = parse_marine_zone_conditions(periods)
 
-    assert result == MarineZoneConditions()
+    assert result.model_copy(update={"days": []}) == MarineZoneConditions()
 
 
 def test_parse_marine_zone_conditions_empty_periods() -> None:
@@ -453,3 +453,46 @@ def test_parse_alerts_limit_counts_kept_alerts_only() -> None:
         ]
     }
     assert [a.event for a in _parse_alerts(payload, limit=1)] == ["Gale Warning"]
+
+
+def test_parse_marine_zone_days_groups_day_and_night_periods() -> None:
+    from app.providers.nws import parse_marine_zone_days
+
+    periods = [
+        {
+            "name": "Rest Of Today",
+            "detailedForecast": "NE winds 10 to 15 kt. Seas 2 to 4 ft.",
+        },
+        {
+            "name": "Tonight",
+            "detailedForecast": "NE winds 15 to 20 kt. Seas 3 to 5 ft.",
+        },
+        {"name": "Wed", "detailedForecast": "N winds around 10 kt. Seas 2 ft."},
+        {
+            "name": "Wed Night",
+            "detailedForecast": "N winds 5 to 10 kt. Seas 1 to 2 ft.",
+        },
+        {"name": "Thu", "detailedForecast": "Variable winds less than 5 kt."},
+    ]
+    days = parse_marine_zone_days(periods)
+    assert [day.label for day in days] == ["Rest Of Today", "Wed", "Thu"]
+    today, wed, thu = days
+    assert (today.wind_low_kt, today.wind_high_kt, today.wave_high_ft) == (10, 20, 5)
+    assert (wed.wind_low_kt, wed.wind_high_kt, wed.wave_low_ft, wed.wave_high_ft) == (
+        5,
+        10,
+        1,
+        2,
+    )
+    assert wed.wind_direction == "N"
+    assert thu.wave_low_ft is None  # never guessed when the text doesn't say
+
+
+def test_parse_marine_zone_days_when_forecast_starts_at_night() -> None:
+    from app.providers.nws import parse_marine_zone_days
+
+    periods = [
+        {"name": "Tonight", "detailedForecast": "S winds 10 kt. Seas 2 ft."},
+        {"name": "Wed", "detailedForecast": "S winds 15 kt. Seas 3 ft."},
+    ]
+    assert [day.label for day in parse_marine_zone_days(periods)] == ["Tonight", "Wed"]

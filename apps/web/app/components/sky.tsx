@@ -134,10 +134,10 @@ function moonPath(ageDays: number, cx: number, cy: number, r: number): string | 
   ].join(' ')
 }
 
-function Moon({ ageDays }: { ageDays: number }) {
+export function Moon({ ageDays, className = 'h-20 w-20' }: { ageDays: number; className?: string }) {
   const lit = moonPath(ageDays, 40, 40, 32)
   return (
-    <svg viewBox="0 0 80 80" aria-hidden="true" className="h-20 w-20 shrink-0">
+    <svg viewBox="0 0 80 80" aria-hidden="true" className={cx('shrink-0', className)}>
       <circle cx={40} cy={40} r={32} className="fill-border" />
       {lit && <path d={lit} className="fill-[#f1ead2]" />}
       <circle cx={40} cy={40} r={32} fill="none" strokeWidth={1} className="stroke-text-muted/40" />
@@ -360,4 +360,16 @@ export function SunAndMoon({ forecast, now }: { forecast: ForecastEnvelope; now:
       </div>
     </Card>
   )
+}
+
+const WAXING = new Set(['New Moon', 'Waxing Crescent', 'First Quarter', 'Waxing Gibbous'])
+
+/** Moon age (days into the cycle) from a phase name and % lit -- enough
+ * to draw the moon for a day when only those two are known. */
+export function moonAge(phase: string, illuminationPct: number): number {
+  const cycle = 29.530588
+  const lit = Math.min(1, Math.max(0, illuminationPct / 100))
+  const angle = Math.acos(1 - 2 * lit) // 0 at new, pi at full
+  const fraction = angle / (2 * Math.PI)
+  return (WAXING.has(phase) ? fraction : 1 - fraction) * cycle
 }

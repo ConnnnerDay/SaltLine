@@ -184,6 +184,7 @@ from app.domain.normalize import (
     normalize_marine_zone_wind_range,
     normalize_water_temperature,
 )
+from app.domain.outlook import DayOutlook, build_day_outlook
 from app.domain.scoring import (
     ForecastScore,
     score_conditions,
@@ -276,6 +277,9 @@ class ForecastConditions(BaseModel):
     wind_range_kt: tuple[float, float] | None
     wave_range_ft: tuple[float, float] | None
     wind_direction: str | None
+    # The multi-day outlook (app.domain.outlook); empty when the marine
+    # zone forecast is unavailable.
+    days: list[DayOutlook] = []
 
 
 class ForecastTides(BaseModel):
@@ -682,6 +686,21 @@ async def assemble_forecast(
         if tides_result.value is not None
         else None
     )
+
+    # Enrichment only, like guidance below: never cost the forecast itself.
+    try:
+        conditions.days = build_day_outlook(
+            marine_zone_conditions.days if marine_zone_conditions else [],
+            now=now,
+            tz_name=location.timezone,
+            lat=location.lat,
+            lng=location.lng,
+            coast=wind_orientation_for_region(location.conditions_region),
+            water_temperature=water_temperature,
+            tide_predictions=tides_result.value,
+        )
+    except Exception:
+        _logger.exception("day outlook failed for %s", location.id)
 
     hourly_outlook: HourlyOutlook = build_hourly_outlook(
         sun_times=sun_times,

@@ -52,6 +52,33 @@ class FishingType(str, Enum):
     OFFSHORE = "offshore"
 
 
+class TargetGroup(str, Enum):
+    """The original profile's "What are you mostly fishing for?"."""
+
+    BOTTOM = "bottom"
+    PELAGIC = "pelagic"
+    STRUCTURE = "structure"
+    GAMEFISH = "gamefish"
+    INSHORE_SLAM = "inshore_slam"
+
+
+class FishingTime(str, Enum):
+    """The original profile's "When do you typically go fishing?"."""
+
+    DAWN = "dawn"
+    MORNING = "morning"
+    AFTERNOON = "afternoon"
+    EVENING = "evening"
+    NIGHT = "night"
+
+
+class TidePreference(str, Enum):
+    INCOMING = "incoming"
+    OUTGOING = "outgoing"
+    HIGH = "high"
+    LOW = "low"
+
+
 class GearUse(str, Enum):
     YES = "yes"
     SOMETIMES = "sometimes"
@@ -104,6 +131,9 @@ class UserPreferences(Base):
     uses_cut_bait: Mapped[str | None] = mapped_column(String, nullable=True)
     experience: Mapped[str | None] = mapped_column(String, nullable=True)
     profile_completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    target_groups: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    fishing_times: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    tide_preference: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 class PreferencesOut(BaseModel):
@@ -124,6 +154,9 @@ class PreferencesOut(BaseModel):
     uses_cut_bait: GearUse | None = None
     experience: Experience | None = None
     profile_completed: bool = False
+    target_groups: list[TargetGroup] | None = None
+    fishing_times: list[FishingTime] | None = None
+    tide_preference: TidePreference | None = None
 
 
 class PreferencesUpdate(BaseModel):
@@ -147,3 +180,6 @@ class PreferencesUpdate(BaseModel):
     uses_cut_bait: GearUse | None = None
     experience: Experience | None = None
     profile_completed: bool | None = None
+    target_groups: list[TargetGroup] | None = Field(default=None, max_length=5)
+    fishing_times: list[FishingTime] | None = Field(default=None, max_length=5)
+    tide_preference: TidePreference | None = None

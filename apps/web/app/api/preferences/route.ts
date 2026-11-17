@@ -20,6 +20,9 @@ export type Preferences = {
   uses_cut_bait: 'yes' | 'sometimes' | 'no' | null
   experience: 'beginner' | 'intermediate' | 'experienced' | null
   profile_completed: boolean
+  target_groups: string[] | null
+  fishing_times: string[] | null
+  tide_preference: 'incoming' | 'outgoing' | 'high' | 'low' | null
 }
 
 /**

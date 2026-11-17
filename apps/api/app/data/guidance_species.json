@@ -41,6 +41,10 @@
         "onshore_wind",
         "rough_surf",
         "low_light"
+      ],
+      "targets": [
+        "bottom",
+        "inshore_slam"
       ]
     },
     {
@@ -79,6 +83,9 @@
       "conditions": [
         "onshore_wind",
         "rough_surf"
+      ],
+      "targets": [
+        "bottom"
       ]
     },
     {
@@ -117,6 +124,9 @@
       "conditions": [
         "onshore_wind",
         "rough_surf"
+      ],
+      "targets": [
+        "pelagic"
       ]
     },
     {
@@ -156,6 +166,9 @@
       "conditions": [
         "calm_water",
         "low_light"
+      ],
+      "targets": [
+        "inshore_slam"
       ]
     },
     {
@@ -194,6 +207,9 @@
       "conditions": [
         "onshore_wind",
         "rough_surf"
+      ],
+      "targets": [
+        "bottom"
       ]
     },
     {
@@ -230,6 +246,9 @@
       "conditions": [
         "onshore_wind",
         "rough_surf"
+      ],
+      "targets": [
+        "bottom"
       ]
     },
     {
@@ -266,6 +285,9 @@
       "conditions": [
         "onshore_wind",
         "rough_surf"
+      ],
+      "targets": [
+        "bottom"
       ]
     },
     {
@@ -300,6 +322,9 @@
       "explanation_warm": "Sheepshead stack up around nearshore structure and pilings, picking at barnacles and crabs before moving offshore for spawning.",
       "conditions": [
         "calm_water"
+      ],
+      "targets": [
+        "structure"
       ]
     },
     {
@@ -338,6 +363,10 @@
       "conditions": [
         "onshore_wind",
         "low_light"
+      ],
+      "targets": [
+        "bottom",
+        "inshore_slam"
       ]
     },
     {
@@ -373,6 +402,9 @@
       "conditions": [
         "onshore_wind",
         "rough_surf"
+      ],
+      "targets": [
+        "bottom"
       ]
     },
     {
@@ -409,6 +441,9 @@
       "conditions": [
         "onshore_wind",
         "daytime"
+      ],
+      "targets": [
+        "pelagic"
       ]
     },
     {
@@ -441,6 +476,10 @@
       "explanation_warm": "Snook are rare visitors to NC during unusually warm summers; they are prized gamefish that ambush bait around inlets, docks and structure.",
       "conditions": [
         "calm_water"
+      ],
+      "targets": [
+        "gamefish",
+        "inshore_slam"
       ]
     },
     {
@@ -477,6 +516,9 @@
         "onshore_wind",
         "rough_surf",
         "low_light"
+      ],
+      "targets": [
+        "pelagic"
       ]
     },
     {
@@ -511,6 +553,9 @@
       "explanation_warm": "Tautog become less active as water warms and move to deeper structure; early spring offers a window before they thin out.",
       "conditions": [
         "calm_water"
+      ],
+      "targets": [
+        "structure"
       ]
     },
     {
@@ -543,7 +588,10 @@
       "lures": "Small jigs (1-2 oz bucktail), soft plastic crabs/shrimp on drop-shot rigs, small diamond jigs near structure",
       "explanation_cold": "Inshore black sea bass inhabit wrecks and hard bottom, feeding on crabs, shrimp and small fish; bottom-fish with squid or cut bait.",
       "explanation_warm": "Black sea bass are abundant over nearshore reefs and wrecks, aggressively hitting squid strips and cut bait.",
-      "conditions": []
+      "conditions": [],
+      "targets": [
+        "structure"
+      ]
     },
     {
       "id": "barred-surfperch",
@@ -579,6 +627,9 @@
       "conditions": [
         "onshore_wind",
         "rough_surf"
+      ],
+      "targets": [
+        "bottom"
       ]
     },
     {
@@ -615,6 +666,9 @@
       "conditions": [
         "onshore_wind",
         "rough_surf"
+      ],
+      "targets": [
+        "bottom"
       ]
     },
     {
@@ -650,6 +704,9 @@
       "explanation_warm": "California halibut move into shallow sandy areas near piers, jetties, and in the surf zone to ambush baitfish; cast parallel to shore and retrieve slowly along the bottom.",
       "conditions": [
         "calm_water"
+      ],
+      "targets": [
+        "bottom"
       ]
     },
     {
@@ -683,6 +740,9 @@
       "conditions": [
         "onshore_wind",
         "rough_surf"
+      ],
+      "targets": [
+        "bottom"
       ]
     },
     {
@@ -716,6 +776,9 @@
       "conditions": [
         "onshore_wind",
         "rough_surf"
+      ],
+      "targets": [
+        "bottom"
       ]
     },
     {
@@ -749,7 +812,10 @@
       "lures": "Tube jigs in black/purple, soft plastic paddle tails, metal jigs (Crippled Herring), and Buzz Bombs \u2014 black rockfish readily hit surface lures",
       "explanation_cold": "Black rockfish hold near rocky reefs and kelp at 30-150 ft year-round; they are less active in winter but can be found schooling tight to structure.",
       "explanation_warm": "Spring and summer are prime for black rockfish along the Pacific coast; they school near the surface around kelp beds and rocky points and aggressively hit surface poppers, tube jigs, and cut herring.",
-      "conditions": []
+      "conditions": [],
+      "targets": [
+        "structure"
+      ]
     },
     {
       "id": "lingcod",
@@ -782,6 +848,9 @@
       "explanation_warm": "Lingcod retreat to deeper water offshore during warm months; less accessible from shore.",
       "conditions": [
         "low_light"
+      ],
+      "targets": [
+        "structure"
       ]
     },
     {
@@ -817,6 +886,10 @@
       "conditions": [
         "onshore_wind",
         "low_light"
+      ],
+      "targets": [
+        "pelagic",
+        "gamefish"
       ]
     },
     {
@@ -852,6 +925,9 @@
       "explanation_warm": "Papio are the most popular shore-fishing target in Hawaii; these juvenile jacks roam reefs and harbors and are a great family fishing species.",
       "conditions": [
         "daytime"
+      ],
+      "targets": [
+        "pelagic"
       ]
     },
     {
@@ -886,6 +962,9 @@
       "explanation_warm": "Bonefish (oio) feed on shallow sand flats in Hawaii; they are the ghosts of the flats -- fast, wary, and an incredible fight on light tackle.",
       "conditions": [
         "onshore_wind"
+      ],
+      "targets": [
+        "bottom"
       ]
     },
     {
@@ -919,6 +998,9 @@
       "explanation_warm": "Moi (Pacific threadfin) is Hawaii's most revered eating fish; once reserved for royalty, they feed in the sandy surf zone and are caught from beaches and piers.",
       "conditions": [
         "onshore_wind"
+      ],
+      "targets": [
+        "bottom"
       ]
     }
   ]

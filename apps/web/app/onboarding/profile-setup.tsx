@@ -1,20 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Card } from '@/app/components/ui'
 import { cx } from '@/app/components/ui/cx'
 import { LocationSearch } from '@/app/components/location-search'
 import type { LocationSearchResult } from '@/app/api/locations/search/route'
-import { COMFORT_PRESETS, FISHING_TYPES, type Gear } from '@/lib/profile-options'
+import {
+  COMFORT_PRESETS,
+  FISHING_TIMES,
+  FISHING_TYPES,
+  TARGET_GROUPS,
+  TIDE_PREFERENCES,
+  type Gear,
+} from '@/lib/profile-options'
+import type { Preferences } from '@/app/api/preferences/route'
 
 const STEP_TITLES = [
   'Where do you fish most?',
   'How do you fish?',
+  'What are you mostly fishing for?',
+  'When do you usually fish?',
   'What do you fish with?',
   'Your comfort limits',
   'Your experience',
 ]
+
+function toggle(list: string[], value: string): string[] {
+  return list.includes(value) ? list.filter((item) => item !== value) : [...list, value]
+}
 
 const CHIP =
   'rounded-md border px-3 py-2 text-sm font-semibold transition-colors ' +
@@ -78,6 +92,10 @@ export function ProfileSetup({ next }: { next: string }) {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [home, setHome] = useState<LocationSearchResult | null>(null)
+  const [savedHomeId, setSavedHomeId] = useState<string | null>(null)
+  const [targets, setTargets] = useState<string[]>([])
+  const [times, setTimes] = useState<string[]>([])
+  const [tide, setTide] = useState<string | null>(null)
   const [types, setTypes] = useState<string[]>([])
   const [lures, setLures] = useState<Gear | null>(null)
   const [liveBait, setLiveBait] = useState<Gear | null>(null)
@@ -91,6 +109,32 @@ export function ProfileSetup({ next }: { next: string }) {
 
   const isLast = step === STEP_TITLES.length - 1
 
+  // Re-running setup (account menu "Fishing profile") edits the saved
+  // profile rather than starting from blank.
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/preferences')
+      .then((response) => (response.ok ? (response.json() as Promise<Preferences>) : null))
+      .then((saved) => {
+        if (cancelled || !saved) return
+        setSavedHomeId(saved.default_location_id)
+        setTypes(saved.fishing_types ?? [])
+        setTargets(saved.target_groups ?? [])
+        setTimes(saved.fishing_times ?? [])
+        setTide(saved.tide_preference)
+        setLures(saved.uses_lures)
+        setLiveBait(saved.uses_live_bait)
+        setCutBait(saved.uses_cut_bait)
+        setWind(saved.wind_threshold_kt === null ? '' : String(saved.wind_threshold_kt))
+        setSurf(saved.surf_threshold_ft === null ? '' : String(saved.surf_threshold_ft))
+        setExperience(saved.experience)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   async function save(body: Record<string, unknown>) {
     setSaving(true)
     setError(null)
@@ -101,7 +145,8 @@ export function ProfileSetup({ next }: { next: string }) {
         body: JSON.stringify(body),
       })
       if (!response.ok) throw new Error()
-      router.push(home ? `/forecast/${encodeURIComponent(home.id)}` : next)
+      const homeId = home?.id ?? savedHomeId
+      router.push(homeId && next === '/locations' ? `/forecast/${encodeURIComponent(homeId)}` : next)
       router.refresh()
     } catch {
       setError('Could not save your profile. Try again.')
@@ -110,16 +155,21 @@ export function ProfileSetup({ next }: { next: string }) {
   }
 
   function finish() {
-    const number = (text: string) => (text.trim() === '' ? undefined : Number(text))
+    const number = (text: string) => (text.trim() === '' ? null : Number(text))
+    // Every answer is sent, including cleared ones (null), so re-running
+    // setup can also remove an answer.
     save({
       ...(home ? { default_location_id: home.id } : {}),
-      ...(types.length ? { fishing_types: types } : {}),
-      ...(lures ? { uses_lures: lures } : {}),
-      ...(liveBait ? { uses_live_bait: liveBait } : {}),
-      ...(cutBait ? { uses_cut_bait: cutBait } : {}),
-      ...(number(wind) !== undefined ? { wind_threshold_kt: number(wind) } : {}),
-      ...(number(surf) !== undefined ? { surf_threshold_ft: number(surf) } : {}),
-      ...(experience ? { experience } : {}),
+      fishing_types: types.length ? types : null,
+      target_groups: targets.length ? targets : null,
+      fishing_times: times.length ? times : null,
+      tide_preference: tide,
+      uses_lures: lures,
+      uses_live_bait: liveBait,
+      uses_cut_bait: cutBait,
+      wind_threshold_kt: number(wind),
+      surf_threshold_ft: number(surf),
+      experience,
       profile_completed: true,
     })
   }
@@ -135,9 +185,17 @@ export function ProfileSetup({ next }: { next: string }) {
   return (
     <Card className="flex min-h-[26rem] flex-col gap-5 p-6!">
       <div className="flex items-center justify-between gap-3">
-        <p className="section-label" aria-live="polite">
-          Step {step + 1} of {STEP_TITLES.length}
-        </p>
+        <div className="flex flex-1 flex-col gap-1.5">
+          <p className="section-label" aria-live="polite">
+            Step {step + 1} of {STEP_TITLES.length}
+          </p>
+          <div className="h-1 w-full max-w-40 overflow-hidden rounded-full bg-border" aria-hidden="true">
+            <div
+              className="h-full bg-primary transition-all"
+              style={{ width: `${((step + 1) / STEP_TITLES.length) * 100}%` }}
+            />
+          </div>
+        </div>
         <button
           type="button"
           onClick={() => save({ profile_completed: true })}
@@ -155,10 +213,16 @@ export function ProfileSetup({ next }: { next: string }) {
             Your home spot is the forecast Saltline opens to. You can change it any time.
           </p>
           <LocationSearch onSelect={setHome} label="Search for your spot" />
-          {home && (
+          {home ? (
             <p className="text-sm text-text" role="status">
               Home spot: <span className="font-bold">{home.name}, {home.state}</span>
             </p>
+          ) : (
+            savedHomeId && (
+              <p className="text-sm text-text-muted">
+                You already have a home spot. Search only to change it.
+              </p>
+            )
           )}
         </div>
       )}
@@ -187,6 +251,75 @@ export function ProfileSetup({ next }: { next: string }) {
       )}
 
       {step === 2 && (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-text-muted">
+            These move up in &quot;What&apos;s biting&quot;. Leave it empty for whatever&apos;s
+            biting.
+          </p>
+          <div className="flex flex-col gap-2">
+            {TARGET_GROUPS.map((group) => (
+              <button
+                key={group.value}
+                type="button"
+                aria-pressed={targets.includes(group.value)}
+                onClick={() => setTargets((current) => toggle(current, group.value))}
+                className={cx(
+                  CHIP,
+                  'flex flex-col items-start text-left',
+                  targets.includes(group.value)
+                    ? 'border-primary bg-primary text-primary-contrast'
+                    : 'border-border bg-surface text-text hover:border-primary',
+                )}
+              >
+                <span>{group.label}</span>
+                <span
+                  className={cx(
+                    'text-xs font-normal',
+                    targets.includes(group.value) ? 'opacity-80' : 'text-text-muted',
+                  )}
+                >
+                  {group.examples}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-text-muted">
+            Your forecast will show the best window inside these times.
+          </p>
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Usual times">
+            {FISHING_TIMES.map((time) => (
+              <Chip
+                key={time.value}
+                selected={times.includes(time.value)}
+                onClick={() => setTimes((current) => toggle(current, time.value))}
+              >
+                {time.label}
+              </Chip>
+            ))}
+          </div>
+          <div className="flex flex-col gap-2" role="group" aria-label="Preferred tide">
+            <span className="text-sm font-medium text-text">Preferred tide (optional)</span>
+            <div className="flex flex-wrap gap-2">
+              {TIDE_PREFERENCES.map((option) => (
+                <Chip
+                  key={option.value}
+                  selected={tide === option.value}
+                  onClick={() => setTide((current) => (current === option.value ? null : option.value))}
+                >
+                  {option.label}
+                </Chip>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {step === 4 && (
         <div className="flex flex-col gap-4">
           <p className="text-sm text-text-muted">
             &quot;Pack for today&quot; will only suggest what you actually use.
@@ -197,7 +330,7 @@ export function ProfileSetup({ next }: { next: string }) {
         </div>
       )}
 
-      {step === 3 && (
+      {step === 5 && (
         <div className="flex flex-col gap-4">
           <p className="text-sm text-text-muted">
             Days over your limits get flagged and rated a step lower.
@@ -247,7 +380,7 @@ export function ProfileSetup({ next }: { next: string }) {
         </div>
       )}
 
-      {step === 4 && (
+      {step === 6 && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap gap-2" role="group" aria-label="Experience">
             {(

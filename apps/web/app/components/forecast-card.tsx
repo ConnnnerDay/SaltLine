@@ -39,8 +39,18 @@ export type HourlyActivity = {
   feeding: 'major' | 'minor' | null
 }
 
+/** apps/api's personalized "your window": the best stretch inside the
+ * signed-in user's usual fishing times (and preferred tide). */
+export type YourWindow = {
+  start: string
+  end: string
+  tag: HourlyActivity['tag']
+  reasons: string[]
+}
+
 export type HourlyOutlook = {
   hours: HourlyActivity[]
+  your_window?: YourWindow | null
 }
 
 export type Observation = {
@@ -75,6 +85,8 @@ export type SpeciesPick = {
   sinker: string
   lures: string
   regulation?: Regulation | null
+  targets?: string[]
+  matches_profile?: boolean
 }
 
 /** Sprint 35's `app.domain.guidance.FishingGuidance`. */
@@ -646,6 +658,31 @@ function BestWindowCallout({ window, timezone }: { window: BestWindow; timezone:
   )
 }
 
+function YourWindowCallout({ window, timezone }: { window: YourWindow; timezone: string }) {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+  const start = formatter.format(new Date(window.start))
+  const end = formatter.format(new Date(window.end))
+  return (
+    <div className="flex min-w-[12rem] flex-col items-center gap-1 rounded-md border border-border border-t-2 border-t-primary bg-surface-raised px-5 py-3.5 text-center">
+      <span className="text-[0.6875rem] font-bold uppercase tracking-widest text-primary">
+        Your window · {capitalize(window.tag)}
+      </span>
+      <span className="text-lg font-bold text-text">
+        {start === end ? start : `${start} – ${end}`}
+      </span>
+      {window.reasons.length > 0 && (
+        <span className="font-serif text-sm italic text-text-muted">
+          {window.reasons.join(' · ')}
+        </span>
+      )}
+    </div>
+  )
+}
+
 /** One stat tile in the "Today's forecast" strip (legacy `.stat-card`):
  * colored top rule, uppercase label, big value, small muted note. */
 function StatTile({
@@ -806,6 +843,11 @@ function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
                 )}
               >
                 {capitalize(pick.tier)}
+                {pick.matches_profile && (
+                  <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-primary-contrast">
+                    Your target
+                  </span>
+                )}
               </span>
               <p className="line-clamp-2 text-sm text-text-muted">{pick.bait}</p>
               {pick.regulation && (
@@ -1127,11 +1169,19 @@ export function ForecastCard({
         </Card>
       )}
 
-      {bestWindow && (
+      {(bestWindow || forecast.hourly_outlook?.your_window) && (
         <Card className="flex flex-col gap-4 p-5!">
           <h2 className="section-label">When to fish</h2>
           <div className="flex flex-wrap justify-center gap-3">
-            <BestWindowCallout window={bestWindow} timezone={forecast.location.timezone} />
+            {bestWindow && (
+              <BestWindowCallout window={bestWindow} timezone={forecast.location.timezone} />
+            )}
+            {forecast.hourly_outlook?.your_window && (
+              <YourWindowCallout
+                window={forecast.hourly_outlook.your_window}
+                timezone={forecast.location.timezone}
+              />
+            )}
           </div>
         </Card>
       )}

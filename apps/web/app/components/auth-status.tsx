@@ -133,6 +133,14 @@ function AccountMenu({ name }: { name: string }) {
             Preferences
           </Link>
           <Link
+            href="/onboarding?next=/"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 text-sm text-text no-underline hover:bg-bg focus-visible:outline-none focus-visible:bg-bg"
+          >
+            Fishing profile
+          </Link>
+          <Link
             href="/saved"
             role="menuitem"
             onClick={() => setOpen(false)}

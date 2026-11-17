@@ -84,6 +84,9 @@ def test_get_with_no_row_returns_defaults(client: TestClient) -> None:
         "uses_cut_bait": None,
         "experience": None,
         "profile_completed": False,
+        "target_groups": None,
+        "fishing_times": None,
+        "tide_preference": None,
     }
 
 

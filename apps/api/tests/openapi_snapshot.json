@@ -815,6 +815,18 @@
         "title": "ExportedSavedLocation",
         "type": "object"
       },
+      "FishingTime": {
+        "description": "The original profile's \"When do you typically go fishing?\".",
+        "enum": [
+          "dawn",
+          "morning",
+          "afternoon",
+          "evening",
+          "night"
+        ],
+        "title": "FishingTime",
+        "type": "string"
+      },
       "FishingType": {
         "description": "How someone fishes -- the original app's profile choices.",
         "enum": [
@@ -1128,6 +1140,20 @@
             ],
             "title": "Fishing Style"
           },
+          "fishing_times": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FishingTime"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fishing Times"
+          },
           "fishing_types": {
             "anyOf": [
               {
@@ -1157,6 +1183,30 @@
               }
             ],
             "title": "Surf Threshold Ft"
+          },
+          "target_groups": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/TargetGroup"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Groups"
+          },
+          "tide_preference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TidePreference"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "units": {
             "$ref": "#/components/schemas/DisplayUnits",
@@ -1242,6 +1292,21 @@
             ],
             "title": "Fishing Style"
           },
+          "fishing_times": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FishingTime"
+                },
+                "maxItems": 5,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fishing Times"
+          },
           "fishing_types": {
             "anyOf": [
               {
@@ -1280,6 +1345,31 @@
               }
             ],
             "title": "Surf Threshold Ft"
+          },
+          "target_groups": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/TargetGroup"
+                },
+                "maxItems": 5,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Groups"
+          },
+          "tide_preference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TidePreference"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "units": {
             "anyOf": [
@@ -1531,6 +1621,28 @@
         ],
         "title": "SourceStatus",
         "type": "object"
+      },
+      "TargetGroup": {
+        "description": "The original profile's \"What are you mostly fishing for?\".",
+        "enum": [
+          "bottom",
+          "pelagic",
+          "structure",
+          "gamefish",
+          "inshore_slam"
+        ],
+        "title": "TargetGroup",
+        "type": "string"
+      },
+      "TidePreference": {
+        "enum": [
+          "incoming",
+          "outgoing",
+          "high",
+          "low"
+        ],
+        "title": "TidePreference",
+        "type": "string"
       },
       "ValidationError": {
         "properties": {

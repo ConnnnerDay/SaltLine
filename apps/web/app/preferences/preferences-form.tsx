@@ -19,6 +19,9 @@ const EMPTY: Preferences = {
   uses_cut_bait: null,
   experience: null,
   profile_completed: false,
+  target_groups: null,
+  fishing_times: null,
+  tide_preference: null,
 }
 
 const CHOICE =

@@ -160,3 +160,148 @@ async def test_forecast_route_personalizes_only_for_a_user_with_a_profile() -> N
     await engine.dispose()
     broken = AppState(**{**state.__dict__, "db_sessionmaker": sessionmaker})
     assert await _personalized(envelope, "user-1", broken) is envelope  # DB gone
+
+
+# --- targets, usual times, tide preference, experience ----------------------
+
+
+def _pick(pick_id: str, score: int, targets: list[str]) -> dict[str, object]:
+    return {
+        "id": pick_id,
+        "name": pick_id.title(),
+        "score": score,
+        "tier": "prime" if score >= 65 else "good" if score >= 50 else "fair",
+        "reasons": ["Water in range"],
+        "explanation": "",
+        "bait": "Fresh shrimp; cut mullet",
+        "rig": "Fish finder rig",
+        "hook_size": "2/0",
+        "sinker": "2 oz",
+        "lures": "Spoons",
+        "targets": targets,
+    }
+
+
+def _guided_envelope() -> ForecastEnvelope:
+    envelope = _envelope(wind=[5, 10], waves=[1, 2])
+    return envelope.model_copy(
+        update={
+            "recommendations": {
+                "basis": {
+                    "water_temp_f": 65.0,
+                    "water_temp_is_fallback": False,
+                    "month": 11,
+                    "region": "atlantic_mid",
+                },
+                "species": [
+                    _pick("bluefish", 70, ["pelagic"]),
+                    _pick("red-drum", 66, ["bottom", "inshore_slam"]),
+                    _pick("spot", 40, ["bottom"]),
+                ],
+                "pack": {"headline": "x", "rows": []},
+            }
+        }
+    )
+
+
+def test_target_groups_boost_and_rerank_with_reason() -> None:
+    from app.domain.preferences import TargetGroup
+
+    out = personalize(
+        _guided_envelope(), PreferencesOut(target_groups=[TargetGroup.BOTTOM])
+    )
+    assert out.recommendations is not None
+    species = out.recommendations["species"]
+    assert [p["id"] for p in species] == ["red-drum", "bluefish", "spot"]
+    assert species[0]["score"] == 76
+    assert species[0]["matches_profile"] is True
+    assert "Matches what you fish for (bottom fish)" in species[0]["reasons"]
+    assert species[2]["tier"] == "good"  # 40 + 10 = 50
+    assert out.recommendations["pack"]["headline"].startswith("Tackle for Red-Drum")
+
+
+def test_beginner_gets_a_start_simple_row_first() -> None:
+    from app.domain.preferences import Experience
+
+    out = personalize(
+        _guided_envelope(), PreferencesOut(experience=Experience.BEGINNER)
+    )
+    assert out.recommendations is not None
+    rows = out.recommendations["pack"]["rows"]
+    assert rows[0]["kind"] == "tip"
+    assert rows[0]["value"].startswith("Fish finder rig with fresh shrimp for bluefish")
+
+
+def _hour(hour: int, tag: str) -> dict[str, object]:
+    return {
+        "hour": hour,
+        "time": f"2026-11-17T{hour:02d}:00:00-05:00",
+        "level": {"low": 20, "med": 45, "high": 65, "prime": 85}[tag],
+        "tag": tag,
+        "reasons": ["Dawn"] if hour in (6, 7) else [],
+    }
+
+
+def _timed_envelope() -> ForecastEnvelope:
+    tags = {6: "high", 7: "high", 10: "prime", 11: "prime", 18: "high", 19: "med"}
+    hours = [_hour(h, tags.get(h, "low")) for h in range(24)]
+    return _envelope().model_copy(
+        update={
+            "hourly_outlook": {"hours": hours},
+            "tides": {
+                "station_id": "x",
+                "predictions": [
+                    {
+                        "time": "2026-11-17T08:00:00-05:00",
+                        "kind": "high",
+                        "height_ft": 4.0,
+                    },
+                    {
+                        "time": "2026-11-17T14:00:00-05:00",
+                        "kind": "low",
+                        "height_ft": 0.5,
+                    },
+                    {
+                        "time": "2026-11-17T20:00:00-05:00",
+                        "kind": "high",
+                        "height_ft": 4.1,
+                    },
+                ],
+            },
+        }
+    )
+
+
+def test_your_window_stays_inside_usual_times() -> None:
+    from app.domain.preferences import FishingTime
+
+    out = personalize(
+        _timed_envelope(), PreferencesOut(fishing_times=[FishingTime.DAWN])
+    )
+    assert out.hourly_outlook is not None
+    window = out.hourly_outlook["your_window"]
+    assert (window["start"][11:13], window["end"][11:13]) == ("06", "07")
+    assert window["tag"] == "high"
+    assert "Dawn" in window["reasons"]
+
+
+def test_your_window_prefers_the_users_tide() -> None:
+    from app.domain.preferences import FishingTime, TidePreference
+
+    prefs = PreferencesOut(
+        fishing_times=[FishingTime.MORNING, FishingTime.EVENING],
+        tide_preference=TidePreference.INCOMING,
+    )
+    out = personalize(_timed_envelope(), prefs)
+    assert out.hourly_outlook is not None
+    window = out.hourly_outlook["your_window"]
+    # 10-11 AM is prime but on the falling (outgoing) tide; 6-7 PM is the
+    # best incoming-tide stretch in the morning/evening hours.
+    assert (window["start"][11:13], window["end"][11:13]) == ("18", "18")
+    assert "incoming tide (your preference)" in window["reasons"]
+
+
+def test_no_usual_times_means_no_window() -> None:
+    out = personalize(_timed_envelope(), PreferencesOut())
+    assert out.hourly_outlook is not None
+    assert "your_window" not in out.hourly_outlook

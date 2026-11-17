@@ -124,6 +124,9 @@ class SpeciesPick(BaseModel):
     sinker: str
     lures: str
     regulation: Regulation | None = None
+    targets: list[str] = []
+    """The original profile's target groups this species belongs to
+    (bottom, pelagic, structure, gamefish, inshore_slam)."""
 
 
 class GuidanceBasis(BaseModel):
@@ -539,6 +542,7 @@ def build_fishing_guidance(
                     hook_size=species["hook_size"],
                     sinker=species["sinker"],
                     lures=species["lures"],
+                    targets=species.get("targets", []),
                     regulation=(
                         regulation_for(species["id"], state, today or date.today())
                         if state

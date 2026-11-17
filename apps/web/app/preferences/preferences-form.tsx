@@ -5,7 +5,13 @@ import { Button, Card, Field } from '@/app/components/ui'
 import { cx } from '@/app/components/ui/cx'
 import type { Preferences } from '@/app/api/preferences/route'
 import { LocationSearch } from '@/app/components/location-search'
-import { FISHING_TYPES, type Gear } from '@/lib/profile-options'
+import {
+  FISHING_TIMES,
+  FISHING_TYPES,
+  TARGET_GROUPS,
+  TIDE_PREFERENCES,
+  type Gear,
+} from '@/lib/profile-options'
 
 const EMPTY: Preferences = {
   units: 'imperial',
@@ -25,9 +31,82 @@ const EMPTY: Preferences = {
 }
 
 const CHOICE =
-  'rounded-md border px-3 py-2 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring'
+  'min-h-10 rounded-md border px-3.5 py-2 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring'
 const CHOICE_ON = 'border-primary bg-primary text-primary-contrast'
-const CHOICE_OFF = 'border-border bg-transparent text-text-muted hover:border-primary'
+const CHOICE_OFF = 'border-border bg-transparent text-text-muted hover:border-primary hover:text-text'
+
+/** One titled block of the form; blocks are separated by hairlines. */
+function Group({
+  title,
+  description,
+  children,
+}: {
+  title: string
+  description?: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="flex flex-col gap-4 border-t border-border py-6 first:border-t-0 first:pt-0">
+      <div className="flex flex-col gap-1">
+        <h2 className="section-label text-text!">{title}</h2>
+        {description && <p className="text-sm text-text-muted">{description}</p>}
+      </div>
+      {children}
+    </section>
+  )
+}
+
+/** A labeled row of toggle chips (multi- or single-select). */
+function Chips({
+  label,
+  options,
+  isOn,
+  onToggle,
+}: {
+  label: string
+  options: { value: string; label: string }[]
+  isOn: (value: string) => boolean
+  onToggle: (value: string) => void
+}) {
+  return (
+    <fieldset className="flex flex-col gap-2">
+      <legend className="mb-2 text-sm font-semibold text-text">{label}</legend>
+      <div className="flex flex-wrap gap-2">
+        {options.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            aria-pressed={isOn(option.value)}
+            onClick={() => onToggle(option.value)}
+            className={cx(CHOICE, isOn(option.value) ? CHOICE_ON : CHOICE_OFF)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </fieldset>
+  )
+}
+
+function toggleIn(list: string[] | null, value: string): string[] | null {
+  const current = list ?? []
+  const next = current.includes(value)
+    ? current.filter((item) => item !== value)
+    : [...current, value]
+  return next.length ? next : null
+}
+
+const GEAR_OPTIONS = [
+  { value: 'yes', label: 'Yes' },
+  { value: 'sometimes', label: 'Sometimes' },
+  { value: 'no', label: 'No' },
+]
+
+const EXPERIENCE_OPTIONS = [
+  { value: 'beginner', label: 'Beginner' },
+  { value: 'intermediate', label: 'Intermediate' },
+  { value: 'experienced', label: 'Experienced' },
+]
 
 function toInputValue(value: number | null): string {
   return value === null ? '' : String(value)
@@ -39,7 +118,12 @@ function fromInputValue(value: string): number | null {
   return Number.isFinite(parsed) ? parsed : null
 }
 
-export function PreferencesForm() {
+export function PreferencesForm({
+  locationNames = {},
+}: {
+  /** Curated location id -> "Name, ST", to show the home spot by name. */
+  locationNames?: Record<string, string>
+}) {
   const [preferences, setPreferences] = useState<Preferences>(EMPTY)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -117,11 +201,146 @@ export function PreferencesForm() {
     )
   }
 
+  const currentHome = homeName ?? (preferences.default_location_id ? (locationNames[preferences.default_location_id] ?? 'A custom spot') : null)
+
   return (
     <Card>
-      <form onSubmit={handleSubmit} noValidate>
-        <div className="mb-4 flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-text">Units</span>
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col">
+        <Group title="Home spot" description="The forecast Saltline opens to.">
+          <p className="flex items-center gap-2 rounded-md border border-border bg-surface-raised px-3.5 py-3 text-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" className="shrink-0 text-primary">
+              <circle cx="12" cy="10" r="3" />
+              <path d="M12 2a8 8 0 0 0-8 8c0 5.4 7.1 11.5 7.4 11.8a1 1 0 0 0 1.2 0C12.9 21.5 20 15.4 20 10a8 8 0 0 0-8-8z" />
+            </svg>
+            <span className={currentHome ? 'font-semibold text-text' : 'text-text-muted'}>
+              {currentHome ?? 'None yet'}
+            </span>
+          </p>
+          <LocationSearch
+            label="Change home spot"
+            onSelect={(location) => {
+              setHomeName(`${location.name}, ${location.state}`)
+              setPreferences((p) => ({ ...p, default_location_id: location.id }))
+            }}
+          />
+        </Group>
+
+        <Group title="How you fish">
+          <Chips
+            label="Where"
+            options={FISHING_TYPES}
+            isOn={(value) => preferences.fishing_types?.includes(value) ?? false}
+            onToggle={(value) =>
+              setPreferences((p) => ({ ...p, fishing_types: toggleIn(p.fishing_types, value) }))
+            }
+          />
+          <Chips
+            label="Mostly fishing for"
+            options={TARGET_GROUPS}
+            isOn={(value) => preferences.target_groups?.includes(value) ?? false}
+            onToggle={(value) =>
+              setPreferences((p) => ({ ...p, target_groups: toggleIn(p.target_groups, value) }))
+            }
+          />
+          <Chips
+            label="Experience"
+            options={EXPERIENCE_OPTIONS}
+            isOn={(value) => preferences.experience === value}
+            onToggle={(value) =>
+              setPreferences((p) => ({
+                ...p,
+                experience:
+                  p.experience === value ? null : (value as Preferences['experience']),
+              }))
+            }
+          />
+        </Group>
+
+        <Group title="When you fish" description="Your forecast shows the best window inside these times.">
+          <Chips
+            label="Usual times"
+            options={FISHING_TIMES}
+            isOn={(value) => preferences.fishing_times?.includes(value) ?? false}
+            onToggle={(value) =>
+              setPreferences((p) => ({ ...p, fishing_times: toggleIn(p.fishing_times, value) }))
+            }
+          />
+          <Chips
+            label="Preferred tide"
+            options={TIDE_PREFERENCES}
+            isOn={(value) => preferences.tide_preference === value}
+            onToggle={(value) =>
+              setPreferences((p) => ({
+                ...p,
+                tide_preference:
+                  p.tide_preference === value
+                    ? null
+                    : (value as Preferences['tide_preference']),
+              }))
+            }
+          />
+        </Group>
+
+        <Group title="Gear" description="Pack for today skips what you never use.">
+          {(
+            [
+              ['uses_lures', 'Lures'],
+              ['uses_live_bait', 'Live bait'],
+              ['uses_cut_bait', 'Cut bait'],
+            ] as const
+          ).map(([field, label]) => (
+            <Chips
+              key={field}
+              label={label}
+              options={GEAR_OPTIONS}
+              isOn={(value) => preferences[field] === value}
+              onToggle={(value) =>
+                setPreferences((p) => ({
+                  ...p,
+                  [field]: p[field] === value ? null : (value as Gear),
+                }))
+              }
+            />
+          ))}
+        </Group>
+
+        <Group
+          title="Comfort limits"
+          description="Days over your limits get flagged and rated a step lower."
+        >
+          <div className="grid grid-cols-2 gap-3 [&>div]:mb-0">
+            <Field
+              label="Max wind (kt)"
+              type="number"
+              inputMode="decimal"
+              min={0}
+              max={100}
+              value={toInputValue(preferences.wind_threshold_kt)}
+              onChange={(event) =>
+                setPreferences((p) => ({
+                  ...p,
+                  wind_threshold_kt: fromInputValue(event.target.value),
+                }))
+              }
+            />
+            <Field
+              label="Max surf (ft)"
+              type="number"
+              inputMode="decimal"
+              min={0}
+              max={60}
+              value={toInputValue(preferences.surf_threshold_ft)}
+              onChange={(event) =>
+                setPreferences((p) => ({
+                  ...p,
+                  surf_threshold_ft: fromInputValue(event.target.value),
+                }))
+              }
+            />
+          </div>
+        </Group>
+
+        <Group title="Units">
           <div className="flex gap-2" role="radiogroup" aria-label="Units">
             {(['imperial', 'metric'] as const).map((option) => (
               <button
@@ -131,149 +350,16 @@ export function PreferencesForm() {
                 aria-checked={preferences.units === option}
                 onClick={() => setPreferences((p) => ({ ...p, units: option }))}
                 className={cx(
-                  'rounded-md border px-4 py-2 text-sm font-semibold capitalize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring',
-                  preferences.units === option
-                    ? 'border-primary bg-primary text-primary-contrast'
-                    : 'border-border bg-transparent text-text hover:bg-surface',
-                )}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <fieldset className="mb-4 flex flex-col gap-1.5">
-          <legend className="mb-1.5 text-sm font-medium text-text">How you fish</legend>
-          <div className="flex flex-wrap gap-2">
-            {FISHING_TYPES.map((type) => {
-              const selected = preferences.fishing_types?.includes(type.value) ?? false
-              return (
-                <button
-                  key={type.value}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() =>
-                    setPreferences((p) => {
-                      const current = p.fishing_types ?? []
-                      const next = selected
-                        ? current.filter((value) => value !== type.value)
-                        : [...current, type.value]
-                      return { ...p, fishing_types: next.length ? next : null }
-                    })
-                  }
-                  className={cx(CHOICE, selected ? CHOICE_ON : CHOICE_OFF)}
-                >
-                  {type.label}
-                </button>
-              )
-            })}
-          </div>
-        </fieldset>
-
-        {(
-          [
-            ['uses_lures', 'Lures'],
-            ['uses_live_bait', 'Live bait'],
-            ['uses_cut_bait', 'Cut bait'],
-          ] as const
-        ).map(([field, label]) => (
-          <fieldset key={field} className="mb-4 flex flex-col gap-1.5">
-            <legend className="mb-1.5 text-sm font-medium text-text">{label}</legend>
-            <div className="flex gap-2">
-              {(['yes', 'sometimes', 'no'] as Gear[]).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  aria-pressed={preferences[field] === option}
-                  onClick={() =>
-                    setPreferences((p) => ({
-                      ...p,
-                      [field]: p[field] === option ? null : option,
-                    }))
-                  }
-                  className={cx(
-                    CHOICE,
-                    'capitalize',
-                    preferences[field] === option ? CHOICE_ON : CHOICE_OFF,
-                  )}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-        ))}
-
-        <fieldset className="mb-4 flex flex-col gap-1.5">
-          <legend className="mb-1.5 text-sm font-medium text-text">Experience</legend>
-          <div className="flex flex-wrap gap-2">
-            {(['beginner', 'intermediate', 'experienced'] as const).map((option) => (
-              <button
-                key={option}
-                type="button"
-                aria-pressed={preferences.experience === option}
-                onClick={() =>
-                  setPreferences((p) => ({
-                    ...p,
-                    experience: p.experience === option ? null : option,
-                  }))
-                }
-                className={cx(
                   CHOICE,
                   'capitalize',
-                  preferences.experience === option ? CHOICE_ON : CHOICE_OFF,
+                  preferences.units === option ? CHOICE_ON : CHOICE_OFF,
                 )}
               >
                 {option}
               </button>
             ))}
           </div>
-        </fieldset>
-
-        <Field
-          label="Max wind (kt)"
-          type="number"
-          min={0}
-          max={100}
-          hint="Days over your limits get flagged and rated a step lower."
-          value={toInputValue(preferences.wind_threshold_kt)}
-          onChange={(event) =>
-            setPreferences((p) => ({
-              ...p,
-              wind_threshold_kt: fromInputValue(event.target.value),
-            }))
-          }
-        />
-
-        <Field
-          label="Max surf (ft)"
-          type="number"
-          min={0}
-          max={60}
-          value={toInputValue(preferences.surf_threshold_ft)}
-          onChange={(event) =>
-            setPreferences((p) => ({
-              ...p,
-              surf_threshold_ft: fromInputValue(event.target.value),
-            }))
-          }
-        />
-
-        <div className="mb-4 flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-text">Home spot</span>
-          <p className="text-sm text-text-muted">
-            {homeName ?? preferences.default_location_id ?? 'None yet'} — the forecast
-            Saltline opens to.
-          </p>
-          <LocationSearch
-            label="Change home spot"
-            onSelect={(location) => {
-              setHomeName(`${location.name}, ${location.state}`)
-              setPreferences((p) => ({ ...p, default_location_id: location.id }))
-            }}
-          />
-        </div>
+        </Group>
 
         {/* Sprint 47: a save failure is a whole-form outcome (the PATCH
             either applied or it didn't), not a validation error on
@@ -290,7 +376,7 @@ export function PreferencesForm() {
           </p>
         )}
 
-        <Button type="submit" variant="primary" className="w-full" disabled={isSaving}>
+        <Button type="submit" variant="primary" className="mt-2 w-full" disabled={isSaving}>
           {isSaving ? 'Saving…' : 'Save preferences'}
         </Button>
       </form>

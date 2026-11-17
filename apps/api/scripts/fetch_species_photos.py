@@ -16,6 +16,8 @@ Run from apps/api with a Python that has Pillow (needs network access to
 en.wikipedia.org, commons.wikimedia.org and upload.wikimedia.org):
 
     python3 -m scripts.fetch_species_photos
+
+`--trim-existing` only re-trims letterbox borders on the committed photos.
 """
 
 from __future__ import annotations
@@ -178,9 +180,26 @@ def _photo_for(article: str) -> dict[str, str] | None:
     }
 
 
+def _trim_borders(image: Any) -> Any:
+    """Crop solid letterbox bars (black or white edges baked into some
+    Commons photos) so every photo fills its frame the same way. Leaves
+    the image alone if trimming would remove more than 45% of it."""
+    from PIL import ImageChops  # type: ignore[import-not-found,unused-ignore]
+
+    corner = image.getpixel((0, 0))
+    background = Image.new(image.mode, image.size, corner)
+    diff = ImageChops.difference(image, background).convert("L")
+    box = diff.point(lambda value: 255 if value > 24 else 0).getbbox()
+    if not box:
+        return image
+    left, top, right, bottom = box
+    kept = (right - left) * (bottom - top) / (image.width * image.height)
+    return image.crop(box) if 0.55 <= kept < 0.99 else image
+
+
 def _save_resized(data: bytes, target: Path) -> None:
     with Image.open(io.BytesIO(data)) as source:
-        image = source.convert("RGB")
+        image = _trim_borders(source.convert("RGB"))
         if image.width > _WIDTH:
             image = image.resize((_WIDTH, round(image.height * _WIDTH / image.width)))
         image.save(target, "JPEG", quality=82, optimize=True, progressive=True)
@@ -191,6 +210,15 @@ def main() -> None:
     _PHOTO_DIR.mkdir(parents=True, exist_ok=True)
     # Incremental: keep photos already fetched (pass --force to refetch all).
     force = "--force" in sys.argv
+    if "--trim-existing" in sys.argv:
+        for path in sorted(_PHOTO_DIR.glob("*.jpg")):
+            with Image.open(path) as source:
+                image = source.convert("RGB")
+            trimmed = _trim_borders(image)
+            if trimmed.size != image.size:
+                trimmed.save(path, "JPEG", quality=82, optimize=True, progressive=True)
+                print(f"  trimmed {path.name}: {image.size} -> {trimmed.size}")
+        return
     manifest: dict[str, dict[str, str]] = (
         {} if force or not _MANIFEST.exists() else json.loads(_MANIFEST.read_text())
     )

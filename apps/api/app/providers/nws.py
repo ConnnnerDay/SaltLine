@@ -35,9 +35,10 @@ closing a named gap.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Any
 
 from pydantic import BaseModel
@@ -143,9 +144,29 @@ class WeatherDay(BaseModel):
     precip_pct: int | None = None
 
 
+class PressurePoint(BaseModel):
+    time: datetime
+    mb: float
+
+
+class Barometer(BaseModel):
+    """Air pressure at the nearest NWS observation station, its change
+    over the last 3 hours, and an hourly series for the last day."""
+
+    station_id: str
+    station_name: str
+    latest_mb: float
+    latest_at: datetime
+    change_3h_mb: float | None = None
+    # steady / rising / falling, "rapidly" when 3 h change >= 3 mb.
+    trend: str = "steady"
+    history: list[PressurePoint] = []
+
+
 class PointWeather(BaseModel):
     now: WeatherNow | None = None
     days: list[WeatherDay] = []
+    barometer: Barometer | None = None
 
 
 class GridpointWindForecast(BaseModel):
@@ -493,20 +514,102 @@ def parse_point_weather(periods: list[dict[str, Any]]) -> PointWeather:
     return weather
 
 
+def _items(payload: object) -> list[dict[str, Any]]:
+    """A collection's members in either NWS response shape."""
+    if not isinstance(payload, dict):
+        return []
+    raw = payload.get("@graph") or payload.get("features") or []
+    return [item.get("properties", item) for item in raw if isinstance(item, dict)]
+
+
+def parse_barometer(
+    observations: list[dict[str, Any]], station_id: str, station_name: str
+) -> Barometer | None:
+    """Build the barometer from a station's observations (any order):
+    the latest pressure, its change from about 3 hours earlier, and the
+    last 24 hours sampled to one reading per hour. Pressures arrive in
+    pascals; NWS leaves `value` null for a missing reading."""
+    readings: list[tuple[datetime, float]] = []
+    for item in observations:
+        value = (item.get("barometricPressure") or {}).get("value")
+        if not isinstance(value, (int, float)):
+            value = (item.get("seaLevelPressure") or {}).get("value")
+        try:
+            moment = datetime.fromisoformat(str(item.get("timestamp")))
+        except ValueError:
+            continue
+        if isinstance(value, (int, float)):
+            readings.append((moment, round(value / 100, 1)))
+    if not readings:
+        return None
+    readings.sort()
+    latest_at, latest_mb = readings[-1]
+    earlier = [r for r in readings if r[0] <= latest_at - timedelta(hours=3)]
+    change = round(latest_mb - earlier[-1][1], 1) if earlier else None
+    if change is None or abs(change) < 1.0:
+        trend = "steady"
+    else:
+        trend = ("rising" if change > 0 else "falling") + (
+            " rapidly" if abs(change) >= 3.0 else ""
+        )
+    hourly: dict[datetime, tuple[datetime, float]] = {}
+    for moment, mb in readings:
+        if moment >= latest_at - timedelta(hours=24):
+            hourly[moment.replace(minute=0, second=0, microsecond=0)] = (moment, mb)
+    return Barometer(
+        station_id=station_id,
+        station_name=station_name,
+        latest_mb=latest_mb,
+        latest_at=latest_at,
+        change_3h_mb=change,
+        trend=trend,
+        history=[PressurePoint(time=t, mb=mb) for t, mb in sorted(hourly.values())],
+    )
+
+
+async def _fetch_barometer(
+    client: BoundedHTTPClient, stations_url: str
+) -> Barometer | None:
+    try:
+        stations = _items(await client.get_json(stations_url, headers=_NWS_HEADERS))
+        if not stations:
+            return None
+        station = stations[0]
+        station_id = str(station.get("stationIdentifier") or "")
+        observations = _items(
+            await client.get_json(
+                f"https://api.weather.gov/stations/{station_id}/observations?limit=150",
+                headers=_NWS_HEADERS,
+            )
+        )
+        return parse_barometer(
+            observations, station_id, str(station.get("name") or station_id)
+        )
+    except Exception:  # enrichment only
+        logger.warning("NWS station barometer unavailable", exc_info=True)
+        return None
+
+
 async def fetch_point_weather(
     client: BoundedHTTPClient, lat: float, lng: float
 ) -> PointWeather | None:
     """The standard NWS forecast for the land grid point nearest
-    (lat, lng): air temperature, sky and rain chance. Enrichment only:
-    degrades to `None` on any failure."""
+    (lat, lng): air temperature, sky and rain chance, plus the barometer
+    at the nearest observation station. Enrichment only: degrades to
+    `None` (or no barometer) on any failure."""
     try:
         points = await client.get_json(
             f"https://api.weather.gov/points/{lat:.4f},{lng:.4f}", headers=_NWS_HEADERS
         )
         forecast_url = _field(points, "forecast", "points")
-        forecast = await client.get_json(forecast_url, headers=_NWS_HEADERS)
-        periods = _field(forecast, "periods", forecast_url)
-        return parse_point_weather(periods)
+        stations_url = _field(points, "observationStations", "points")
+        forecast, barometer = await asyncio.gather(
+            client.get_json(forecast_url, headers=_NWS_HEADERS),
+            _fetch_barometer(client, str(stations_url)),
+        )
+        weather = parse_point_weather(_field(forecast, "periods", forecast_url))
+        weather.barometer = barometer
+        return weather
     except Exception:  # enrichment only: any failure just means no weather
         logger.warning("NWS point weather forecast unavailable", exc_info=True)
         return None

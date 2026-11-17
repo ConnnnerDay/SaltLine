@@ -290,6 +290,9 @@ class ForecastConditions(BaseModel):
     swell: list[SwellComponent] = []
     # How today's wind meets this coast (`wind_effect_for`).
     wind_effect: WindEffect | None = None
+    # This spot's monthly average water temperatures, January first (the
+    # same regional profile the monthly-average fallback uses).
+    water_temp_normals_f: list[float] = []
 
 
 class ForecastTides(BaseModel):
@@ -361,7 +364,7 @@ async def _fetch_water_temp(
 
 
 async def _fetch_buoy(
-    client: BoundedHTTPClient, station_ids: list[str]
+    client: BoundedHTTPClient, station_ids: list[str], now: datetime | None = None
 ) -> _FetchResult[BuoyObservation]:
     """Tries the location's buoys in order (up to _MAX_BUOYS_TRIED) and
     uses the first that reports: buoys go offline or get decommissioned
@@ -372,7 +375,7 @@ async def _fetch_buoy(
     first_error: str | None = None
     for station_id in station_ids[:_MAX_BUOYS_TRIED]:
         try:
-            value = await fetch_buoy_observation(client, station_id)
+            value = await fetch_buoy_observation(client, station_id, now=now)
         except ProviderError as exc:
             first_error = first_error or str(exc)
             continue
@@ -453,7 +456,7 @@ async def assemble_forecast(
     ) = await asyncio.gather(
         _fetch_marine_zone(client, location.nws_zone),
         _fetch_water_temp(client, location.water_temp_station),
-        _fetch_buoy(client, location.ndbc_stations),
+        _fetch_buoy(client, location.ndbc_stations, now),
         fetch_point_alerts(client, location.lat, location.lng),
         _fetch_tides(client, location.coops_station, now, location.timezone),
         fetch_point_weather(client, location.lat, location.lng),
@@ -734,6 +737,12 @@ async def assemble_forecast(
                 "wind_direction": wind_direction or conditions.days[0].wind_direction,
             }
         )
+    normals = monthly_water_temps_for_region(
+        location.temp_region, location.temp_offset, water_temp_profiles
+    )
+    conditions.water_temp_normals_f = [
+        round(normals[month], 1) for month in range(1, 13) if month in normals
+    ]
     conditions.weather = point_weather
     conditions.swell = marine_zone_conditions.swell if marine_zone_conditions else []
     conditions.wind_effect = wind_effect_for(

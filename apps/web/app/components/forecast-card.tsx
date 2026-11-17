@@ -9,6 +9,7 @@ import { WhereToFish, YourDay } from './your-day'
 import { SunAndMoon, WeatherAlerts, type SkyConditions } from './sky'
 import { NextDays } from './next-days'
 import { WindAndWaves } from './wind-waves'
+import { PressureAndWater } from './pressure-water'
 import { WeatherIcon } from './weather-icon'
 import { currentTime } from '@/lib/clock'
 import type { NearbyCam } from '@/lib/get-cams'
@@ -1366,6 +1367,15 @@ export function ForecastCard({
       <SunAndMoon forecast={forecast} now={currentTime()} />
 
       <WindAndWaves forecast={forecast} />
+
+      <PressureAndWater
+        forecast={forecast}
+        month={Number(
+          new Intl.DateTimeFormat('en-US', { timeZone: forecast.location.timezone, month: 'numeric' }).format(
+            new Date(forecast.generated_at),
+          ),
+        )}
+      />
 
       {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} />}
 

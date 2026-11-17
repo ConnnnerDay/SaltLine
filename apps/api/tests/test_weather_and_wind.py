@@ -129,3 +129,39 @@ def test_day_outlook_carries_that_dates_weather() -> None:
         "clear",
         0,
     )
+
+
+def test_parse_barometer_trend_and_hourly_history() -> None:
+    from app.providers.nws import parse_barometer
+
+    def obs(hour: int, minute: int, pa: float | None) -> dict:
+        return {
+            "timestamp": f"2026-11-17T{hour:02d}:{minute:02d}:00+00:00",
+            "barometricPressure": {"value": pa},
+        }
+
+    falling = parse_barometer(
+        [
+            obs(12, 0, 102000),
+            obs(13, 0, 101900),
+            obs(14, 0, 101800),
+            obs(15, 0, 101650),
+            obs(15, 20, None),
+        ],
+        "KILM",
+        "Wilmington",
+    )
+    assert falling is not None
+    assert (falling.latest_mb, falling.change_3h_mb, falling.trend) == (
+        1016.5,
+        -3.5,
+        "falling rapidly",
+    )
+    assert [p.mb for p in falling.history] == [1020.0, 1019.0, 1018.0, 1016.5]
+
+    steady = parse_barometer([obs(12, 0, 101300), obs(15, 0, 101350)], "K", "K")
+    assert steady is not None and steady.trend == "steady"
+    # Less than 3 hours of data: no change claimed.
+    short = parse_barometer([obs(14, 0, 101300), obs(15, 0, 101500)], "K", "K")
+    assert short is not None and (short.change_3h_mb, short.trend) == (None, "steady")
+    assert parse_barometer([obs(15, 0, None)], "K", "K") is None

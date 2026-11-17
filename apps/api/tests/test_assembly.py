@@ -757,7 +757,9 @@ async def test_buoy_falls_back_to_the_next_listed_station(
     real_fetch = assembly.fetch_buoy_observation
     tried: list[str] = []
 
-    async def first_one_gone(client: BoundedHTTPClient, station_id: str) -> object:
+    async def first_one_gone(
+        client: BoundedHTTPClient, station_id: str, now: object = None
+    ) -> object:
         tried.append(station_id)
         if station_id == _WRIGHTSVILLE_BEACH.ndbc_stations[0]:
             raise ProviderHTTPStatusError("404", status_code=404)
@@ -782,7 +784,9 @@ async def test_buoy_unavailable_only_when_every_listed_station_fails(
     from app.domain import assembly
     from app.infra.http_client import ProviderHTTPStatusError
 
-    async def all_gone(client: BoundedHTTPClient, station_id: str) -> object:
+    async def all_gone(
+        client: BoundedHTTPClient, station_id: str, now: object = None
+    ) -> object:
         raise ProviderHTTPStatusError(f"{station_id} 404", status_code=404)
 
     monkeypatch.setattr(assembly, "fetch_buoy_observation", all_gone)

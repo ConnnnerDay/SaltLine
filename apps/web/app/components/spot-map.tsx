@@ -19,6 +19,11 @@ import { cx } from './ui/cx'
  * apart) separate enough to pick. Each spot is a
  * real <button> with a label (keyboard and screen-reader friendly);
  * hovering or focusing one names it, and clicking picks it.
+ *
+ * Tapping anywhere else drops a pin there and lists the closest spots to
+ * it, with distances -- "I fish near here, what's closest?" -- and when
+ * the selection changes from outside (a search, a saved home spot) the
+ * map zooms to that spot's state so its neighbors are in view.
  */
 
 export type MapSpot = {
@@ -39,6 +44,19 @@ const COASTS: { key: string; label: string; match: (spot: MapSpot) => boolean }[
 ]
 
 const WIDTH = 960
+const NEAREST = 4
+
+function milesBetween(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const rad = Math.PI / 180
+  const dLat = (b.lat - a.lat) * rad
+  const dLng = (b.lng - a.lng) * rad
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLng / 2) ** 2
+  return 3958.8 * 2 * Math.asin(Math.sqrt(h))
+}
+
+function coastOf(spot: MapSpot): string {
+  return COASTS.find((c) => c.key !== 'all' && c.match(spot))?.key ?? 'all'
+}
 const HEIGHT = 600
 
 // The topology is static, so its GeoJSON is built once.
@@ -58,13 +76,27 @@ export function SpotMap({
   const [coast, setCoast] = useState('all')
   const [state, setState] = useState<string | null>(null)
   const [hovered, setHovered] = useState<MapSpot | null>(null)
+  const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null)
+  // The selection this map last zoomed for (or picked itself): when the
+  // selection changes from outside -- a search, a saved home spot -- the
+  // map zooms to that spot's state, so it shows among its neighbors.
+  const [zoomedFor, setZoomedFor] = useState<string | null>(null)
+  if (selectedId && selectedId !== zoomedFor) {
+    const spot = spots.find((s) => s.id === selectedId)
+    if (spot) {
+      setZoomedFor(selectedId)
+      setCoast(coastOf(spot))
+      setState(spot.state)
+      setPin(null)
+    }
+  }
   const coasts = COASTS.filter((c) => c.key === 'all' || spots.some(c.match))
   const onCoast = spots.filter(COASTS.find((c) => c.key === coast)!.match)
   // States on this coast, in coast order (north to south / west to east).
   const states = coast === 'all' ? [] : [...new Set(onCoast.map((spot) => spot.state))]
   const visible = state ? onCoast.filter((spot) => spot.state === state) : onCoast
 
-  const { path, points } = useMemo(() => {
+  const { path, points, projection } = useMemo(() => {
     const projection = geoAlbersUsa()
     // Fit the visible spots, each padded by ~0.25 degrees so a state
     // with one spot (or a tight cluster) doesn't zoom in absurdly far.
@@ -93,13 +125,37 @@ export function SpotMap({
       const xy = projection([spot.lng, spot.lat])
       if (xy) points.set(spot.id, xy as [number, number])
     }
-    return { path: geoPath(projection), points }
+    return { path: geoPath(projection), points, projection }
   }, [coast, spots, visible])
 
   function pickCoast(key: string) {
     setCoast(key)
     setState(null)
+    setPin(null)
   }
+
+  function pick(spot: MapSpot) {
+    setZoomedFor(spot.id)
+    onSelect(spot)
+  }
+
+  function dropPin(event: React.MouseEvent<HTMLDivElement>) {
+    if (event.target !== event.currentTarget) return
+    setHovered(null)
+    const box = event.currentTarget.getBoundingClientRect()
+    const x = ((event.clientX - box.left) / box.width) * WIDTH
+    const y = ((event.clientY - box.top) / box.height) * HEIGHT
+    const lngLat = projection.invert?.([x, y])
+    setPin(lngLat ? { lng: lngLat[0], lat: lngLat[1] } : null)
+  }
+
+  const nearest = pin
+    ? spots
+        .map((spot) => ({ spot, miles: milesBetween(pin, spot) }))
+        .sort((a, b) => a.miles - b.miles)
+        .slice(0, NEAREST)
+    : []
+  const pinXY = pin ? projection([pin.lng, pin.lat]) : null
 
   const selected = spots.find((spot) => spot.id === selectedId) ?? null
   const label = hovered ?? selected
@@ -130,7 +186,7 @@ export function SpotMap({
               <span className="text-text-muted">, {label.state}</span>
             </>
           ) : (
-            <span className="text-text-muted">Tap a dot to pick a spot</span>
+            <span className="text-text-muted">Tap a dot, or anywhere to find the closest</span>
           )}
         </span>
       </div>
@@ -184,9 +240,20 @@ export function SpotMap({
               </g>
             )
           })}
+          {pinXY && (
+            <g className="pointer-events-none" transform={`translate(${pinXY[0]} ${pinXY[1]})`}>
+              {/* A map pin whose point sits on the tapped spot. */}
+              <path
+                d="M0 0 C -4 -10 -14 -16 -14 -26 A 14 14 0 1 1 14 -26 C 14 -16 4 -10 0 0 Z"
+                strokeWidth={2.5}
+                className="fill-text stroke-surface"
+              />
+              <circle cy={-26} r={5} className="fill-surface" />
+            </g>
+          )}
         </svg>
         {/* Accessible hit targets, laid over the drawn dots. */}
-        <div className="relative -mt-[62.5%] pb-[62.5%]">
+        <div className="relative -mt-[62.5%] cursor-crosshair pb-[62.5%]" onClick={dropPin} onMouseLeave={() => setHovered(null)}>
           {spots.map((spot) => {
             const xy = points.get(spot.id)
             if (!xy || !visible.includes(spot)) return null
@@ -196,18 +263,60 @@ export function SpotMap({
                 type="button"
                 aria-label={`${spot.name}, ${spot.state}`}
                 aria-pressed={spot.id === selectedId}
-                onClick={() => onSelect(spot)}
+                onClick={() => pick(spot)}
                 onMouseEnter={() => setHovered(spot)}
                 onMouseLeave={() => setHovered(null)}
                 onFocus={() => setHovered(spot)}
                 onBlur={() => setHovered(null)}
-                className="absolute h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                className="absolute h-7 w-7 cursor-pointer -translate-x-1/2 -translate-y-1/2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
                 style={{ left: `${(xy[0] / WIDTH) * 100}%`, top: `${(xy[1] / HEIGHT) * 100}%` }}
               />
             )
           })}
         </div>
       </div>
+
+      {nearest.length > 0 && (
+        <div className="flex flex-col gap-2" aria-live="polite">
+          <div className="flex items-baseline justify-between gap-3">
+            <h3 className="text-sm font-semibold text-text">Closest spots to your pin</h3>
+            <button
+              type="button"
+              onClick={() => setPin(null)}
+              className="text-xs font-semibold text-text-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+            >
+              Clear pin
+            </button>
+          </div>
+          <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+            {nearest.map(({ spot, miles }) => (
+              <li key={spot.id}>
+                <button
+                  type="button"
+                  aria-pressed={spot.id === selectedId}
+                  onClick={() => pick(spot)}
+                  onMouseEnter={() => setHovered(spot)}
+                  onMouseLeave={() => setHovered(null)}
+                  className={cx(
+                    'flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring',
+                    spot.id === selectedId
+                      ? 'border-accent bg-surface-raised'
+                      : 'border-border bg-surface hover:border-primary',
+                  )}
+                >
+                  <span className="min-w-0">
+                    <span className="font-semibold text-text">{spot.name}</span>
+                    <span className="text-text-muted">, {spot.state}</span>
+                  </span>
+                  <span className="shrink-0 text-xs tabular-nums text-text-muted">
+                    {miles < 10 ? miles.toFixed(1) : Math.round(miles)} mi
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }

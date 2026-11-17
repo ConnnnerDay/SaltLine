@@ -37,7 +37,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
 from pydantic import BaseModel
@@ -93,6 +93,15 @@ class MarineDay(BaseModel):
     wave_high_ft: float | None = None
 
 
+class SwellComponent(BaseModel):
+    """One wave train from the marine text's "Wave Detail" ("SE 1 ft at
+    8 seconds"): where it comes from, how big, and its period."""
+
+    direction: str
+    height_ft: float
+    period_s: int
+
+
 class MarineZoneConditions(BaseModel):
     """Wind and wave ranges parsed from an NWS marine zone forecast's first
     ~24 hours (3 periods). `None` fields mean the source text didn't
@@ -106,6 +115,37 @@ class MarineZoneConditions(BaseModel):
     wave_high_ft: float | None = None
     # The whole forecast (usually 5 days), one entry per calendar day.
     days: list[MarineDay] = []
+    # The first period's wave trains, largest first.
+    swell: list[SwellComponent] = []
+
+
+class WeatherNow(BaseModel):
+    """The NWS land forecast's current period ("This Afternoon")."""
+
+    name: str
+    temperature_f: float | None = None
+    short_forecast: str = ""
+    sky: str = "unknown"
+    precip_pct: int | None = None
+    is_daytime: bool = True
+
+
+class WeatherDay(BaseModel):
+    """One calendar day of the NWS land forecast (its day and night
+    periods). `high_f`/`low_f` are None when the forecast starts after
+    that day's daytime period, or ends before its night."""
+
+    date: date
+    high_f: float | None = None
+    low_f: float | None = None
+    short_forecast: str = ""
+    sky: str = "unknown"
+    precip_pct: int | None = None
+
+
+class PointWeather(BaseModel):
+    now: WeatherNow | None = None
+    days: list[WeatherDay] = []
 
 
 class GridpointWindForecast(BaseModel):
@@ -170,7 +210,39 @@ def parse_marine_zone_conditions(periods: list[dict[str, Any]]) -> MarineZoneCon
         conditions.wave_low_ft = min(s[0] for s in wave_ranges)
         conditions.wave_high_ft = max(s[1] for s in wave_ranges)
     conditions.days = parse_marine_zone_days(periods)
+    conditions.swell = parse_wave_detail(
+        next(
+            (
+                str(p.get("detailedForecast") or "")
+                for p in periods
+                if "wave detail" in str(p.get("detailedForecast") or "").lower()
+            ),
+            "",
+        )
+    )
     return conditions
+
+
+_WAVE_DETAIL_RE = re.compile(r"wave detail:\s*(.+?)(?:\.\s|\.$|$)", re.IGNORECASE)
+_SWELL_RE = re.compile(
+    r"\b([NSEW]{1,3})\s+(\d+(?:\.\d+)?)\s*(?:ft|feet)\s+at\s+(\d+)\s*seconds?",
+    re.IGNORECASE,
+)
+
+
+def parse_wave_detail(text: str) -> list[SwellComponent]:
+    """The wave trains in a marine period's "Wave Detail: N 3 ft at 4
+    seconds and SE 1 ft at 8 seconds." sentence, largest first."""
+    match = _WAVE_DETAIL_RE.search(text)
+    if not match:
+        return []
+    components = [
+        SwellComponent(
+            direction=direction.upper(), height_ft=float(height), period_s=int(period)
+        )
+        for direction, height, period in _SWELL_RE.findall(match.group(1))
+    ]
+    return sorted(components, key=lambda c: c.height_ft, reverse=True)
 
 
 def _is_night_period(name: str) -> bool:
@@ -355,6 +427,89 @@ async def fetch_gridpoint_wind(
         logger.warning("NWS gridpoint wind forecast unavailable", exc_info=True)
         return None
     return parse_gridpoint_wind(periods)
+
+
+# Sky category from NWS's shortForecast text, most severe match first.
+_SKY_KEYWORDS: list[tuple[str, tuple[str, ...]]] = [
+    ("storm", ("thunder", "tstorm", "t-storm")),
+    ("snow", ("snow", "sleet", "ice", "freezing")),
+    ("rain", ("rain", "shower", "drizzle")),
+    ("fog", ("fog", "haze", "smoke")),
+    ("cloudy", ("mostly cloudy", "cloudy", "overcast")),
+    ("partly", ("partly", "mostly sunny", "mostly clear")),
+    ("clear", ("sunny", "clear", "fair")),
+    ("wind", ("breezy", "windy")),
+]
+
+
+def sky_category(short_forecast: str) -> str:
+    text = short_forecast.lower()
+    for category, keywords in _SKY_KEYWORDS:
+        if any(keyword in text for keyword in keywords):
+            return category
+    return "unknown"
+
+
+def _precip(period: dict[str, Any]) -> int | None:
+    value = (period.get("probabilityOfPrecipitation") or {}).get("value")
+    return int(value) if isinstance(value, (int, float)) else None
+
+
+def parse_point_weather(periods: list[dict[str, Any]]) -> PointWeather:
+    """The current period plus one entry per calendar day (by each
+    period's own start date), from a standard NWS gridpoint forecast."""
+    weather = PointWeather()
+    if not periods:
+        return weather
+    first = periods[0]
+    weather.now = WeatherNow(
+        name=str(first.get("name") or ""),
+        temperature_f=first.get("temperature"),
+        short_forecast=str(first.get("shortForecast") or ""),
+        sky=sky_category(str(first.get("shortForecast") or "")),
+        precip_pct=_precip(first),
+        is_daytime=bool(first.get("isDaytime", True)),
+    )
+    by_date: dict[date, WeatherDay] = {}
+    for period in periods:
+        try:
+            start = datetime.fromisoformat(str(period.get("startTime")))
+        except ValueError:
+            continue
+        day = by_date.setdefault(start.date(), WeatherDay(date=start.date()))
+        text = str(period.get("shortForecast") or "")
+        temp = period.get("temperature")
+        if period.get("isDaytime"):
+            day.high_f = temp
+            day.short_forecast, day.sky = text, sky_category(text)
+        else:
+            day.low_f = temp
+            if not day.short_forecast:
+                day.short_forecast, day.sky = text, sky_category(text)
+        chance = _precip(period)
+        if chance is not None:
+            day.precip_pct = max(day.precip_pct or 0, chance)
+    weather.days = sorted(by_date.values(), key=lambda day: day.date)
+    return weather
+
+
+async def fetch_point_weather(
+    client: BoundedHTTPClient, lat: float, lng: float
+) -> PointWeather | None:
+    """The standard NWS forecast for the land grid point nearest
+    (lat, lng): air temperature, sky and rain chance. Enrichment only:
+    degrades to `None` on any failure."""
+    try:
+        points = await client.get_json(
+            f"https://api.weather.gov/points/{lat:.4f},{lng:.4f}", headers=_NWS_HEADERS
+        )
+        forecast_url = _field(points, "forecast", "points")
+        forecast = await client.get_json(forecast_url, headers=_NWS_HEADERS)
+        periods = _field(forecast, "periods", forecast_url)
+        return parse_point_weather(periods)
+    except Exception:  # enrichment only: any failure just means no weather
+        logger.warning("NWS point weather forecast unavailable", exc_info=True)
+        return None
 
 
 async def fetch_point_alerts(

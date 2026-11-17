@@ -795,3 +795,18 @@ async def test_buoy_unavailable_only_when_every_listed_station_fails(
     buoy = next(s for s in envelope.sources if s.provider == "ndbc:buoy")
     assert buoy.state is SourceState.UNAVAILABLE
     assert buoy.detail == f"{_WRIGHTSVILLE_BEACH.ndbc_stations[0]} 404"
+
+
+async def test_outlook_today_matches_the_headline() -> None:
+    client = _make_client(nws_ok=True, coops_ok=True, ndbc_ok=True)
+    async with client:
+        envelope = await assemble_forecast(
+            _WRIGHTSVILLE_BEACH, client, _WATER_TEMP_PROFILES, now=_NOW
+        )
+    conditions = envelope.conditions
+    assert conditions is not None
+    assert conditions["days"], "the fixture's marine forecast yields at least one day"
+    today = conditions["days"][0]
+    assert today["score"] == conditions["score"]["score"]
+    assert today["verdict"] == conditions["score"]["verdict"]
+    assert today["wind_range_kt"] == conditions["wind_range_kt"]

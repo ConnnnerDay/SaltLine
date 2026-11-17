@@ -191,6 +191,7 @@ from app.domain.scoring import (
     wind_orientation_for_region,
 )
 from app.domain.timing import HourlyOutlook, build_hourly_outlook
+from app.domain.wind import WindEffect, wind_effect_for
 from app.infra.http_client import BoundedHTTPClient, ProviderError
 from app.infra.timezones import safe_zone
 from app.providers.astronomy import LunarDetails, SolunarTimes, SunTimes, TwilightTimes
@@ -211,10 +212,13 @@ from app.providers.noaa_coops import (
 from app.providers.nws import (
     GridpointWindForecast,
     MarineZoneConditions,
+    PointWeather,
+    SwellComponent,
     WeatherAlert,
     fetch_gridpoint_wind,
     fetch_marine_zone_conditions,
     fetch_point_alerts,
+    fetch_point_weather,
 )
 
 _logger = logging.getLogger(__name__)
@@ -280,6 +284,12 @@ class ForecastConditions(BaseModel):
     # The multi-day outlook (app.domain.outlook); empty when the marine
     # zone forecast is unavailable.
     days: list[DayOutlook] = []
+    # NWS land forecast (air temperature, sky, rain); None if unavailable.
+    weather: PointWeather | None = None
+    # Wave trains from the marine text's "Wave Detail", largest first.
+    swell: list[SwellComponent] = []
+    # How today's wind meets this coast (`wind_effect_for`).
+    wind_effect: WindEffect | None = None
 
 
 class ForecastTides(BaseModel):
@@ -419,6 +429,13 @@ def _reconcile_range(
     return None
 
 
+def _storms_today(weather: PointWeather, now: datetime, tz_name: str) -> bool:
+    today = now.astimezone(safe_zone(tz_name)).date()
+    return (weather.now is not None and weather.now.sky == "storm") or any(
+        day.date == today and day.sky == "storm" for day in weather.days
+    )
+
+
 async def assemble_forecast(
     location: ResolvedLocation,
     client: BoundedHTTPClient,
@@ -432,12 +449,14 @@ async def assemble_forecast(
         buoy_result,
         alerts,
         tides_result,
+        point_weather,
     ) = await asyncio.gather(
         _fetch_marine_zone(client, location.nws_zone),
         _fetch_water_temp(client, location.water_temp_station),
         _fetch_buoy(client, location.ndbc_stations),
         fetch_point_alerts(client, location.lat, location.lng),
         _fetch_tides(client, location.coops_station, now, location.timezone),
+        fetch_point_weather(client, location.lat, location.lng),
     )
 
     sources = [
@@ -698,9 +717,39 @@ async def assemble_forecast(
             coast=wind_orientation_for_region(location.conditions_region),
             water_temperature=water_temperature,
             tide_predictions=tides_result.value,
+            weather_days=point_weather.days if point_weather else None,
         )
     except Exception:
         _logger.exception("day outlook failed for %s", location.id)
+    # "Today" in the outlook is the headline itself: same score, verdict
+    # and reconciled wind/wave ranges (the headline also uses the live buoy
+    # and the time-of-day bonus), so the two can never disagree.
+    if conditions.days:
+        conditions.days[0] = conditions.days[0].model_copy(
+            update={
+                "score": score.score,
+                "verdict": score.verdict.value,
+                "wind_range_kt": wind_range,
+                "wave_range_ft": wave_range,
+                "wind_direction": wind_direction or conditions.days[0].wind_direction,
+            }
+        )
+    conditions.weather = point_weather
+    conditions.swell = marine_zone_conditions.swell if marine_zone_conditions else []
+    conditions.wind_effect = wind_effect_for(
+        wind_orientation_for_region(location.conditions_region), wind_direction
+    )
+    if point_weather and _storms_today(point_weather, now, location.timezone):
+        warnings.append(
+            Warning(
+                code="lightning_risk",
+                message=(
+                    "Thunderstorms are in today's forecast. Lightning finds fishing "
+                    "rods: leave the beach, pier or water at the first rumble of thunder."
+                ),
+                severity=WarningSeverity.ADVISORY,
+            )
+        )
 
     hourly_outlook: HourlyOutlook = build_hourly_outlook(
         sun_times=sun_times,

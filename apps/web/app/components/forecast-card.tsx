@@ -1,6 +1,7 @@
 import { Badge, type BadgeVariant, Button, Card } from './ui'
 import { cx } from './ui/cx'
 import type { NearbyCam } from '@/lib/get-cams'
+import speciesPhotos from '@/lib/species-photos.json'
 
 export type ForecastVerdict = 'Excellent' | 'Good' | 'Fair' | 'Challenging' | 'Poor' | 'Unknown'
 
@@ -699,6 +700,52 @@ function formatRange(range: [number, number]): string {
   return low === high ? `${low}` : `${low}–${high}`
 }
 
+type SpeciesPhoto = {
+  src: string
+  credit: string
+  license: string
+  license_url: string
+  source_url: string
+}
+
+const SPECIES_PHOTOS = speciesPhotos as Record<string, SpeciesPhoto>
+
+/**
+ * A species photo, self-hosted from public/species (downloaded once by
+ * apps/api's scripts/fetch_species_photos.py from Wikimedia Commons, free
+ * licenses only), always with its author/license credit linked to the
+ * source page -- the attribution those licenses require.
+ */
+function SpeciesPhotoFigure({ id, name, compact = false }: { id: string; name: string; compact?: boolean }) {
+  const photo = SPECIES_PHOTOS[id]
+  if (!photo) return null
+  return (
+    <figure className="flex flex-col gap-1">
+      <img
+        src={photo.src}
+        alt={name}
+        loading="lazy"
+        width={480}
+        height={300}
+        className={cx(
+          'w-full rounded-md bg-bg object-contain',
+          compact ? 'aspect-[16/9]' : 'aspect-[16/9] sm:max-w-xs',
+        )}
+      />
+      <figcaption className="truncate text-[0.625rem] text-text-muted">
+        <a
+          href={photo.source_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline-offset-2 hover:underline"
+        >
+          Photo: {photo.credit} · {photo.license}
+        </a>
+      </figcaption>
+    </figure>
+  )
+}
+
 const GUIDANCE_TIER_TEXT: Record<GuidanceTier, string> = {
   prime: 'text-accent',
   good: 'text-primary',
@@ -734,6 +781,7 @@ function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
               key={pick.id}
               className="flex flex-col gap-1.5 rounded-md border border-border bg-surface-raised px-4 py-3"
             >
+              <SpeciesPhotoFigure id={pick.id} name={pick.name} compact />
               <div className="flex items-start justify-between gap-2">
                 <span className="font-bold leading-tight text-text">{pick.name}</span>
                 <span
@@ -879,6 +927,7 @@ function RigsAndTips({ guidance }: { guidance: FishingGuidance }) {
         {guidance.species.map((pick) => (
           <li key={pick.id} className="flex flex-col gap-2 border-b border-border pb-4 last:border-b-0 last:pb-0">
             <h3 className="text-base font-bold text-text">{pick.name}</h3>
+            <SpeciesPhotoFigure id={pick.id} name={pick.name} />
             <p className="font-serif text-base italic text-text-muted">{pick.explanation}</p>
             <dl className="grid grid-cols-1 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-[auto_1fr]">
               <dt className="section-label pt-0.5">Rig</dt>

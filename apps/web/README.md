@@ -8,6 +8,15 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Species photos (original feature restored).** "What's biting" cards and
+"Rigs & tips" show a photo of each species with its credit and license,
+linked to the Commons source page, as those licenses require. Photos are
+self-hosted from `public/species/` with their metadata in
+`lib/species-photos.json`, so the CSP stays self-only and photos work
+offline. 25 of 26 catalogue species have one; Redtail surfperch has no
+standard-size thumbnail on Commons, and its card simply has no image.
+Refresh or add photos with apps/api's `scripts/fetch_species_photos.py`.
+
 **Pack for today and live cams (original features restored).** Two
 collapsible rows on the forecast page. "Pack for today" shows the
 day's tackle list for the top species. "Live cams" lists nearby public cam

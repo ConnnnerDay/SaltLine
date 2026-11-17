@@ -1,5 +1,7 @@
 import { Badge, Button, Card, Container, Field } from '../components/ui'
 import { RigDiagram } from '../components/rig-diagram'
+import { SpotDiagram, SPOTS } from '../components/spot-diagram'
+import type { Water } from '@/lib/fishing-style'
 import { RIGS, type RigId } from '@/lib/rigs'
 
 /**
@@ -30,6 +32,20 @@ export default function DesignSystemPage() {
           <h2 id="gallery-heading" className="text-2xl font-semibold text-text">
             Components
           </h2>
+
+          <div className="flex flex-col gap-3">
+            <h3 className="text-lg font-medium text-text">Where-to-fish cross-sections</h3>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {(Object.keys(SPOTS) as Water[]).map((water) => (
+                <Card key={water} className="flex flex-col gap-2">
+                  <span className="text-sm font-semibold text-text">{SPOTS[water].title}</span>
+                  <div className="overflow-hidden rounded-md border border-border">
+                    <SpotDiagram water={water} className="block h-auto w-full" />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
 
           <div className="flex flex-col gap-3">
             <h3 className="text-lg font-medium text-text">Rig diagrams</h3>

@@ -3,6 +3,9 @@ import { cx } from './ui/cx'
 import { HourlyChart } from './hourly-chart'
 import { RigDiagram } from './rig-diagram'
 import { RIGS, rigsFor, type RigId } from '@/lib/rigs'
+import { RIG_FIT, RIG_WATER_TIPS, WATER_NOUN, WATER_PHRASE, watersFor } from '@/lib/fishing-style'
+import type { Preferences } from '@/app/api/preferences/route'
+import { YourDay } from './your-day'
 import type { NearbyCam } from '@/lib/get-cams'
 import speciesPhotos from '@/lib/species-photos.json'
 
@@ -959,7 +962,16 @@ function formatAsOf(asOf: string): string {
  * that uses them as its main rig; a fish that lists an alternative rig
  * is named under that rig too ("also works for").
  */
-function RigsAndTips({ guidance }: { guidance: FishingGuidance }) {
+function RigsAndTips({
+  guidance,
+  profile = null,
+}: {
+  guidance: FishingGuidance
+  profile?: Preferences | null
+}) {
+  const waters = watersFor(profile)
+  // Lure-only rigs are skipped for someone who never fishes lures.
+  const skipJig = profile?.uses_lures === 'no'
   const groups = new Map<RigId, { main: SpeciesPick[]; also: SpeciesPick[] }>()
   for (const pick of guidance.species) {
     rigsFor(pick.rig).forEach((id, index) => {
@@ -968,12 +980,37 @@ function RigsAndTips({ guidance }: { guidance: FishingGuidance }) {
       groups.set(id, group)
     })
   }
-  const ordered = [...groups.entries()]
-    .filter(([, group]) => group.main.length > 0)
-    .concat([...groups.entries()].filter(([, group]) => group.main.length === 0))
+  if (skipJig) groups.delete('jig')
+  // Rigs that suit the user's kind of water come first, then rigs that
+  // are some pick's main rig, then alternatives; otherwise pick order.
+  const fit = (id: RigId) => {
+    const ranks = waters.map((water) => RIG_FIT[water].indexOf(id)).filter((rank) => rank >= 0)
+    return ranks.length ? Math.min(...ranks) : Infinity
+  }
+  const entries = [...groups.entries()]
+  const ordered = entries
+    .map((entry, index) => ({ entry, index }))
+    .sort(
+      (a, b) =>
+        Number(a.entry[1].main.length === 0) - Number(b.entry[1].main.length === 0) ||
+        fit(a.entry[0]) - fit(b.entry[0]) ||
+        a.index - b.index,
+    )
+    .map(({ entry }) => entry)
+
+  const fittingWater = (id: RigId) => waters.find((water) => RIG_FIT[water].includes(id))
+  const waterTips = (id: RigId) =>
+    waters
+      .map((water) => ({ water, tip: RIG_WATER_TIPS[id]?.[water] }))
+      .filter((entry): entry is { water: (typeof waters)[number]; tip: string } => Boolean(entry.tip))
 
   return (
     <>
+      {skipJig && guidance.species.some((pick) => rigsFor(pick.rig).includes('jig')) && (
+        <p className="text-xs text-text-muted">
+          Jig rigs are hidden because your profile says you don&apos;t fish lures.
+        </p>
+      )}
       <ol className="flex flex-col gap-4">
         {ordered.map(([id, group]) => {
           const rig = RIGS[id]
@@ -1005,8 +1042,24 @@ function RigsAndTips({ guidance }: { guidance: FishingGuidance }) {
 
               <div className="flex min-w-0 flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <h3 className="text-lg font-bold text-text">{rig.name}</h3>
+                  <h3 className="flex flex-wrap items-center gap-2 text-lg font-bold text-text">
+                    {rig.name}
+                    {fittingWater(id) && (
+                      <span className="rounded-full bg-go-bg px-2 py-0.5 text-xs font-bold text-go-text">
+                        Suits your {WATER_NOUN[fittingWater(id)!]} fishing
+                      </span>
+                    )}
+                  </h3>
                   <p className="text-sm leading-relaxed text-text-muted">{rig.summary}</p>
+                  {waterTips(id).map(({ water, tip }) => (
+                    <p
+                      key={water}
+                      className="rounded-md border-l-4 border-l-primary bg-primary-tint px-3 py-2 text-sm text-text"
+                    >
+                      <span className="font-semibold">{WATER_PHRASE[water]}: </span>
+                      {tip}
+                    </p>
+                  ))}
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -1138,10 +1191,13 @@ function SizeAndBagLimits({ guidance }: { guidance: FishingGuidance }) {
 export function ForecastCard({
   forecast,
   cams = [],
+  profile = null,
 }: {
   forecast: ForecastEnvelope
   /** Nearby public live-cam links (lib/get-cams.ts). */
   cams?: NearbyCam[]
+  /** The signed-in user's fishing profile; null on the public share page. */
+  profile?: Preferences | null
 }) {
   const score = forecast.conditions?.score
   const bestWindow = forecast.hourly_outlook ? deriveBestWindow(forecast.hourly_outlook) : null
@@ -1244,6 +1300,8 @@ export function ForecastCard({
         </dl>
       </Card>
 
+      <YourDay forecast={forecast} profile={profile} />
+
       {forecast.hourly_outlook && (
         <Card className="flex flex-col gap-4">
           <SectionHeader title="Fishing activity today" aside="0–100, by hour" />
@@ -1293,7 +1351,7 @@ export function ForecastCard({
 
         {forecast.recommendations && forecast.recommendations.species.length > 0 && (
           <CollapsibleSection title="Rigs & tips">
-            <RigsAndTips guidance={forecast.recommendations} />
+            <RigsAndTips guidance={forecast.recommendations} profile={profile} />
           </CollapsibleSection>
         )}
 

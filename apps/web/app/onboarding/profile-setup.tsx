@@ -117,17 +117,23 @@ export function ProfileSetup({ next }: { next: string }) {
       .then((response) => (response.ok ? (response.json() as Promise<Preferences>) : null))
       .then((saved) => {
         if (cancelled || !saved) return
+        // Fill only answers the user hasn't touched yet: this request can
+        // land after they've already tapped choices, and must never undo them.
         setSavedHomeId(saved.default_location_id)
-        setTypes(saved.fishing_types ?? [])
-        setTargets(saved.target_groups ?? [])
-        setTimes(saved.fishing_times ?? [])
-        setTide(saved.tide_preference)
-        setLures(saved.uses_lures)
-        setLiveBait(saved.uses_live_bait)
-        setCutBait(saved.uses_cut_bait)
-        setWind(saved.wind_threshold_kt === null ? '' : String(saved.wind_threshold_kt))
-        setSurf(saved.surf_threshold_ft === null ? '' : String(saved.surf_threshold_ft))
-        setExperience(saved.experience)
+        setTypes((current) => (current.length ? current : (saved.fishing_types ?? [])))
+        setTargets((current) => (current.length ? current : (saved.target_groups ?? [])))
+        setTimes((current) => (current.length ? current : (saved.fishing_times ?? [])))
+        setTide((current) => current ?? saved.tide_preference)
+        setLures((current) => current ?? saved.uses_lures)
+        setLiveBait((current) => current ?? saved.uses_live_bait)
+        setCutBait((current) => current ?? saved.uses_cut_bait)
+        setWind((current) =>
+          current !== '' || saved.wind_threshold_kt === null ? current : String(saved.wind_threshold_kt),
+        )
+        setSurf((current) =>
+          current !== '' || saved.surf_threshold_ft === null ? current : String(saved.surf_threshold_ft),
+        )
+        setExperience((current) => current ?? saved.experience)
       })
       .catch(() => {})
     return () => {

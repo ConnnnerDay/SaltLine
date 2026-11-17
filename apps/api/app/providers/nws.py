@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import logging
 import re
+from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel
@@ -107,6 +108,8 @@ class WeatherAlert(BaseModel):
     severity: str
     headline: str
     description: str
+    # When the alert ends (`ends`, else `expires`); shown as "until 1:29 PM".
+    expires: datetime | None = None
 
 
 def parse_marine_zone_conditions(periods: list[dict[str, Any]]) -> MarineZoneConditions:
@@ -200,10 +203,12 @@ def _parse_alerts(payload: dict[str, Any], limit: int) -> list[WeatherAlert]:
     """
     raw = payload.get("features", []) or payload.get("@graph", [])
     alerts: list[WeatherAlert] = []
-    for item in raw[:limit]:
+    for item in raw:
+        if len(alerts) >= limit:
+            break
         fields = item.get("properties", item)
         event = fields.get("event", "")
-        if not event:
+        if not event or not _is_real_alert(fields):
             continue
         alerts.append(
             WeatherAlert(
@@ -211,9 +216,32 @@ def _parse_alerts(payload: dict[str, Any], limit: int) -> list[WeatherAlert]:
                 severity=fields.get("severity", ""),
                 headline=fields.get("headline", ""),
                 description=(fields.get("description", "") or "")[:300],
+                expires=_alert_time(fields.get("ends") or fields.get("expires")),
             )
         )
     return alerts
+
+
+def _is_real_alert(fields: dict[str, Any]) -> bool:
+    """NWS sends test messages and cancellations through the same active
+    feed (a live "TEST Tsunami Warning" showed up on a forecast). Only an
+    in-force, real alert is kept: `status` "Actual" (when present), not a
+    cancellation, and no "TEST" headline."""
+    status = str(fields.get("status") or "Actual")
+    message_type = str(fields.get("messageType") or "Alert")
+    headline = str(fields.get("headline") or "")
+    return (
+        status.lower() == "actual"
+        and message_type.lower() != "cancel"
+        and not headline.upper().startswith("TEST")
+    )
+
+
+def _alert_time(value: object) -> datetime | None:
+    try:
+        return datetime.fromisoformat(str(value)) if value else None
+    except ValueError:
+        return None
 
 
 def _field(payload: object, name: str, source: str) -> Any:

@@ -171,6 +171,14 @@ def _wind_condition_multiplier(wind_range: tuple[float, float] | None) -> float:
     return 1.0
 
 
+def _in_window(hour: int, start_h: float, end_h: float) -> bool:
+    """Whether *hour* falls in a start..end hour-of-day window, including a
+    window that wraps past midnight (22.5 -> 0.5 covers 23 and 0)."""
+    if start_h <= end_h:
+        return start_h <= hour <= end_h
+    return hour >= start_h or hour <= end_h
+
+
 def build_hourly_outlook(
     *,
     sun_times: SunTimes,
@@ -212,7 +220,7 @@ def build_hourly_outlook(
         s_h = _hour_of_day(period.start, tz)
         e_h = _hour_of_day(period.end, tz)
         for h in range(24):
-            if s_h <= h <= e_h:
+            if _in_window(h, s_h, e_h):
                 activity[h] += _MAJOR_SOLUNAR_BOOST
                 reason_parts[h].append("Major solunar")
                 feeding_tag[h] = FeedingBand.MAJOR
@@ -223,7 +231,7 @@ def build_hourly_outlook(
         s_h = _hour_of_day(period.start, tz)
         e_h = _hour_of_day(period.end, tz)
         for h in range(24):
-            if s_h <= h <= e_h:
+            if _in_window(h, s_h, e_h):
                 activity[h] += _MINOR_SOLUNAR_BOOST
                 reason_parts[h].append("Minor solunar")
                 if feeding_tag[h] != FeedingBand.MAJOR:

@@ -417,3 +417,39 @@ async def test_fetch_gridpoint_wind_unexpected_shape_degrades_to_none() -> None:
 
     async with BoundedHTTPClient(transport=httpx.MockTransport(handler)) as client:
         assert await fetch_gridpoint_wind(client, 34.21, -77.8) is None
+
+
+def test_parse_alerts_drops_tests_and_cancellations() -> None:
+    from app.providers.nws import _parse_alerts
+
+    def feature(**props: object) -> dict[str, object]:
+        return {
+            "properties": {"event": "Small Craft Advisory", "headline": "SCA", **props}
+        }
+
+    payload = {
+        "features": [
+            feature(
+                headline="TEST Tsunami Warning issued ...", event="Tsunami Warning"
+            ),
+            feature(status="Test"),
+            feature(status="Exercise"),
+            feature(messageType="Cancel"),
+            feature(status="Actual", ends="2026-11-17T18:00:00-05:00"),
+        ]
+    }
+    alerts = _parse_alerts(payload, limit=5)
+    assert [alert.event for alert in alerts] == ["Small Craft Advisory"]
+    assert alerts[0].expires is not None and alerts[0].expires.hour == 18
+
+
+def test_parse_alerts_limit_counts_kept_alerts_only() -> None:
+    from app.providers.nws import _parse_alerts
+
+    payload = {
+        "features": [
+            {"properties": {"event": "Tsunami Warning", "headline": "TEST ..."}},
+            {"properties": {"event": "Gale Warning", "headline": "Gale"}},
+        ]
+    }
+    assert [a.event for a in _parse_alerts(payload, limit=1)] == ["Gale Warning"]

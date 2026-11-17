@@ -193,3 +193,17 @@ def test_compute_solunar_times_pacific_coast_also_produces_valid_periods() -> No
 
     assert len(result.major_periods) == 2
     assert 0.0 <= result.illumination_pct <= 100.0
+
+
+def test_solunar_periods_always_end_after_they_start() -> None:
+    from datetime import UTC, timedelta
+
+    from app.providers.astronomy import compute_solunar_times
+
+    start = datetime(2026, 11, 1, 12, tzinfo=UTC)
+    for day in range(30):  # a full lunar cycle, so some windows cross midnight
+        times = compute_solunar_times(
+            start + timedelta(days=day), 34.2, -77.8, "America/New_York"
+        )
+        for period in [*times.major_periods, *times.minor_periods]:
+            assert period.end > period.start

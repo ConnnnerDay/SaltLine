@@ -156,13 +156,6 @@ const SOURCE_STATE_TO_BADGE: Record<SourceStatus['state'], BadgeVariant> = {
   unavailable: 'nogo',
 }
 
-const ACTIVITY_TAG_TO_BADGE: Record<ActivityTag, BadgeVariant> = {
-  prime: 'go',
-  high: 'go',
-  med: 'marginal',
-  low: 'neutral',
-}
-
 const PROVIDER_LABELS: Record<string, string> = {
   'nws:marine_zone': 'NWS marine zone',
   'noaa_coops:water_temperature': 'Water temperature',
@@ -365,6 +358,20 @@ function TideTable({
   )
 }
 
+const ACTIVITY_BAR: Record<ActivityTag, string> = {
+  prime: 'bg-tier-prime',
+  high: 'bg-tier-high',
+  med: 'bg-tier-med',
+  low: 'bg-tier-low',
+}
+
+const ACTIVITY_LABEL: Record<ActivityTag, string> = {
+  prime: 'Prime',
+  high: 'High',
+  med: 'Good',
+  low: 'Low',
+}
+
 /**
  * Sprint 34's hourly outlook table -- the "text alternatives" half of
  * the acceptance bar (apps/api's `app.domain.timing.
@@ -410,12 +417,15 @@ function HourlyOutlookTable({
           </thead>
           <tbody>
             {outlook.hours.map((hour) => {
-              const why = [
-                ...hour.reasons,
-                hour.tide_event ? `${capitalize(hour.tide_event)} tide` : null,
-              ]
-                .filter((part): part is string => Boolean(part))
-                .join(' · ')
+              // reasons can already name the tide event; list each once.
+              const why = Array.from(
+                new Set(
+                  [
+                    ...hour.reasons,
+                    hour.tide_event ? `${capitalize(hour.tide_event)} tide` : null,
+                  ].filter((part): part is string => Boolean(part)),
+                ),
+              ).join(' · ')
               return (
                 <tr
                   key={hour.hour}
@@ -425,11 +435,24 @@ function HourlyOutlookTable({
                     {formatter.format(new Date(hour.time))}
                     {hour.is_now && <span className="text-text-muted"> (now)</span>}
                   </td>
-                  <td className="py-1.5 pr-4">
-                    <Badge variant={ACTIVITY_TAG_TO_BADGE[hour.tag]}>
-                      {capitalize(hour.tag)}
-                      {hour.peak && ' · Peak'}
-                    </Badge>
+                  <td className="py-2 pr-4">
+                    <span className="flex items-center gap-2.5 whitespace-nowrap">
+                      <span aria-hidden="true" className="h-1.5 w-16 overflow-hidden rounded-full bg-border sm:w-24">
+                        <span
+                          className={cx('block h-full rounded-full', ACTIVITY_BAR[hour.tag])}
+                          style={{ width: `${Math.max(4, hour.level)}%` }}
+                        />
+                      </span>
+                      <span className="font-semibold text-text">
+                        {ACTIVITY_LABEL[hour.tag]}
+                      </span>
+                      <span className="text-text-muted tabular-nums">{hour.level}</span>
+                      {hour.peak && (
+                        <span className="rounded-full bg-amber/15 px-1.5 text-xs font-bold text-amber">
+                          Peak
+                        </span>
+                      )}
+                    </span>
                   </td>
                   <td className="py-1.5 break-words text-text-muted">{why || '—'}</td>
                 </tr>
@@ -553,6 +576,39 @@ function SectionHeader({ title, aside }: { title: string; aside?: React.ReactNod
   )
 }
 
+/** The day's 0-100 score as a ring meter: the arc fills in the
+ * verdict's color over a track of the same surface, the number sits in
+ * the middle. Decorative (`aria-hidden`); the headline carries the score
+ * as text for screen readers. The arc animates in on load. */
+function ScoreRing({ score, colorClass }: { score: number; colorClass: string }) {
+  const radius = 42
+  const circumference = 2 * Math.PI * radius
+  const clamped = Math.max(0, Math.min(100, score))
+  return (
+    <div aria-hidden="true" className="relative h-20 w-20 shrink-0 sm:h-24 sm:w-24">
+      <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
+        <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="8" className="stroke-border" />
+        <circle
+          cx="50"
+          cy="50"
+          r={radius}
+          fill="none"
+          strokeWidth="8"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference * (1 - clamped / 100)}
+          className={cx('score-ring-arc stroke-current', colorClass)}
+          style={{ '--ring-length': `${circumference}` } as React.CSSProperties}
+        />
+      </svg>
+      <span className="absolute inset-0 flex flex-col items-center justify-center leading-none">
+        <span className="text-2xl font-extrabold tabular-nums text-text sm:text-3xl">{clamped}</span>
+        <span className="mt-0.5 text-[0.6875rem] font-semibold text-text-muted">/ 100</span>
+      </span>
+    </div>
+  )
+}
+
 /** One stat tile in the "Today's forecast" strip (legacy `.stat-card`):
  * colored top rule, uppercase label, big value, small muted note. */
 function StatTile({
@@ -608,6 +664,17 @@ export const VERDICT_TEXT: Record<ForecastVerdict, string> = {
   Challenging: 'text-accent',
   Poor: 'text-danger-text',
   Unknown: 'text-text-muted',
+}
+
+const COMPASS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW']
+
+/** A wind direction as a compass point. Older cached forecasts can
+ * carry raw degrees ("32.0") from the CO-OPS wind feed. */
+export function compassLabel(direction: string): string {
+  const degrees = Number(direction)
+  return Number.isFinite(degrees) && direction.trim() !== ''
+    ? COMPASS[Math.round(degrees / 22.5) % 16]
+    : direction
 }
 
 /**
@@ -954,12 +1021,13 @@ function RigsAndTips({ guidance }: { guidance: FishingGuidance }) {
  * Presentational rendering of a `ForecastEnvelope`, laid out like the
  * original Saltline dashboard and shared by both forecast pages:
  *
- * 1. "Today's forecast" -- the verdict as a big colored headline
- *    ("CHALLENGING · 42/100") over apps/api's plain-language summary in
- *    italic serif, then stat tiles for water temp, wind, waves (apps/api's
- *    already-reconciled ranges, shown verbatim) and confidence/freshness.
- * 2. "Fishing activity & day timeline" -- the tier-colored hourly chart.
- * 3. "When to fish" -- `deriveBestWindow`'s best window as a tile.
+ * 1. "Today's forecast" -- the verdict as a big colored headline beside
+ *    a 0-100 score ring (`ScoreRing`), apps/api's plain-language summary,
+ *    then stat tiles for water temp, wind, waves (rounded by
+ *    `formatRange`) and confidence/freshness.
+ * 2. "Fishing activity today" -- `HourlyChart` (hourly-chart.tsx).
+ * 3. "When to fish" -- the best window, plus the signed-in user's own
+ *    window when their profile has usual times.
  * 4. "What's biting" -- sprint 35's ranked picks, each with its reasons.
  * 5. Collapsible rows for pack for today, rigs & tips (sprint 35's tackle detail), the
  *    species calendar, tides, the hour-by-hour table (the chart's
@@ -1001,27 +1069,31 @@ export function ForecastCard({
     <div className="rise-in flex min-w-0 flex-col gap-4 sm:gap-5">
       <Card className="overflow-hidden p-0!">
         <div className="flex flex-col gap-2 px-5 pb-5 pt-5 sm:px-6 sm:pt-6">
-          <h2 className="section-label">Today&apos;s forecast</h2>
-          <p
-            className={cx(
-              'text-4xl font-extrabold uppercase leading-none tracking-tight break-words sm:text-5xl',
-              VERDICT_TEXT[verdict],
-            )}
-          >
-            {verdict}
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex min-w-0 flex-col gap-2">
+              <h2 className="section-label">Today&apos;s forecast</h2>
+              <p
+                className={cx(
+                  'text-4xl font-extrabold uppercase leading-none tracking-tight break-words sm:text-5xl',
+                  VERDICT_TEXT[verdict],
+                )}
+              >
+                {verdict}
+                {score && score.score !== null && (
+                  <span className="sr-only">, score {score.score} out of 100</span>
+                )}
+              </p>
+              {forecast.conditions?.comfort?.over_limit && (
+                <p className="w-fit rounded-md border border-marginal-border bg-marginal-bg px-2.5 py-1 text-xs font-semibold text-marginal-text">
+                  Over your comfort limits
+                  {score?.personalized_from && ` · ${score.personalized_from} for most anglers`}
+                </p>
+              )}
+            </div>
             {score && score.score !== null && (
-              <>
-                {' '}
-                <span className="whitespace-nowrap">· {score.score}/100</span>
-              </>
+              <ScoreRing score={score.score} colorClass={VERDICT_TEXT[verdict]} />
             )}
-          </p>
-          {forecast.conditions?.comfort?.over_limit && (
-            <p className="w-fit rounded-md border border-marginal-border bg-marginal-bg px-2.5 py-1 text-xs font-semibold text-marginal-text">
-              Over your comfort limits
-              {score?.personalized_from && ` · ${score.personalized_from} for most anglers`}
-            </p>
-          )}
+          </div>
           {score?.summary && (
             <p className="max-w-3xl text-sm leading-relaxed text-text-muted sm:text-base">{score.summary}</p>
           )}
@@ -1043,7 +1115,7 @@ export function ForecastCard({
               label="Wind"
               value={
                 conditions?.wind_range_kt
-                  ? `${conditions.wind_direction ? `${conditions.wind_direction} ` : ''}${formatRange(conditions.wind_range_kt)} kt`
+                  ? `${conditions.wind_direction ? `${compassLabel(conditions.wind_direction)} ` : ''}${formatRange(conditions.wind_range_kt)} kt`
                   : '—'
               }
               note={conditions?.wind_range_kt ? 'next 24 h' : 'unavailable'}

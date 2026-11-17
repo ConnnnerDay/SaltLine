@@ -330,3 +330,15 @@ textarea {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* The score ring's arc draws in from empty on load. */
+@keyframes ring-draw {
+  from {
+    stroke-dashoffset: var(--ring-length);
+  }
+}
+
+.score-ring-arc {
+  animation: ring-draw 900ms var(--ease-smooth) both;
+  animation-delay: 150ms;
+}

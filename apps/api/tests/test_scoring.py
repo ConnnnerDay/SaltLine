@@ -388,3 +388,11 @@ class TestFactorSortingAndSummary:
 def test_forecast_score_is_pydantic_model() -> None:
     result = score_conditions((5.0, 8.0), (1.0, 2.0))
     assert isinstance(result, ForecastScore)
+
+
+def test_range_labels_round_and_collapse_equal_ends() -> None:
+    from app.domain.scoring import _range_label
+
+    assert _range_label((10.4, 13.4), "kt", step=1.0) == "10-13 kt"
+    assert _range_label((4.4, 4.6), "ft", step=0.5) == "4.5 ft"
+    assert _range_label((4.0, 4.0), "ft", step=0.5) == "4 ft"

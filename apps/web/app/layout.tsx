@@ -3,6 +3,7 @@ import './globals.css'
 import { OfflineBanner } from './offline-banner'
 import { ServiceWorkerRegistration } from './service-worker-registration'
 import { SiteHeader } from './components/site-header'
+import { MobileTabBar } from './components/main-nav'
 
 // Sprint 49 ("SEO and sharing"): NEXT_PUBLIC_SITE_URL lets metadataBase
 // (and every relative canonical/OpenGraph URL built from it, here and
@@ -73,6 +74,7 @@ export default function RootLayout({
         <OfflineBanner />
         <SiteHeader />
         {children}
+        <MobileTabBar />
       </body>
     </html>
   )

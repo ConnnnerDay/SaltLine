@@ -179,8 +179,44 @@ async def fetch_coops_wind(
     return CoopsWindReading(
         wind_low_kt=round(speed_f, 1),
         wind_high_kt=round(max(speed_f, gust_f), 1),
-        wind_direction=rows[0].get("d") or None,
+        wind_direction=_coops_direction(rows[0]),
     )
+
+
+_COMPASS_POINTS = (
+    "N",
+    "NNE",
+    "NE",
+    "ENE",
+    "E",
+    "ESE",
+    "SE",
+    "SSE",
+    "S",
+    "SSW",
+    "SW",
+    "WSW",
+    "W",
+    "WNW",
+    "NW",
+    "NNW",
+)
+
+
+def _coops_direction(row: dict[str, Any]) -> str | None:
+    """CO-OPS wind rows carry `d` (degrees, e.g. "32.0") and `dr` (a
+    compass label, e.g. "NE"). Every other provider reports a compass
+    label, so prefer `dr` and convert `d` only when it is missing --
+    passing the raw degrees through showed up as "32.0 11-13 kt"."""
+    for key in ("dr", "d"):
+        label = str(row.get(key) or "").strip().upper()
+        if label in _COMPASS_POINTS:
+            return label
+    try:
+        degrees = float(row.get("d") or "")
+    except ValueError:
+        return None
+    return _COMPASS_POINTS[round(degrees / 22.5) % 16]
 
 
 async def fetch_tide_predictions(

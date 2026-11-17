@@ -3,7 +3,7 @@
 import { useId, useState, type FormEvent } from 'react'
 import { Button, Card } from '@/app/components/ui'
 import type { CatchEntry } from '@/app/api/catches/route'
-import { formatRange } from '@/app/components/forecast-card'
+import { compassLabel, formatRange } from '@/app/components/forecast-card'
 
 export type LocationOption = { id: string; label: string }
 
@@ -33,7 +33,7 @@ function conditionsLine(entry: CatchEntry): string | null {
     parts.push(`water ${Math.round(c.water_temp_f)}°F${c.water_temp_is_fallback ? ' (avg)' : ''}`)
   if (c.wind_range_kt)
     parts.push(
-      `wind ${c.wind_direction ? `${c.wind_direction} ` : ''}${formatRange(c.wind_range_kt)} kt`,
+      `wind ${c.wind_direction ? `${compassLabel(c.wind_direction)} ` : ''}${formatRange(c.wind_range_kt)} kt`,
     )
   if (c.wave_range_ft) parts.push(`waves ${formatRange(c.wave_range_ft, 0.5)} ft`)
   return parts.length ? parts.join(' · ') : null
@@ -252,10 +252,19 @@ export function CatchLog({
                     </div>
                     {entry.bait && <p className="text-sm text-text">Bait: {entry.bait}</p>}
                     {entry.notes && (
-                      <p className="font-serif text-base italic text-text-muted">{entry.notes}</p>
+                      <p className="text-sm leading-relaxed text-text-muted">{entry.notes}</p>
                     )}
                     {conditions && (
-                      <p className="text-xs text-text-muted">Conditions: {conditions}</p>
+                      <ul aria-label="Conditions when caught" className="mt-1 flex flex-wrap gap-1.5">
+                        {conditions.split(' · ').map((part) => (
+                          <li
+                            key={part}
+                            className="rounded-full border border-border bg-surface-raised px-2.5 py-0.5 text-xs text-text-muted"
+                          >
+                            {part}
+                          </li>
+                        ))}
+                      </ul>
                     )}
                     <div>
                       <button

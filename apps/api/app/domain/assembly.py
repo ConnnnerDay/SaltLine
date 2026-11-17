@@ -218,6 +218,8 @@ from app.providers.nws import (
 
 _logger = logging.getLogger(__name__)
 
+_MAX_BUOYS_TRIED = 3
+
 _SOURCE_NWS_MARINE_ZONE = "nws:marine_zone"
 _SOURCE_NOAA_COOPS_WATER_TEMP = "noaa_coops:water_temperature"
 _SOURCE_NDBC_BUOY = "ndbc:buoy"
@@ -347,16 +349,25 @@ async def _fetch_water_temp(
 async def _fetch_buoy(
     client: BoundedHTTPClient, station_ids: list[str]
 ) -> _FetchResult[BuoyObservation]:
+    """Tries the location's buoys in order (up to _MAX_BUOYS_TRIED) and
+    uses the first that reports: buoys go offline or get decommissioned
+    often enough that relying on the first alone left 14 of 101 curated
+    spots with no wave/wind readings in a live scan."""
     if not station_ids:
         return _FetchResult(value=None, error="no NDBC buoy assigned to this location")
-    try:
-        value = await fetch_buoy_observation(client, station_ids[0])
-    except ProviderError as exc:
-        return _FetchResult(value=None, error=str(exc))
-    except Exception as exc:  # a parser bug must not 500 the whole forecast
-        _logger.exception("unexpected provider failure")
-        return _FetchResult(value=None, error=f"unexpected {type(exc).__name__}")
-    return _FetchResult(value=value, error=None)
+    first_error: str | None = None
+    for station_id in station_ids[:_MAX_BUOYS_TRIED]:
+        try:
+            value = await fetch_buoy_observation(client, station_id)
+        except ProviderError as exc:
+            first_error = first_error or str(exc)
+            continue
+        except Exception as exc:  # a parser bug must not 500 the whole forecast
+            _logger.exception("unexpected provider failure")
+            first_error = first_error or f"unexpected {type(exc).__name__}"
+            continue
+        return _FetchResult(value=value, error=None)
+    return _FetchResult(value=None, error=first_error)
 
 
 async def _fetch_tides(

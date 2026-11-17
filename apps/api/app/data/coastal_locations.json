@@ -9,7 +9,7 @@
     "coops_station": "8510560",
     "ndbc_stations": [
       "44025",
-      "44017"
+      "44097"
     ],
     "nws_zone": "ANZ338",
     "temp_region": "northeast",
@@ -126,7 +126,8 @@
     ],
     "nws_zone": "AMZ150",
     "temp_region": "nc_outer_banks",
-    "conditions_region": "atlantic_mid"
+    "conditions_region": "atlantic_mid",
+    "water_temp_station": "8652587"
   },
   {
     "id": "cape-hatteras-nc",
@@ -153,8 +154,8 @@
     "timezone": "America/New_York",
     "coops_station": "8656483",
     "ndbc_stations": [
-      "41036",
-      "41025"
+      "41025",
+      "41159"
     ],
     "nws_zone": "AMZ154",
     "temp_region": "nc_south",
@@ -230,14 +231,15 @@
     "lat": 32.2163,
     "lng": -80.7526,
     "timezone": "America/New_York",
-    "coops_station": "8669100",
+    "coops_station": "8669133",
     "ndbc_stations": [
       "41004",
       "41008"
     ],
     "nws_zone": "AMZ256",
     "temp_region": "sc_ga",
-    "conditions_region": "atlantic_south"
+    "conditions_region": "atlantic_south",
+    "water_temp_station": "8670870"
   },
   {
     "id": "tybee-island-ga",
@@ -250,7 +252,7 @@
     "ndbc_stations": [
       "41008"
     ],
-    "nws_zone": "AMZ330",
+    "nws_zone": "AMZ362",
     "temp_region": "sc_ga",
     "conditions_region": "atlantic_south"
   },
@@ -343,10 +345,11 @@
     "ndbc_stations": [
       "41114"
     ],
-    "nws_zone": "AMZ554",
+    "nws_zone": "AMZ650",
     "temp_region": "fl_south",
     "conditions_region": "atlantic_south",
-    "temp_offset": -2
+    "temp_offset": -2,
+    "water_temp_station": "8722670"
   },
   {
     "id": "fort-lauderdale-fl",
@@ -359,7 +362,7 @@
     "ndbc_stations": [
       "41114"
     ],
-    "nws_zone": "AMZ556",
+    "nws_zone": "AMZ651",
     "temp_region": "fl_south",
     "conditions_region": "atlantic_south"
   },
@@ -480,7 +483,7 @@
     "ndbc_stations": [
       "42039"
     ],
-    "nws_zone": "GMZ855",
+    "nws_zone": "GMZ635",
     "temp_region": "fl_gulf_north",
     "conditions_region": "gulf"
   },
@@ -493,10 +496,10 @@
     "timezone": "America/Chicago",
     "coops_station": "8729840",
     "ndbc_stations": [
-      "42040",
-      "42039"
+      "42039",
+      "42012"
     ],
-    "nws_zone": "GMZ855",
+    "nws_zone": "GMZ634",
     "temp_region": "fl_gulf_north",
     "conditions_region": "gulf"
   },
@@ -510,7 +513,7 @@
     "coops_station": "8735180",
     "ndbc_stations": [
       "42012",
-      "42040"
+      "42357"
     ],
     "nws_zone": "GMZ630",
     "temp_region": "gulf_central",
@@ -525,8 +528,8 @@
     "timezone": "America/Chicago",
     "coops_station": "8747437",
     "ndbc_stations": [
-      "42007",
-      "42012"
+      "42012",
+      "42416"
     ],
     "nws_zone": "GMZ634",
     "temp_region": "gulf_central",
@@ -572,12 +575,13 @@
     "timezone": "America/Chicago",
     "coops_station": "8775241",
     "ndbc_stations": [
-      "42020",
-      "42035"
+      "42035",
+      "42033"
     ],
-    "nws_zone": "GMZ245",
+    "nws_zone": "GMZ255",
     "temp_region": "gulf_west",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "water_temp_station": "8775237"
   },
   {
     "id": "south-padre-island-tx",
@@ -588,7 +592,7 @@
     "timezone": "America/Chicago",
     "coops_station": "8779770",
     "ndbc_stations": [
-      "42020"
+      "42044"
     ],
     "nws_zone": "GMZ255",
     "temp_region": "gulf_west",
@@ -606,7 +610,7 @@
       "46258",
       "46225"
     ],
-    "nws_zone": "PZZ750",
+    "nws_zone": "PZZ740",
     "temp_region": "pacific_san_diego",
     "conditions_region": "pacific_south"
   },
@@ -622,7 +626,7 @@
       "46258",
       "46225"
     ],
-    "nws_zone": "PZZ750",
+    "nws_zone": "PZZ740",
     "temp_region": "pacific_san_diego",
     "conditions_region": "pacific_south",
     "temp_offset": -1
@@ -639,7 +643,7 @@
       "46258",
       "46225"
     ],
-    "nws_zone": "PZZ750",
+    "nws_zone": "PZZ740",
     "temp_region": "pacific_san_diego",
     "conditions_region": "pacific_south"
   },
@@ -652,10 +656,10 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9410580",
     "ndbc_stations": [
-      "46242",
-      "46225"
+      "46225",
+      "46285"
     ],
-    "nws_zone": "PZZ750",
+    "nws_zone": "PZZ655",
     "temp_region": "pacific_socal",
     "conditions_region": "pacific_south"
   },
@@ -668,8 +672,8 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9410580",
     "ndbc_stations": [
-      "46242",
-      "46222"
+      "46222",
+      "46256"
     ],
     "nws_zone": "PZZ670",
     "temp_region": "pacific_socal",
@@ -689,7 +693,8 @@
     "nws_zone": "PZZ670",
     "temp_region": "pacific_socal",
     "conditions_region": "pacific_south",
-    "temp_offset": 1
+    "temp_offset": 1,
+    "water_temp_station": "9410840"
   },
   {
     "id": "santa-monica-ca",
@@ -769,7 +774,7 @@
       "46011",
       "46054"
     ],
-    "nws_zone": "PZZ640",
+    "nws_zone": "PZZ645",
     "temp_region": "pacific_central_cal",
     "conditions_region": "pacific_south"
   },
@@ -785,7 +790,7 @@
       "46011",
       "46028"
     ],
-    "nws_zone": "PZZ640",
+    "nws_zone": "PZZ645",
     "temp_region": "pacific_central_cal",
     "conditions_region": "pacific_south"
   },
@@ -820,7 +825,8 @@
     "nws_zone": "PZZ535",
     "temp_region": "pacific_central_cal",
     "conditions_region": "pacific",
-    "temp_offset": 1
+    "temp_offset": 1,
+    "water_temp_station": "9413450"
   },
   {
     "id": "half-moon-bay-ca",
@@ -836,7 +842,8 @@
     ],
     "nws_zone": "PZZ530",
     "temp_region": "pacific_norcal",
-    "conditions_region": "pacific"
+    "conditions_region": "pacific",
+    "water_temp_station": "9414750"
   },
   {
     "id": "san-francisco-ca",
@@ -852,7 +859,8 @@
     ],
     "nws_zone": "PZZ530",
     "temp_region": "pacific_norcal",
-    "conditions_region": "pacific"
+    "conditions_region": "pacific",
+    "water_temp_station": "9414750"
   },
   {
     "id": "bodega-bay-ca",
@@ -902,7 +910,8 @@
     "nws_zone": "PZZ350",
     "temp_region": "pacific_nw",
     "conditions_region": "pacific",
-    "temp_offset": 2
+    "temp_offset": 2,
+    "water_temp_station": "9419750"
   },
   {
     "id": "charleston-or",
@@ -948,7 +957,7 @@
       "46050",
       "46229"
     ],
-    "nws_zone": "PZZ255",
+    "nws_zone": "PZZ253",
     "temp_region": "pacific_nw",
     "conditions_region": "pacific"
   },
@@ -963,7 +972,7 @@
     "ndbc_stations": [
       "46050"
     ],
-    "nws_zone": "PZZ255",
+    "nws_zone": "PZZ252",
     "temp_region": "pacific_nw",
     "conditions_region": "pacific"
   },
@@ -978,7 +987,7 @@
     "ndbc_stations": [
       "46029"
     ],
-    "nws_zone": "PZZ250",
+    "nws_zone": "PZZ210",
     "temp_region": "pacific_nw",
     "conditions_region": "pacific",
     "temp_offset": -1
@@ -1045,7 +1054,8 @@
     "nws_zone": "PZZ135",
     "temp_region": "pacific_nw",
     "conditions_region": "pacific",
-    "temp_offset": 2
+    "temp_offset": 2,
+    "water_temp_station": "9446484"
   },
   {
     "id": "honolulu-hi",
@@ -1169,8 +1179,8 @@
     "timezone": "America/New_York",
     "coops_station": "8447386",
     "ndbc_stations": [
-      "44018",
-      "44013"
+      "44013",
+      "44020"
     ],
     "nws_zone": "ANZ234",
     "temp_region": "northeast",
@@ -1186,8 +1196,8 @@
     "timezone": "America/New_York",
     "coops_station": "8449130",
     "ndbc_stations": [
-      "44017",
-      "44018"
+      "44020",
+      "44085"
     ],
     "nws_zone": "ANZ236",
     "temp_region": "northeast",
@@ -1203,10 +1213,10 @@
     "timezone": "America/New_York",
     "coops_station": "8452660",
     "ndbc_stations": [
-      "44017",
-      "44097"
+      "44097",
+      "44085"
     ],
-    "nws_zone": "ANZ330",
+    "nws_zone": "ANZ235",
     "temp_region": "northeast",
     "conditions_region": "atlantic_north",
     "temp_offset": 1
@@ -1272,7 +1282,8 @@
     ],
     "nws_zone": "AMZ158",
     "temp_region": "nc_south",
-    "conditions_region": "atlantic_mid"
+    "conditions_region": "atlantic_mid",
+    "water_temp_station": "8658120"
   },
   {
     "id": "pawleys-island-sc",
@@ -1315,7 +1326,7 @@
     "ndbc_stations": [
       "41008"
     ],
-    "nws_zone": "AMZ350",
+    "nws_zone": "AMZ450",
     "temp_region": "sc_ga",
     "conditions_region": "atlantic_south"
   },
@@ -1332,7 +1343,8 @@
     ],
     "nws_zone": "AMZ450",
     "temp_region": "fl_northeast",
-    "conditions_region": "atlantic_south"
+    "conditions_region": "atlantic_south",
+    "water_temp_station": "8720218"
   },
   {
     "id": "sebastian-inlet-fl",
@@ -1450,8 +1462,7 @@
     "timezone": "America/Chicago",
     "coops_station": "8760922",
     "ndbc_stations": [
-      "42041",
-      "42007"
+      "42354"
     ],
     "nws_zone": "GMZ536",
     "temp_region": "gulf_central",
@@ -1470,7 +1481,8 @@
     ],
     "nws_zone": "GMZ335",
     "temp_region": "gulf_west",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "water_temp_station": "8772471"
   },
   {
     "id": "corpus-christi-tx",
@@ -1481,9 +1493,10 @@
     "timezone": "America/Chicago",
     "coops_station": "8775237",
     "ndbc_stations": [
-      "42020"
+      "42033",
+      "42034"
     ],
-    "nws_zone": "GMZ245",
+    "nws_zone": "GMZ232",
     "temp_region": "gulf_west",
     "conditions_region": "gulf"
   },
@@ -1496,8 +1509,8 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9410580",
     "ndbc_stations": [
-      "46242",
-      "46222"
+      "46222",
+      "46253"
     ],
     "nws_zone": "PZZ670",
     "temp_region": "pacific_socal",
@@ -1517,7 +1530,8 @@
     ],
     "nws_zone": "PZZ670",
     "temp_region": "pacific_socal",
-    "conditions_region": "pacific_south"
+    "conditions_region": "pacific_south",
+    "water_temp_station": "9410840"
   },
   {
     "id": "pacific-city-or",
@@ -1530,7 +1544,7 @@
     "ndbc_stations": [
       "46050"
     ],
-    "nws_zone": "PZZ255",
+    "nws_zone": "PZZ252",
     "temp_region": "pacific_nw",
     "conditions_region": "pacific"
   },
@@ -1545,7 +1559,7 @@
     "ndbc_stations": [
       "46029"
     ],
-    "nws_zone": "PZZ250",
+    "nws_zone": "PZZ251",
     "temp_region": "pacific_nw",
     "conditions_region": "pacific"
   },
@@ -1577,7 +1591,7 @@
     "ndbc_stations": [
       "51003"
     ],
-    "nws_zone": "PHZ126",
+    "nws_zone": "PHZ122",
     "temp_region": "hawaii",
     "conditions_region": "hawaii_conditions"
   },
@@ -1592,7 +1606,7 @@
     "ndbc_stations": [
       "51201"
     ],
-    "nws_zone": "PHZ100",
+    "nws_zone": "PHZ112",
     "temp_region": "hawaii",
     "conditions_region": "hawaii_conditions"
   }

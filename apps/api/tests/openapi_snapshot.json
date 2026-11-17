@@ -571,6 +571,17 @@
           "timezone": {
             "title": "Timezone",
             "type": "string"
+          },
+          "water_temp_station": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Temp Station"
           }
         },
         "required": [

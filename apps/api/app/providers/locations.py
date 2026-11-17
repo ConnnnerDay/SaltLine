@@ -113,6 +113,10 @@ class CuratedLocation(BaseModel):
     temp_region: str
     conditions_region: str
     temp_offset: int = 0
+    water_temp_station: str | None = None
+    """CO-OPS station for water temperature, when the tide station
+    (`coops_station`) has no temperature sensor. Unset means use
+    `coops_station` for both (see scripts/repair_location_sources.py)."""
 
 
 class NearestLocationMatch(BaseModel):
@@ -386,7 +390,7 @@ def resolved_from_curated(location: CuratedLocation) -> ResolvedLocation:
         lng=location.lng,
         timezone=location.timezone,
         coops_station=location.coops_station,
-        water_temp_station=location.coops_station,
+        water_temp_station=location.water_temp_station or location.coops_station,
         ndbc_stations=list(location.ndbc_stations),
         nws_zone=location.nws_zone,
         temp_region=location.temp_region,

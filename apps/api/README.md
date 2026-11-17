@@ -8,6 +8,33 @@ never directly from a browser.
 
 ## Status
 
+**Live data sources repaired.** A live scan of all 101 curated spots found
+only 47 with every source working. The legacy station ids had drifted:
+- 32 tide stations had no water-temperature sensor
+- 22 NWS marine-zone ids now 404 (NWS renumbered zones)
+- 14 first buoys were gone
+- 1 tide station was invalid
+
+Fixes:
+- `scripts/repair_location_sources.py` verifies every spot's sources
+  against live data and swaps in only replacements that work: nearest
+  water-temp station (30 mi), nearest tide station (25 mi, only after two
+  failures), reporting buoys from NDBC's catalog (75 mi), and the marine
+  zone NWS places a few miles offshore. Applied to
+  `app/data/coastal_locations.json`: 22 zones, 15 buoy lists, 14
+  water-temp stations, 1 tide station.
+- New optional `CuratedLocation.water_temp_station` (water temperature
+  used to always come from the tide station).
+- `assemble_forecast` now tries a spot's buoys in order (up to 3), not
+  just the first.
+- Bug: CO-OPS' tide catalog (2.04 MB) exceeded `BoundedHTTPClient`'s 2 MB
+  cap, so dynamic points never got their own tide station. Catalogs now
+  use a per-request `max_bytes` (10 MB).
+
+Re-scan: 80 of 101 spots fully working (was 47). The remaining gaps are
+genuine: 18 spots with no working water-temp sensor within 30 mi keep the
+labeled monthly average. Suite 496 passed.
+
 **Species photo fetcher.** `scripts/fetch_species_photos.py` maps each
 catalogue species to a hand-picked Wikipedia article and takes its lead
 image. It keeps only free licenses (CC or public domain) per Commons

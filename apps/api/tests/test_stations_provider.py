@@ -285,3 +285,31 @@ async def test_fetch_ndbc_catalog_degrades_to_empty_on_provider_error() -> None:
         result = await fetch_ndbc_catalog(client)
 
     assert result == []
+
+
+@pytest.mark.asyncio
+async def test_tide_catalog_larger_than_the_default_limit_still_loads() -> None:
+    """Regression: a 2.5 MB catalog (CO-OPS' real one passed 2 MB) used to
+    fail the client's default size cap and degrade to `[]`."""
+    import httpx
+
+    from app.infra.http_client import BoundedHTTPClient
+    from app.providers.stations import fetch_coops_tide_catalog
+
+    station = {
+        "id": "8658163",
+        "name": "Wrightsville Beach",
+        "lat": 34.2,
+        "lng": -77.8,
+        "state": "NC",
+        "padding": "x" * 500,
+    }
+    payload = {"stations": [station] * 5000}  # ~2.5 MB
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=payload)
+
+    async with BoundedHTTPClient(transport=httpx.MockTransport(handler)) as client:
+        catalog = await fetch_coops_tide_catalog(client)
+
+    assert len(catalog) == 5000

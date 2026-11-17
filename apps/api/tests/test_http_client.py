@@ -274,3 +274,24 @@ async def test_timeout_is_retried_then_succeeds() -> None:
 
     assert result == {"ok": True}
     assert attempts["count"] == 2
+
+
+@pytest.mark.asyncio
+async def test_per_request_max_bytes_overrides_the_client_limit() -> None:
+    """The station catalogs outgrew the 2 MB default (CO-OPS' tide catalog
+    was 2.04 MB): a per-request `max_bytes` lets them through without
+    raising the cap for every other provider call."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, text='"' + "x" * 98 + '"')
+
+    async with BoundedHTTPClient(
+        transport=httpx.MockTransport(handler), max_response_bytes=10
+    ) as client:
+        with pytest.raises(ProviderResponseTooLargeError):
+            await client.get_json("https://example.test/big")
+        assert (
+            await client.get_json("https://example.test/big", max_bytes=1000)
+            == "x" * 98
+        )
+        assert await client.get_text("https://example.test/big", max_bytes=1000)

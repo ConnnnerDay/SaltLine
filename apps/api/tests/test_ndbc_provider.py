@@ -135,3 +135,24 @@ async def test_fetch_buoy_observation_success() -> None:
         result = await fetch_buoy_observation(client, "41110")
 
     assert result.wind_direction == "SW"
+
+
+def test_stale_rows_are_ignored_when_now_is_given() -> None:
+    from datetime import UTC, datetime
+
+    import pytest
+
+    from app.providers.ndbc import NdbcDataUnavailableError, parse_realtime_text
+
+    feed = (
+        "#YY  MM DD hh mm WDIR WSPD GST  WVHT   DPD   APD MWD   PRES  ATMP  WTMP  DEWP  VIS PTDY  TIDE\n"
+        "#yr  mo dy hr mn degT m/s  m/s     m   sec   sec degT   hPa  degC  degC  degC  nmi  hPa    ft\n"
+        "2026 10 10 22 08 230  6.0  6.0    MM    MM    MM  MM 1019.3  27.6  26.2  25.3   MM   MM    MM\n"
+    )
+    # Without a clock (old behavior) the month-old row is read...
+    assert parse_realtime_text(feed).pressure_mb == 1019.3
+    # ...with one, a month-old buoy counts as unavailable.
+    with pytest.raises(NdbcDataUnavailableError):
+        parse_realtime_text(feed, now=datetime(2026, 11, 17, 20, tzinfo=UTC))
+    fresh = datetime(2026, 10, 10, 23, tzinfo=UTC)
+    assert parse_realtime_text(feed, now=fresh).pressure_mb == 1019.3

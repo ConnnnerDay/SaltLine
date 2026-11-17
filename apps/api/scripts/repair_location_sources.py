@@ -107,7 +107,8 @@ async def _repair_tides(
 
 async def _buoy_ok(client: BoundedHTTPClient, station_id: str) -> bool:
     try:
-        await fetch_buoy_observation(client, station_id)
+        # A buoy that only serves old rows counts as broken.
+        await fetch_buoy_observation(client, station_id, now=datetime.now(UTC))
     except (ProviderError, KeyError, ValueError, TypeError):
         return False
     return True

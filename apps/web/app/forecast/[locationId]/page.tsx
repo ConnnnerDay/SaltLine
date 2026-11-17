@@ -83,6 +83,8 @@ export default async function ForecastPage({ params }: Props) {
       errorReason={errorReason}
       cams={await camsPromise}
       profile={await profilePromise}
+      nearbyLinkBase="/forecast"
+      userId={session.user.id}
       retryHref={`/forecast/${encodeURIComponent(locationId)}`}
       backHref="/locations"
       backLabel="Back to search"

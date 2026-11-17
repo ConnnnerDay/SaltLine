@@ -8,6 +8,9 @@ import type { Preferences } from '@/app/api/preferences/route'
 import { WhereToFish, YourDay } from './your-day'
 import { SunAndMoon, WeatherAlerts, type SkyConditions } from './sky'
 import { NextDays } from './next-days'
+import { WindAndWaves } from './wind-waves'
+import { PressureAndWater } from './pressure-water'
+import { WeatherIcon } from './weather-icon'
 import { currentTime } from '@/lib/clock'
 import type { NearbyCam } from '@/lib/get-cams'
 import speciesPhotos from '@/lib/species-photos.json'
@@ -1220,6 +1223,19 @@ export function ForecastCard({
   const conditions = forecast.conditions
   const waterTemp = conditions?.water_temperature
   const sourcesDown = forecast.sources.filter((source) => source.state !== 'ok').length
+  const weatherNow = (
+    forecast.conditions as {
+      weather?: {
+        now: {
+          name: string
+          temperature_f: number | null
+          short_forecast: string
+          sky: string
+          precip_pct: number | null
+        } | null
+      } | null
+    } | null
+  )?.weather?.now
 
   return (
     <div className="rise-in flex min-w-0 flex-col gap-4 sm:gap-5">
@@ -1256,6 +1272,19 @@ export function ForecastCard({
           </div>
           {score?.summary && (
             <p className="max-w-3xl text-sm leading-relaxed text-text-muted sm:text-base">{score.summary}</p>
+          )}
+          {weatherNow && (
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text">
+              <WeatherIcon sky={weatherNow.sky} className="h-5 w-5" />
+              <span className="font-semibold">{weatherNow.short_forecast}</span>
+              {weatherNow.temperature_f !== null && (
+                <span className="tabular-nums">· {Math.round(weatherNow.temperature_f)}°F</span>
+              )}
+              {weatherNow.precip_pct !== null && (
+                <span className="text-text-muted tabular-nums">· {weatherNow.precip_pct}% chance of rain</span>
+              )}
+              <span className="text-xs text-text-muted">({weatherNow.name.toLowerCase()})</span>
+            </p>
           )}
         </div>
 
@@ -1336,6 +1365,17 @@ export function ForecastCard({
       )}
 
       <SunAndMoon forecast={forecast} now={currentTime()} />
+
+      <WindAndWaves forecast={forecast} />
+
+      <PressureAndWater
+        forecast={forecast}
+        month={Number(
+          new Intl.DateTimeFormat('en-US', { timeZone: forecast.location.timezone, month: 'numeric' }).format(
+            new Date(forecast.generated_at),
+          ),
+        )}
+      />
 
       {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} />}
 

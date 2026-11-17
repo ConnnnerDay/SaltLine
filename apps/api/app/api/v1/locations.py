@@ -50,10 +50,12 @@ from app.api.deps import AppState, get_app_state, resolve_location_id
 from app.api.internal_auth import require_internal_signature
 from app.domain.analytics import AnalyticsEventIn, AnalyticsEventType, try_record_event
 from app.providers.coastal_bounds import is_valid_coordinate
+from app.providers.inaturalist import RecentSightings, fetch_recent_sightings
 from app.providers.live_cams import DEFAULT_RADIUS_MILES, NearbyCam, find_nearby_cams
 from app.providers.locations import (
     CuratedLocation,
     ResolvedLocation,
+    find_nearest_locations,
     format_dynamic_id,
     load_curated_locations,
     search_curated_locations,
@@ -129,3 +131,54 @@ async def nearby_cams(
     app's "Live Cams"). Empty when none are within *radius_miles*."""
     location = await resolve_location_id(location_id, state)
     return find_nearby_cams(location.lat, location.lng, radius_miles)
+
+
+class NearbySpot(BaseModel):
+    id: str
+    name: str
+    state: str
+    distance_miles: float
+
+
+@router.get("/{location_id}/nearby")
+async def nearby_spots(
+    location_id: str,
+    limit: int = Query(3, ge=1, le=6),
+    max_miles: float = Query(60.0, gt=0, le=150),
+    state: AppState = Depends(get_app_state),  # noqa: B008
+) -> list[NearbySpot]:
+    """The curated spots closest to a location (any location, curated or
+    a dynamic point), nearest first, excluding the location itself --
+    the forecast page's "Nearby spots today"."""
+    location = await resolve_location_id(location_id, state)
+    matches = find_nearest_locations(
+        location.lat,
+        location.lng,
+        load_curated_locations(),
+        n=limit + 1,
+        max_miles=max_miles,
+    )
+    return [
+        NearbySpot(
+            id=match.location.id,
+            name=match.location.name,
+            state=match.location.state,
+            distance_miles=match.distance_miles,
+        )
+        for match in matches
+        if match.location.id != location.id
+    ][:limit]
+
+
+@router.get("/{location_id}/sightings")
+async def recent_sightings(
+    location_id: str,
+    state: AppState = Depends(get_app_state),  # noqa: B008
+) -> RecentSightings | None:
+    """Fish recently seen near a location (iNaturalist research-grade
+    observations, last 60 days, within ~15 miles). `null` when iNaturalist
+    can't be reached -- the forecast page just leaves the section out."""
+    location = await resolve_location_id(location_id, state)
+    return await fetch_recent_sightings(
+        state.http_client, location.lat, location.lng, datetime.now(UTC)
+    )

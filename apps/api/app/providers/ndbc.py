@@ -30,6 +30,8 @@ ledger.
 
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
+
 from pydantic import BaseModel
 
 from app.infra.http_client import BoundedHTTPClient, ProviderError
@@ -87,7 +89,26 @@ def _deg_to_compass(deg: float) -> str:
     return _COMPASS_POINTS[idx]
 
 
-def parse_realtime_text(text: str) -> BuoyObservation:
+# A row older than this isn't "now": dead or stalled buoys keep serving
+# their last readings for weeks (41037 was a month stale in a live check).
+MAX_ROW_AGE = timedelta(hours=6)
+
+
+def _row_time(fields: list[str], col: dict[str, int]) -> datetime | None:
+    try:
+        return datetime(
+            int(fields[col["YY"]]),
+            int(fields[col["MM"]]),
+            int(fields[col["DD"]]),
+            int(fields[col["hh"]]),
+            int(fields[col["mm"]]),
+            tzinfo=UTC,
+        )
+    except (KeyError, ValueError, IndexError):
+        return None
+
+
+def parse_realtime_text(text: str, now: datetime | None = None) -> BuoyObservation:
     """Parse an NDBC `realtime2/<station>.txt` feed into the most recent
     usable reading for each field, checking up to the 10 most recent
     observation rows (rows 2-11; row 0 is the header, row 1 is units).
@@ -115,6 +136,10 @@ def parse_realtime_text(text: str) -> BuoyObservation:
         fields = line.split()
         if len(fields) < len(header):
             continue
+        if now is not None:
+            row_time = _row_time(fields, col)
+            if row_time is not None and row_time < now - MAX_ROW_AGE:
+                break  # rows are newest first: everything after is older
 
         wspd_raw = fields[col["WSPD"]] if "WSPD" in col else "MM"
         gst_raw = fields[col["GST"]] if "GST" in col else "MM"
@@ -167,9 +192,11 @@ def parse_realtime_text(text: str) -> BuoyObservation:
 
 
 async def fetch_buoy_observation(
-    client: BoundedHTTPClient, station_id: str
+    client: BoundedHTTPClient, station_id: str, now: datetime | None = None
 ) -> BuoyObservation:
-    """Fetch and parse a buoy's real-time observation feed."""
+    """Fetch and parse a buoy's real-time observation feed. With *now*,
+    rows older than `MAX_ROW_AGE` are ignored, so a stalled buoy raises
+    `NdbcDataUnavailableError` and the caller moves on to the next one."""
     url = f"https://www.ndbc.noaa.gov/data/realtime2/{station_id}.txt"
     text = await client.get_text(url)
-    return parse_realtime_text(text)
+    return parse_realtime_text(text, now=now)

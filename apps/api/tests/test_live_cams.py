@@ -63,3 +63,14 @@ def test_route_validates_radius(client: TestClient) -> None:
         ).status_code
         == 422
     )
+
+
+def test_nearby_spots_route(client: TestClient) -> None:
+    resp = client.get("/v1/locations/wrightsville-beach-nc/nearby")
+    assert resp.status_code == 200
+    spots = resp.json()
+    assert 1 <= len(spots) <= 3
+    assert all(spot["id"] != "wrightsville-beach-nc" for spot in spots)
+    distances = [spot["distance_miles"] for spot in spots]
+    assert distances == sorted(distances) and distances[-1] <= 60
+    assert client.get("/v1/locations/nowhere/nearby").status_code == 404

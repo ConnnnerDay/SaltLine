@@ -2,6 +2,7 @@ import type { Preferences } from '@/app/api/preferences/route'
 import { limitsFor } from '@/lib/fishing-style'
 import { compassLabel, formatRange, VERDICT_TEXT, type ForecastEnvelope } from './forecast-card'
 import { Moon, moonAge } from './sky'
+import { WeatherIcon } from './weather-icon'
 import { Card } from './ui'
 import { cx } from './ui/cx'
 
@@ -28,6 +29,11 @@ export type DayOutlook = {
   illumination_pct: number
   solunar_rating: string
   tides: { time: string; kind: 'high' | 'low'; height_ft: number }[]
+  high_f?: number | null
+  low_f?: number | null
+  sky?: string | null
+  short_forecast?: string | null
+  precip_pct?: number | null
 }
 
 const METER: Record<string, string> = {
@@ -108,6 +114,23 @@ export function NextDays({
                   </span>
                 )}
               </div>
+              {day.short_forecast && (
+                <div className="flex items-center gap-2" title={day.short_forecast}>
+                  <WeatherIcon sky={day.sky} className="h-7 w-7" />
+                  <span className="flex flex-col text-xs leading-tight">
+                    <span className="font-semibold tabular-nums text-text">
+                      {day.high_f != null ? `${Math.round(day.high_f)}°` : '—'}
+                      <span className="font-normal text-text-muted">
+                        {' / '}
+                        {day.low_f != null ? `${Math.round(day.low_f)}°` : '—'}
+                      </span>
+                    </span>
+                    <span className="line-clamp-1 text-text-muted">
+                      {day.precip_pct ? `${day.precip_pct}% rain` : day.short_forecast}
+                    </span>
+                  </span>
+                </div>
+              )}
               <dl className="flex flex-col gap-0.5 text-sm">
                 <div className="flex justify-between gap-2">
                   <dt className="text-text-muted">Wind</dt>

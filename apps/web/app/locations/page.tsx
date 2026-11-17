@@ -1,7 +1,8 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
-import { LocationsSearchPage } from './locations-search'
+import { internalApiFetch } from '@/lib/internal-api-client'
+import { type BrowseLocation, LocationsSearchPage } from './locations-search'
 
 /**
  * Sprint 29 ("Account-required routing"): docs/product-definition.md's
@@ -24,5 +25,8 @@ export default async function LocationsPage() {
     redirect('/login?next=/locations')
   }
 
-  return <LocationsSearchPage />
+  // The browse list is a nice-to-have: if the API is down, search still works.
+  const locations = await internalApiFetch<BrowseLocation[]>('/v1/locations').catch(() => [])
+
+  return <LocationsSearchPage locations={locations} />
 }

@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Badge, Button, Card } from '@/app/components/ui'
+import { Button, Card } from '@/app/components/ui'
+import { cx } from '@/app/components/ui/cx'
 import {
   deriveBestWindow,
   formatBestWindowRange,
-  VERDICT_TO_BADGE,
+  formatRange,
+  VERDICT_TEXT,
   type ForecastEnvelope,
 } from '@/app/components/forecast-card'
 import type { SavedLocation } from '@/app/api/saved-locations/route'
@@ -69,15 +71,15 @@ export function SavedLocationsList({
   }
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {locations.map((location) => (
-        <Card key={location.id} className="flex items-center justify-between gap-3">
+        <li key={location.id} className="relative">
           <a
             href={`/forecast/${encodeURIComponent(location.location_id)}`}
-            className="flex flex-1 flex-col gap-1.5 text-text no-underline"
+            className="flex h-full flex-col gap-3 rounded-lg border border-border bg-surface p-5 pr-12 text-text no-underline shadow-card transition-[border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/60"
           >
             <span>
-              <span className="font-semibold">{location.name}</span>
+              <span className="block text-lg font-bold leading-tight">{location.name}</span>
               <span className="block text-sm text-text-muted">{location.state}</span>
             </span>
             <LocationForecastSummary forecast={location.forecast} />
@@ -87,7 +89,7 @@ export function SavedLocationsList({
             onClick={() => handleRemove(location.id)}
             disabled={removingId === location.id}
             aria-label={`Remove ${location.name} from saved spots`}
-            className="shrink-0 self-start rounded-md p-2 text-text-muted hover:bg-bg hover:text-danger-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring disabled:opacity-50"
+            className="absolute right-3 top-3 rounded-md p-2 text-text-muted hover:bg-bg hover:text-danger-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring disabled:opacity-50"
           >
             <svg
               width="18"
@@ -105,36 +107,42 @@ export function SavedLocationsList({
               <path d="M6 7 L7 20 a1 1 0 0 0 1 1 h8 a1 1 0 0 0 1 -1 L19 7" />
             </svg>
           </button>
-        </Card>
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }
 
-/**
- * The one piece of the row that's new this sprint: each saved
- * location's own go/no-go verdict and best window, the same
- * `VERDICT_TO_BADGE`/`deriveBestWindow` mapping the full forecast page
- * uses, at a glance rather than requiring a tap-through to see it. A
- * location whose own forecast fetch failed (a real apps/api error, not
- * this sprint's concern to retry inline) shows a plain muted note
- * instead of a badge -- the row itself, and the link to the full page,
- * still work.
- */
 function LocationForecastSummary({ forecast }: { forecast: ForecastEnvelope | null }) {
   if (!forecast) {
-    return <p className="text-sm text-text-muted">Forecast unavailable</p>
+    return <p className="text-sm text-text-muted">Forecast unavailable right now</p>
   }
 
-  const verdict = forecast.conditions?.score?.verdict ?? 'Unknown'
+  const score = forecast.conditions?.score
+  const verdict = score?.verdict ?? 'Unknown'
+  const conditions = forecast.conditions
   const bestWindow = forecast.hourly_outlook ? deriveBestWindow(forecast.hourly_outlook) : null
+  const facts = [
+    conditions?.water_temperature && `${conditions.water_temperature.value.toFixed(0)}°F water`,
+    conditions?.wind_range_kt && `${formatRange(conditions.wind_range_kt)} kt wind`,
+    conditions?.wave_range_ft && `${formatRange(conditions.wave_range_ft, 0.5)} ft waves`,
+  ].filter(Boolean)
 
   return (
-    <span className="flex flex-wrap items-center gap-2">
-      <Badge variant={VERDICT_TO_BADGE[verdict]}>{verdict}</Badge>
+    <span className="mt-auto flex flex-col gap-2">
+      <span className={cx('text-2xl font-extrabold uppercase leading-none tracking-tight', VERDICT_TEXT[verdict])}>
+        {verdict}
+        {score && score.score !== null && (
+          <span className="ml-2 text-base font-bold normal-case text-text-muted">
+            {score.score}/100
+          </span>
+        )}
+      </span>
+      {facts.length > 0 && <span className="text-sm text-text-muted">{facts.join(' · ')}</span>}
       {bestWindow && (
-        <span className="text-sm text-text-muted">
-          Best {formatBestWindowRange(bestWindow, forecast.location.timezone)}
+        <span className="text-sm text-text">
+          <span className="text-text-muted">Best </span>
+          {formatBestWindowRange(bestWindow, forecast.location.timezone)}
         </span>
       )}
     </span>

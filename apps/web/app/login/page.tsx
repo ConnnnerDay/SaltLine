@@ -88,7 +88,7 @@ export default function LoginPage() {
   return (
     <main>
       <Container>
-        <div className="mx-auto flex max-w-sm flex-col gap-6 py-10 sm:py-16">
+        <div className="mx-auto flex max-w-md flex-col gap-6 py-10 sm:py-14">
           <header>
             <h1 className="text-3xl font-bold text-text sm:text-4xl">Log in</h1>
             <p className="mt-3 text-text-muted">Welcome back to Saltline.</p>

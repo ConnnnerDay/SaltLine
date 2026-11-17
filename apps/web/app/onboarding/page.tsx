@@ -26,7 +26,7 @@ export default async function OnboardingPage({ searchParams }: Props) {
   return (
     <main>
       <Container>
-        <div className="mx-auto flex max-w-lg flex-col gap-6 py-10 sm:py-14">
+        <div className="mx-auto flex max-w-2xl flex-col gap-6 py-10 sm:py-14">
           <ProfileSetup next={safeRedirectTarget(next ?? null, '/locations')} />
         </div>
       </Container>

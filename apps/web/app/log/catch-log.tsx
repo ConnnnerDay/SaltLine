@@ -3,6 +3,7 @@
 import { useId, useState, type FormEvent } from 'react'
 import { Button, Card } from '@/app/components/ui'
 import type { CatchEntry } from '@/app/api/catches/route'
+import { formatRange } from '@/app/components/forecast-card'
 
 export type LocationOption = { id: string; label: string }
 
@@ -32,9 +33,9 @@ function conditionsLine(entry: CatchEntry): string | null {
     parts.push(`water ${Math.round(c.water_temp_f)}°F${c.water_temp_is_fallback ? ' (avg)' : ''}`)
   if (c.wind_range_kt)
     parts.push(
-      `wind ${c.wind_direction ? `${c.wind_direction} ` : ''}${c.wind_range_kt[0]}–${c.wind_range_kt[1]} kt`,
+      `wind ${c.wind_direction ? `${c.wind_direction} ` : ''}${formatRange(c.wind_range_kt)} kt`,
     )
-  if (c.wave_range_ft) parts.push(`waves ${c.wave_range_ft[0]}–${c.wave_range_ft[1]} ft`)
+  if (c.wave_range_ft) parts.push(`waves ${formatRange(c.wave_range_ft, 0.5)} ft`)
   return parts.length ? parts.join(' · ') : null
 }
 

@@ -601,7 +601,7 @@ function CollapsibleSection({
   )
 }
 
-const VERDICT_TEXT: Record<ForecastVerdict, string> = {
+export const VERDICT_TEXT: Record<ForecastVerdict, string> = {
   Excellent: 'text-go-text',
   Good: 'text-go-text',
   Fair: 'text-marginal-text',
@@ -610,9 +610,18 @@ const VERDICT_TEXT: Record<ForecastVerdict, string> = {
   Unknown: 'text-text-muted',
 }
 
-function formatRange(range: [number, number]): string {
-  const [low, high] = range
-  return low === high ? `${low}` : `${low}–${high}`
+/**
+ * "8–13" from a [low, high] range, rounded to *step* (1 for knots, 0.5
+ * for feet) so a buoy's 13.4 kt never shows as a false-precision decimal.
+ * Shared with the saved-spots cards and the catch log.
+ */
+export function formatRange(range: [number, number], step = 1): string {
+  const round = (value: number) => {
+    const rounded = Math.round(value / step) * step
+    return Number.isInteger(rounded) ? `${rounded}` : rounded.toFixed(1)
+  }
+  const [low, high] = range.map(round)
+  return low === high ? low : `${low}–${high}`
 }
 
 type SpeciesPhoto = {
@@ -1044,7 +1053,7 @@ export function ForecastCard({
           <div className="bg-surface">
             <StatTile
               label="Waves"
-              value={conditions?.wave_range_ft ? `${formatRange(conditions.wave_range_ft)} ft` : '—'}
+              value={conditions?.wave_range_ft ? `${formatRange(conditions.wave_range_ft, 0.5)} ft` : '—'}
               note={conditions?.wave_range_ft ? 'next 24 h' : 'unavailable'}
               rule="border-t-border"
             />

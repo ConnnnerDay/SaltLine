@@ -474,12 +474,13 @@ async def test_score_falls_back_to_buoy_range_when_marine_zone_unavailable() -> 
     assert conditions.buoy is not None
     assert conditions.buoy.wind_speed is not None
     assert conditions.buoy.wave_height is not None
-    # score_conditions labels ranges with int() truncation, not round().
-    wind_value = int(conditions.buoy.wind_speed.value)
-    wave_value = int(conditions.buoy.wave_height.value)
+    # A single buoy reading is a zero-width range: labeled once ("16 kt"),
+    # never "16-16 kt"; wind rounds to whole knots, waves to half feet.
+    wind_value = f"{round(conditions.buoy.wind_speed.value):g}"
+    wave_value = f"{round(conditions.buoy.wave_height.value * 2) / 2:g}"
     descriptions = " ".join(f.description for f in conditions.score.factors)
-    assert f"{wind_value}-{wind_value} kt" in descriptions
-    assert f"{wave_value}-{wave_value} ft" in descriptions
+    assert f"({wind_value} kt)" in descriptions
+    assert f"({wave_value} ft)" in descriptions
     # The reconciled range exposed on ForecastConditions is the same
     # degenerate zero-width range score_conditions was given.
     assert conditions.wind_range_kt == (

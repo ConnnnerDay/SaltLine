@@ -145,6 +145,20 @@ def onshore_offshore_dirs(orientation: str) -> tuple[set[str], set[str]]:
     return _DIRS_BY_ORIENTATION.get(orientation, _DIRS_BY_ORIENTATION["east"])
 
 
+def _range_label(
+    values: tuple[float, float] | list[float], unit: str, step: float
+) -> str:
+    """ "10-13 kt", or "4 ft" when both ends round the same -- rounded to
+    *step* rather than truncated (4.5 ft stays 4.5, never "4-4 ft")."""
+
+    def fmt(value: float) -> str:
+        rounded = round(value / step) * step
+        return f"{rounded:g}"
+
+    low, high = fmt(values[0]), fmt(values[1])
+    return f"{low} {unit}" if low == high else f"{low}-{high} {unit}"
+
+
 def score_conditions(
     wind_range: tuple[float, float] | None,
     wave_range: tuple[float, float] | None,
@@ -172,8 +186,8 @@ def score_conditions(
     wave_max = wave_range[1]
     factors: list[ScoreFactor] = []
 
-    wind_lbl = f"{int(wind_range[0])}-{int(wind_range[1])} kt"
-    wave_lbl = f"{int(wave_range[0])}-{int(wave_range[1])} ft"
+    wind_lbl = _range_label(wind_range, "kt", step=1.0)
+    wave_lbl = _range_label(wave_range, "ft", step=0.5)
 
     if wind_max <= _WIND_LIGHT_KT:
         score += 14

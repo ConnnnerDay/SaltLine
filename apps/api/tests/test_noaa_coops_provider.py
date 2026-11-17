@@ -254,3 +254,14 @@ async def test_fetch_tide_predictions_dst_fall_back_does_not_raise() -> None:
 
     assert len(tides) == 1
     assert tides[0].time.fold == 0
+
+
+def test_coops_direction_prefers_compass_label_then_degrees() -> None:
+    from app.providers.noaa_coops import _coops_direction
+
+    # Real CO-OPS rows: "d" is degrees, "dr" the compass label.
+    assert _coops_direction({"d": "32.00", "dr": "NE"}) == "NE"
+    # No label: degrees are converted, never passed through raw.
+    assert _coops_direction({"d": "32.0"}) == "NNE"
+    assert _coops_direction({"d": "355"}) == "N"
+    assert _coops_direction({"d": ""}) is None

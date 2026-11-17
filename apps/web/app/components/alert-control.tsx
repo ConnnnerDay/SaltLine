@@ -66,7 +66,7 @@ export function AlertControl({ locationId }: { locationId: string }) {
   const current: Choice = rule ? rule.min_verdict : 'off'
 
   return (
-    <div className="flex flex-col gap-1.5 rounded-lg border border-border bg-surface p-4 shadow-card">
+    <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-5 shadow-card sm:p-6">
       <label htmlFor={selectId} className="section-label">
         Email alerts
       </label>
@@ -75,7 +75,7 @@ export function AlertControl({ locationId }: { locationId: string }) {
         value={current}
         disabled={!loaded || busy}
         onChange={(event) => change(event.target.value as Choice)}
-        className="w-full rounded-md border border-border bg-surface px-3 py-2.5 text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring sm:w-auto"
+        className="w-full rounded-md border border-border bg-surface px-3 py-2.5 text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring sm:w-auto sm:min-w-80 sm:self-start"
       >
         <option value="off">Off</option>
         <option value="Good">Email me when it&apos;s Good or better</option>

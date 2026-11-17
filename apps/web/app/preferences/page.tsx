@@ -2,6 +2,7 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { Container } from '@/app/components/ui'
 import { auth } from '@/lib/auth'
+import { internalApiFetch } from '@/lib/internal-api-client'
 import { PreferencesForm } from './preferences-form'
 
 /**
@@ -19,22 +20,27 @@ export default async function PreferencesPage() {
   if (!session) {
     redirect('/login')
   }
+  const locations = await internalApiFetch<{ id: string; name: string; state: string }[]>(
+    '/v1/locations',
+  ).catch(() => [])
+  const locationNames = Object.fromEntries(
+    locations.map((location) => [location.id, `${location.name}, ${location.state}`]),
+  )
 
   return (
     <main>
       <Container>
-        <div className="mx-auto flex max-w-sm flex-col gap-6 py-10 sm:py-16">
+        <div className="mx-auto flex max-w-xl flex-col gap-6 py-10 sm:py-14">
           <header>
             <h1 className="text-3xl font-bold text-text sm:text-4xl">Preferences</h1>
-            <p className="mt-3 text-text-muted">
-              Units, fishing style, and personal comfort thresholds.
-            </p>
-            <p className="mt-2 text-sm">
-              <a href="/onboarding?next=/preferences">Re-run the fishing profile setup</a> to
-              change your targets, usual times, and preferred tide.
+            <p className="mt-2 text-text-muted">
+              Your fishing profile shapes every forecast you see.{' '}
+              <a href="/onboarding?next=/preferences" className="font-semibold">
+                Walk through setup again
+              </a>
             </p>
           </header>
-          <PreferencesForm />
+          <PreferencesForm locationNames={locationNames} />
         </div>
       </Container>
     </main>

@@ -1,5 +1,6 @@
 import { Badge, type BadgeVariant, Button, Card } from './ui'
 import { cx } from './ui/cx'
+import { HourlyChart } from './hourly-chart'
 import type { NearbyCam } from '@/lib/get-cams'
 import speciesPhotos from '@/lib/species-photos.json'
 
@@ -215,41 +216,15 @@ function SourceStatusList({ sources }: { sources: SourceStatus[] }) {
   )
 }
 
-const _TIDE_CHART_WIDTH = 600
-const _TIDE_CHART_HEIGHT = 110
-const _TIDE_CHART_TOP = 16
-const _TIDE_CHART_BOTTOM = 84
-// Horizontal padding so the first/last point's centered height label
-// (text-anchor="middle") isn't clipped by the viewBox edge.
-const _TIDE_CHART_SIDE_PADDING = 18
-
-/**
- * Sprint 34's remaining "accessible charts" sub-item for tides -- a
- * point chart, not an interpolated curve: NOAA CO-OPS's `hilo`
- * predictions product (`app.providers.noaa_coops.fetch_tide_predictions`)
- * gives real predicted heights only at each high/low extremum, not a
- * continuous hourly series, so plotting a smooth cosine-shaped curve
- * between them would be *inventing* the in-between shape rather than
- * showing real predicted values -- exactly the kind of unsupported
- * invention `docs/product-definition.md`'s Integrity rule (already
- * enforced server-side, e.g. `is_fallback` labeling) argues against
- * doing on the frontend too. Straight lines between real points are
- * an honest visual summary of the same handful of values
- * `TideTable` already lists as text; every point still gets a native
- * SVG `<title>` with its exact time/height, and each point's height
- * is labeled directly (a small point count, unlike the 24-bar hourly
- * chart, is exactly the case `dataviz`'s "label selectively" guidance
- * allows labeling every point). Single-hue on `--color-primary` (a
- * magnitude series, not a categorical one -- same reasoning as
- * `HourlyOutlookChart`), `aria-hidden="true"` alongside the
- * already-complete `TideTable`, no `tabindex` inside it (an
- * `aria-hidden` subtree must never contain a keyboard-focusable
- * element). The x-axis is real elapsed time between the first and
- * last prediction, not evenly-spaced-by-index, since predictions can
- * span more than one day unevenly.
- */
 function TideChart({ tides, timezone }: { tides: ForecastTides; timezone: string }) {
-  const points = tides.predictions
+  // The chart covers the next ~24 hours (the table lists every
+  // prediction): three days of zigzag is too dense to read.
+  const firstTime = tides.predictions.length
+    ? new Date(tides.predictions[0].time).getTime()
+    : 0
+  const points = tides.predictions.filter(
+    (prediction) => new Date(prediction.time).getTime() - firstTime <= 26 * 3600 * 1000,
+  )
   if (points.length < 2) return null
 
   const times = points.map((p) => new Date(p.time).getTime())
@@ -268,49 +243,61 @@ function TideChart({ tides, timezone }: { tides: ForecastTides; timezone: string
     minute: '2-digit',
   })
 
-  const plotWidth = _TIDE_CHART_WIDTH - _TIDE_CHART_SIDE_PADDING * 2
+  // Positions in percent of the plot box: x inset 6% each side so edge
+  // labels fit; y keeps 22% headroom above highs and 26% below lows for
+  // their labels.
   const coords = points.map((prediction, index) => ({
     prediction,
-    x: _TIDE_CHART_SIDE_PADDING + ((times[index] - minTime) / timeSpan) * plotWidth,
-    y:
-      _TIDE_CHART_BOTTOM -
-      ((prediction.height_ft - minHeight) / heightSpan) *
-        (_TIDE_CHART_BOTTOM - _TIDE_CHART_TOP),
+    x: 6 + ((times[index] - minTime) / timeSpan) * 88,
+    y: 22 + (1 - (prediction.height_ft - minHeight) / heightSpan) * 52,
   }))
-
-  const linePath = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x} ${c.y}`).join(' ')
+  const line = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x} ${c.y}`).join(' ')
+  const area = `${line} L ${coords[coords.length - 1].x} 100 L ${coords[0].x} 100 Z`
 
   return (
-    <div aria-hidden="true" className="flex flex-col gap-1">
+    <div aria-hidden="true" className="relative h-40 sm:h-44">
       <svg
-        viewBox={`0 0 ${_TIDE_CHART_WIDTH} ${_TIDE_CHART_HEIGHT}`}
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
         role="presentation"
-        className="w-full"
+        className="absolute inset-0 h-full w-full"
       >
-        <path d={linePath} fill="none" strokeWidth={2} className="stroke-primary" />
-        {coords.map(({ prediction, x, y }) => (
-          <g key={prediction.time}>
-            <circle cx={x} cy={y} r={4} className="fill-primary">
-              <title>
-                {`${prediction.kind === 'high' ? 'High' : 'Low'} tide, ${timeFormatter.format(
-                  new Date(prediction.time),
-                )}: ${prediction.height_ft.toFixed(1)} ft`}
-              </title>
-            </circle>
-            <text
-              x={x}
-              y={prediction.kind === 'high' ? y - 10 : y + 18}
-              textAnchor="middle"
-              className="fill-text-muted text-[9px]"
-            >
-              {prediction.height_ft.toFixed(1)}
-            </text>
-          </g>
-        ))}
+        <path d={area} className="fill-primary opacity-10" />
+        <path
+          d={line}
+          fill="none"
+          strokeWidth={2}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+          className="stroke-primary"
+        />
       </svg>
-      <p className="text-xs text-text-muted">
-        Predicted tide height over time; each point is a high or low tide.
-      </p>
+      {coords.map(({ prediction, x, y }) => {
+        const high = prediction.kind === 'high'
+        return (
+          <div
+            key={prediction.time}
+            className="absolute flex -translate-x-1/2 flex-col items-center"
+            style={{ left: `${x}%`, top: `${y}%` }}
+          >
+            <span className="absolute h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-primary ring-2 ring-surface" />
+            <span
+              className={cx(
+                'absolute whitespace-nowrap text-center text-xs leading-tight tabular-nums',
+                high ? 'bottom-2' : 'top-2',
+              )}
+            >
+              <span className="block font-bold text-text">
+                {high ? 'High' : 'Low'} {prediction.height_ft.toFixed(1)} ft
+              </span>
+              <span className="block text-text-muted">
+                {timeFormatter.format(new Date(prediction.time))}
+              </span>
+            </span>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -342,16 +329,16 @@ function TideTable({
   return (
     <div className="flex flex-col gap-2">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
+        <table className="w-full text-left text-sm sm:w-auto">
           <caption className="sr-only">
             Upcoming high and low tides for {tides.station_id}
           </caption>
           <thead>
             <tr className="text-text-muted">
-              <th scope="col" className="py-1 pr-4 font-medium">
+              <th scope="col" className="py-1 pr-4 font-medium sm:pr-12">
                 Time
               </th>
-              <th scope="col" className="py-1 pr-4 font-medium">
+              <th scope="col" className="py-1 pr-4 font-medium sm:pr-12">
                 Tide
               </th>
               <th scope="col" className="py-1 font-medium">
@@ -362,10 +349,10 @@ function TideTable({
           <tbody>
             {tides.predictions.map((prediction) => (
               <tr key={prediction.time} className="border-t border-border">
-                <td className="py-1.5 pr-4 text-text">
+                <td className="py-1.5 pr-4 text-text sm:pr-12">
                   {formatter.format(new Date(prediction.time))}
                 </td>
-                <td className="py-1.5 pr-4 text-text">
+                <td className="py-1.5 pr-4 text-text sm:pr-12">
                   {prediction.kind === 'high' ? 'High' : 'Low'}
                 </td>
                 <td className="py-1.5 text-text">{prediction.height_ft.toFixed(1)} ft</td>
@@ -378,135 +365,11 @@ function TideTable({
   )
 }
 
-const _SHORT_HOURS = [
-  '12a', '1a', '2a', '3a', '4a', '5a', '6a', '7a', '8a', '9a', '10a', '11a',
-  '12p', '1p', '2p', '3p', '4p', '5p', '6p', '7p', '8p', '9p', '10p', '11p',
-]
-
-const _CHART_SLOT = 30
-const _CHART_BAR_WIDTH = 22
-const _CHART_BAR_MAX_HEIGHT = 90
-const _CHART_BASELINE_Y = 100
-const _CHART_WIDTH = _CHART_SLOT * 24
-const _CHART_HEIGHT = 128
-
-/**
- * Sprint 34's hourly-outlook visual chart, drawn in the original
- * Saltline style: one bar per hour, colored by activity tier (prime
- * coral, high blue, med amber, low navy) with a text legend, and the
- * current hour labeled "Now". It's `aria-hidden`: `HourlyOutlookTable`
- * carries the same data as real text, and the legend plus bar height
- * mean color is never the only channel. Each bar has a native SVG
- * `<title>` tooltip but nothing focusable (axe-core's
- * `aria-hidden-focus` rule).
- */
-const TIER_FILL: Record<ActivityTag, string> = {
-  prime: 'fill-tier-prime',
-  high: 'fill-tier-high',
-  med: 'fill-tier-med',
-  low: 'fill-tier-low',
-}
-
-const TIER_LEGEND: { tag: ActivityTag; label: string; swatch: string }[] = [
-  { tag: 'prime', label: 'Prime', swatch: 'bg-tier-prime' },
-  { tag: 'high', label: 'High', swatch: 'bg-tier-high' },
-  { tag: 'med', label: 'Good', swatch: 'bg-tier-med' },
-  { tag: 'low', label: 'Low', swatch: 'bg-tier-low' },
-]
-
-function HourlyOutlookChart({ outlook }: { outlook: HourlyOutlook }) {
-  return (
-    <div aria-hidden="true" className="flex flex-col gap-1">
-      {/* Below ~560px the 24 bars get too thin to read, so the chart
-          keeps a minimum width and scrolls sideways inside its card. */}
-      <div className="-mx-1 overflow-x-auto px-1">
-      <svg
-        viewBox={`0 0 ${_CHART_WIDTH} ${_CHART_HEIGHT}`}
-        role="presentation"
-        className="w-full min-w-[560px]"
-      >
-        <line
-          x1={0}
-          y1={_CHART_BASELINE_Y}
-          x2={_CHART_WIDTH}
-          y2={_CHART_BASELINE_Y}
-          strokeWidth={1}
-          className="stroke-border"
-        />
-        {outlook.hours.map((hour, index) => {
-          const x = index * _CHART_SLOT + (_CHART_SLOT - _CHART_BAR_WIDTH) / 2
-          const barHeight = Math.max(2, (hour.level / 100) * _CHART_BAR_MAX_HEIGHT)
-          const y = _CHART_BASELINE_Y - barHeight
-          return (
-            <g key={hour.hour}>
-              <rect
-                x={x}
-                y={y}
-                width={_CHART_BAR_WIDTH}
-                height={barHeight}
-                rx={2}
-                strokeWidth={hour.is_now ? 2 : 0}
-                className={cx(TIER_FILL[hour.tag], hour.is_now && 'stroke-text')}
-              >
-                <title>{`${_SHORT_HOURS[hour.hour]}: ${hour.level}/100 (${hour.tag})`}</title>
-              </rect>
-              {hour.peak && (
-                <circle
-                  cx={x + _CHART_BAR_WIDTH / 2}
-                  cy={y - 6}
-                  r={3}
-                  className="fill-amber"
-                />
-              )}
-              {hour.is_now && (
-                <text
-                  x={x + _CHART_BAR_WIDTH / 2}
-                  y={_CHART_HEIGHT - 6}
-                  textAnchor="middle"
-                  className="fill-accent text-[9px] font-bold"
-                >
-                  Now
-                </text>
-              )}
-            </g>
-          )
-        })}
-        {outlook.hours.map((hour, index) =>
-          index % 3 === 0 && !hour.is_now ? (
-            <text
-              key={`label-${hour.hour}`}
-              x={index * _CHART_SLOT + _CHART_SLOT / 2}
-              y={_CHART_HEIGHT - 6}
-              textAnchor="middle"
-              className="fill-text-muted text-[9px]"
-            >
-              {_SHORT_HOURS[hour.hour]}
-            </text>
-          ) : null,
-        )}
-      </svg>
-      </div>
-      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-text-muted">
-        {TIER_LEGEND.map((item) => (
-          <span key={item.tag} className="flex items-center gap-1.5">
-            <span className={cx('h-2.5 w-2.5 rounded-sm', item.swatch)} />
-            {item.label}
-          </span>
-        ))}
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-amber" />
-          Day&apos;s peak
-        </span>
-      </div>
-    </div>
-  )
-}
-
 /**
  * Sprint 34's hourly outlook table -- the "text alternatives" half of
  * the acceptance bar (apps/api's `app.domain.timing.
  * build_hourly_outlook`, backend), rendered alongside
- * `HourlyOutlookChart` above as the real accessible representation
+ * `HourlyChart` (hourly-chart.tsx) as the real accessible representation
  * (the chart is `aria-hidden`). A plain, properly-labeled `<table>` is
  * itself an accessible representation, not a fallback for one.
  * `hour.reasons`/`tide_event` are apps/api's own plain-language "why"
@@ -638,21 +501,21 @@ function BestWindowCallout({ window, timezone }: { window: BestWindow; timezone:
   return (
     <div
       className={cx(
-        'flex min-w-[12rem] flex-col items-center gap-1 rounded-md border border-border border-t-2 bg-surface-raised px-5 py-3.5 text-center',
-        window.tag === 'prime' ? 'border-t-tier-prime' : 'border-t-tier-high',
+        'flex flex-col gap-1 rounded-md border border-border border-l-4 bg-surface-raised px-4 py-3.5',
+        window.tag === 'prime' ? 'border-l-tier-prime' : 'border-l-tier-high',
       )}
     >
       <span
         className={cx(
-          'text-[0.6875rem] font-bold uppercase tracking-widest',
-          window.tag === 'prime' ? 'text-accent' : 'text-primary',
+          'section-label',
+          window.tag === 'prime' ? 'text-accent!' : 'text-primary!',
         )}
       >
-        {capitalize(window.tag)}
+        Best today · {capitalize(window.tag)}
       </span>
-      <span className="text-lg font-bold text-text">{rangeLabel}</span>
+      <span className="text-xl font-bold tabular-nums text-text">{rangeLabel}</span>
       {reasons.length > 0 && (
-        <span className="font-serif text-sm italic text-text-muted">{reasons.join(' · ')}</span>
+        <span className="text-sm text-text-muted">{reasons.join(' · ')}</span>
       )}
     </div>
   )
@@ -667,18 +530,25 @@ function YourWindowCallout({ window, timezone }: { window: YourWindow; timezone:
   const start = formatter.format(new Date(window.start))
   const end = formatter.format(new Date(window.end))
   return (
-    <div className="flex min-w-[12rem] flex-col items-center gap-1 rounded-md border border-border border-t-2 border-t-primary bg-surface-raised px-5 py-3.5 text-center">
-      <span className="text-[0.6875rem] font-bold uppercase tracking-widest text-primary">
-        Your window · {capitalize(window.tag)}
-      </span>
-      <span className="text-lg font-bold text-text">
+    <div className="flex flex-col gap-1 rounded-md border border-border border-l-4 border-l-primary bg-surface-raised px-4 py-3.5">
+      <span className="section-label text-primary!">Your window · {capitalize(window.tag)}</span>
+      <span className="text-xl font-bold tabular-nums text-text">
         {start === end ? start : `${start} – ${end}`}
       </span>
       {window.reasons.length > 0 && (
-        <span className="font-serif text-sm italic text-text-muted">
-          {window.reasons.join(' · ')}
-        </span>
+        <span className="text-sm text-text-muted">{window.reasons.join(' · ')}</span>
       )}
+    </div>
+  )
+}
+
+/** The one heading style every forecast section uses: a section label,
+ * optional right-hand note. */
+function SectionHeader({ title, aside }: { title: string; aside?: React.ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+      <h2 className="section-label">{title}</h2>
+      {aside && <span className="text-xs text-text-muted">{aside}</span>}
     </div>
   )
 }
@@ -697,7 +567,7 @@ function StatTile({
   rule: string
 }) {
   return (
-    <div className={cx('flex flex-col gap-1 border-t-2 bg-surface-raised/60 px-4 py-3', rule)}>
+    <div className={cx('flex h-full flex-col gap-1 border-t-2 px-5 py-4 sm:px-6', rule)}>
       <dt className="section-label">{label}</dt>
       <dd className="text-2xl font-bold tracking-tight text-text">{value}</dd>
       {note && <dd className="text-xs text-text-muted">{note}</dd>}
@@ -716,17 +586,17 @@ function CollapsibleSection({
   children: React.ReactNode
 }) {
   return (
-    <details className="collapsible min-w-0 border-t border-border">
-      <summary className="flex items-center justify-between gap-3 px-1 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">
-        <span className="flex flex-wrap items-center gap-3">
-          <span className="text-xs font-bold uppercase tracking-widest text-text">{title}</span>
+    <details className="collapsible group min-w-0 border-t border-border first:border-t-0">
+      <summary className="flex min-h-14 items-center justify-between gap-3 px-5 py-3.5 hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring sm:px-6">
+        <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="section-label text-text!">{title}</span>
           {aside}
         </span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="chevron shrink-0 text-text-muted">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="chevron shrink-0 text-text-muted group-hover:text-text">
           <path d="M6 9 L12 15 L18 9" />
         </svg>
       </summary>
-      <div className="flex min-w-0 flex-col gap-4 px-1 pb-5">{children}</div>
+      <div className="flex min-w-0 flex-col gap-4 px-5 pb-6 pt-1 sm:px-6">{children}</div>
     </details>
   )
 }
@@ -765,19 +635,34 @@ function SpeciesPhotoFigure({ id, name, compact = false }: { id: string; name: s
   const photo = SPECIES_PHOTOS[id]
   if (!photo) return null
   return (
-    <figure className="flex flex-col gap-1">
-      <img
-        src={photo.src}
-        alt={name}
-        loading="lazy"
-        width={480}
-        height={300}
+    <figure className="flex flex-col gap-1.5">
+      {/* Every frame is the same shape: the photo is shown whole
+          (contain) over a blurred, dimmed copy of itself, so a wide
+          croaker and a tall surfperch both fill the frame without being
+          cropped or letterboxed in mismatched colors. */}
+      <div
         className={cx(
-          'w-full rounded-md bg-bg object-contain',
-          compact ? 'aspect-[16/9]' : 'aspect-[16/9] sm:max-w-xs',
+          'relative overflow-hidden rounded-md bg-bg',
+          compact ? 'aspect-[16/10]' : 'aspect-[16/10] sm:max-w-xs',
         )}
-      />
-      <figcaption className="truncate text-[0.625rem] text-text-muted">
+      >
+        <img
+          src={photo.src}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          className="absolute inset-0 h-full w-full scale-125 object-cover opacity-50 blur-xl"
+        />
+        <img
+          src={photo.src}
+          alt={name}
+          loading="lazy"
+          width={480}
+          height={300}
+          className="relative h-full w-full object-contain drop-shadow-[0_4px_12px_rgb(0_0_0/35%)]"
+        />
+      </div>
+      <figcaption className="truncate px-1 text-[0.6875rem] text-text-muted">
         <a
           href={photo.source_url}
           target="_blank"
@@ -791,10 +676,10 @@ function SpeciesPhotoFigure({ id, name, compact = false }: { id: string; name: s
   )
 }
 
-const GUIDANCE_TIER_TEXT: Record<GuidanceTier, string> = {
-  prime: 'text-accent',
-  good: 'text-primary',
-  fair: 'text-text-muted',
+const GUIDANCE_TIER_PILL: Record<GuidanceTier, string> = {
+  prime: 'border-accent/50 bg-accent-tint text-accent',
+  good: 'border-primary/50 bg-primary-tint text-primary',
+  fair: 'border-border bg-surface text-text-muted',
 }
 
 /**
@@ -804,63 +689,82 @@ const GUIDANCE_TIER_TEXT: Record<GuidanceTier, string> = {
  */
 function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
   return (
-    <Card className="flex flex-col gap-4 border-l-2 border-l-tier-prime p-5!">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="section-label">What&apos;s biting</h2>
-        {guidance.basis.water_temp_is_fallback && (
-          <span className="text-xs text-text-muted">
-            Based on the monthly average water temperature
-          </span>
-        )}
-      </div>
+    <Card className="flex flex-col gap-4">
+      <SectionHeader
+        title="What's biting"
+        aside={
+          guidance.basis.water_temp_is_fallback
+            ? 'Based on the monthly average water temperature'
+            : `Ranked for ${Math.round(guidance.basis.water_temp_f)}°F water`
+        }
+      />
 
+      {guidance.species.length > 1 && (
+        <p className="-mt-2 text-xs text-text-muted sm:hidden">
+          Swipe for all {guidance.species.length} picks →
+        </p>
+      )}
       {guidance.species.length === 0 ? (
         <p className="text-sm text-text-muted">
           None of the common surf and pier targets for this area are in range at{' '}
           {Math.round(guidance.basis.water_temp_f)}°F right now.
         </p>
       ) : (
-        <ol className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        // Phones: a swipeable row (snap per card, next card peeking in);
+        // wider screens: a 2/3-column grid.
+        <ol className="no-scrollbar -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
           {guidance.species.map((pick, index) => (
             <li
               key={pick.id}
-              className="flex flex-col gap-1.5 rounded-md border border-border bg-surface-raised px-4 py-3"
+              className="flex w-[84%] shrink-0 snap-start flex-col gap-2.5 overflow-hidden rounded-md border sm:w-auto border-border bg-surface-raised p-3 transition-[border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/60"
             >
               <SpeciesPhotoFigure id={pick.id} name={pick.name} compact />
-              <div className="flex items-start justify-between gap-2">
-                <span className="font-bold leading-tight text-text">{pick.name}</span>
-                <span
-                  aria-label={`Rank ${index + 1}`}
-                  className="flex h-5 min-w-5 items-center justify-center rounded-full bg-border px-1.5 text-[0.6875rem] font-bold text-text"
-                >
-                  {index + 1}
-                </span>
-              </div>
-              <span
-                className={cx(
-                  'text-[0.6875rem] font-bold uppercase tracking-widest',
-                  GUIDANCE_TIER_TEXT[pick.tier],
-                )}
-              >
-                {capitalize(pick.tier)}
-                {pick.matches_profile && (
-                  <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-primary-contrast">
-                    Your target
+              <div className="flex flex-col gap-2 px-1">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-base font-bold leading-snug text-text">{pick.name}</span>
+                  <span
+                    aria-label={`Rank ${index + 1}`}
+                    className="flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-border px-1.5 text-xs font-bold tabular-nums text-text"
+                  >
+                    {index + 1}
                   </span>
-                )}
-              </span>
-              <p className="line-clamp-2 text-sm text-text-muted">{pick.bait}</p>
-              {pick.regulation && (
-                <p className="text-xs text-text-muted">
-                  <span className="font-bold text-text">{pick.regulation.state}:</span>{' '}
-                  {[pick.regulation.min_size, pick.regulation.bag_limit]
-                    .filter(Boolean)
-                    .join(' · ') || 'see state rules'}
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span
+                    className={cx(
+                      'rounded-full border px-2 py-0.5 text-xs font-bold uppercase tracking-wide',
+                      GUIDANCE_TIER_PILL[pick.tier],
+                    )}
+                  >
+                    {capitalize(pick.tier)}
+                  </span>
+                  {pick.matches_profile && (
+                    <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-primary-contrast">
+                      Your target
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-text">
+                  <span className="text-text-muted">Bait: </span>
+                  {pick.bait}
                 </p>
-              )}
-              <p className="font-serif text-sm italic text-text-muted">
-                {pick.reasons.join(' · ')}
-              </p>
+                {pick.regulation && (
+                  <p className="text-sm text-text">
+                    <span className="text-text-muted">{pick.regulation.state} limits: </span>
+                    {[pick.regulation.min_size, pick.regulation.bag_limit]
+                      .filter(Boolean)
+                      .join(' · ') || 'see state rules'}
+                  </p>
+                )}
+                <ul className="mt-0.5 flex flex-col gap-1 border-t border-border pt-2.5 text-xs leading-relaxed text-text-muted">
+                  {pick.reasons.map((reason) => (
+                    <li key={reason} className="flex gap-2">
+                      <span aria-hidden="true" className="mt-[0.45rem] h-1 w-1 shrink-0 rounded-full bg-text-muted" />
+                      {reason}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </li>
           ))}
         </ol>
@@ -897,7 +801,7 @@ function SpeciesCalendar({
   return (
     <div className="flex min-w-0 flex-col gap-3">
       <div className="relative max-w-full overflow-x-auto">
-        <table className="w-full min-w-[520px] border-separate border-spacing-y-1 text-left text-sm">
+        <table className="w-full min-w-[520px] border-separate border-spacing-y-1 text-left text-sm sm:w-auto">
           <caption className="sr-only">Peak and good months for each species in this area</caption>
           <thead>
             <tr className="text-text-muted">
@@ -909,7 +813,7 @@ function SpeciesCalendar({
                   key={index}
                   scope="col"
                   className={cx(
-                    'w-7 py-1 text-center text-xs font-bold',
+                    'w-7 py-1 text-center text-xs font-bold sm:w-9',
                     index + 1 === currentMonth && 'text-accent',
                   )}
                 >
@@ -923,7 +827,7 @@ function SpeciesCalendar({
           <tbody>
             {rows.map((row) => (
               <tr key={row.id}>
-                <th scope="row" className="whitespace-nowrap py-0.5 pr-3 font-semibold text-text">
+                <th scope="row" className="whitespace-nowrap py-0.5 pr-6 font-semibold text-text">
                   {row.name}
                 </th>
                 {row.months.map((level, index) => (
@@ -978,7 +882,7 @@ function RigsAndTips({ guidance }: { guidance: FishingGuidance }) {
           <li key={pick.id} className="flex flex-col gap-2 border-b border-border pb-4 last:border-b-0 last:pb-0">
             <h3 className="text-base font-bold text-text">{pick.name}</h3>
             <SpeciesPhotoFigure id={pick.id} name={pick.name} />
-            <p className="font-serif text-base italic text-text-muted">{pick.explanation}</p>
+            <p className="text-sm leading-relaxed text-text-muted">{pick.explanation}</p>
             <dl className="grid grid-cols-1 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-[auto_1fr]">
               <dt className="section-label pt-0.5">Rig</dt>
               <dd className="text-text">{pick.rig}</dd>
@@ -1085,13 +989,13 @@ export function ForecastCard({
   const sourcesDown = forecast.sources.filter((source) => source.state !== 'ok').length
 
   return (
-    <div className="flex min-w-0 flex-col gap-4">
+    <div className="rise-in flex min-w-0 flex-col gap-4 sm:gap-5">
       <Card className="overflow-hidden p-0!">
-        <div className="flex flex-col gap-1.5 px-5 pb-4 pt-5">
+        <div className="flex flex-col gap-2 px-5 pb-5 pt-5 sm:px-6 sm:pt-6">
           <h2 className="section-label">Today&apos;s forecast</h2>
           <p
             className={cx(
-              'text-[2rem] font-extrabold uppercase leading-none tracking-tight break-words sm:text-5xl',
+              'text-4xl font-extrabold uppercase leading-none tracking-tight break-words sm:text-5xl',
               VERDICT_TEXT[verdict],
             )}
           >
@@ -1110,7 +1014,7 @@ export function ForecastCard({
             </p>
           )}
           {score?.summary && (
-            <p className="font-serif text-base italic text-text-muted">{score.summary}</p>
+            <p className="max-w-3xl text-sm leading-relaxed text-text-muted sm:text-base">{score.summary}</p>
           )}
         </div>
 
@@ -1163,16 +1067,16 @@ export function ForecastCard({
       </Card>
 
       {forecast.hourly_outlook && (
-        <Card className="flex flex-col gap-4 border-t-2 border-t-tier-prime p-5!">
-          <h2 className="section-label">Fishing activity &amp; day timeline</h2>
-          <HourlyOutlookChart outlook={forecast.hourly_outlook} />
+        <Card className="flex flex-col gap-4">
+          <SectionHeader title="Fishing activity today" aside="0–100, by hour" />
+          <HourlyChart outlook={forecast.hourly_outlook} />
         </Card>
       )}
 
       {(bestWindow || forecast.hourly_outlook?.your_window) && (
-        <Card className="flex flex-col gap-4 p-5!">
-          <h2 className="section-label">When to fish</h2>
-          <div className="flex flex-wrap justify-center gap-3">
+        <Card className="flex flex-col gap-4">
+          <SectionHeader title="When to fish" />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {bestWindow && (
               <BestWindowCallout window={bestWindow} timezone={forecast.location.timezone} />
             )}
@@ -1188,12 +1092,12 @@ export function ForecastCard({
 
       {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} />}
 
-      <div className="flex min-w-0 flex-col border-b border-border">
+      <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
         {forecast.recommendations?.pack && (
           <CollapsibleSection
             title="Pack for today"
             aside={
-              <span className="font-serif text-sm italic text-text-muted">
+              <span className="text-sm text-text-muted">
                 {forecast.recommendations.pack.headline}
               </span>
             }
@@ -1235,9 +1139,7 @@ export function ForecastCard({
                   key={cam.id}
                   className="flex flex-col gap-1 rounded-md border border-border bg-surface-raised px-4 py-3"
                 >
-                  <span className="text-[0.6875rem] font-bold uppercase tracking-widest text-primary">
-                    {cam.cam_type} cam
-                  </span>
+                  <span className="section-label text-primary!">{cam.cam_type} cam</span>
                   <span className="font-bold text-text">{cam.name}</span>
                   <span className="text-xs text-text-muted">{cam.distance_miles} miles away</span>
                   <a
@@ -1255,7 +1157,10 @@ export function ForecastCard({
         )}
 
         {forecast.tides && (
-          <CollapsibleSection title="Today's tides">
+          <CollapsibleSection
+            title="Tides"
+            aside={<span className="text-xs text-text-muted">Next 24 hours, then the full list</span>}
+          >
             <TideChart tides={forecast.tides} timezone={forecast.location.timezone} />
             <TideTable tides={forecast.tides} timezone={forecast.location.timezone} />
           </CollapsibleSection>
@@ -1298,7 +1203,7 @@ export function ForecastCard({
             </ul>
           </CollapsibleSection>
         )}
-      </div>
+      </Card>
     </div>
   )
 }

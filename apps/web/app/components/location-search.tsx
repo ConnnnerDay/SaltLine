@@ -184,7 +184,7 @@ export function LocationSearch({
         error={error ?? undefined}
       />
 
-      <Card className="absolute z-10 mt-1 w-full p-0" hidden={!listboxHasContent}>
+      <Card className="absolute z-10 mt-1 w-full p-0!" hidden={!listboxHasContent}>
         {/* role="listbox"/"option" on plain divs, not ul/li: overriding
             li's implicit "listitem" role to "option" breaks the ARIA
             required-owned-elements relationship a real <ul> expects

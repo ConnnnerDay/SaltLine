@@ -183,7 +183,7 @@ export function ProfileSetup({ next }: { next: string }) {
   }
 
   return (
-    <Card className="flex min-h-[26rem] flex-col gap-5 p-6!">
+    <Card className="flex min-h-[26rem] flex-col gap-5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-1 flex-col gap-1.5">
           <p className="section-label" aria-live="polite">

@@ -28,9 +28,8 @@ import { cx } from './ui/cx'
  *   user's comfort limits (or a typical limit for the kayak/boat they
  *   fish from), as a band on a scale with the limit marked.
  * - The tide right now, and whether it's their preferred tide.
- * - Where to fish: a cross-section of their kind of water (surf beach,
- *   pier, jetty, flats, offshore structure) with numbered hotspots and
- *   the tide tip for that water right now.
+ *
+ * The where-to-fish guides (`WhereToFish`, below) live in "Rigs & tips".
  */
 
 function hasProfile(profile: Preferences | null): profile is Preferences {
@@ -160,7 +159,6 @@ export function YourDay({
 
   const conditions = forecast.conditions
   const limits = limitsFor(profile)
-  const waters = watersFor(profile).slice(0, 2)
   const tide = tideNow(forecast.tides)
   const timeFormatter = new Intl.DateTimeFormat('en-US', {
     timeZone: forecast.location.timezone,
@@ -235,10 +233,34 @@ export function YourDay({
         </div>
       )}
 
+    </Card>
+  )
+}
+
+/**
+ * "Where to fish": a cross-section of each kind of water the user fishes
+ * (up to two) with numbered hotspots, the matching list, and what the
+ * tide is doing on that water right now. Lives in the "Rigs & tips"
+ * section, with the rest of the how-to content.
+ */
+export function WhereToFish({
+  forecast,
+  profile,
+}: {
+  forecast: ForecastEnvelope
+  profile: Preferences | null
+}) {
+  const waters = watersFor(profile).slice(0, 2)
+  if (waters.length === 0) return null
+  const tide = tideNow(forecast.tides)
+  return (
+    <section className="flex flex-col gap-4">
+      <h3 className="section-label">Where to fish</h3>
+      <div className="flex flex-col gap-4">
       {waters.map((water) => (
         <section
           key={water}
-          className="grid grid-cols-1 gap-4 border-t border-border pt-5 md:grid-cols-[minmax(0,22rem)_1fr]"
+          className="grid grid-cols-1 gap-4 rounded-md border border-border bg-surface-raised p-4 sm:p-5 md:grid-cols-[minmax(0,22rem)_1fr]"
         >
           <div className="self-start overflow-hidden rounded-md border border-border">
             <SpotDiagram water={water} className="block h-auto w-full" />
@@ -248,7 +270,7 @@ export function YourDay({
               {SPOTS[water].title}
               <span className="ml-2 text-xs font-semibold text-text-muted">{WATER_LABEL[water]}</span>
             </h3>
-            <ol className="flex flex-col gap-2 text-sm text-text">
+            <ul className="flex flex-col gap-2 text-sm text-text">
               {SPOTS[water].hotspots.map((spot, index) => (
                 <li key={spot} className="flex gap-2.5">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-[0.6875rem] font-bold text-white">
@@ -257,7 +279,7 @@ export function YourDay({
                   <span className="leading-relaxed">{spot}</span>
                 </li>
               ))}
-            </ol>
+            </ul>
             {tide && (
               <p className="rounded-md border-l-4 border-l-primary bg-primary-tint px-3 py-2 text-sm text-text">
                 <span className="font-semibold">Right now: </span>
@@ -267,6 +289,7 @@ export function YourDay({
           </div>
         </section>
       ))}
-    </Card>
+      </div>
+    </section>
   )
 }

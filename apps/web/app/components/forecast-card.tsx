@@ -5,7 +5,7 @@ import { RigDiagram } from './rig-diagram'
 import { RIGS, rigsFor, type RigId } from '@/lib/rigs'
 import { RIG_FIT, RIG_WATER_TIPS, WATER_NOUN, WATER_PHRASE, watersFor } from '@/lib/fishing-style'
 import type { Preferences } from '@/app/api/preferences/route'
-import { YourDay } from './your-day'
+import { WhereToFish, YourDay } from './your-day'
 import type { NearbyCam } from '@/lib/get-cams'
 import speciesPhotos from '@/lib/species-photos.json'
 
@@ -1065,7 +1065,7 @@ function RigsAndTips({
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                   <section className="flex flex-col gap-2">
                     <h4 className="section-label">How to tie it</h4>
-                    <ol className="flex flex-col gap-2 text-sm text-text">
+                    <ul className="flex flex-col gap-2 text-sm text-text">
                       {rig.tie.map((step, index) => (
                         <li key={step} className="flex gap-2.5">
                           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-border text-[0.6875rem] font-bold tabular-nums text-text">
@@ -1074,7 +1074,7 @@ function RigsAndTips({
                           <span className="leading-relaxed">{step}</span>
                         </li>
                       ))}
-                    </ol>
+                    </ul>
                   </section>
                   <section className="flex flex-col gap-2">
                     <h4 className="section-label">Fishing it</h4>
@@ -1349,9 +1349,27 @@ export function ForecastCard({
           </CollapsibleSection>
         )}
 
-        {forecast.recommendations && forecast.recommendations.species.length > 0 && (
-          <CollapsibleSection title="Rigs & tips">
-            <RigsAndTips guidance={forecast.recommendations} profile={profile} />
+        {((forecast.recommendations && forecast.recommendations.species.length > 0) ||
+          watersFor(profile).length > 0) && (
+          <CollapsibleSection
+            title="Rigs & tips"
+            aside={
+              watersFor(profile).length > 0 ? (
+                <span className="text-xs text-text-muted">
+                  Where to fish, then the rigs for today
+                </span>
+              ) : undefined
+            }
+          >
+            <WhereToFish forecast={forecast} profile={profile} />
+            {forecast.recommendations && forecast.recommendations.species.length > 0 && (
+              <>
+                {watersFor(profile).length > 0 && (
+                  <h3 className="section-label mt-2">Rigs for today</h3>
+                )}
+                <RigsAndTips guidance={forecast.recommendations} profile={profile} />
+              </>
+            )}
           </CollapsibleSection>
         )}
 

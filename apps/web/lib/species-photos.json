@@ -1,0 +1,177 @@
+{
+  "atlantic-croaker": {
+    "src": "/species/atlantic-croaker.jpg",
+    "credit": "Smithsonian Environmental Research Center",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Micropogonias_undulatus_RR_072120_0655_(50142583921).jpg"
+  },
+  "barred-surfperch": {
+    "src": "/species/barred-surfperch.jpg",
+    "credit": "SFOfishing",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Barred_Surfperch.jpg"
+  },
+  "black-drum": {
+    "src": "/species/black-drum.jpg",
+    "credit": "Smithsonian Environmental Research Center",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Pogonias_cromis_-_SERC.jpg"
+  },
+  "black-rockfish": {
+    "src": "/species/black-rockfish.jpg",
+    "credit": "Bloopityboop",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Sebastes_melanops_VA_02.jpg"
+  },
+  "black-sea-bass": {
+    "src": "/species/black-sea-bass.jpg",
+    "credit": "Unknown author",
+    "license": "Public domain",
+    "license_url": "",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Centropristis_striata.png"
+  },
+  "bluefish": {
+    "src": "/species/bluefish.jpg",
+    "credit": "Unknown author",
+    "license": "Public domain",
+    "license_url": "",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Pomatomus_saltatrix.png"
+  },
+  "california-halibut": {
+    "src": "/species/california-halibut.jpg",
+    "credit": "Unknown author",
+    "license": "Public domain",
+    "license_url": "",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Halibut_300.jpg"
+  },
+  "corbina": {
+    "src": "/species/corbina.jpg",
+    "credit": "N1ywb at English Wikipedia",
+    "license": "CC BY-SA 3.0",
+    "license_url": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "source_url": "https://commons.wikimedia.org/wiki/File:California_corbina.JPG"
+  },
+  "flounder": {
+    "src": "/species/flounder.jpg",
+    "credit": "Arturodomiao",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Paralichthys-dentatus-1024x576.webp"
+  },
+  "lingcod": {
+    "src": "/species/lingcod.jpg",
+    "credit": "Unknown author",
+    "license": "Public domain",
+    "license_url": "",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Ophiodon_elongatus.png"
+  },
+  "moi": {
+    "src": "/species/moi.jpg",
+    "credit": "NNPS photo - Bryan Harry",
+    "license": "Public domain",
+    "license_url": "",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Polydactylus_sexfilis_by_NPS.jpg"
+  },
+  "oio-bonefish": {
+    "src": "/species/oio-bonefish.jpg",
+    "credit": "Brian Gratwicke",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Bonefish_Albula_vulpes.jpg"
+  },
+  "papio": {
+    "src": "/species/papio.jpg",
+    "credit": "Diego Delso",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Jurel_de_aleta_azul_(Caranx_melampygus),_Yeda,_Arabia_Saudita,_2025-05-23,_DD_22.jpg"
+  },
+  "pompano": {
+    "src": "/species/pompano.jpg",
+    "credit": "Dugmore, A. Radclyffe; Evermann, Barton Warren; Jordan, David Starr",
+    "license": "Public domain",
+    "license_url": "",
+    "source_url": "https://commons.wikimedia.org/wiki/File:American_food_and_game_fishes_(Plate_(28))_BHL8308905.jpg"
+  },
+  "red-drum": {
+    "src": "/species/red-drum.jpg",
+    "credit": "Noaa",
+    "license": "Public domain",
+    "license_url": "",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Redfish_or_Red_drum.webp"
+  },
+  "sheepshead": {
+    "src": "/species/sheepshead.jpg",
+    "credit": "Unknown author",
+    "license": "Public domain",
+    "license_url": "",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Sheepshead.jpg"
+  },
+  "snook": {
+    "src": "/species/snook.jpg",
+    "credit": "Matthew Hoelscher",
+    "license": "CC BY-SA 2.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Centropomus.jpg"
+  },
+  "spanish-mackerel": {
+    "src": "/species/spanish-mackerel.jpg",
+    "credit": "NOAA",
+    "license": "Public domain",
+    "license_url": "",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Spanish_mack_photo3_exp.jpg"
+  },
+  "speckled-trout": {
+    "src": "/species/speckled-trout.jpg",
+    "credit": "Raver Duane, U.S. Fish and Wildlife Service",
+    "license": "Public domain",
+    "license_url": "",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Spotted_seatrout_fish_cynoscion_nebulosus.jpg"
+  },
+  "spot": {
+    "src": "/species/spot.jpg",
+    "credit": "NOAA's Fisheries Collection; Collection of Brandi Noble",
+    "license": "Public domain",
+    "license_url": "",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Spot_(_Leiostomus_xanthurus_).jpg"
+  },
+  "striped-bass": {
+    "src": "/species/striped-bass.jpg",
+    "credit": "D Ross Robertson",
+    "license": "Public domain",
+    "license_url": "",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Morone_saxatilis_SI2.jpg"
+  },
+  "tautog": {
+    "src": "/species/tautog.jpg",
+    "credit": "no rights reserved",
+    "license": "CC0",
+    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Tautog_(Tautoga_onitis),_United_States_imported_from_iNaturalist_photo_442131359.jpg"
+  },
+  "ulua-giant-trevally": {
+    "src": "/species/ulua-giant-trevally.jpg",
+    "credit": "Dr. Dwayne Meadows, NOAA/NMFS/OPR",
+    "license": "Public domain",
+    "license_url": "",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Caranx_ignobilis.jpg"
+  },
+  "whiting-sea-mullet": {
+    "src": "/species/whiting-sea-mullet.jpg",
+    "credit": "Cláudio D. Timm",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Menticirrhus_americanus.jpg"
+  },
+  "yellowfin-croaker": {
+    "src": "/species/yellowfin-croaker.jpg",
+    "credit": "Unknown author",
+    "license": "Public domain",
+    "license_url": "",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Umbrina_roncador_mspc098.jpg"
+  }
+}

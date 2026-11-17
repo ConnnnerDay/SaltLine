@@ -8,6 +8,15 @@ never directly from a browser.
 
 ## Status
 
+**Species photo fetcher.** `scripts/fetch_species_photos.py` maps each
+catalogue species to a hand-picked Wikipedia article and takes its lead
+image. It keeps only free licenses (CC or public domain) per Commons
+metadata, downloads Wikimedia's standard-size thumbnail (1280 or 330, as
+Wikimedia asks bulk fetchers; never originals), resizes locally to 480px
+JPEG with Pillow, and writes apps/web's `public/species/` and
+`lib/species-photos.json`. It's incremental (`--force` refetches) and
+paced with backoff on 429.
+
 **Pack for today and live cams (original features restored).**
 `FishingGuidance.pack` ports the legacy `build_trip_setup` (without the
 per-user gear profile): lures, a color/action tip (murky, cold or

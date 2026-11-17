@@ -1138,6 +1138,34 @@
         "title": "NearbyCam",
         "type": "object"
       },
+      "NearbySpot": {
+        "properties": {
+          "distance_miles": {
+            "title": "Distance Miles",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "state",
+          "distance_miles"
+        ],
+        "title": "NearbySpot",
+        "type": "object"
+      },
       "PreferencesOut": {
         "description": "Response shape. Always returns a full object, even for a user with\nno row yet (sprint 36's endpoint creates one with these same\ndefaults on first read) -- a `404` for \"no preferences set yet\" would\nmake every new user's first `GET` an error case for no real reason.",
         "properties": {
@@ -2087,6 +2115,77 @@
           }
         },
         "summary": "Nearby Cams",
+        "tags": [
+          "locations"
+        ]
+      }
+    },
+    "/v1/locations/{location_id}/nearby": {
+      "get": {
+        "description": "The curated spots closest to a location (any location, curated or\na dynamic point), nearest first, excluding the location itself --\nthe forecast page's \"Nearby spots today\".",
+        "operationId": "nearby_spots_v1_locations__location_id__nearby_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "location_id",
+            "required": true,
+            "schema": {
+              "title": "Location Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 3,
+              "maximum": 6,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "max_miles",
+            "required": false,
+            "schema": {
+              "default": 60.0,
+              "exclusiveMinimum": 0,
+              "maximum": 150,
+              "title": "Max Miles",
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NearbySpot"
+                  },
+                  "title": "Response Nearby Spots V1 Locations  Location Id  Nearby Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Nearby Spots",
         "tags": [
           "locations"
         ]

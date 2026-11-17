@@ -54,6 +54,7 @@ from app.providers.live_cams import DEFAULT_RADIUS_MILES, NearbyCam, find_nearby
 from app.providers.locations import (
     CuratedLocation,
     ResolvedLocation,
+    find_nearest_locations,
     format_dynamic_id,
     load_curated_locations,
     search_curated_locations,
@@ -129,3 +130,40 @@ async def nearby_cams(
     app's "Live Cams"). Empty when none are within *radius_miles*."""
     location = await resolve_location_id(location_id, state)
     return find_nearby_cams(location.lat, location.lng, radius_miles)
+
+
+class NearbySpot(BaseModel):
+    id: str
+    name: str
+    state: str
+    distance_miles: float
+
+
+@router.get("/{location_id}/nearby")
+async def nearby_spots(
+    location_id: str,
+    limit: int = Query(3, ge=1, le=6),
+    max_miles: float = Query(60.0, gt=0, le=150),
+    state: AppState = Depends(get_app_state),  # noqa: B008
+) -> list[NearbySpot]:
+    """The curated spots closest to a location (any location, curated or
+    a dynamic point), nearest first, excluding the location itself --
+    the forecast page's "Nearby spots today"."""
+    location = await resolve_location_id(location_id, state)
+    matches = find_nearest_locations(
+        location.lat,
+        location.lng,
+        load_curated_locations(),
+        n=limit + 1,
+        max_miles=max_miles,
+    )
+    return [
+        NearbySpot(
+            id=match.location.id,
+            name=match.location.name,
+            state=match.location.state,
+            distance_miles=match.distance_miles,
+        )
+        for match in matches
+        if match.location.id != location.id
+    ][:limit]

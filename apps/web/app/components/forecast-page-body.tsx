@@ -2,6 +2,7 @@ import { LocationBar } from './location-bar'
 import type { NearbyCam } from '@/lib/get-cams'
 import { Container } from './ui'
 import { ForecastCard, ForecastErrorCard, type ForecastEnvelope } from './forecast-card'
+import { NearbySpots } from './nearby-spots'
 import type { Preferences } from '@/app/api/preferences/route'
 
 /**
@@ -19,6 +20,8 @@ export function ForecastPageBody({
   errorReason,
   cams,
   profile = null,
+  nearbyLinkBase = '/share',
+  userId,
   retryHref,
   backHref,
   backLabel,
@@ -32,6 +35,10 @@ export function ForecastPageBody({
   cams?: NearbyCam[]
   /** The signed-in user's fishing profile (personalizes the card). */
   profile?: Preferences | null
+  /** Where "Nearby spots today" links: /forecast (signed in) or /share. */
+  nearbyLinkBase?: string
+  /** Signed-in user, so nearby verdicts are personalized like this one. */
+  userId?: string
   /** Sprint 47: the current page's own URL, so a failed fetch gets a
    * real "Try again" action (see ForecastErrorCard) instead of only a
    * "back" link that leaves the failure unresolved. */
@@ -57,6 +64,14 @@ export function ForecastPageBody({
         <div className="flex flex-col gap-4 py-5 pb-16">
           {error && <ForecastErrorCard message={error} reason={errorReason} retryHref={retryHref} />}
           {forecast && <ForecastCard forecast={forecast} cams={cams} profile={profile} />}
+          {forecast && (
+            <NearbySpots
+              locationId={forecast.location.id}
+              currentScore={forecast.conditions?.score?.score ?? null}
+              linkBase={nearbyLinkBase}
+              userId={userId}
+            />
+          )}
           {children}
         </div>
       </Container>

@@ -10,7 +10,6 @@ import { SunAndMoon, WeatherAlerts, type SkyConditions } from './sky'
 import { NextDays } from './next-days'
 import { WindAndWaves } from './wind-waves'
 import { PressureAndWater } from './pressure-water'
-import { GamePlan } from './game-plan'
 import { WeatherIcon } from './weather-icon'
 import { currentTime } from '@/lib/clock'
 import type { NearbyCam } from '@/lib/get-cams'
@@ -1336,8 +1335,6 @@ export function ForecastCard({
           </div>
         </dl>
       </Card>
-
-      <GamePlan forecast={forecast} profile={profile} now={currentTime()} />
 
       <YourDay forecast={forecast} profile={profile} />
 

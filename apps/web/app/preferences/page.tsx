@@ -30,7 +30,7 @@ export default async function PreferencesPage() {
   return (
     <main>
       <Container>
-        <div className="mx-auto flex max-w-xl flex-col gap-6 py-10 sm:py-14">
+        <div className="mx-auto flex max-w-2xl flex-col gap-6 py-10 sm:py-14">
           <header>
             <h1 className="text-3xl font-bold text-text sm:text-4xl">Preferences</h1>
             <p className="mt-2 text-text-muted">

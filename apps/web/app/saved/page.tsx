@@ -63,10 +63,10 @@ export default async function SavedPage() {
   return (
     <main>
       <Container>
-        <div className="mx-auto flex max-w-sm flex-col gap-6 py-10 sm:py-16">
+        <div className="mx-auto flex max-w-2xl flex-col gap-6 py-10 sm:py-14">
           <header>
             <h1 className="text-3xl font-bold text-text sm:text-4xl">Saved spots</h1>
-            <p className="mt-3 text-text-muted">Your saved locations, most recent last.</p>
+            <p className="mt-3 text-text-muted">Today&apos;s call for every spot you saved, side by side.</p>
           </header>
           <SavedLocationsList initialLocations={locations} initialError={error} />
         </div>

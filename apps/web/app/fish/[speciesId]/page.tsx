@@ -9,6 +9,7 @@ import { InternalApiError, internalApiFetch } from '@/lib/internal-api-client'
 import type { Preferences } from '@/app/api/preferences/route'
 import { ACCESS_LABEL, MONTH_NAMES, REGION_LABEL, TARGET_LABEL, seasonOf, type FishDetail } from '@/lib/fish'
 import { localizeText, temp, type Units } from '@/lib/units'
+import { FavoriteButton } from '../favorite-button'
 
 export const dynamic = 'force-dynamic'
 
@@ -68,7 +69,10 @@ export default async function FishDetailPage({ params }: Props) {
           </Link>
 
           <header className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold text-text sm:text-4xl">{fish.name}</h1>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <h1 className="text-3xl font-bold text-text sm:text-4xl">{fish.name}</h1>
+              <FavoriteButton speciesId={fish.id} initial={prefs?.favorite_species ?? []} />
+            </div>
             <p className="flex flex-wrap items-center gap-1.5 text-xs">
               <span
                 className={cx(

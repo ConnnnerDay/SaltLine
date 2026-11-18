@@ -17,6 +17,9 @@ overlay applied per request on a copy -- it never changes the cache.
 - Gear (`uses_lures`, `uses_live_bait`, `uses_cut_bait`): "Pack for today"
   drops lure rows for someone who never uses lures, and bait rows for
   someone who uses neither live nor cut bait.
+- Favorite fish (`favorite_species`, the Fish guide's "My fish"): any of
+  them biting here today (scored as usual, from any list) lead "What's
+  biting", boosted `_FAVORITE_BONUS` points with a "One of your fish" reason.
 - Experience: beginners get a "Start simple" row in "Pack for today".
 - Usual times + tide preference (`fishing_times`, `tide_preference`):
   `hourly_outlook.your_window` -- the best stretch of the day inside the
@@ -32,6 +35,7 @@ from app.domain.guidance import (
     MAX_PICKS,
     GuidanceTier,
     SpeciesPick,
+    build_fishing_guidance,
     build_pack_for_today,
 )
 from app.domain.models import ForecastEnvelope, Warning, WarningSeverity
@@ -39,6 +43,7 @@ from app.domain.preferences import PreferencesOut
 from app.infra.timezones import safe_zone
 
 _TARGET_BONUS = 10
+_FAVORITE_BONUS = 15
 
 _TARGET_LABELS = {
     "bottom": "bottom fish",
@@ -234,6 +239,61 @@ def _filter_pack(pack: dict[str, Any], prefs: PreferencesOut) -> dict[str, Any]:
     return {**pack, "rows": rows}
 
 
+def _favorite_picks(
+    recommendations: dict[str, Any],
+    conditions: dict[str, Any] | None,
+    favorite_ids: list[str],
+) -> list[dict[str, Any]]:
+    """The user's starred fish ("My fish") that are biting here today,
+    scored exactly as "What's biting" scores everything (any list: shore,
+    boat or tidal), boosted and labelled, best first. A favorite that is out
+    of range or out of season simply isn't included."""
+    basis = recommendations.get("basis") or {}
+    if not basis.get("region"):
+        return []
+    cond = conditions or {}
+    # The state's limits: whatever state today's picks already carry.
+    state = next(
+        (
+            pick["regulation"]["state"]
+            for pick in recommendations.get("species") or []
+            if pick.get("regulation")
+        ),
+        None,
+    )
+    every = build_fishing_guidance(
+        region=str(basis["region"]),
+        water_temp_f=float(basis.get("water_temp_f", 65.0)),
+        water_temp_is_fallback=bool(basis.get("water_temp_is_fallback", True)),
+        month=int(basis.get("month", 1)),
+        wave_range_ft=_pair(cond.get("wave_range_ft")),
+        wind_range_kt=_pair(cond.get("wind_range_kt")),
+        wind_direction=cond.get("wind_direction"),
+        state=state,
+        max_picks=10_000,
+    )
+    scored = {
+        pick.id: pick
+        for pick in [*every.species, *every.boat_species, *every.tidal_species]
+    }
+    picks = []
+    for species_id in favorite_ids:
+        pick = scored.get(species_id)
+        if pick is None:
+            continue
+        boosted = pick.score + _FAVORITE_BONUS
+        picks.append(
+            {
+                **pick.model_dump(mode="json"),
+                "score": boosted,
+                "tier": _tier(boosted),
+                "reasons": [*pick.reasons, "One of your fish"],
+                "matches_profile": True,
+            }
+        )
+    return sorted(picks, key=lambda pick: pick["score"], reverse=True)
+
+
 def _rebuilt_pack(
     recommendations: dict[str, Any],
     conditions: dict[str, Any] | None,
@@ -318,6 +378,20 @@ def personalize(envelope: ForecastEnvelope, prefs: PreferencesOut) -> ForecastEn
             recommendations["species"], targets
         )
         recommendations["pack"] = _rebuilt_pack(recommendations, conditions, envelope)
+
+    if recommendations and prefs.favorite_species:
+        favorites = _favorite_picks(recommendations, conditions, prefs.favorite_species)
+        if favorites:
+            chosen = {pick["id"] for pick in favorites}
+            rest = [
+                pick
+                for pick in recommendations.get("species") or []
+                if pick["id"] not in chosen
+            ]
+            recommendations["species"] = (favorites + rest)[:MAX_PICKS]
+            recommendations["pack"] = _rebuilt_pack(
+                recommendations, conditions, envelope
+            )
 
     if recommendations and recommendations.get("pack"):
         pack = _filter_pack(recommendations["pack"], prefs)

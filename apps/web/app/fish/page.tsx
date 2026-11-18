@@ -44,6 +44,7 @@ export default async function FishPage() {
             species={species.map((fish) => ({ ...fish, photo: SPECIES_PHOTOS[fish.id]?.src ?? null }))}
             initialRegion={home?.conditions_region ?? null}
             month={month}
+            favorites={prefs?.favorite_species ?? []}
             units={prefs?.units ?? 'imperial'}
           />
         </div>

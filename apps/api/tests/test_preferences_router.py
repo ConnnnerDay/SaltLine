@@ -88,6 +88,7 @@ def test_get_with_no_row_returns_defaults(client: TestClient) -> None:
         "fishing_times": None,
         "tide_preference": None,
         "forecast_layout": None,
+        "favorite_species": None,
     }
 
 
@@ -296,3 +297,16 @@ def test_forecast_layout_rejects_junk_ids(client: TestClient) -> None:
     ):
         resp = client.patch("/v1/me/preferences", json={"forecast_layout": bad})
         assert resp.status_code == 422, bad
+
+
+def test_favorite_species_round_trip(client: TestClient) -> None:
+    resp = client.patch(
+        "/v1/me/preferences", json={"favorite_species": ["cobia", "red-drum"]}
+    )
+    assert resp.status_code == 200
+    assert client.get("/v1/me/preferences").json()["favorite_species"] == [
+        "cobia",
+        "red-drum",
+    ]
+    bad = client.patch("/v1/me/preferences", json={"favorite_species": ["<x>"]})
+    assert bad.status_code == 422

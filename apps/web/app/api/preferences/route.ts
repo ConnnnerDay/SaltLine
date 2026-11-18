@@ -25,6 +25,8 @@ export type Preferences = {
   tide_preference: 'incoming' | 'outgoing' | 'high' | 'low' | null
   /** How the forecast's tabbed sections are arranged (ForecastTabs). */
   forecast_layout?: ForecastLayout | null
+  /** "My fish": species ids starred in the Fish guide. */
+  favorite_species?: string[] | null
 }
 
 export type ForecastLayout = {

@@ -28,7 +28,9 @@ export function FishGuide({
   initialRegion,
   month,
   units,
+  favorites = [],
 }: {
+  favorites?: string[]
   species: GuideFish[]
   initialRegion: string | null
   month: number
@@ -39,12 +41,15 @@ export function FishGuide({
   const [season, setSeason] = useState<(typeof SEASONS)[number]['key']>('all')
   const [kinds, setKinds] = useState<FishSummary['access'][]>(['shore', 'boat', 'tidal'])
   const [shown, setShown] = useState(PAGE)
+  const [mineOnly, setMineOnly] = useState(false)
+  const mine = useMemo(() => new Set(favorites), [favorites])
 
   const order = useMemo(() => new Map(species.map((fish, index) => [fish.id, index])), [species])
   const results = useMemo(() => {
     const q = query.trim().toLowerCase()
     return species
-      .filter((fish) => region === 'all' || fish.regions.includes(region))
+      .filter((fish) => !mineOnly || mine.has(fish.id))
+      .filter((fish) => mineOnly || region === 'all' || fish.regions.includes(region))
       .filter((fish) => kinds.includes(fish.access))
       .filter((fish) => !q || fish.name.toLowerCase().includes(q))
       .filter((fish) => {
@@ -58,7 +63,7 @@ export function FishGuide({
           SEASON_RANK[seasonOf(a, month)] - SEASON_RANK[seasonOf(b, month)] ||
           order.get(a.id)! - order.get(b.id)!,
       )
-  }, [species, order, query, region, season, kinds, month])
+  }, [species, order, query, region, season, kinds, month, mineOnly, mine])
 
   function toggleKind(kind: FishSummary['access']) {
     setKinds((current) => (current.includes(kind) ? current.filter((k) => k !== kind) : [...current, kind]))
@@ -82,6 +87,20 @@ export function FishGuide({
           />
         </label>
         <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Region">
+          <button
+            type="button"
+            aria-pressed={mineOnly}
+            onClick={() => {
+              setMineOnly((value) => !value)
+              setShown(PAGE)
+            }}
+            className={cx(chip(mineOnly), 'mr-2 inline-flex items-center gap-1')}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 3.5l2.6 5.3 5.9.9-4.25 4.1 1 5.8L12 16.9l-5.25 2.7 1-5.8L3.5 9.7l5.9-.9z" />
+            </svg>
+            My fish ({favorites.length})
+          </button>
           <span className="mr-1 text-xs font-semibold text-text-muted">Region</span>
           {[{ key: 'all', label: 'All' }, ...REGIONS].map((option) => (
             <button
@@ -128,13 +147,15 @@ export function FishGuide({
       </div>
 
       <p className="text-sm text-text-muted" aria-live="polite">
-        {results.length} fish{region !== 'all' && ` in the ${REGION_LABEL[region]}`}
+        {results.length} fish{mineOnly ? ' in My fish' : region !== 'all' && ` in the ${REGION_LABEL[region]}`}
         {season !== 'all' && (season === 'peak' ? ', at their peak now' : ', in season now')}
       </p>
 
       {results.length === 0 ? (
         <p className="rounded-lg border border-dashed border-border px-4 py-8 text-center text-sm text-text-muted">
-          No fish match. Try another region, or clear the search.
+          {mineOnly
+            ? 'No fish in My fish yet. Open any fish and tap “Add to My fish”.'
+            : 'No fish match. Try another region, or clear the search.'}
         </p>
       ) : (
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -157,7 +178,14 @@ export function FishGuide({
                     )}
                   </span>
                   <span className="flex min-w-0 flex-col gap-1">
-                    <span data-fish-name className="font-bold leading-snug">{fish.name}</span>
+                    <span data-fish-name className="font-bold leading-snug">
+                      {fish.name}
+                      {mine.has(fish.id) && (
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" className="ml-1.5 inline text-accent" role="img" aria-label="In My fish">
+                          <path d="M12 3.5l2.6 5.3 5.9.9-4.25 4.1 1 5.8L12 16.9l-5.25 2.7 1-5.8L3.5 9.7l5.9-.9z" />
+                        </svg>
+                      )}
+                    </span>
                     <span className="flex flex-wrap items-center gap-1.5 text-xs">
                       <span
                         className={cx(

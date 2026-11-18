@@ -180,6 +180,8 @@ class UserPreferences(Base):
     forecast_layout: Mapped[dict[str, object] | None] = mapped_column(
         JSON, nullable=True
     )
+    # "My fish": catalogue species ids the user starred in the Fish guide.
+    favorite_species: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
 
 
 class PreferencesOut(BaseModel):
@@ -204,6 +206,7 @@ class PreferencesOut(BaseModel):
     fishing_times: list[FishingTime] | None = None
     tide_preference: TidePreference | None = None
     forecast_layout: ForecastLayout | None = None
+    favorite_species: list[_LayoutKey] | None = Field(default=None, max_length=60)
 
 
 class PreferencesUpdate(BaseModel):
@@ -231,3 +234,4 @@ class PreferencesUpdate(BaseModel):
     fishing_times: list[FishingTime] | None = Field(default=None, max_length=5)
     tide_preference: TidePreference | None = None
     forecast_layout: ForecastLayout | None = None
+    favorite_species: list[_LayoutKey] | None = Field(default=None, max_length=60)

@@ -19,6 +19,10 @@ en.wikipedia.org and upload.wikimedia.org):
     python3 -m scripts.fetch_species_photos
 
 `--trim-existing` only re-trims letterbox borders on the committed photos.
+`--inat` fills in species still missing a photo from iNaturalist instead
+(api.inaturalist.org, by exact scientific name, Creative Commons photos
+only, credited the same way) -- for fish Wikipedia has no free lead image
+for, or while Wikimedia is rate-limiting.
 """
 
 from __future__ import annotations
@@ -183,6 +187,120 @@ ARTICLES: dict[str, str] = {
     "roi": "Peacock_grouper",
 }
 
+
+# Catalogue id -> scientific name, for the iNaturalist fallback (`--inat`):
+# exact names, since common-name search there matches the wrong taxa.
+SCIENTIFIC: dict[str, str] = {
+    "redtail-surfperch": "Amphistichus rhodoterus",
+    "weakfish-gray-trout": "Cynoscion regalis",
+    "scup-porgy": "Stenotomus chrysops",
+    "winter-flounder": "Pseudopleuronectes americanus",
+    "atlantic-mackerel": "Scomber scombrus",
+    "false-albacore": "Euthynnus alletteratus",
+    "atlantic-bonito": "Sarda sarda",
+    "northern-kingfish": "Menticirrhus saxatilis",
+    "cunner-bergall": "Tautogolabrus adspersus",
+    "pollock": "Pollachius virens",
+    "white-perch": "Morone americana",
+    "hickory-shad": "Alosa mediocris",
+    "american-eel": "Anguilla rostrata",
+    "northern-puffer-blowfish": "Sphoeroides maculatus",
+    "sea-robin": "Prionotus carolinus",
+    "smooth-dogfish": "Mustelus canis",
+    "spiny-dogfish": "Squalus acanthias",
+    "clearnose-skate": "Rostroraja eglanteria",
+    "cobia": "Rachycentron canadum",
+    "king-mackerel": "Scomberomorus cavalla",
+    "atlantic-spadefish": "Chaetodipterus faber",
+    "gray-triggerfish": "Balistes capriscus",
+    "southern-flounder": "Paralichthys lethostigma",
+    "gulf-flounder": "Paralichthys albigutta",
+    "southern-kingfish": "Menticirrhus americanus",
+    "gulf-kingfish": "Menticirrhus littoralis",
+    "silver-perch": "Bairdiella chrysoura",
+    "sand-seatrout-white-trout": "Cynoscion arenarius",
+    "silver-seatrout": "Cynoscion nothus",
+    "pinfish": "Lagodon rhomboides",
+    "mangrove-snapper": "Lutjanus griseus",
+    "jack-crevalle": "Caranx hippos",
+    "blue-runner": "Caranx crysos",
+    "ladyfish": "Elops saurus",
+    "tarpon": "Megalops atlanticus",
+    "tripletail": "Lobotes surinamensis",
+    "permit": "Trachinotus falcatus",
+    "lookdown": "Selene vomer",
+    "great-barracuda": "Sphyraena barracuda",
+    "bonefish": "Albula vulpes",
+    "sand-perch": "Diplectrum formosum",
+    "tomtate": "Haemulon aurolineatum",
+    "oyster-toadfish": "Opsanus tau",
+    "atlantic-sharpnose-shark": "Rhizoprionodon terraenovae",
+    "sandbar-shark": "Carcharhinus plumbeus",
+    "blacktip-shark": "Carcharhinus limbatus",
+    "spinner-shark": "Carcharhinus brevipinna",
+    "bonnethead-shark": "Sphyrna tiburo",
+    "bull-shark": "Carcharhinus leucas",
+    "atlantic-stingray": "Hypanus sabinus",
+    "southern-stingray": "Hypanus americanus",
+    "cownose-ray": "Rhinoptera bonasus",
+    "calico-surfperch": "Amphistichus koelzi",
+    "walleye-surfperch": "Hyperprosopon argenteum",
+    "silver-surfperch": "Hyperprosopon ellipticum",
+    "rubberlip-seaperch": "Rhacochilus toxotes",
+    "pile-perch": "Rhacochilus vacca",
+    "striped-seaperch": "Embiotoca lateralis",
+    "shiner-perch": "Cymatogaster aggregata",
+    "black-perch": "Embiotoca jacksoni",
+    "jacksmelt": "Atherinopsis californiensis",
+    "white-croaker": "Genyonemus lineatus",
+    "starry-flounder": "Platichthys stellatus",
+    "pacific-sanddab": "Citharichthys sordidus",
+    "kelp-greenling": "Hexagrammos decagrammus",
+    "cabezon": "Scorpaenichthys marmoratus",
+    "grass-rockfish": "Sebastes rastrelliger",
+    "blue-rockfish": "Sebastes mystinus",
+    "copper-rockfish": "Sebastes caurinus",
+    "monkeyface-prickleback": "Cebidichthys violaceus",
+    "striped-bass-west-coast": "Morone saxatilis",
+    "chinook-salmon": "Oncorhynchus tshawytscha",
+    "coho-salmon": "Oncorhynchus kisutch",
+    "leopard-shark": "Triakis semifasciata",
+    "bat-ray": "Myliobatis californica",
+    "pacific-mackerel": "Scomber japonicus",
+    "spotfin-croaker": "Roncador stearnsii",
+    "kelp-bass-calico-bass": "Paralabrax clathratus",
+    "barred-sand-bass": "Paralabrax nebulifer",
+    "spotted-sand-bass": "Paralabrax maculatofasciatus",
+    "california-sheephead": "Bodianus pulcher",
+    "opaleye": "Girella nigricans",
+    "halfmoon": "Medialuna californiensis",
+    "jack-mackerel": "Trachurus symmetricus",
+    "pacific-barracuda": "Sphyraena argentea",
+    "pacific-bonito": "Sarda chiliensis",
+    "yellowtail": "Seriola dorsalis",
+    "queenfish": "Seriphus politus",
+    "sargo": "Anisotremus davidsonii",
+    "shovelnose-guitarfish": "Pseudobatos productus",
+    "round-stingray": "Urobatis halleri",
+    "omilu-bluefin-trevally": "Caranx melampygus",
+    "menpachi": "Myripristis berndti",
+    "aholehole": "Kuhlia sandvicensis",
+    "weke-goatfish": "Mulloidichthys flavolineatus",
+    "akule": "Selar crumenophthalmus",
+    "opelu": "Decapterus macarellus",
+    "taape": "Lutjanus kasmira",
+    "toau": "Lutjanus fulvus",
+    "uku": "Aprion virescens",
+    "kaku-barracuda": "Sphyraena barracuda",
+    "nenue": "Kyphosus vaigiensis",
+    "kala": "Naso unicornis",
+    "manini": "Acanthurus triostegus",
+    "uhu-parrotfish": "Scarus rubroviolaceus",
+    "amaama-mullet": "Mugil cephalus",
+    "mu": "Monotaxis grandoculis",
+    "roi": "Cephalopholis argus",
+}
+
 _FREE_LICENSE = re.compile(r"^(cc[- ]|cc0|public domain|pd)", re.IGNORECASE)
 
 
@@ -244,6 +362,81 @@ def _fetch_thumb(original_url: str) -> bytes:
     # Never falls back to the original: Wikimedia explicitly asks bulk
     # fetchers not to. A species without a standard thumbnail goes without.
     raise last or RuntimeError("no thumbnail")
+
+
+_INAT_LICENSES = {
+    "cc0": ("CC0", "https://creativecommons.org/publicdomain/zero/1.0/"),
+    "cc-by": ("CC BY 4.0", "https://creativecommons.org/licenses/by/4.0/"),
+    "cc-by-sa": ("CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0/"),
+    "cc-by-nc": ("CC BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0/"),
+    "cc-by-nc-sa": (
+        "CC BY-NC-SA 4.0",
+        "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    ),
+    "cc-by-nd": ("CC BY-ND 4.0", "https://creativecommons.org/licenses/by-nd/4.0/"),
+    "cc-by-nc-nd": (
+        "CC BY-NC-ND 4.0",
+        "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+    ),
+}
+
+
+def _inat_credit(attribution: str) -> str:
+    """iNaturalist's "(c) Jane, some rights reserved (CC BY-NC), uploaded by
+    Jane" -> "Jane via iNaturalist" (the license is shown separately)."""
+    match = re.match(
+        r"^\(c\)\s*(.+?),\s*(?:some|no) rights reserved", _plain(attribution)
+    )
+    name = match.group(1) if match else _plain(attribution)
+    return f"{name or 'A contributor'} via iNaturalist"
+
+
+def _photo_from_inat(scientific: str) -> dict[str, str] | None:
+    """The taxon's default photo on iNaturalist (api.inaturalist.org), when
+    the taxon matches *scientific* exactly and the photo has a Creative
+    Commons license. Used for species Wikipedia can't supply (or while
+    Wikimedia is rate-limiting)."""
+    query = urllib.parse.urlencode({"q": scientific, "rank": "species", "per_page": 30})
+    results = _get_json(f"https://api.inaturalist.org/v1/taxa?{query}")["results"]
+    taxon = next(
+        (
+            t
+            for t in results
+            if scientific.lower()
+            in (t.get("name", "").lower(), str(t.get("matched_term", "")).lower())
+        ),
+        None,
+    )
+    if not taxon:
+        print(f"  skip {scientific}: no exact iNaturalist taxon")
+        return None
+    photo = taxon.get("default_photo") or {}
+    if photo.get("license_code") not in _INAT_LICENSES:
+        # The taxon's headline photo isn't openly licensed: take the first
+        # of its other photos that is.
+        detail = _get_json(f"https://api.inaturalist.org/v1/taxa/{taxon['id']}")[
+            "results"
+        ][0]
+        photo = next(
+            (
+                entry["photo"]
+                for entry in detail.get("taxon_photos", [])
+                if entry.get("photo", {}).get("license_code") in _INAT_LICENSES
+            ),
+            {},
+        )
+    license_code = photo.get("license_code")
+    if license_code not in _INAT_LICENSES or not photo.get("medium_url"):
+        print(f"  skip {scientific}: no CC-licensed iNaturalist photo")
+        return None
+    license_name, license_url = _INAT_LICENSES[license_code]
+    return {
+        "image_url": str(photo["medium_url"]),
+        "credit": _inat_credit(str(photo.get("attribution") or "")),
+        "license": license_name,
+        "license_url": license_url,
+        "source_url": f"https://www.inaturalist.org/photos/{photo['id']}",
+    }
 
 
 def _photo_for(article: str) -> dict[str, str] | None:
@@ -322,6 +515,7 @@ def main() -> None:
     _PHOTO_DIR.mkdir(parents=True, exist_ok=True)
     # Incremental: keep photos already fetched (pass --force to refetch all).
     force = "--force" in sys.argv
+    inat = "--inat" in sys.argv
     if "--trim-existing" in sys.argv:
         for path in sorted(_PHOTO_DIR.glob("*.jpg")):
             with Image.open(path) as source:
@@ -340,11 +534,15 @@ def main() -> None:
             manifest[species_id]["credit"] = _plain(manifest[species_id]["credit"])
             continue
         article = ARTICLES.get(species_id)
-        if article is None:
-            print(f"  no article mapped for {species_id}")
-            continue
+        scientific = SCIENTIFIC.get(species_id)
         try:
-            photo = _photo_for(article)
+            if inat and scientific:
+                photo = _photo_from_inat(scientific)
+            elif article:
+                photo = _photo_for(article)
+            else:
+                print(f"  no article mapped for {species_id}")
+                continue
         except (OSError, KeyError, ValueError, StopIteration) as exc:  # keep going
             print(f"  failed {species_id}: {exc}")
             continue
@@ -352,7 +550,10 @@ def main() -> None:
             continue
         target = _PHOTO_DIR / f"{species_id}.jpg"
         try:
-            _save_resized(_fetch_thumb(photo["image_url"]), target)
+            image = (
+                _fetch(photo["image_url"]) if inat else _fetch_thumb(photo["image_url"])
+            )
+            _save_resized(image, target)
         except (OSError, RuntimeError, ValueError) as exc:
             print(f"  failed {species_id} download: {exc}")
             continue

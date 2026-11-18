@@ -1,10 +1,80 @@
 {
+  "aholehole": {
+    "src": "/species/aholehole.jpg",
+    "credit": "Ken-ichi Ueda via iNaturalist",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/171527622"
+  },
+  "akule": {
+    "src": "/species/akule.jpg",
+    "credit": "Bernd Dietrich via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/89918827"
+  },
+  "amaama-mullet": {
+    "src": "/species/amaama-mullet.jpg",
+    "credit": "Ian Banks via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/11976021"
+  },
+  "american-eel": {
+    "src": "/species/american-eel.jpg",
+    "credit": "EricksonSmith via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/9901094"
+  },
+  "atlantic-bonito": {
+    "src": "/species/atlantic-bonito.jpg",
+    "credit": "Susanne Spindler via iNaturalist",
+    "license": "CC BY-NC-ND 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/167226627"
+  },
   "atlantic-croaker": {
     "src": "/species/atlantic-croaker.jpg",
     "credit": "Smithsonian Environmental Research Center",
     "license": "CC BY 2.0",
     "license_url": "https://creativecommons.org/licenses/by/2.0",
     "source_url": "https://commons.wikimedia.org/wiki/File:Micropogonias_undulatus_RR_072120_0655_(50142583921).jpg"
+  },
+  "atlantic-mackerel": {
+    "src": "/species/atlantic-mackerel.jpg",
+    "credit": "Hans Hillewaert via iNaturalist",
+    "license": "CC BY-NC-ND 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/462705827"
+  },
+  "atlantic-sharpnose-shark": {
+    "src": "/species/atlantic-sharpnose-shark.jpg",
+    "credit": "Kevin Bryant via iNaturalist",
+    "license": "CC BY-NC-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/161395"
+  },
+  "atlantic-spadefish": {
+    "src": "/species/atlantic-spadefish.jpg",
+    "credit": "Brian Gratwicke via iNaturalist",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/252611090"
+  },
+  "atlantic-stingray": {
+    "src": "/species/atlantic-stingray.jpg",
+    "credit": "Ryan Rash via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/176633652"
+  },
+  "barred-sand-bass": {
+    "src": "/species/barred-sand-bass.jpg",
+    "credit": "Jeremy_Jodoin via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/449004516"
   },
   "barred-surfperch": {
     "src": "/species/barred-surfperch.jpg",
@@ -13,12 +83,26 @@
     "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
     "source_url": "https://commons.wikimedia.org/wiki/File:Barred_Surfperch.jpg"
   },
+  "bat-ray": {
+    "src": "/species/bat-ray.jpg",
+    "credit": "craigjhowe via iNaturalist",
+    "license": "CC BY-NC-ND 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/59021274"
+  },
   "black-drum": {
     "src": "/species/black-drum.jpg",
     "credit": "Smithsonian Environmental Research Center",
     "license": "CC BY 2.0",
     "license_url": "https://creativecommons.org/licenses/by/2.0",
     "source_url": "https://commons.wikimedia.org/wiki/File:Pogonias_cromis_-_SERC.jpg"
+  },
+  "black-perch": {
+    "src": "/species/black-perch.jpg",
+    "credit": "uwkwaj via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/105583995"
   },
   "black-rockfish": {
     "src": "/species/black-rockfish.jpg",
@@ -34,12 +118,68 @@
     "license_url": "",
     "source_url": "https://commons.wikimedia.org/wiki/File:Centropristis_striata.png"
   },
+  "blacktip-shark": {
+    "src": "/species/blacktip-shark.jpg",
+    "credit": "Luis P. B. via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/247619680"
+  },
+  "blue-rockfish": {
+    "src": "/species/blue-rockfish.jpg",
+    "credit": "NOAA Photo Library via iNaturalist",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/26245"
+  },
+  "blue-runner": {
+    "src": "/species/blue-runner.jpg",
+    "credit": "Thomas Menut via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/68708086"
+  },
   "bluefish": {
     "src": "/species/bluefish.jpg",
     "credit": "Unknown author",
     "license": "Public domain",
     "license_url": "",
     "source_url": "https://commons.wikimedia.org/wiki/File:Pomatomus_saltatrix.png"
+  },
+  "bonefish": {
+    "src": "/species/bonefish.jpg",
+    "credit": "James-LaFontaine via iNaturalist",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/601558048"
+  },
+  "bonnethead-shark": {
+    "src": "/species/bonnethead-shark.jpg",
+    "credit": "Kevin Bryant via iNaturalist",
+    "license": "CC BY-NC-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/30458297"
+  },
+  "bull-shark": {
+    "src": "/species/bull-shark.jpg",
+    "credit": "Luis P. B. via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/351417931"
+  },
+  "cabezon": {
+    "src": "/species/cabezon.jpg",
+    "credit": "Sara Thiebaud via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/112504004"
+  },
+  "calico-surfperch": {
+    "src": "/species/calico-surfperch.jpg",
+    "credit": "joe_cutler via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/4603204"
   },
   "california-halibut": {
     "src": "/species/california-halibut.jpg",
@@ -48,12 +188,75 @@
     "license_url": "",
     "source_url": "https://commons.wikimedia.org/wiki/File:Halibut_300.jpg"
   },
+  "california-sheephead": {
+    "src": "/species/california-sheephead.jpg",
+    "credit": "victorbach via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/106228676"
+  },
+  "chinook-salmon": {
+    "src": "/species/chinook-salmon.jpg",
+    "credit": "hewittdoesit via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/561290071"
+  },
+  "clearnose-skate": {
+    "src": "/species/clearnose-skate.jpg",
+    "credit": "uconnbirdfish via iNaturalist",
+    "license": "CC BY-NC-ND 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/30746748"
+  },
+  "cobia": {
+    "src": "/species/cobia.jpg",
+    "credit": "Ewout Knoester via iNaturalist",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/19249056"
+  },
+  "coho-salmon": {
+    "src": "/species/coho-salmon.jpg",
+    "credit": "Samuel Taylor via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/728795606"
+  },
+  "copper-rockfish": {
+    "src": "/species/copper-rockfish.jpg",
+    "credit": "Andrew Harmer via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/153578953"
+  },
   "corbina": {
     "src": "/species/corbina.jpg",
     "credit": "N1ywb at English Wikipedia",
     "license": "CC BY-SA 3.0",
     "license_url": "http://creativecommons.org/licenses/by-sa/3.0/",
     "source_url": "https://commons.wikimedia.org/wiki/File:California_corbina.JPG"
+  },
+  "cownose-ray": {
+    "src": "/species/cownose-ray.jpg",
+    "credit": "Virginia Sea Grant via iNaturalist",
+    "license": "CC BY-ND 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nd/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/520079878"
+  },
+  "cunner-bergall": {
+    "src": "/species/cunner-bergall.jpg",
+    "credit": "derekkeats via iNaturalist",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/3584"
+  },
+  "false-albacore": {
+    "src": "/species/false-albacore.jpg",
+    "credit": "Athila Bertoncini Andrade via iNaturalist",
+    "license": "CC BY-NC-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/29909093"
   },
   "flounder": {
     "src": "/species/flounder.jpg",
@@ -62,12 +265,159 @@
     "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
     "source_url": "https://commons.wikimedia.org/wiki/File:Paralichthys-dentatus-1024x576.webp"
   },
+  "grass-rockfish": {
+    "src": "/species/grass-rockfish.jpg",
+    "credit": "Jacob via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/456948376"
+  },
+  "gray-triggerfish": {
+    "src": "/species/gray-triggerfish.jpg",
+    "credit": "Luis P. B. via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/274989805"
+  },
+  "great-barracuda": {
+    "src": "/species/great-barracuda.jpg",
+    "credit": "Zane Libke via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/463595824"
+  },
+  "gulf-flounder": {
+    "src": "/species/gulf-flounder.jpg",
+    "credit": "shmavin via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/451655366"
+  },
+  "gulf-kingfish": {
+    "src": "/species/gulf-kingfish.jpg",
+    "credit": "Vince Golder via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/460459767"
+  },
+  "halfmoon": {
+    "src": "/species/halfmoon.jpg",
+    "credit": "uwkwaj via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/260599189"
+  },
+  "hickory-shad": {
+    "src": "/species/hickory-shad.jpg",
+    "credit": "Peter Wilson via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/172741763"
+  },
+  "jack-crevalle": {
+    "src": "/species/jack-crevalle.jpg",
+    "credit": "James Bailey via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/1800499"
+  },
+  "jack-mackerel": {
+    "src": "/species/jack-mackerel.jpg",
+    "credit": "craigjhowe via iNaturalist",
+    "license": "CC BY-NC-ND 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/59025274"
+  },
+  "jacksmelt": {
+    "src": "/species/jacksmelt.jpg",
+    "credit": "Vince Golder via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/440510564"
+  },
+  "kaku-barracuda": {
+    "src": "/species/kaku-barracuda.jpg",
+    "credit": "Zane Libke via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/463595824"
+  },
+  "kala": {
+    "src": "/species/kala.jpg",
+    "credit": "François Libert via iNaturalist",
+    "license": "CC BY-NC-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/233701070"
+  },
+  "kelp-bass-calico-bass": {
+    "src": "/species/kelp-bass-calico-bass.jpg",
+    "credit": "Kai via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/624735349"
+  },
+  "kelp-greenling": {
+    "src": "/species/kelp-greenling.jpg",
+    "credit": "KJ via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/117750924"
+  },
+  "king-mackerel": {
+    "src": "/species/king-mackerel.jpg",
+    "credit": "Sylvain Le Bris via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/253653518"
+  },
+  "ladyfish": {
+    "src": "/species/ladyfish.jpg",
+    "credit": "Quinn via iNaturalist",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/458673791"
+  },
+  "leopard-shark": {
+    "src": "/species/leopard-shark.jpg",
+    "credit": "Brian Gratwicke via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/520058171"
+  },
   "lingcod": {
     "src": "/species/lingcod.jpg",
     "credit": "Unknown author",
     "license": "Public domain",
     "license_url": "",
     "source_url": "https://commons.wikimedia.org/wiki/File:Ophiodon_elongatus.png"
+  },
+  "lookdown": {
+    "src": "/species/lookdown.jpg",
+    "credit": "Milla-Maria Salo via iNaturalist",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/1048616"
+  },
+  "mangrove-snapper": {
+    "src": "/species/mangrove-snapper.jpg",
+    "credit": "Frank Krasovec via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/413518733"
+  },
+  "manini": {
+    "src": "/species/manini.jpg",
+    "credit": "François Libert via iNaturalist",
+    "license": "CC BY-NC-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/237987787"
+  },
+  "menpachi": {
+    "src": "/species/menpachi.jpg",
+    "credit": "Jean-Paul Cassez via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/114918026"
   },
   "moi": {
     "src": "/species/moi.jpg",
@@ -76,12 +426,103 @@
     "license_url": "",
     "source_url": "https://commons.wikimedia.org/wiki/File:Polydactylus_sexfilis_by_NPS.jpg"
   },
+  "monkeyface-prickleback": {
+    "src": "/species/monkeyface-prickleback.jpg",
+    "credit": "Andrew Harmer via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/336622936"
+  },
+  "mu": {
+    "src": "/species/mu.jpg",
+    "credit": "François Libert via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/229645984"
+  },
+  "nenue": {
+    "src": "/species/nenue.jpg",
+    "credit": "orionsmcc via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/179510695"
+  },
+  "northern-kingfish": {
+    "src": "/species/northern-kingfish.jpg",
+    "credit": "Koaw Nature via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/236726310"
+  },
+  "northern-puffer-blowfish": {
+    "src": "/species/northern-puffer-blowfish.jpg",
+    "credit": "Fish_man via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/734872690"
+  },
   "oio-bonefish": {
     "src": "/species/oio-bonefish.jpg",
     "credit": "Brian Gratwicke",
     "license": "CC BY 2.0",
     "license_url": "https://creativecommons.org/licenses/by/2.0",
     "source_url": "https://commons.wikimedia.org/wiki/File:Bonefish_Albula_vulpes.jpg"
+  },
+  "omilu-bluefin-trevally": {
+    "src": "/species/omilu-bluefin-trevally.jpg",
+    "credit": "David Rolla via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/20989833"
+  },
+  "opaleye": {
+    "src": "/species/opaleye.jpg",
+    "credit": "Jennifer Lentz, Ph.D. via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/9430036"
+  },
+  "opelu": {
+    "src": "/species/opelu.jpg",
+    "credit": "BJ Stacey via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/188915"
+  },
+  "oyster-toadfish": {
+    "src": "/species/oyster-toadfish.jpg",
+    "credit": "Dan Schofield via iNaturalist",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/156065863"
+  },
+  "pacific-barracuda": {
+    "src": "/species/pacific-barracuda.jpg",
+    "credit": "Dave Fitzgerald via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/431738093"
+  },
+  "pacific-bonito": {
+    "src": "/species/pacific-bonito.jpg",
+    "credit": "Jacob via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/229544907"
+  },
+  "pacific-mackerel": {
+    "src": "/species/pacific-mackerel.jpg",
+    "credit": "BJ Stacey via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/188918"
+  },
+  "pacific-sanddab": {
+    "src": "/species/pacific-sanddab.jpg",
+    "credit": "Gregory C Jensen via iNaturalist",
+    "license": "CC BY-NC-ND 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/128255332"
   },
   "papio": {
     "src": "/species/papio.jpg",
@@ -90,12 +531,47 @@
     "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
     "source_url": "https://commons.wikimedia.org/wiki/File:Jurel_de_aleta_azul_(Caranx_melampygus),_Yeda,_Arabia_Saudita,_2025-05-23,_DD_22.jpg"
   },
+  "permit": {
+    "src": "/species/permit.jpg",
+    "credit": "François Libert via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/229031488"
+  },
+  "pile-perch": {
+    "src": "/species/pile-perch.jpg",
+    "credit": "Josh Houston via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/318369196"
+  },
+  "pinfish": {
+    "src": "/species/pinfish.jpg",
+    "credit": "Alex R via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/23327498"
+  },
+  "pollock": {
+    "src": "/species/pollock.jpg",
+    "credit": "Tino Strauss via iNaturalist",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/347681001"
+  },
   "pompano": {
     "src": "/species/pompano.jpg",
     "credit": "Dugmore, A. Radclyffe; Evermann, Barton Warren; Jordan, David Starr",
     "license": "Public domain",
     "license_url": "",
     "source_url": "https://commons.wikimedia.org/wiki/File:American_food_and_game_fishes_(Plate_(28))_BHL8308905.jpg"
+  },
+  "queenfish": {
+    "src": "/species/queenfish.jpg",
+    "credit": "Jacob via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/402904408"
   },
   "red-drum": {
     "src": "/species/red-drum.jpg",
@@ -104,6 +580,76 @@
     "license_url": "",
     "source_url": "https://commons.wikimedia.org/wiki/File:Redfish_or_Red_drum.webp"
   },
+  "redtail-surfperch": {
+    "src": "/species/redtail-surfperch.jpg",
+    "credit": "Jacob via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/457568954"
+  },
+  "roi": {
+    "src": "/species/roi.jpg",
+    "credit": "François Libert via iNaturalist",
+    "license": "CC BY-NC-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/237394538"
+  },
+  "round-stingray": {
+    "src": "/species/round-stingray.jpg",
+    "credit": "Stefanie via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/17184576"
+  },
+  "rubberlip-seaperch": {
+    "src": "/species/rubberlip-seaperch.jpg",
+    "credit": "Jeremy_Jodoin via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/381459752"
+  },
+  "sand-perch": {
+    "src": "/species/sand-perch.jpg",
+    "credit": "Pauline Walsh Jacobson via iNaturalist",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/173002120"
+  },
+  "sand-seatrout-white-trout": {
+    "src": "/species/sand-seatrout-white-trout.jpg",
+    "credit": "Ben via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/21986209"
+  },
+  "sandbar-shark": {
+    "src": "/species/sandbar-shark.jpg",
+    "credit": "Nicholas Hess via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/182239485"
+  },
+  "sargo": {
+    "src": "/species/sargo.jpg",
+    "credit": "Nicholas Lara via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/103303550"
+  },
+  "scup-porgy": {
+    "src": "/species/scup-porgy.jpg",
+    "credit": "Alex Shure via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/180655089"
+  },
+  "sea-robin": {
+    "src": "/species/sea-robin.jpg",
+    "credit": "Neil DeMaster via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/149530882"
+  },
   "sheepshead": {
     "src": "/species/sheepshead.jpg",
     "credit": "Unknown author",
@@ -111,12 +657,75 @@
     "license_url": "",
     "source_url": "https://commons.wikimedia.org/wiki/File:Sheepshead.jpg"
   },
+  "shiner-perch": {
+    "src": "/species/shiner-perch.jpg",
+    "credit": "Jeremy_Jodoin via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/408765880"
+  },
+  "shovelnose-guitarfish": {
+    "src": "/species/shovelnose-guitarfish.jpg",
+    "credit": "Brenna Green via iNaturalist",
+    "license": "CC BY-NC-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/2441883"
+  },
+  "silver-perch": {
+    "src": "/species/silver-perch.jpg",
+    "credit": "Fish_man via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/728603856"
+  },
+  "silver-seatrout": {
+    "src": "/species/silver-seatrout.jpg",
+    "credit": "Jacob Jones via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/196124705"
+  },
+  "silver-surfperch": {
+    "src": "/species/silver-surfperch.jpg",
+    "credit": "Jacob via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/457528156"
+  },
+  "smooth-dogfish": {
+    "src": "/species/smooth-dogfish.jpg",
+    "credit": "Neil DeMaster via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/217211066"
+  },
   "snook": {
     "src": "/species/snook.jpg",
     "credit": "Matthew Hoelscher",
     "license": "CC BY-SA 2.0",
     "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
     "source_url": "https://commons.wikimedia.org/wiki/File:Centropomus.jpg"
+  },
+  "southern-flounder": {
+    "src": "/species/southern-flounder.jpg",
+    "credit": "Jacob Jones via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/70711277"
+  },
+  "southern-kingfish": {
+    "src": "/species/southern-kingfish.jpg",
+    "credit": "Vince Golder via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/460458795"
+  },
+  "southern-stingray": {
+    "src": "/species/southern-stingray.jpg",
+    "credit": "Kerry Lewis via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/117019880"
   },
   "spanish-mackerel": {
     "src": "/species/spanish-mackerel.jpg",
@@ -132,12 +741,47 @@
     "license_url": "",
     "source_url": "https://commons.wikimedia.org/wiki/File:Spotted_seatrout_fish_cynoscion_nebulosus.jpg"
   },
+  "spinner-shark": {
+    "src": "/species/spinner-shark.jpg",
+    "credit": "Albert Kang via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/82121942"
+  },
+  "spiny-dogfish": {
+    "src": "/species/spiny-dogfish.jpg",
+    "credit": "Malcolm Francis via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/394671370"
+  },
   "spot": {
     "src": "/species/spot.jpg",
     "credit": "NOAA's Fisheries Collection; Collection of Brandi Noble",
     "license": "Public domain",
     "license_url": "",
     "source_url": "https://commons.wikimedia.org/wiki/File:Spot_(_Leiostomus_xanthurus_).jpg"
+  },
+  "spotfin-croaker": {
+    "src": "/species/spotfin-croaker.jpg",
+    "credit": "Jacob via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/206174409"
+  },
+  "spotted-sand-bass": {
+    "src": "/species/spotted-sand-bass.jpg",
+    "credit": "koakinley via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/336062813"
+  },
+  "starry-flounder": {
+    "src": "/species/starry-flounder.jpg",
+    "credit": "André Giraldi via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/453819611"
   },
   "striped-bass": {
     "src": "/species/striped-bass.jpg",
@@ -146,12 +790,75 @@
     "license_url": "",
     "source_url": "https://commons.wikimedia.org/wiki/File:Morone_saxatilis_SI2.jpg"
   },
+  "striped-bass-west-coast": {
+    "src": "/species/striped-bass-west-coast.jpg",
+    "credit": "Alex Shure via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/175377771"
+  },
+  "striped-seaperch": {
+    "src": "/species/striped-seaperch.jpg",
+    "credit": "KJ via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/110585555"
+  },
+  "taape": {
+    "src": "/species/taape.jpg",
+    "credit": "Michal via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/266439854"
+  },
+  "tarpon": {
+    "src": "/species/tarpon.jpg",
+    "credit": "Rachel Andres-Beck via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/54532250"
+  },
   "tautog": {
     "src": "/species/tautog.jpg",
     "credit": "no rights reserved",
     "license": "CC0",
     "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "source_url": "https://commons.wikimedia.org/wiki/File:Tautog_(Tautoga_onitis),_United_States_imported_from_iNaturalist_photo_442131359.jpg"
+  },
+  "toau": {
+    "src": "/species/toau.jpg",
+    "credit": "sea-kangaroo via iNaturalist",
+    "license": "CC BY-NC-ND 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/342096316"
+  },
+  "tomtate": {
+    "src": "/species/tomtate.jpg",
+    "credit": "François Libert via iNaturalist",
+    "license": "CC BY-NC-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/237394600"
+  },
+  "tripletail": {
+    "src": "/species/tripletail.jpg",
+    "credit": "Ria Tan via iNaturalist",
+    "license": "CC BY-NC-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/9645532"
+  },
+  "uhu-parrotfish": {
+    "src": "/species/uhu-parrotfish.jpg",
+    "credit": "Programa Marino del Golfo de California via iNaturalist",
+    "license": "CC BY-NC-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/58070748"
+  },
+  "uku": {
+    "src": "/species/uku.jpg",
+    "credit": "Mark Rosenstein via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/11971194"
   },
   "ulua-giant-trevally": {
     "src": "/species/ulua-giant-trevally.jpg",
@@ -160,6 +867,41 @@
     "license_url": "",
     "source_url": "https://commons.wikimedia.org/wiki/File:Caranx_ignobilis.jpg"
   },
+  "walleye-surfperch": {
+    "src": "/species/walleye-surfperch.jpg",
+    "credit": "Jacob via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/335057255"
+  },
+  "weakfish-gray-trout": {
+    "src": "/species/weakfish-gray-trout.jpg",
+    "credit": "baltimorefishing1 via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/131084741"
+  },
+  "weke-goatfish": {
+    "src": "/species/weke-goatfish.jpg",
+    "credit": "Craig Fujii via iNaturalist",
+    "license": "CC BY-NC-ND 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/305558859"
+  },
+  "white-croaker": {
+    "src": "/species/white-croaker.jpg",
+    "credit": "Vince Golder via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/440510526"
+  },
+  "white-perch": {
+    "src": "/species/white-perch.jpg",
+    "credit": "Emilio Concari via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/240159095"
+  },
   "whiting-sea-mullet": {
     "src": "/species/whiting-sea-mullet.jpg",
     "credit": "Cláudio D. Timm",
@@ -167,11 +909,25 @@
     "license_url": "https://creativecommons.org/licenses/by/2.0",
     "source_url": "https://commons.wikimedia.org/wiki/File:Menticirrhus_americanus.jpg"
   },
+  "winter-flounder": {
+    "src": "/species/winter-flounder.jpg",
+    "credit": "shahar chaikin via iNaturalist",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/238672916"
+  },
   "yellowfin-croaker": {
     "src": "/species/yellowfin-croaker.jpg",
     "credit": "Unknown author",
     "license": "Public domain",
     "license_url": "",
     "source_url": "https://commons.wikimedia.org/wiki/File:Umbrina_roncador_mspc098.jpg"
+  },
+  "yellowtail": {
+    "src": "/species/yellowtail.jpg",
+    "credit": "martinmoscovich via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/83112837"
   }
 }

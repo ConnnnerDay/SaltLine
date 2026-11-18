@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { SpotSwitcher, type SwitcherSpot } from './spot-switcher'
 
 /**
  * The original Saltline location bar: a slim navy strip under the
@@ -10,10 +11,13 @@ export function LocationBar({
   backHref,
   backLabel,
   label,
+  switcher,
 }: {
   backHref: string
   backLabel: string
   label: string | null
+  /** Signed in: the name opens a switcher of these spots. */
+  switcher?: { currentId: string; spots: SwitcherSpot[] }
 }) {
   return (
     <div className="border-b border-header-border bg-header text-white">
@@ -33,6 +37,8 @@ export function LocationBar({
         </svg>
         {label === null ? (
           <div aria-hidden="true" className="h-4 w-48 animate-pulse rounded bg-white/20" />
+        ) : switcher ? (
+          <SpotSwitcher label={label} currentId={switcher.currentId} spots={switcher.spots} />
         ) : (
           <h1 className="truncate text-base font-bold tracking-tight text-white">{label}</h1>
         )}

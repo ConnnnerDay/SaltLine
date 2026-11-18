@@ -1,4 +1,5 @@
 import { LocationBar } from './location-bar'
+import type { SwitcherSpot } from './spot-switcher'
 import type { NearbyCam } from '@/lib/get-cams'
 import { Container } from './ui'
 import { ForecastCard, ForecastErrorCard, type ForecastEnvelope } from './forecast-card'
@@ -26,8 +27,11 @@ export function ForecastPageBody({
   retryHref,
   backHref,
   backLabel,
+  switcherSpots,
   children,
 }: {
+  /** Signed in: spots for the location bar's quick switcher. */
+  switcherSpots?: SwitcherSpot[]
   forecast: ForecastEnvelope | null
   error: string | null
   /** Plain-language cause for the error card (lib/diagnose-api.ts). */
@@ -59,6 +63,9 @@ export function ForecastPageBody({
         backHref={backHref}
         backLabel={backLabel}
         label={forecast?.location.label ?? 'Forecast'}
+        switcher={
+          forecast && switcherSpots ? { currentId: forecast.location.id, spots: switcherSpots } : undefined
+        }
       />
 
       <Container>

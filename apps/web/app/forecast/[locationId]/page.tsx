@@ -8,6 +8,8 @@ import { Button } from '@/app/components/ui'
 import type { ForecastEnvelope } from '@/app/components/forecast-card'
 import { auth } from '@/lib/auth'
 import type { Preferences } from '@/app/api/preferences/route'
+import type { SavedLocation } from '@/app/api/saved-locations/route'
+import type { SwitcherSpot } from '@/app/components/spot-switcher'
 import { fetchForecast } from '@/lib/get-forecast'
 import { fetchNearbyCams } from '@/lib/get-cams'
 import { logForecastFailure, userFacingReason } from '@/lib/diagnose-api'
@@ -57,6 +59,9 @@ export default async function ForecastPage({ params }: Props) {
   const profilePromise = internalApiFetch<Preferences>('/v1/me/preferences', {
     userId: session.user.id,
   }).catch(() => null)
+  const savedPromise = internalApiFetch<SavedLocation[]>('/v1/me/locations', {
+    userId: session.user.id,
+  }).catch(() => [] as SavedLocation[])
   const camsPromise = Promise.all([fetchNearbyCams(locationId), profilePromise]).then(
     ([cams, prefs]) =>
       // As in the original app: someone who doesn't fish piers isn't shown pier cams.
@@ -76,13 +81,32 @@ export default async function ForecastPage({ params }: Props) {
     error = err instanceof Error ? err.message : 'Unknown error'
   }
 
+  // The location bar's quick switcher: home spot first, then saved spots.
+  const [profile, saved] = await Promise.all([profilePromise, savedPromise])
+  const homeId = profile?.default_location_id ?? null
+  const switcherSpots: SwitcherSpot[] = saved
+    .map((spot) => ({ id: spot.location_id, name: spot.name, state: spot.state, home: spot.location_id === homeId }))
+    .sort((a, b) => Number(Boolean(b.home)) - Number(Boolean(a.home)))
+  if (homeId && !switcherSpots.some((spot) => spot.id === homeId)) {
+    // A home spot that isn't also saved: name it from the curated list
+    // (or this page, for a custom pinned home spot being viewed now).
+    const curated = await internalApiFetch<{ id: string; name: string; state: string }[]>('/v1/locations', {
+      userId: session.user.id,
+    }).catch(() => [])
+    const home = curated.find((spot) => spot.id === homeId)
+    if (home) switcherSpots.unshift({ id: home.id, name: home.name, state: home.state, home: true })
+    else if (forecast?.location.id === homeId)
+      switcherSpots.unshift({ id: homeId, name: forecast.location.label, state: '', home: true })
+  }
+
   return (
     <ForecastPageBody
+      switcherSpots={switcherSpots}
       forecast={forecast}
       error={error}
       errorReason={errorReason}
       cams={await camsPromise}
-      profile={await profilePromise}
+      profile={profile}
       nearbyLinkBase="/forecast"
       userId={session.user.id}
       retryHref={`/forecast/${encodeURIComponent(locationId)}`}

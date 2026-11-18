@@ -69,7 +69,7 @@ def test_over_wind_limit_downgrades_and_explains() -> None:
     assert score["verdict"] == "Fair"
     assert score["personalized_from"] == "Good"
     assert score["score"] == 70  # the score itself is unchanged
-    assert "wind up to 20 kt (your limit 15)" in score["summary"]
+    assert "wind up to 20 kt (your limit 15 kt)" in score["summary"]
     assert [w.code for w in out.warnings] == ["over_comfort_limit"]
     assert envelope.conditions is not None
     assert envelope.conditions["score"]["verdict"] == "Good"  # input untouched
@@ -87,7 +87,7 @@ def test_surf_limit_uses_the_high_end_of_the_range() -> None:
     reasons = comfort_breaches(
         {"wave_range_ft": [2, 4]}, PreferencesOut(surf_threshold_ft=3)
     )
-    assert reasons == ["surf up to 4 ft (your limit 3)"]
+    assert reasons == ["surf up to 4 ft (your limit 3 ft)"]
 
 
 def test_poor_cannot_go_lower() -> None:

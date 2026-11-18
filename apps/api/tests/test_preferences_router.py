@@ -87,6 +87,7 @@ def test_get_with_no_row_returns_defaults(client: TestClient) -> None:
         "target_groups": None,
         "fishing_times": None,
         "tide_preference": None,
+        "forecast_layout": None,
     }
 
 
@@ -254,3 +255,44 @@ def test_invalid_profile_values_are_rejected(
     client: TestClient, bad: dict[str, object]
 ) -> None:
     assert client.patch("/v1/me/preferences", json=bad).status_code == 422
+
+
+def test_forecast_layout_round_trips(client: TestClient) -> None:
+    layout = {
+        "tabs": {"today": ["tides", "when"], "fish": ["biting"]},
+        "hidden": ["sky", "cams"],
+        "start": "conditions",
+        "stats": ["water", "tide", "air", "wind"],
+        "folded": ["pressure"],
+        "extra_tabs": ["mine-1"],
+        "labels": {"mine-1": "Morning check", "fish": "Species"},
+        "compact": True,
+        "biting_count": 3,
+        "biting_photos": False,
+        "show_summary": False,
+        "show_weather": True,
+    }
+    resp = client.patch("/v1/me/preferences", json={"forecast_layout": layout})
+    assert resp.status_code == 200
+    assert resp.json()["forecast_layout"] == layout
+    assert client.get("/v1/me/preferences").json()["forecast_layout"] == layout
+    # Clearing it resets to the default arrangement.
+    resp = client.patch("/v1/me/preferences", json={"forecast_layout": None})
+    assert resp.json()["forecast_layout"] is None
+
+
+def test_forecast_layout_rejects_junk_ids(client: TestClient) -> None:
+    for bad in (
+        {"tabs": {"today": ["<script>"]}},
+        {"hidden": ["x" * 80]},
+        {"hidden": ["a"] * 41},
+        {"stats": ["water"] * 7},
+        {"start": "Bad Tab"},
+        {"labels": {"today": "<b>hi</b>"}},
+        {"labels": {"today": "x" * 21}},
+        {"labels": {"today": "   "}},
+        {"extra_tabs": ["a", "b", "c", "d"]},
+        {"biting_count": 0},
+    ):
+        resp = client.patch("/v1/me/preferences", json={"forecast_layout": bad})
+        assert resp.status_code == 422, bad

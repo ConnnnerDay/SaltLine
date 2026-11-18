@@ -1,5 +1,7 @@
 'use client'
 
+import { tempBand, type Units } from '@/lib/units'
+
 import type { CatchEntry } from '@/app/api/catches/route'
 import { Card } from '@/app/components/ui'
 
@@ -64,11 +66,10 @@ function timeOfDay(entry: CatchEntry): string {
   return TIME_BUCKETS.find((bucket) => bucket.hours.includes(hour))?.label ?? 'Night'
 }
 
-function waterBand(entry: CatchEntry): string | null {
+function waterBand(entry: CatchEntry, units: Units): string | null {
   const temp = entry.conditions?.water_temp_f
   if (temp == null || entry.conditions?.water_temp_is_fallback) return null
-  const low = Math.floor(temp / 5) * 5
-  return `${low}–${low + 5}°F`
+  return tempBand(temp, units).label
 }
 
 /** The most common bucket, if it has enough catches to call a pattern. */
@@ -116,7 +117,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   )
 }
 
-export function CatchInsights({ catches }: { catches: CatchEntry[] }) {
+export function CatchInsights({ catches, units = 'imperial' }: { catches: CatchEntry[]; units?: Units }) {
   if (catches.length < 2) {
     return (
       <Card className="flex flex-col gap-2">
@@ -134,7 +135,7 @@ export function CatchInsights({ catches }: { catches: CatchEntry[] }) {
   // Catches whose snapshot was taken with solunar data (moon_phase is
   // recorded alongside it); solunar itself is null outside both periods.
   const withSolunar = catches.filter((entry) => entry.conditions?.moon_phase)
-  const withWater = catches.filter((entry) => waterBand(entry))
+  const withWater = catches.filter((entry) => waterBand(entry, units))
 
   const times = count(catches, timeOfDay, TIME_BUCKETS.map((bucket) => bucket.label))
   const tides = count(
@@ -152,7 +153,7 @@ export function CatchInsights({ catches }: { catches: CatchEntry[] }) {
           : 'Outside both',
     ['Major period', 'Minor period', 'Outside both'],
   )
-  const water = count(withWater, waterBand).sort((a, b) => parseInt(a.label) - parseInt(b.label))
+  const water = count(withWater, (entry) => waterBand(entry, units)).sort((a, b) => parseInt(a.label) - parseInt(b.label))
   const moons = count(withMoon, (entry) => entry.conditions?.moon_phase ?? null, MOON_ORDER)
   const species = count(catches, (entry) => entry.species).slice(0, 6)
 

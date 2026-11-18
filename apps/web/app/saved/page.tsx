@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { Container } from '@/app/components/ui'
 import { auth } from '@/lib/auth'
 import { internalApiFetch } from '@/lib/internal-api-client'
+import type { Preferences } from '@/app/api/preferences/route'
 import { fetchForecast } from '@/lib/get-forecast'
 import type { SavedLocation } from '@/app/api/saved-locations/route'
 import { SavedLocationsList, type SavedLocationWithForecast } from './saved-locations-list'
@@ -40,6 +41,9 @@ export default async function SavedPage() {
     redirect('/login?next=/saved')
   }
 
+  const units = await internalApiFetch<Preferences>('/v1/me/preferences', { userId: session.user.id })
+    .then((prefs) => prefs.units)
+    .catch(() => 'imperial' as const)
   let locations: SavedLocationWithForecast[] | null = null
   let error: string | null = null
   try {
@@ -68,7 +72,7 @@ export default async function SavedPage() {
             <h1 className="text-3xl font-bold text-text sm:text-4xl">Saved spots</h1>
             <p className="mt-3 text-text-muted">Today&apos;s call for every spot you saved, side by side.</p>
           </header>
-          <SavedLocationsList initialLocations={locations} initialError={error} />
+          <SavedLocationsList initialLocations={locations} initialError={error} units={units} />
         </div>
       </Container>
     </main>

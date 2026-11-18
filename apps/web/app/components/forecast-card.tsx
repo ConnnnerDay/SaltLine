@@ -13,6 +13,10 @@ import { PressureAndWater } from './pressure-water'
 import { SurfZone } from './surf-zone'
 import { WeatherIcon } from './weather-icon'
 import { currentTime } from '@/lib/clock'
+import { requestUnits } from '@/lib/request-units'
+import { distance, height, heightRange, localizeText, speedRange, temp } from '@/lib/units'
+import { ForecastTabs } from './forecast-tabs'
+import { ForecastLayoutProvider, HeadlineStats, ShowIf, WithinBitingCount, type StatTileData } from './forecast-layout'
 import type { NearbyCam } from '@/lib/get-cams'
 import speciesPhotos from '@/lib/species-photos.json'
 
@@ -294,7 +298,7 @@ function TideChart({ tides, timezone }: { tides: ForecastTides; timezone: string
               )}
             >
               <span className="block font-bold text-text">
-                {high ? 'High' : 'Low'} {prediction.height_ft.toFixed(1)} ft
+                {high ? 'High' : 'Low'} {height(prediction.height_ft, requestUnits())}
               </span>
               <span className="block text-text-muted">
                 {timeFormatter.format(new Date(prediction.time))}
@@ -360,7 +364,7 @@ function TideTable({
                 <td className="py-1.5 pr-4 text-text sm:pr-12">
                   {prediction.kind === 'high' ? 'High' : 'Low'}
                 </td>
-                <td className="py-1.5 text-text">{prediction.height_ft.toFixed(1)} ft</td>
+                <td className="py-1.5 text-text">{height(prediction.height_ft, requestUnits())}</td>
               </tr>
             ))}
           </tbody>
@@ -623,26 +627,6 @@ function ScoreRing({ score, colorClass }: { score: number; colorClass: string })
 
 /** One stat tile in the "Today's forecast" strip (legacy `.stat-card`):
  * colored top rule, uppercase label, big value, small muted note. */
-function StatTile({
-  label,
-  value,
-  note,
-  rule,
-}: {
-  label: string
-  value: string
-  note?: string
-  rule: string
-}) {
-  return (
-    <div className={cx('flex h-full flex-col gap-1 border-t-2 px-5 py-4 sm:px-6', rule)}>
-      <dt className="section-label">{label}</dt>
-      <dd className="text-2xl font-bold tracking-tight text-text">{value}</dd>
-      {note && <dd className="text-xs text-text-muted">{note}</dd>}
-    </div>
-  )
-}
-
 /** A legacy-style collapsible section row ("TODAY'S TIDES ⌄"). */
 function CollapsibleSection({
   title,
@@ -655,7 +639,7 @@ function CollapsibleSection({
 }) {
   return (
     <details className="collapsible group min-w-0 border-t border-border first:border-t-0">
-      <summary className="flex min-h-14 items-center justify-between gap-3 px-5 py-3.5 hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring sm:px-6">
+      <summary className="flex min-h-14 items-center justify-between gap-3 px-5 py-3.5 in-data-[density=compact]:min-h-11 in-data-[density=compact]:py-2 hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring sm:px-6">
         <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
           <span className="section-label text-text!">{title}</span>
           {aside}
@@ -776,6 +760,14 @@ const GUIDANCE_TIER_PILL: Record<GuidanceTier, string> = {
  * pick was scored on) so no recommendation appears without its "why".
  */
 function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
+  // Reasons every pick shares (today's wind, surf, season) are said once,
+  // above the cards; each card keeps only what's particular to that fish.
+  const shared =
+    guidance.species.length > 1
+      ? guidance.species[0].reasons.filter((reason) =>
+          guidance.species.every((pick) => pick.reasons.includes(reason)),
+        )
+      : []
   return (
     <Card className="flex flex-col gap-4">
       <SectionHeader
@@ -783,30 +775,45 @@ function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
         aside={
           guidance.basis.water_temp_is_fallback
             ? 'Based on the monthly average water temperature'
-            : `Ranked for ${Math.round(guidance.basis.water_temp_f)}°F water`
+            : `Ranked for ${temp(guidance.basis.water_temp_f, requestUnits())} water`
         }
       />
 
+      {shared.length > 0 && (
+        <div className="-mt-1 flex flex-col gap-1.5">
+          <span className="text-sm font-semibold text-text">Why they&apos;re biting today</span>
+          <ul className="flex flex-wrap gap-1.5">
+            {shared.map((reason) => (
+              <li key={reason} className="rounded-full border border-border bg-surface-raised px-2.5 py-1 text-xs text-text">
+                {reason}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {guidance.species.length > 1 && (
         <p className="-mt-2 text-xs text-text-muted sm:hidden">
-          Swipe for all {guidance.species.length} picks →
+          Swipe for more picks →
         </p>
       )}
       {guidance.species.length === 0 ? (
         <p className="text-sm text-text-muted">
           None of the common surf and pier targets for this area are in range at{' '}
-          {Math.round(guidance.basis.water_temp_f)}°F right now.
+          {temp(guidance.basis.water_temp_f, requestUnits())} right now.
         </p>
       ) : (
         // Phones: a swipeable row (snap per card, next card peeking in);
         // wider screens: a 2/3-column grid.
         <ol className="no-scrollbar -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
           {guidance.species.map((pick, index) => (
+            <WithinBitingCount key={pick.id} index={index}>
             <li
-              key={pick.id}
               className="flex w-[84%] shrink-0 snap-start flex-col gap-2.5 overflow-hidden rounded-md border sm:w-auto border-border bg-surface-raised p-3 transition-[border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/60"
             >
-              <SpeciesPhotoFigure id={pick.id} name={pick.name} compact />
+              <ShowIf option="biting_photos">
+                <SpeciesPhotoFigure id={pick.id} name={pick.name} compact />
+              </ShowIf>
               <div className="flex flex-col gap-2 px-1">
                 <div className="flex items-start justify-between gap-2">
                   <span className="text-base font-bold leading-snug text-text">{pick.name}</span>
@@ -844,16 +851,19 @@ function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
                       .join(' · ') || 'see state rules'}
                   </p>
                 )}
+                {pick.reasons.some((reason) => !shared.includes(reason)) && (
                 <ul className="mt-0.5 flex flex-col gap-1 border-t border-border pt-2.5 text-xs leading-relaxed text-text-muted">
-                  {pick.reasons.map((reason) => (
+                  {pick.reasons.filter((reason) => !shared.includes(reason)).map((reason) => (
                     <li key={reason} className="flex gap-2">
                       <span aria-hidden="true" className="mt-[0.45rem] h-1 w-1 shrink-0 rounded-full bg-text-muted" />
                       {reason}
                     </li>
                   ))}
                 </ul>
+                )}
               </div>
             </li>
+            </WithinBitingCount>
           ))}
         </ol>
       )}
@@ -1057,14 +1067,14 @@ function RigsAndTips({
                       </span>
                     )}
                   </h3>
-                  <p className="text-sm leading-relaxed text-text-muted">{rig.summary}</p>
+                  <p className="text-sm leading-relaxed text-text-muted">{localizeText(rig.summary, requestUnits())}</p>
                   {waterTips(id).map(({ water, tip }) => (
                     <p
                       key={water}
                       className="rounded-md border-l-4 border-l-primary bg-primary-tint px-3 py-2 text-sm text-text"
                     >
                       <span className="font-semibold">{WATER_PHRASE[water]}: </span>
-                      {tip}
+                      {localizeText(tip ?? '', requestUnits())}
                     </p>
                   ))}
                 </div>
@@ -1078,7 +1088,7 @@ function RigsAndTips({
                           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-border text-[0.6875rem] font-bold tabular-nums text-text">
                             {index + 1}
                           </span>
-                          <span className="leading-relaxed">{step}</span>
+                          <span className="leading-relaxed">{localizeText(step, requestUnits())}</span>
                         </li>
                       ))}
                     </ul>
@@ -1089,7 +1099,7 @@ function RigsAndTips({
                       {rig.tips.map((tip) => (
                         <li key={tip} className="flex gap-2.5">
                           <span aria-hidden="true" className="mt-[0.55rem] h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                          <span className="leading-relaxed">{tip}</span>
+                          <span className="leading-relaxed">{localizeText(tip, requestUnits())}</span>
                         </li>
                       ))}
                     </ul>
@@ -1199,8 +1209,14 @@ export function ForecastCard({
   forecast,
   cams = [],
   profile = null,
+  nearby = null,
+  seen = null,
 }: {
   forecast: ForecastEnvelope
+  /** "Nearby spots today" (streams in; shown on the Week tab). */
+  nearby?: React.ReactNode
+  /** "Fish seen nearby lately" (streams in; shown on the Fish tab). */
+  seen?: React.ReactNode
   /** Nearby public live-cam links (lib/get-cams.ts). */
   cams?: NearbyCam[]
   /** The signed-in user's fishing profile; null on the public share page. */
@@ -1238,8 +1254,105 @@ export function ForecastCard({
     } | null
   )?.weather?.now
 
+  // Every headline number this spot has, in default order; the user picks
+  // which (up to four) show, in Customize (./forecast-layout).
+  const tz = forecast.location.timezone
+  const units = requestUnits()
+  const clock = (iso: string) =>
+    new Intl.DateTimeFormat('en-US', { timeZone: tz, hour: 'numeric', minute: '2-digit' }).format(new Date(iso))
+  const now = currentTime().getTime()
+  const upcomingTides = (forecast.tides?.predictions ?? []).filter((tide) => new Date(tide.time).getTime() > now)
+  const sunTimes = (forecast.conditions as SkyConditions | null)?.sun_times
+  const barometer = (
+    forecast.conditions as { weather?: { barometer?: { latest_mb: number; trend: string } | null } | null } | null
+  )?.weather?.barometer
+  const statCandidates: (StatTileData | false | null | undefined)[] = [
+    waterTemp && {
+      key: 'water',
+      label: 'Water temp',
+      value: temp(waterTemp.value, units, 1),
+      note: waterTemp.is_fallback ? 'monthly avg' : 'live reading',
+      rule: 'border-t-tier-high',
+    },
+    {
+      key: 'wind',
+      label: 'Wind',
+      value: conditions?.wind_range_kt
+        ? `${conditions.wind_direction ? `${compassLabel(conditions.wind_direction)} ` : ''}${speedRange(conditions.wind_range_kt, units)}`
+        : '—',
+      note: conditions?.wind_range_kt ? 'next 24 h' : 'unavailable',
+      rule: 'border-t-border',
+    },
+    {
+      key: 'waves',
+      label: 'Waves',
+      value: conditions?.wave_range_ft ? heightRange(conditions.wave_range_ft, units) : '—',
+      note: conditions?.wave_range_ft ? 'next 24 h' : 'unavailable',
+      rule: 'border-t-border',
+    },
+    {
+      key: 'confidence',
+      label: 'Confidence',
+      value: capitalize(forecast.confidence.level),
+      note: `Updated ${generatedAtLabel}`,
+      rule:
+        forecast.state === 'fresh'
+          ? 'border-t-go-border'
+          : forecast.state === 'unavailable'
+            ? 'border-t-nogo-border'
+            : 'border-t-marginal-border',
+    },
+    weatherNow?.temperature_f != null && {
+      key: 'air',
+      label: 'Air temp',
+      value: temp(weatherNow.temperature_f, units),
+      note: weatherNow.short_forecast,
+      rule: 'border-t-border',
+    },
+    weatherNow?.precip_pct != null && {
+      key: 'rain',
+      label: 'Rain',
+      value: `${weatherNow.precip_pct}%`,
+      note: `chance, ${weatherNow.name.toLowerCase()}`,
+      rule: 'border-t-border',
+    },
+    upcomingTides.length > 0 && {
+      key: 'tide',
+      label: `Next ${upcomingTides[0].kind} tide`,
+      value: clock(upcomingTides[0].time),
+      note: `${height(upcomingTides[0].height_ft, units)}${
+        upcomingTides[1] ? ` · then ${upcomingTides[1].kind} ${clock(upcomingTides[1].time)}` : ''
+      }`,
+      rule: 'border-t-tier-high',
+    },
+    barometer && {
+      key: 'pressure',
+      label: 'Barometer',
+      value: `${barometer.latest_mb.toFixed(0)} mb`,
+      note: barometer.trend,
+      rule: 'border-t-border',
+    },
+    sunTimes && {
+      key: 'sun',
+      ...(now < new Date(sunTimes.sunrise).getTime()
+        ? { label: 'Sunrise', value: clock(sunTimes.sunrise), note: `sunset ${clock(sunTimes.sunset)}` }
+        : { label: 'Sunset', value: clock(sunTimes.sunset), note: `sunrise was ${clock(sunTimes.sunrise)}` }),
+      rule: 'border-t-border',
+    },
+  ]
+  const headlineStats = statCandidates.filter((stat): stat is StatTileData => Boolean(stat))
+  const STAT_NAMES: Record<string, string> = {
+    water: 'Water temp', wind: 'Wind', waves: 'Waves', confidence: 'Confidence', air: 'Air temp',
+    rain: 'Rain chance', tide: 'Next tide', pressure: 'Barometer', sun: 'Sunrise / sunset',
+  }
+
   return (
-    <div className="rise-in flex min-w-0 flex-col gap-4 sm:gap-5">
+    <ForecastLayoutProvider
+      initial={profile?.forecast_layout ?? null}
+      canCustomize={profile !== null}
+      statOptions={headlineStats.map((stat) => ({ key: stat.key, label: STAT_NAMES[stat.key] ?? stat.label }))}
+    >
+    <div className="rise-in flex min-w-0 flex-col gap-4 sm:gap-5 in-data-[density=compact]:gap-2.5 sm:in-data-[density=compact]:gap-3">
       <WeatherAlerts
         alerts={(forecast.conditions as SkyConditions | null)?.alerts ?? []}
         timezone={forecast.location.timezone}
@@ -1251,7 +1364,7 @@ export function ForecastCard({
               <h2 className="section-label">Today&apos;s forecast</h2>
               <p
                 className={cx(
-                  'text-4xl font-extrabold uppercase leading-none tracking-tight break-words sm:text-5xl',
+                  'text-[1.75rem] font-extrabold uppercase leading-none tracking-tight min-[400px]:text-4xl sm:text-5xl',
                   VERDICT_TEXT[verdict],
                 )}
               >
@@ -1272,223 +1385,346 @@ export function ForecastCard({
             )}
           </div>
           {score?.summary && (
-            <p className="max-w-3xl text-sm leading-relaxed text-text-muted sm:text-base">{score.summary}</p>
+            <ShowIf option="show_summary">
+              <p className="max-w-3xl text-sm leading-relaxed text-text-muted sm:text-base">{score.summary}</p>
+            </ShowIf>
           )}
           {weatherNow && (
+            <ShowIf option="show_weather">
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text">
               <WeatherIcon sky={weatherNow.sky} className="h-5 w-5" />
               <span className="font-semibold">{weatherNow.short_forecast}</span>
               {weatherNow.temperature_f !== null && (
-                <span className="tabular-nums">· {Math.round(weatherNow.temperature_f)}°F</span>
+                <span className="tabular-nums">· {temp(weatherNow.temperature_f, units)}</span>
               )}
               {weatherNow.precip_pct !== null && (
                 <span className="text-text-muted tabular-nums">· {weatherNow.precip_pct}% chance of rain</span>
               )}
               <span className="text-xs text-text-muted">({weatherNow.name.toLowerCase()})</span>
             </p>
+            </ShowIf>
           )}
         </div>
 
-        <dl className="grid grid-cols-2 gap-px border-t border-border bg-border sm:grid-cols-4">
-          {waterTemp && (
-            <div className="bg-surface">
-              <StatTile
-                label="Water temp"
-                value={`${waterTemp.value.toFixed(1)}°F`}
-                note={waterTemp.is_fallback ? 'monthly avg' : 'live reading'}
-                rule="border-t-tier-high"
-              />
-            </div>
-          )}
-          <div className="bg-surface">
-            <StatTile
-              label="Wind"
-              value={
-                conditions?.wind_range_kt
-                  ? `${conditions.wind_direction ? `${compassLabel(conditions.wind_direction)} ` : ''}${formatRange(conditions.wind_range_kt)} kt`
-                  : '—'
-              }
-              note={conditions?.wind_range_kt ? 'next 24 h' : 'unavailable'}
-              rule="border-t-border"
-            />
-          </div>
-          <div className="bg-surface">
-            <StatTile
-              label="Waves"
-              value={conditions?.wave_range_ft ? `${formatRange(conditions.wave_range_ft, 0.5)} ft` : '—'}
-              note={conditions?.wave_range_ft ? 'next 24 h' : 'unavailable'}
-              rule="border-t-border"
-            />
-          </div>
-          <div className="bg-surface">
-            <StatTile
-              label="Confidence"
-              value={capitalize(forecast.confidence.level)}
-              note={`Updated ${generatedAtLabel}`}
-              rule={
-                forecast.state === 'fresh'
-                  ? 'border-t-go-border'
-                  : forecast.state === 'unavailable'
-                    ? 'border-t-nogo-border'
-                    : 'border-t-marginal-border'
-              }
-            />
-          </div>
-        </dl>
+        <HeadlineStats stats={headlineStats} />
       </Card>
 
-      <YourDay forecast={forecast} profile={profile} />
-
-      <NextDays forecast={forecast} profile={profile} />
-
-      {forecast.hourly_outlook && (
-        <Card className="flex flex-col gap-4">
-          <SectionHeader title="Fishing activity today" aside="0–100, by hour" />
-          <HourlyChart outlook={forecast.hourly_outlook} />
-        </Card>
-      )}
-
-      {(bestWindow || forecast.hourly_outlook?.your_window) && (
-        <Card className="flex flex-col gap-4">
-          <SectionHeader title="When to fish" />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {bestWindow && (
-              <BestWindowCallout window={bestWindow} timezone={forecast.location.timezone} />
-            )}
-            {forecast.hourly_outlook?.your_window && (
-              <YourWindowCallout
-                window={forecast.hourly_outlook.your_window}
-                timezone={forecast.location.timezone}
-              />
-            )}
-          </div>
-        </Card>
-      )}
-
-      <SunAndMoon forecast={forecast} now={currentTime()} />
-
-      <WindAndWaves forecast={forecast} />
-
-      <SurfZone forecast={forecast} />
-
-      <PressureAndWater
-        forecast={forecast}
-        month={Number(
-          new Intl.DateTimeFormat('en-US', { timeZone: forecast.location.timezone, month: 'numeric' }).format(
-            new Date(forecast.generated_at),
-          ),
-        )}
+      <ForecastTabs
+        tabs={[
+          { key: 'today', label: 'Today', hint: 'When to go' },
+          { key: 'conditions', label: 'Conditions', hint: 'Water, wind, tides' },
+          { key: 'fish', label: 'Fish', hint: 'Species, rigs, limits' },
+          { key: 'week', label: 'Week', hint: 'Days ahead, nearby' },
+        ]}
+        sections={[
+          {
+            id: 'your-day',
+            label: 'Your day',
+            tab: 'today',
+            content: (
+              <>
+                <YourDay forecast={forecast} profile={profile} />
+              </>
+            ),
+          },
+          {
+            id: 'when',
+            label: 'When to fish',
+            tab: 'today',
+            content: (
+              <>
+                {(bestWindow || forecast.hourly_outlook) && (
+                  <Card className="flex flex-col gap-4">
+                    <SectionHeader title="When to fish" aside={forecast.hourly_outlook ? 'Activity 0–100, by hour' : undefined} />
+                    {(bestWindow || forecast.hourly_outlook?.your_window) && (
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {bestWindow && (
+                          <BestWindowCallout window={bestWindow} timezone={forecast.location.timezone} />
+                        )}
+                        {forecast.hourly_outlook?.your_window && (
+                          <YourWindowCallout
+                            window={forecast.hourly_outlook.your_window}
+                            timezone={forecast.location.timezone}
+                          />
+                        )}
+                      </div>
+                    )}
+                    {forecast.hourly_outlook && (
+                      <>
+                        <HourlyChart outlook={forecast.hourly_outlook} />
+                        <details className="collapsible group border-t border-border pt-3">
+                          <summary className="flex w-fit cursor-pointer items-center gap-1.5 text-sm font-semibold text-primary">
+                            Hour by hour
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="chevron">
+                              <path d="M6 9 L12 15 L18 9" />
+                            </svg>
+                          </summary>
+                          <div className="pt-3">
+                            <HourlyOutlookTable outlook={forecast.hourly_outlook} timezone={forecast.location.timezone} />
+                          </div>
+                        </details>
+                      </>
+                    )}
+                  </Card>
+                )}
+              </>
+            ),
+          },
+          {
+            id: 'wind',
+            label: 'Wind & waves',
+            tab: 'conditions',
+            content: (
+              <>
+                <WindAndWaves forecast={forecast} />
+              </>
+            ),
+          },
+          {
+            id: 'surf',
+            label: 'Surf zone',
+            tab: 'conditions',
+            content: (
+              <>
+                <SurfZone forecast={forecast} />
+              </>
+            ),
+          },
+          {
+            id: 'tides',
+            label: 'Tides',
+            tab: 'conditions',
+            content: (
+              <>
+                {forecast.tides && (
+                  <Card className="flex flex-col gap-4">
+                    <SectionHeader title="Tides" aside="Next 24 hours" />
+                    <TideChart tides={forecast.tides} timezone={forecast.location.timezone} />
+                    <details className="collapsible group">
+                      <summary className="flex w-fit cursor-pointer items-center gap-1.5 text-sm font-semibold text-primary">
+                        Every high and low
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="chevron">
+                          <path d="M6 9 L12 15 L18 9" />
+                        </svg>
+                      </summary>
+                      <div className="pt-3">
+                        <TideTable tides={forecast.tides} timezone={forecast.location.timezone} />
+                      </div>
+                    </details>
+                  </Card>
+                )}
+              </>
+            ),
+          },
+          {
+            id: 'pressure',
+            label: 'Pressure & water temperature',
+            tab: 'conditions',
+            content: (
+              <>
+                <PressureAndWater
+                  forecast={forecast}
+                  month={Number(
+                    new Intl.DateTimeFormat('en-US', { timeZone: forecast.location.timezone, month: 'numeric' }).format(
+                      new Date(forecast.generated_at),
+                    ),
+                  )}
+                />
+              </>
+            ),
+          },
+          {
+            id: 'sky',
+            label: 'Sun & moon',
+            tab: 'conditions',
+            content: (
+              <>
+                <SunAndMoon forecast={forecast} now={currentTime()} />
+              </>
+            ),
+          },
+          {
+            id: 'biting',
+            label: "What's biting",
+            tab: 'fish',
+            content: (
+              <>
+                {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} />}
+              </>
+            ),
+          },
+          {
+            id: 'rigs',
+            label: 'Rigs & tips',
+            tab: 'fish',
+            content: (
+              <>
+                {((forecast.recommendations && forecast.recommendations.species.length > 0) ||
+                  watersFor(profile).length > 0) && (
+                  <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
+                    <CollapsibleSection
+                      title="Rigs & tips"
+                      aside={
+                        watersFor(profile).length > 0 ? (
+                          <span className="text-xs text-text-muted">
+                            Where to fish, then the rigs for today
+                          </span>
+                        ) : undefined
+                      }
+                    >
+                      <WhereToFish forecast={forecast} profile={profile} />
+                      {forecast.recommendations && forecast.recommendations.species.length > 0 && (
+                        <>
+                          {watersFor(profile).length > 0 && (
+                            <h3 className="section-label mt-2">Rigs for today</h3>
+                          )}
+                          <RigsAndTips guidance={forecast.recommendations} profile={profile} />
+                        </>
+                      )}
+                    </CollapsibleSection>
+                  </Card>
+                )}
+              </>
+            ),
+          },
+          {
+            id: 'pack',
+            label: 'Pack for today',
+            tab: 'fish',
+            content: (
+              <>
+                {forecast.recommendations?.pack && (
+                  <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
+                    <CollapsibleSection
+                      title="Pack for today"
+                      aside={
+                        <span className="text-sm text-text-muted">
+                          {forecast.recommendations.pack.headline}
+                        </span>
+                      }
+                    >
+                      <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
+                        {forecast.recommendations.pack.rows.map((row) => (
+                          <div key={row.kind} className="contents">
+                            <dt className="section-label pt-0.5">{row.label}</dt>
+                            <dd className="text-text">{row.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </CollapsibleSection>
+                  </Card>
+                )}
+              </>
+            ),
+          },
+          {
+            id: 'limits',
+            label: 'Size & bag limits',
+            tab: 'fish',
+            content: (
+              <>
+                {forecast.recommendations?.species.some((pick) => pick.regulation) && (
+                  <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
+                    <CollapsibleSection title="Size & bag limits">
+                      <SizeAndBagLimits guidance={forecast.recommendations} />
+                    </CollapsibleSection>
+                  </Card>
+                )}
+              </>
+            ),
+          },
+          {
+            id: 'calendar',
+            label: 'Species calendar',
+            tab: 'fish',
+            content: (
+              <>
+                {forecast.recommendations?.calendar && forecast.recommendations.calendar.length > 0 && (
+                  <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
+                    <CollapsibleSection title="Species calendar">
+                      <SpeciesCalendar
+                        rows={forecast.recommendations.calendar}
+                        currentMonth={forecast.recommendations.basis.month}
+                      />
+                    </CollapsibleSection>
+                  </Card>
+                )}
+              </>
+            ),
+          },
+          {
+            id: 'seen',
+            label: 'Fish seen nearby',
+            tab: 'fish',
+            content: (
+              <>
+                {seen}
+              </>
+            ),
+          },
+          {
+            id: 'days',
+            label: 'Next few days',
+            tab: 'week',
+            content: (
+              <>
+                <NextDays forecast={forecast} profile={profile} />
+              </>
+            ),
+          },
+          {
+            id: 'nearby',
+            label: 'Nearby spots',
+            tab: 'week',
+            content: (
+              <>
+                {nearby}
+              </>
+            ),
+          },
+          {
+            id: 'cams',
+            label: 'Live cams',
+            tab: 'week',
+            content: (
+              <>
+                {cams.length > 0 && (
+                  <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
+                    <CollapsibleSection
+                      title="Live cams"
+                      aside={<span className="text-xs text-text-muted">{cams.length} nearby</span>}
+                    >
+                      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {cams.map((cam) => (
+                          <li
+                            key={cam.id}
+                            className="flex flex-col gap-1 rounded-md border border-border bg-surface-raised px-4 py-3"
+                          >
+                            <span className="section-label text-primary!">{cam.cam_type} cam</span>
+                            <span className="font-bold text-text">{cam.name}</span>
+                            <span className="text-xs text-text-muted">{distance(cam.distance_miles, units)} away</span>
+                            <a
+                              href={cam.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-1 text-sm font-semibold text-primary underline-offset-2 hover:underline"
+                            >
+                              Open live cam<span className="sr-only"> (opens the cam&apos;s own site in a new tab)</span> ↗
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </CollapsibleSection>
+                  </Card>
+                )}
+              </>
+            ),
+          },
+        ]}
       />
 
-      {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} />}
-
-      <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
-        {forecast.recommendations?.pack && (
-          <CollapsibleSection
-            title="Pack for today"
-            aside={
-              <span className="text-sm text-text-muted">
-                {forecast.recommendations.pack.headline}
-              </span>
-            }
-          >
-            <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
-              {forecast.recommendations.pack.rows.map((row) => (
-                <div key={row.kind} className="contents">
-                  <dt className="section-label pt-0.5">{row.label}</dt>
-                  <dd className="text-text">{row.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </CollapsibleSection>
-        )}
-
-        {((forecast.recommendations && forecast.recommendations.species.length > 0) ||
-          watersFor(profile).length > 0) && (
-          <CollapsibleSection
-            title="Rigs & tips"
-            aside={
-              watersFor(profile).length > 0 ? (
-                <span className="text-xs text-text-muted">
-                  Where to fish, then the rigs for today
-                </span>
-              ) : undefined
-            }
-          >
-            <WhereToFish forecast={forecast} profile={profile} />
-            {forecast.recommendations && forecast.recommendations.species.length > 0 && (
-              <>
-                {watersFor(profile).length > 0 && (
-                  <h3 className="section-label mt-2">Rigs for today</h3>
-                )}
-                <RigsAndTips guidance={forecast.recommendations} profile={profile} />
-              </>
-            )}
-          </CollapsibleSection>
-        )}
-
-        {forecast.recommendations?.species.some((pick) => pick.regulation) && (
-          <CollapsibleSection title="Size & bag limits">
-            <SizeAndBagLimits guidance={forecast.recommendations} />
-          </CollapsibleSection>
-        )}
-
-        {forecast.recommendations?.calendar && forecast.recommendations.calendar.length > 0 && (
-          <CollapsibleSection title="Species calendar">
-            <SpeciesCalendar
-              rows={forecast.recommendations.calendar}
-              currentMonth={forecast.recommendations.basis.month}
-            />
-          </CollapsibleSection>
-        )}
-
-        {cams.length > 0 && (
-          <CollapsibleSection
-            title="Live cams"
-            aside={<span className="text-xs text-text-muted">{cams.length} nearby</span>}
-          >
-            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {cams.map((cam) => (
-                <li
-                  key={cam.id}
-                  className="flex flex-col gap-1 rounded-md border border-border bg-surface-raised px-4 py-3"
-                >
-                  <span className="section-label text-primary!">{cam.cam_type} cam</span>
-                  <span className="font-bold text-text">{cam.name}</span>
-                  <span className="text-xs text-text-muted">{cam.distance_miles} miles away</span>
-                  <a
-                    href={cam.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-1 text-sm font-semibold text-primary underline-offset-2 hover:underline"
-                  >
-                    Open live cam<span className="sr-only"> (opens the cam&apos;s own site in a new tab)</span> ↗
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </CollapsibleSection>
-        )}
-
-        {forecast.tides && (
-          <CollapsibleSection
-            title="Tides"
-            aside={<span className="text-xs text-text-muted">Next 24 hours, then the full list</span>}
-          >
-            <TideChart tides={forecast.tides} timezone={forecast.location.timezone} />
-            <TideTable tides={forecast.tides} timezone={forecast.location.timezone} />
-          </CollapsibleSection>
-        )}
-
-        {forecast.hourly_outlook && (
-          <CollapsibleSection title="Hour by hour">
-            <HourlyOutlookTable
-              outlook={forecast.hourly_outlook}
-              timezone={forecast.location.timezone}
-            />
-          </CollapsibleSection>
-        )}
-
+      {(forecast.sources.length > 0 || forecast.warnings.length > 0) && (
+        <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
         {forecast.sources.length > 0 && (
           <CollapsibleSection
             title="Data sources"
@@ -1502,7 +1738,6 @@ export function ForecastCard({
             <SourceStatusList sources={forecast.sources} />
           </CollapsibleSection>
         )}
-
         {forecast.warnings.length > 0 && (
           <CollapsibleSection
             title="Warnings"
@@ -1517,8 +1752,10 @@ export function ForecastCard({
             </ul>
           </CollapsibleSection>
         )}
-      </Card>
+        </Card>
+      )}
     </div>
+    </ForecastLayoutProvider>
   )
 }
 

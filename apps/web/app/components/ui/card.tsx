@@ -11,6 +11,8 @@ export function Card({ className, ...props }: CardProps) {
     <div
       className={cx(
         'rounded-lg border border-border bg-surface p-5 shadow-card sm:p-6',
+        // The forecast's "Compact view" (forecast-layout.tsx).
+        'in-data-[density=compact]:p-3.5 sm:in-data-[density=compact]:p-4',
         className,
       )}
       {...props}

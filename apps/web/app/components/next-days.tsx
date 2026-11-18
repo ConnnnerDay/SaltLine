@@ -1,6 +1,8 @@
+import { requestUnits } from '@/lib/request-units'
+import { degrees, heightRange, speedRange } from '@/lib/units'
 import type { Preferences } from '@/app/api/preferences/route'
 import { limitsFor } from '@/lib/fishing-style'
-import { compassLabel, formatRange, VERDICT_TEXT, type ForecastEnvelope } from './forecast-card'
+import { compassLabel, VERDICT_TEXT, type ForecastEnvelope } from './forecast-card'
 import { Moon, moonAge } from './sky'
 import { WeatherIcon } from './weather-icon'
 import { Card } from './ui'
@@ -52,6 +54,7 @@ export function NextDays({
   forecast: ForecastEnvelope
   profile?: Preferences | null
 }) {
+  const units = requestUnits()
   const days = ((forecast.conditions as { days?: DayOutlook[] } | null)?.days ?? []).filter(
     (day) => day.score !== null || day.wind_range_kt || day.wave_range_ft,
   )
@@ -79,7 +82,7 @@ export function NextDays({
         <h2 className="section-label">Next few days</h2>
         <span className="text-xs text-text-muted">From the NWS marine forecast</span>
       </div>
-      <ol className="no-scrollbar -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-1 pt-3 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-5">
+      <ol className="no-scrollbar -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-1 pt-3 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0">
         {days.map((day) => {
           const isBest = hasBest && day.score === topScore
           return (
@@ -119,10 +122,10 @@ export function NextDays({
                   <WeatherIcon sky={day.sky} className="h-7 w-7" />
                   <span className="flex flex-col text-xs leading-tight">
                     <span className="font-semibold tabular-nums text-text">
-                      {day.high_f != null ? `${Math.round(day.high_f)}°` : '—'}
+                      {day.high_f != null ? degrees(day.high_f, units) : '—'}
                       <span className="font-normal text-text-muted">
                         {' / '}
-                        {day.low_f != null ? `${Math.round(day.low_f)}°` : '—'}
+                        {day.low_f != null ? degrees(day.low_f, units) : '—'}
                       </span>
                     </span>
                     <span className="line-clamp-1 text-text-muted">
@@ -136,14 +139,14 @@ export function NextDays({
                   <dt className="text-text-muted">Wind</dt>
                   <dd className="whitespace-nowrap text-right font-semibold tabular-nums text-text">
                     {day.wind_range_kt
-                      ? `${day.wind_direction ? `${compassLabel(day.wind_direction)} ` : ''}${formatRange(day.wind_range_kt)} kt`
+                      ? `${day.wind_direction ? `${compassLabel(day.wind_direction)} ` : ''}${speedRange(day.wind_range_kt, units)}`
                       : '—'}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-2">
                   <dt className="text-text-muted">Seas</dt>
                   <dd className="whitespace-nowrap text-right font-semibold tabular-nums text-text">
-                    {day.wave_range_ft ? `${formatRange(day.wave_range_ft, 0.5)} ft` : '—'}
+                    {day.wave_range_ft ? heightRange(day.wave_range_ft, units) : '—'}
                   </dd>
                 </div>
               </dl>

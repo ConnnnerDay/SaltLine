@@ -23,6 +23,30 @@ export type Preferences = {
   target_groups: string[] | null
   fishing_times: string[] | null
   tide_preference: 'incoming' | 'outgoing' | 'high' | 'low' | null
+  /** How the forecast's tabbed sections are arranged (ForecastTabs). */
+  forecast_layout?: ForecastLayout | null
+}
+
+export type ForecastLayout = {
+  /** Tab key -> the section ids placed there, in order. */
+  tabs: Record<string, string[]>
+  hidden: string[]
+  /** The tab the forecast opens on (default: the first). */
+  start?: string | null
+  /** Headline stat tiles, in order (default: water, wind, waves, confidence). */
+  stats?: string[]
+  /** Sections shown as a one-line bar that opens on tap. */
+  folded?: string[]
+  /** Tabs the user added (keys), and names they gave any tab. */
+  extra_tabs?: string[]
+  labels?: Record<string, string>
+  /** Tighter spacing. */
+  compact?: boolean
+  /** Display options (null/absent = defaults: all picks, photos and both lines on). */
+  biting_count?: number | null
+  biting_photos?: boolean
+  show_summary?: boolean
+  show_weather?: boolean
 }
 
 /**

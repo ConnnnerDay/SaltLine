@@ -1,12 +1,12 @@
 'use client'
 
+import { heightRange, localizeText, speedRange, temp, type Units } from '@/lib/units'
 import { useState } from 'react'
 import { Button, Card } from '@/app/components/ui'
 import { cx } from '@/app/components/ui/cx'
 import {
   deriveBestWindow,
   formatBestWindowRange,
-  formatRange,
   VERDICT_TEXT,
   type ForecastEnvelope,
 } from '@/app/components/forecast-card'
@@ -28,9 +28,11 @@ export type SavedLocationWithForecast = SavedLocation & { forecast: ForecastEnve
 export function SavedLocationsList({
   initialLocations,
   initialError,
+  units = 'imperial',
 }: {
   initialLocations: SavedLocationWithForecast[] | null
   initialError: string | null
+  units?: Units
 }) {
   const [locations, setLocations] = useState(initialLocations)
   const [error, setError] = useState(initialError)
@@ -79,10 +81,10 @@ export function SavedLocationsList({
             className="flex h-full flex-col gap-3 rounded-lg border border-border bg-surface p-5 pr-12 text-text no-underline shadow-card transition-[border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/60"
           >
             <span>
-              <span className="block text-lg font-bold leading-tight">{location.name}</span>
+              <span className="block text-lg font-bold leading-tight">{localizeText(location.name, units)}</span>
               <span className="block text-sm text-text-muted">{location.state}</span>
             </span>
-            <LocationForecastSummary forecast={location.forecast} />
+            <LocationForecastSummary forecast={location.forecast} units={units} />
           </a>
           <button
             type="button"
@@ -113,7 +115,7 @@ export function SavedLocationsList({
   )
 }
 
-function LocationForecastSummary({ forecast }: { forecast: ForecastEnvelope | null }) {
+function LocationForecastSummary({ forecast, units }: { forecast: ForecastEnvelope | null; units: Units }) {
   if (!forecast) {
     return <p className="text-sm text-text-muted">Forecast unavailable right now</p>
   }
@@ -123,9 +125,9 @@ function LocationForecastSummary({ forecast }: { forecast: ForecastEnvelope | nu
   const conditions = forecast.conditions
   const bestWindow = forecast.hourly_outlook ? deriveBestWindow(forecast.hourly_outlook) : null
   const facts = [
-    conditions?.water_temperature && `${conditions.water_temperature.value.toFixed(0)}°F water`,
-    conditions?.wind_range_kt && `${formatRange(conditions.wind_range_kt)} kt wind`,
-    conditions?.wave_range_ft && `${formatRange(conditions.wave_range_ft, 0.5)} ft waves`,
+    conditions?.water_temperature && `${temp(conditions.water_temperature.value, units)} water`,
+    conditions?.wind_range_kt && `${speedRange(conditions.wind_range_kt, units)} wind`,
+    conditions?.wave_range_ft && `${heightRange(conditions.wave_range_ft, units)} waves`,
   ].filter(Boolean)
 
   return (

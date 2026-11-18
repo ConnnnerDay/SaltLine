@@ -23,8 +23,12 @@ from storage.sqlite import save_forecast_to_db
 
 
 def _fresh_ts() -> str:
-    """Return a recent timezone-aware ISO timestamp (5 minutes ago in UTC)."""
-    return (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+    """Return a recent timezone-aware ISO timestamp (up to 5 minutes ago, UTC)."""
+    # A few minutes old, but never before today's UTC midnight (anything
+    # from yesterday counts as stale), so this holds just after midnight too.
+    now = datetime.now(timezone.utc)
+    midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    return max(now - timedelta(minutes=5), midnight).isoformat()
 
 
 @pytest.fixture(autouse=True)
@@ -179,7 +183,7 @@ class TestIsStale:
         assert _is_stale({"generated_at": "not-a-date"}) is False
 
     def test_fresh_today_not_stale(self):
-        ts = (datetime.now(timezone.utc) - timedelta(minutes=10)).isoformat()
+        ts = _fresh_ts()
         assert _is_stale({"generated_at": ts}) is False
 
     def test_over_4h_stale(self):

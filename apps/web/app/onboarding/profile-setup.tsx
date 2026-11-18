@@ -15,6 +15,9 @@ import {
   type Gear,
 } from '@/lib/profile-options'
 import type { Preferences } from '@/app/api/preferences/route'
+import { SpotMap, type MapSpot } from '@/app/components/spot-map'
+import { unitLabel, type Units } from '@/lib/units'
+import { useUnitInput } from '@/lib/use-unit-input'
 
 const STEP_TITLES = [
   'Where do you fish most?',
@@ -88,7 +91,7 @@ function GearRow({
  * everything in one PATCH (marking the profile complete) and goes to the
  * home spot's forecast, or to search if no spot was picked.
  */
-export function ProfileSetup({ next }: { next: string }) {
+export function ProfileSetup({ next, spots = [] }: { next: string; spots?: MapSpot[] }) {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [home, setHome] = useState<LocationSearchResult | null>(null)
@@ -101,8 +104,18 @@ export function ProfileSetup({ next }: { next: string }) {
   const [liveBait, setLiveBait] = useState<Gear | null>(null)
   const [cutBait, setCutBait] = useState<Gear | null>(null)
   const [comfort, setComfort] = useState<string | null>(null)
-  const [wind, setWind] = useState('')
-  const [surf, setSurf] = useState('')
+  // Limits are stored in knots / feet and typed in the chosen units.
+  const [units, setUnits] = useState<Units>('imperial')
+  const [windKt, setWindKt] = useState<number | null>(null)
+  const [surfFt, setSurfFt] = useState<number | null>(null)
+  const windInput = useUnitInput(windKt, 'speed', units, (value) => {
+    setWindKt(value)
+    setComfort(null)
+  })
+  const surfInput = useUnitInput(surfFt, 'height', units, (value) => {
+    setSurfFt(value)
+    setComfort(null)
+  })
   const [experience, setExperience] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -127,12 +140,9 @@ export function ProfileSetup({ next }: { next: string }) {
         setLures((current) => current ?? saved.uses_lures)
         setLiveBait((current) => current ?? saved.uses_live_bait)
         setCutBait((current) => current ?? saved.uses_cut_bait)
-        setWind((current) =>
-          current !== '' || saved.wind_threshold_kt === null ? current : String(saved.wind_threshold_kt),
-        )
-        setSurf((current) =>
-          current !== '' || saved.surf_threshold_ft === null ? current : String(saved.surf_threshold_ft),
-        )
+        setWindKt((current) => current ?? saved.wind_threshold_kt)
+        setSurfFt((current) => current ?? saved.surf_threshold_ft)
+        setUnits(saved.units)
         setExperience((current) => current ?? saved.experience)
       })
       .catch(() => {})
@@ -161,7 +171,6 @@ export function ProfileSetup({ next }: { next: string }) {
   }
 
   function finish() {
-    const number = (text: string) => (text.trim() === '' ? null : Number(text))
     // Every answer is sent, including cleared ones (null), so re-running
     // setup can also remove an answer.
     save({
@@ -173,8 +182,9 @@ export function ProfileSetup({ next }: { next: string }) {
       uses_lures: lures,
       uses_live_bait: liveBait,
       uses_cut_bait: cutBait,
-      wind_threshold_kt: number(wind),
-      surf_threshold_ft: number(surf),
+      wind_threshold_kt: windKt,
+      surf_threshold_ft: surfFt,
+      units,
       experience,
       profile_completed: true,
     })
@@ -184,8 +194,8 @@ export function ProfileSetup({ next }: { next: string }) {
     const preset = COMFORT_PRESETS.find((candidate) => candidate.value === value)
     if (!preset) return
     setComfort(value)
-    setWind(String(preset.wind))
-    setSurf(String(preset.surf))
+    setWindKt(preset.wind)
+    setSurfFt(preset.surf)
   }
 
   return (
@@ -219,9 +229,24 @@ export function ProfileSetup({ next }: { next: string }) {
             Your home spot is the forecast Saltline opens to. You can change it any time.
           </p>
           <LocationSearch onSelect={setHome} label="Search for your spot" />
+          {spots.length > 0 && (
+            <>
+              <div className="flex items-center gap-3 text-xs text-text-muted">
+                <span className="h-px flex-1 bg-border" aria-hidden="true" />
+                or pick one on the map
+                <span className="h-px flex-1 bg-border" aria-hidden="true" />
+              </div>
+              <SpotMap
+                units={units}
+                spots={spots}
+                selectedId={home?.id ?? savedHomeId}
+                onSelect={(spot) => setHome({ id: spot.id, name: spot.name, state: spot.state, lat: spot.lat, lng: spot.lng })}
+              />
+            </>
+          )}
           {home ? (
             <p className="text-sm text-text" role="status">
-              Home spot: <span className="font-bold">{home.name}, {home.state}</span>
+              Home spot: <span className="font-bold">{home.name}{home.state ? `, ${home.state}` : ''}</span>
             </p>
           ) : (
             savedHomeId && (
@@ -341,6 +366,26 @@ export function ProfileSetup({ next }: { next: string }) {
           <p className="text-sm text-text-muted">
             Days over your limits get flagged and rated a step lower.
           </p>
+          <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label="Units">
+            <span className="text-sm font-medium text-text">Units</span>
+            {(['imperial', 'metric'] as const).map((option) => (
+              <button
+                key={option}
+                type="button"
+                role="radio"
+                aria-checked={units === option}
+                onClick={() => setUnits(option)}
+                className={cx(
+                  'rounded-full border px-3 py-1 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring',
+                  units === option
+                    ? 'border-primary bg-primary text-primary-contrast'
+                    : 'border-border text-text-muted hover:border-primary hover:text-text',
+                )}
+              >
+                {option === 'imperial' ? 'Imperial (°F, ft, kt)' : 'Metric (°C, m, km/h)'}
+              </button>
+            ))}
+          </div>
           <div className="flex flex-wrap gap-2">
             {COMFORT_PRESETS.map((preset) => (
               <Chip
@@ -354,31 +399,23 @@ export function ProfileSetup({ next }: { next: string }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-text">Max wind (kt)</span>
+              <span className="text-sm font-medium text-text">Max wind ({unitLabel('speed', units)})</span>
               <input
                 type="number"
                 min="0"
-                max="100"
-                value={wind}
-                onChange={(event) => {
-                  setWind(event.target.value)
-                  setComfort(null)
-                }}
+                max={units === 'metric' ? 185 : 100}
+                {...windInput}
                 className="rounded-md border border-border bg-surface px-3 py-2.5 text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
               />
             </label>
             <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-text">Max surf (ft)</span>
+              <span className="text-sm font-medium text-text">Max surf ({unitLabel('height', units)})</span>
               <input
                 type="number"
                 min="0"
-                max="60"
-                step="0.5"
-                value={surf}
-                onChange={(event) => {
-                  setSurf(event.target.value)
-                  setComfort(null)
-                }}
+                max={units === 'metric' ? 18 : 60}
+                step="any"
+                {...surfInput}
                 className="rounded-md border border-border bg-surface px-3 py-2.5 text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
               />
             </label>

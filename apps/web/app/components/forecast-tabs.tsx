@@ -1,0 +1,668 @@
+'use client'
+
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react'
+import { cx } from './ui/cx'
+import type { ForecastLayout } from '@/app/api/preferences/route'
+import { chosenStats, EMPTY_LAYOUT, MAX_STATS, useForecastLayout } from './forecast-layout'
+
+/**
+ * Splits the forecast below its headline card into a few short tabs
+ * (Today / Conditions / Fish / Week) instead of one very long scroll.
+ * Every section is server-rendered and stays in the page (inactive tabs
+ * are just `hidden`), so switching is instant and nothing refetches.
+ *
+ * The open tab lives in the URL hash (#conditions), so a link or a
+ * reload keeps it, and the browser's back button isn't spammed (the hash
+ * is replaced, not pushed). Follows the WAI-ARIA tabs pattern: arrow
+ * keys / Home / End move between tabs, and only the open tab is in the
+ * tab order.
+ *
+ * Signed-in users can "Customize" the page: move a section up or down,
+ * send it to another tab, or hide it. That arrangement is saved to their
+ * profile (`forecast_layout`, a PATCH to /api/preferences), so it follows
+ * them to every spot and device. The editor also picks the tab the page
+ * opens on and the headline numbers (shared via ./forecast-layout), and
+ * can "fold" a section down to a one-line bar that opens on tap. Sections that render nothing for this
+ * spot (no surf zone forecast here, say) collapse away, toolbar and all.
+ */
+
+export type ForecastTab = { key: string; label: string; hint?: string }
+
+export type ForecastSection = {
+  id: string
+  label: string
+  /** The tab it lives in by default. */
+  tab: string
+  content: React.ReactNode
+}
+
+/** Each tab's section ids, in order: the user's placements first, then
+ * every other section still in its default tab, in default order. */
+function arrange(tabs: ForecastTab[], sections: ForecastSection[], layout: ForecastLayout) {
+  const known = new Set(sections.map((section) => section.id))
+  const placed = new Set<string>()
+  const result: Record<string, string[]> = {}
+  for (const tab of tabs) {
+    result[tab.key] = (layout.tabs[tab.key] ?? []).filter((id) => {
+      if (!known.has(id) || placed.has(id)) return false
+      placed.add(id)
+      return true
+    })
+  }
+  for (const section of sections) {
+    if (!placed.has(section.id)) result[section.tab]?.push(section.id)
+  }
+  return result
+}
+
+function subscribe(onChange: () => void): () => void {
+  window.addEventListener('hashchange', onChange)
+  return () => window.removeEventListener('hashchange', onChange)
+}
+
+const TOOL_BUTTON =
+  'inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-md border border-border bg-surface px-2 text-xs font-semibold text-text hover:border-primary disabled:opacity-40 disabled:hover:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring'
+
+const MAX_EXTRA_TABS = 3
+
+export function ForecastTabs({
+  tabs: baseTabs,
+  sections,
+}: {
+  tabs: ForecastTab[]
+  sections: ForecastSection[]
+}) {
+  const id = useId()
+  const listRef = useRef<HTMLDivElement>(null)
+  const hash = useSyncExternalStore(
+    subscribe,
+    () => window.location.hash.slice(1),
+    () => '',
+  )
+  const { layout, setLayout, editing, setEditing, canCustomize, statOptions } = useForecastLayout()
+  // The built-in tabs plus any the user added, with any names they gave.
+  const labels = layout.labels ?? {}
+  const extraTabs = layout.extra_tabs ?? []
+  const tabs: ForecastTab[] = [
+    ...baseTabs,
+    ...extraTabs.map((key, index) => ({ key, label: `My tab ${index + 1}` })),
+  ].map((tab) => (labels[tab.key] ? { ...tab, label: labels[tab.key], hint: undefined } : tab))
+  const crowded = tabs.length > 4
+  // The tab the page opens on: the user's choice, else the first.
+  const home = tabs.find((tab) => tab.key === layout.start)?.key ?? tabs[0]?.key
+  const active = tabs.find((tab) => tab.key === hash)?.key ?? home
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'error'>('idle')
+  const beforeEdit = useRef<ForecastLayout>(layout)
+
+  // A sideways-scrolling tab row: keep the open tab in view.
+  useEffect(() => {
+    function reveal() {
+      const bar = listRef.current
+      const tab = bar?.querySelector<HTMLElement>(`[data-tab="${active}"]`)
+      if (!bar || !tab || bar.scrollWidth <= bar.clientWidth) return
+      const left = tab.offsetLeft - bar.offsetLeft
+      if (left < bar.scrollLeft || left + tab.offsetWidth > bar.scrollLeft + bar.clientWidth) {
+        bar.scrollLeft = left - (bar.clientWidth - tab.offsetWidth) / 2
+      }
+    }
+    reveal()
+    window.addEventListener('resize', reveal)
+    return () => window.removeEventListener('resize', reveal)
+  }, [active, crowded])
+
+  const byId = new Map(sections.map((section) => [section.id, section]))
+  const placement = arrange(tabs, sections, layout)
+  const hidden = new Set(layout.hidden)
+  const folded = new Set(layout.folded ?? [])
+
+  function open(key: string, focus = false) {
+    const url = new URL(window.location.href)
+    url.hash = key === home ? '' : key
+    window.history.replaceState(window.history.state, '', url)
+    window.dispatchEvent(new HashChangeEvent('hashchange'))
+    if (focus) listRef.current?.querySelector<HTMLButtonElement>(`[data-tab="${key}"]`)?.focus()
+    // If the tab bar has scrolled out of view, bring it back so the new
+    // panel starts at the top of the screen.
+    const bar = listRef.current
+    if (bar && bar.getBoundingClientRect().top < 0) bar.scrollIntoView({ block: 'start' })
+  }
+
+  function onKeyDown(event: React.KeyboardEvent, index: number) {
+    const next =
+      event.key === 'ArrowRight'
+        ? (index + 1) % tabs.length
+        : event.key === 'ArrowLeft'
+          ? (index - 1 + tabs.length) % tabs.length
+          : event.key === 'Home'
+            ? 0
+            : event.key === 'End'
+              ? tabs.length - 1
+              : null
+    if (next === null) return
+    event.preventDefault()
+    open(tabs[next].key, true)
+  }
+
+  /** Apply a change to the full arrangement (every tab spelled out). */
+  function update(change: (tabs: Record<string, string[]>, hidden: Set<string>) => void) {
+    const nextTabs = Object.fromEntries(Object.entries(placement).map(([key, ids]) => [key, [...ids]]))
+    const nextHidden = new Set(hidden)
+    change(nextTabs, nextHidden)
+    setLayout({ ...layout, tabs: nextTabs, hidden: [...nextHidden] })
+  }
+
+  function move(sectionId: string, tabKey: string, delta: number) {
+    update((next) => {
+      const ids = next[tabKey]
+      const from = ids.indexOf(sectionId)
+      const to = from + delta
+      if (from < 0 || to < 0 || to >= ids.length) return
+      ids.splice(from, 1)
+      ids.splice(to, 0, sectionId)
+    })
+  }
+
+  function sendTo(sectionId: string, fromTab: string, toTab: string) {
+    update((next) => {
+      next[fromTab] = next[fromTab].filter((sid) => sid !== sectionId)
+      next[toTab].push(sectionId)
+    })
+  }
+
+  function toggleFolded(sectionId: string) {
+    const next = new Set(folded)
+    if (next.has(sectionId)) next.delete(sectionId)
+    else next.add(sectionId)
+    setLayout({ ...layout, folded: [...next] })
+  }
+
+  function toggleHidden(sectionId: string) {
+    update((_, nextHidden) => {
+      if (nextHidden.has(sectionId)) nextHidden.delete(sectionId)
+      else nextHidden.add(sectionId)
+    })
+  }
+
+  async function save(next: ForecastLayout | null) {
+    setSaveState('saving')
+    try {
+      const response = await fetch('/api/preferences', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ forecast_layout: next }),
+      })
+      if (!response.ok) throw new Error(String(response.status))
+      setSaveState('idle')
+      return true
+    } catch {
+      setSaveState('error')
+      return false
+    }
+  }
+
+  function startEditing() {
+    beforeEdit.current = layout
+    setSaveState('idle')
+    setEditing(true)
+  }
+
+  async function finishEditing() {
+    if (await save(layout)) setEditing(false)
+  }
+
+  function cancelEditing() {
+    setLayout(beforeEdit.current)
+    setSaveState('idle')
+    setEditing(false)
+  }
+
+  function resetLayout() {
+    setLayout(EMPTY_LAYOUT)
+  }
+
+  function renameTab(key: string, value: string) {
+    const clean = value.replace(/[<>\n\r]/g, '').slice(0, 20)
+    const next = { ...labels }
+    if (clean.trim()) next[key] = clean
+    else delete next[key]
+    setLayout({ ...layout, labels: next })
+  }
+
+  function addTab() {
+    if (extraTabs.length >= MAX_EXTRA_TABS) return
+    let n = 1
+    while (extraTabs.includes(`mine-${n}`)) n += 1
+    const key = `mine-${n}`
+    setLayout({ ...layout, extra_tabs: [...extraTabs, key] })
+    open(key)
+  }
+
+  function removeTab(key: string) {
+    // Its sections go back to their usual tabs.
+    const nextTabs = { ...layout.tabs }
+    delete nextTabs[key]
+    const nextLabels = { ...labels }
+    delete nextLabels[key]
+    setLayout({
+      ...layout,
+      tabs: nextTabs,
+      labels: nextLabels,
+      extra_tabs: extraTabs.filter((k) => k !== key),
+      start: layout.start === key ? null : layout.start,
+    })
+    if (active === key) open(baseTabs[0].key)
+  }
+
+  function setStart(key: string) {
+    setLayout({ ...layout, start: key === baseTabs[0]?.key ? null : key })
+  }
+
+  const availableStats = statOptions.map((option) => option.key)
+  const stats = chosenStats(layout, availableStats)
+
+  function toggleStat(key: string) {
+    const next = stats.includes(key) ? stats.filter((k) => k !== key) : [...stats, key]
+    if (next.length === 0 || next.length > MAX_STATS) return
+    setLayout({ ...layout, stats: next })
+  }
+
+  return (
+    <div className="flex min-w-0 flex-col gap-4 sm:gap-5 in-data-[density=compact]:gap-2.5 sm:in-data-[density=compact]:gap-3">
+      <div className="flex min-w-0 items-stretch gap-2">
+        <div
+          ref={listRef}
+          role="tablist"
+          aria-label="Forecast sections"
+          className={cx(
+            'min-w-0 flex-1 scroll-mt-20 gap-1 rounded-lg border border-border bg-surface p-1 shadow-card',
+            // More than four tabs: a row that scrolls sideways on narrow screens.
+            crowded ? 'no-scrollbar flex overflow-x-auto' : 'grid',
+          )}
+          style={crowded ? undefined : { gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
+        >
+          {tabs.map((tab, index) => {
+            const selected = tab.key === active
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                role="tab"
+                id={`${id}-tab-${tab.key}`}
+                data-tab={tab.key}
+                aria-selected={selected}
+                aria-controls={`${id}-panel-${tab.key}`}
+                tabIndex={selected ? 0 : -1}
+                onClick={() => open(tab.key)}
+                onKeyDown={(event) => onKeyDown(event, index)}
+                className={cx(
+                  crowded && 'min-w-[5.5rem] flex-none px-3! sm:flex-1',
+                  'flex min-h-11 min-w-0 flex-col items-center justify-center rounded-md px-0.5 py-1.5 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring',
+                  selected ? 'bg-primary text-primary-contrast' : 'text-text-muted hover:bg-surface-raised hover:text-text',
+                )}
+              >
+                <span className="max-w-full truncate text-sm font-bold">{tab.label}</span>
+                {tab.hint && (
+                  <span className={cx('hidden max-w-full truncate text-[0.6875rem] sm:block', selected ? 'opacity-85' : 'opacity-75')}>
+                    {tab.hint}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+        {canCustomize && !editing && (
+          <button
+            type="button"
+            onClick={startEditing}
+            aria-label="Customize the forecast: move or hide sections"
+            title="Customize: move or hide sections"
+            className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-sm font-semibold text-text-muted shadow-card hover:border-primary hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring sm:flex"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" />
+              <circle cx="16" cy="6" r="2" />
+              <circle cx="10" cy="12" r="2" />
+              <circle cx="18" cy="18" r="2" />
+            </svg>
+            <span className="hidden md:inline">Customize</span>
+          </button>
+        )}
+      </div>
+
+      {canCustomize && !editing && (
+        // Phones: the tab bar needs the full width, so Customize sits below it.
+        <button
+          type="button"
+          onClick={startEditing}
+          className="-mt-2 self-end text-xs font-semibold text-text-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring sm:hidden"
+        >
+          Customize this page
+        </button>
+      )}
+
+      {editing && (
+        <div
+          role="region"
+          aria-label="Customize the forecast"
+          className="z-20 flex flex-wrap sm:sticky sm:top-16 items-center gap-x-3 gap-y-2 rounded-lg border border-primary bg-surface px-4 py-3 shadow-card"
+        >
+          <p className="min-w-0 flex-1 text-sm text-text">
+            <span className="font-semibold">Customizing.</span>{' '}
+            <span className="text-text-muted">
+              Move, fold, hide or send sections to another tab.
+              <span className="hidden sm:inline"> Switch tabs to arrange those too.</span>
+            </span>
+          </p>
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={resetLayout} className={TOOL_BUTTON}>
+              Reset
+            </button>
+            <button type="button" onClick={cancelEditing} className={TOOL_BUTTON}>
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => void finishEditing()}
+              disabled={saveState === 'saving'}
+              className="inline-flex h-8 items-center rounded-md bg-primary px-3 text-xs font-bold text-primary-contrast hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring disabled:opacity-60"
+            >
+              {saveState === 'saving' ? 'Saving…' : 'Done'}
+            </button>
+          </div>
+          <div className="flex w-full flex-col gap-3 border-t border-border pt-3 sm:flex-row sm:items-start sm:gap-6">
+            <div className="flex shrink-0 flex-col gap-2">
+            <label className="flex items-center gap-2 text-sm text-text">
+              <span className="font-semibold">Open on</span>
+              <select
+                value={home}
+                onChange={(event) => setStart(event.target.value)}
+                className="h-8 rounded-md border border-border bg-surface px-2 text-xs font-semibold text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+              >
+                {tabs.map((tab) => (
+                  <option key={tab.key} value={tab.key}>
+                    {tab.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-2 text-sm text-text">
+              <input
+                type="checkbox"
+                checked={Boolean(layout.compact)}
+                onChange={(event) => setLayout({ ...layout, compact: event.target.checked })}
+                className="h-4 w-4 accent-primary"
+              />
+              <span className="font-semibold">Compact view</span>
+              <span className="text-xs text-text-muted">tighter spacing</span>
+            </label>
+            </div>
+            {statOptions.length > 0 && (
+              <div className="flex min-w-0 flex-col gap-1.5" role="group" aria-label="Headline numbers">
+                <span className="text-sm text-text">
+                  <span className="font-semibold">Headline numbers</span>{' '}
+                  <span className="text-xs text-text-muted">
+                    pick up to {MAX_STATS}, in the order you tap them
+                  </span>
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {statOptions.map((option) => {
+                    const on = stats.includes(option.key)
+                    return (
+                      <button
+                        key={option.key}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() => toggleStat(option.key)}
+                        disabled={!on && stats.length >= MAX_STATS}
+                        className={cx(
+                          'rounded-full border px-2.5 py-1 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring disabled:opacity-40',
+                          on
+                            ? 'border-primary bg-primary text-primary-contrast'
+                            : 'border-border text-text-muted hover:border-primary hover:text-text',
+                        )}
+                      >
+                        {on && <span className="mr-1 tabular-nums">{stats.indexOf(option.key) + 1}</span>}
+                        {option.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex w-full flex-col gap-1.5 border-t border-border pt-3" role="group" aria-label="Display">
+            <span className="text-sm font-semibold text-text">Display</span>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-text">
+              {(
+                [
+                  ['show_summary', 'Summary sentence'],
+                  ['show_weather', 'Current weather line'],
+                  ['biting_photos', 'Fish photos'],
+                ] as const
+              ).map(([option, label]) => (
+                <label key={option} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={layout[option] !== false}
+                    onChange={(event) => setLayout({ ...layout, [option]: event.target.checked })}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  {label}
+                </label>
+              ))}
+              <label className="flex items-center gap-2">
+                <span>What&apos;s biting shows</span>
+                <select
+                  value={layout.biting_count ?? 0}
+                  onChange={(event) =>
+                    setLayout({ ...layout, biting_count: Number(event.target.value) || null })
+                  }
+                  className="h-8 rounded-md border border-border bg-surface px-2 text-xs font-semibold text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                >
+                  <option value={0}>every pick</option>
+                  <option value={1}>the top pick</option>
+                  <option value={3}>the top 3</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div className="flex w-full flex-col gap-1.5 border-t border-border pt-3" role="group" aria-label="Tabs">
+            <span className="text-sm text-text">
+              <span className="font-semibold">Tabs</span>{' '}
+              <span className="text-xs text-text-muted">rename any tab, or add your own and move sections into it</span>
+            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              {tabs.map((tab) => {
+                const isExtra = extraTabs.includes(tab.key)
+                const fallback = baseTabs.find((t) => t.key === tab.key)?.label ?? `My tab ${extraTabs.indexOf(tab.key) + 1}`
+                return (
+                  <span key={tab.key} className="flex items-center gap-1">
+                    <input
+                      type="text"
+                      value={labels[tab.key] ?? ''}
+                      placeholder={fallback}
+                      maxLength={20}
+                      aria-label={`Name for the ${fallback} tab`}
+                      onChange={(event) => renameTab(tab.key, event.target.value)}
+                      className="h-8 w-32 rounded-md border border-border bg-surface px-2 text-xs font-semibold text-text placeholder:font-normal placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                    />
+                    {isExtra && (
+                      <button
+                        type="button"
+                        onClick={() => removeTab(tab.key)}
+                        aria-label={`Remove the ${tab.label} tab`}
+                        title="Remove this tab (its sections go back to their usual tabs)"
+                        className={TOOL_BUTTON}
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true">
+                          <path d="M6 6l12 12M18 6L6 18" />
+                        </svg>
+                      </button>
+                    )}
+                  </span>
+                )
+              })}
+              {extraTabs.length < MAX_EXTRA_TABS && (
+                <button type="button" onClick={addTab} className={TOOL_BUTTON}>
+                  + Add a tab
+                </button>
+              )}
+            </div>
+          </div>
+          {saveState === 'error' && (
+            <p role="alert" className="w-full text-sm text-danger-text">
+              Couldn&apos;t save your layout. Try again.
+            </p>
+          )}
+        </div>
+      )}
+
+      {tabs.map((tab) => {
+        const ids = placement[tab.key] ?? []
+        const shown = ids.filter((sid) => !hidden.has(sid))
+        const hiddenHere = ids.filter((sid) => hidden.has(sid))
+        return (
+          <div
+            key={tab.key}
+            role="tabpanel"
+            id={`${id}-panel-${tab.key}`}
+            aria-labelledby={`${id}-tab-${tab.key}`}
+            hidden={tab.key !== active}
+            className="flex min-w-0 flex-col gap-4 sm:gap-5 in-data-[density=compact]:gap-2.5 sm:in-data-[density=compact]:gap-3"
+          >
+            {ids.map((sectionId, index) => {
+              const section = byId.get(sectionId)
+              if (!section) return null
+              const isHidden = hidden.has(sectionId)
+              const isFolded = folded.has(sectionId)
+              // Hidden sections stay mounted (so un-hiding is instant)
+              // but out of sight outside edit mode.
+              return (
+                <div
+                  key={sectionId}
+                  data-section={sectionId}
+                  hidden={isHidden && !editing}
+                  className={cx(
+                    'flex min-w-0 flex-col gap-2 has-[.section-body:empty]:hidden',
+                    editing && 'rounded-lg border border-dashed border-border p-2',
+                  )}
+                >
+                  {editing && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="min-w-0 flex-1 text-sm font-semibold text-text">
+                        {section.label}
+                        {isHidden ? (
+                          <span className="ml-2 text-xs font-normal text-text-muted">Hidden</span>
+                        ) : (
+                          isFolded && <span className="ml-2 text-xs font-normal text-text-muted">Folded</span>
+                        )}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => move(sectionId, tab.key, -1)}
+                        disabled={index === 0}
+                        aria-label={`Move ${section.label} up`}
+                        className={TOOL_BUTTON}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M12 19V5M6 11l6-6 6 6" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => move(sectionId, tab.key, 1)}
+                        disabled={index === ids.length - 1}
+                        aria-label={`Move ${section.label} down`}
+                        className={TOOL_BUTTON}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M12 5v14M6 13l6 6 6-6" />
+                        </svg>
+                      </button>
+                      <label className="sr-only" htmlFor={`${id}-move-${sectionId}`}>
+                        Move {section.label} to another tab
+                      </label>
+                      <select
+                        id={`${id}-move-${sectionId}`}
+                        value={tab.key}
+                        onChange={(event) => sendTo(sectionId, tab.key, event.target.value)}
+                        className="h-8 rounded-md border border-border bg-surface px-2 text-xs font-semibold text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                      >
+                        {tabs.map((option) => (
+                          <option key={option.key} value={option.key}>
+                            {option.key === tab.key ? `In ${option.label}` : `Move to ${option.label}`}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => toggleFolded(sectionId)}
+                        aria-pressed={isFolded}
+                        disabled={isHidden}
+                        title="Folded sections show as a one-line bar you tap to open"
+                        className={TOOL_BUTTON}
+                      >
+                        {isFolded ? 'Unfold' : 'Fold'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleHidden(sectionId)}
+                        aria-pressed={isHidden}
+                        className={TOOL_BUTTON}
+                      >
+                        {isHidden ? 'Show' : 'Hide'}
+                      </button>
+                    </div>
+                  )}
+                  {isFolded && !editing ? (
+                    // Folded: a one-line bar that opens to the full section.
+                    <details className="group flex min-w-0 flex-col">
+                      {/* Closed: a bar with the section's name. Open: the section
+                          itself (which has its own heading), with a small
+                          "Fold up" link under it. */}
+                      <summary className="order-2 flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-lg border border-border bg-surface px-5 py-3 shadow-card hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring group-open:mt-1 group-open:min-h-0 group-open:justify-end group-open:border-0 group-open:bg-transparent group-open:px-1 group-open:py-0 group-open:shadow-none group-open:hover:bg-transparent sm:px-6 [&::-webkit-details-marker]:hidden">
+                        <span className="section-label text-text! group-open:hidden">{section.label}</span>
+                        <span className="hidden text-xs font-semibold text-text-muted hover:text-text group-open:inline">
+                          Fold up
+                        </span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0 text-text-muted group-open:h-3.5 group-open:w-3.5 group-open:rotate-180">
+                          <path d="M6 9 L12 15 L18 9" />
+                        </svg>
+                      </summary>
+                      <div className="section-body order-1 flex min-w-0 flex-col">{section.content}</div>
+                    </details>
+                  ) : (
+                    <div className={cx('section-body flex min-w-0 flex-col', editing && isHidden && 'hidden')}>
+                      {section.content}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+
+            {editing && ids.length === 0 && (
+              <p className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-text-muted">
+                This tab is empty. On another tab, use a section&apos;s &ldquo;Move to {tab.label}&rdquo;
+                to put it here.
+              </p>
+            )}
+            {!editing && shown.length === 0 && (
+              <p className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-text-muted">
+                Nothing on this tab.
+                {canCustomize && ' Use Customize to move sections here.'}
+              </p>
+            )}
+            {!editing && canCustomize && hiddenHere.length > 0 && (
+              <p className="text-center text-xs text-text-muted">
+                {hiddenHere.length} hidden section{hiddenHere.length > 1 ? 's' : ''} ·{' '}
+                <button type="button" onClick={startEditing} className="font-semibold text-primary hover:underline">
+                  Customize
+                </button>
+              </p>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}

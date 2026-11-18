@@ -1,4 +1,7 @@
 import { LocationBar } from './location-bar'
+import { requestUnits } from '@/lib/request-units'
+import { localizeDeep, localizeText } from '@/lib/units'
+import type { SwitcherSpot } from './spot-switcher'
 import type { NearbyCam } from '@/lib/get-cams'
 import { Container } from './ui'
 import { ForecastCard, ForecastErrorCard, type ForecastEnvelope } from './forecast-card'
@@ -26,8 +29,11 @@ export function ForecastPageBody({
   retryHref,
   backHref,
   backLabel,
+  switcherSpots,
   children,
 }: {
+  /** Signed in: spots for the location bar's quick switcher. */
+  switcherSpots?: SwitcherSpot[]
   forecast: ForecastEnvelope | null
   error: string | null
   /** Plain-language cause for the error card (lib/diagnose-api.ts). */
@@ -53,27 +59,41 @@ export function ForecastPageBody({
    * block. */
   children?: React.ReactNode
 }) {
+  // apps/api writes its prose (summaries, reasons, regulations, place
+  // names like "12 mi NW of …") in US units; show it in the reader's.
+  const units = requestUnits()
+  forecast = localizeDeep(forecast, units)
+  switcherSpots = switcherSpots?.map((spot) => ({ ...spot, name: localizeText(spot.name, units) }))
   return (
     <main>
       <LocationBar
         backHref={backHref}
         backLabel={backLabel}
         label={forecast?.location.label ?? 'Forecast'}
+        switcher={
+          forecast && switcherSpots ? { currentId: forecast.location.id, spots: switcherSpots } : undefined
+        }
       />
 
       <Container>
         <div className="flex flex-col gap-4 py-5 pb-16">
           {error && <ForecastErrorCard message={error} reason={errorReason} retryHref={retryHref} />}
-          {forecast && <ForecastCard forecast={forecast} cams={cams} profile={profile} />}
           {forecast && (
-            <NearbySpots
-              locationId={forecast.location.id}
-              currentScore={forecast.conditions?.score?.score ?? null}
-              linkBase={nearbyLinkBase}
-              userId={userId}
+            <ForecastCard
+              forecast={forecast}
+              cams={cams}
+              profile={profile}
+              nearby={
+                <NearbySpots
+                  locationId={forecast.location.id}
+                  currentScore={forecast.conditions?.score?.score ?? null}
+                  linkBase={nearbyLinkBase}
+                  userId={userId}
+                />
+              }
+              seen={<SeenNearby locationId={forecast.location.id} />}
             />
           )}
-          {forecast && <SeenNearby locationId={forecast.location.id} />}
           {children}
         </div>
       </Container>

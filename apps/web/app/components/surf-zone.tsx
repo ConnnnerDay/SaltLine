@@ -1,3 +1,5 @@
+import { requestUnits } from '@/lib/request-units'
+import { localizeText } from '@/lib/units'
 import type { ForecastEnvelope } from './forecast-card'
 import { Card } from './ui'
 import { cx } from './ui/cx'
@@ -122,9 +124,12 @@ export function SurfZone({ forecast }: { forecast: ForecastEnvelope }) {
               label="Water temperature"
               value={
                 today.water_temperature
-                  ? /degree|°/i.test(today.water_temperature)
-                    ? today.water_temperature.replace(/\s*degrees?/i, '°F')
-                    : `${today.water_temperature}°F`
+                  ? localizeText(
+                      /degree|°/i.test(today.water_temperature)
+                        ? today.water_temperature.replace(/\s*degrees?/i, '°F')
+                        : `${today.water_temperature}°F`,
+                      requestUnits(),
+                    )
                   : null
               }
             />

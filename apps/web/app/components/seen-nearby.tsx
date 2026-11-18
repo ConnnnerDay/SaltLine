@@ -1,3 +1,5 @@
+import { requestUnits } from '@/lib/request-units'
+import { distance } from '@/lib/units'
 import { Suspense } from 'react'
 import { internalApiFetch } from '@/lib/internal-api-client'
 import { currentTime } from '@/lib/clock'
@@ -78,7 +80,7 @@ async function SeenNearbyCard({ locationId }: { locationId: string }) {
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <h2 className="section-label">Fish seen nearby lately</h2>
         <span className="text-xs text-text-muted">
-          {data.total_species} species · last {data.days} days · within {data.radius_miles} miles
+          {data.total_species} species · last {data.days} days · within {distance(data.radius_miles, requestUnits())}
         </span>
       </div>
 
@@ -128,7 +130,7 @@ async function SeenNearbyCard({ locationId }: { locationId: string }) {
                         <span className="shrink-0 text-xs text-text-muted">{daysAgo(sighting.observed_on, now)}</span>
                       </span>
                       <span className="truncate text-xs text-text-muted">
-                        {sighting.distance_miles} mi away{sighting.place ? ` · ${sighting.place}` : ''}
+                        {distance(sighting.distance_miles, requestUnits())} away{sighting.place ? ` · ${sighting.place}` : ''}
                       </span>
                     </span>
                   </a>

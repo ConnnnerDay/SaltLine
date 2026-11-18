@@ -295,6 +295,34 @@ def parse_dynamic_id(location_id: str) -> tuple[float, float] | None:
     return lat, lng
 
 
+_COMPASS_8 = ("N", "NE", "E", "SE", "S", "SW", "W", "NW")
+
+
+def _bearing_label(lat1: float, lng1: float, lat2: float, lng2: float) -> str:
+    """8-point compass direction from point 1 toward point 2."""
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    d_lng = math.radians(lng2 - lng1)
+    x = math.sin(d_lng) * math.cos(p2)
+    y = math.cos(p1) * math.sin(p2) - math.sin(p1) * math.cos(p2) * math.cos(d_lng)
+    bearing = (math.degrees(math.atan2(x, y)) + 360) % 360
+    return _COMPASS_8[round(bearing / 45) % 8]
+
+
+def _dynamic_name(
+    lat: float, lng: float, nearest: CuratedLocation | None, miles: float
+) -> str:
+    """A readable name for a dynamic point, placed relative to the nearest
+    curated spot: "Near Wrightsville Beach" within 5 miles, "12 mi NW of
+    Wrightsville Beach" within 100, else its coordinates.
+    """
+    if nearest is None or miles > 100.0:
+        return f"Coastal spot ({lat:.2f}, {lng:.2f})"
+    if miles <= 5.0:
+        return f"Near {nearest.name}"
+    direction = _bearing_label(nearest.lat, nearest.lng, lat, lng)
+    return f"{round(miles)} mi {direction} of {nearest.name}"
+
+
 def resolve_dynamic_location(
     lat: float,
     lng: float,
@@ -329,7 +357,11 @@ def resolve_dynamic_location(
         else (list(nearest.location.ndbc_stations) if nearest else [])
     )
 
-    state = coops.state if coops else (nearest.location.state if nearest else "")
+    # Some CO-OPS catalog entries carry no state; fall back to the nearest
+    # curated spot's.
+    state = (coops.state if coops else "") or (
+        nearest.location.state if nearest else ""
+    )
 
     conditions_region = (
         nearest.location.conditions_region if nearest else _DEFAULT_CONDITIONS_REGION
@@ -345,11 +377,7 @@ def resolve_dynamic_location(
     if nearest and nearest_miles <= _NWS_ZONE_INHERIT_MILES:
         nws_zone = nearest.location.nws_zone
 
-    name = (
-        f"Near {nearest.location.name}"
-        if nearest and nearest_miles <= 25.0
-        else f"Coastal spot ({lat:.2f}, {lng:.2f})"
-    )
+    name = _dynamic_name(lat, lng, nearest.location if nearest else None, nearest_miles)
 
     anchor_candidates = [nearest_miles]
     if coops:

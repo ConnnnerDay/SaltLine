@@ -6,6 +6,8 @@ import { Card, Container } from '@/app/components/ui'
 import { rememberHomeIfUnset } from '@/lib/remember-home'
 import { LocationSearch } from '@/app/components/location-search'
 import { UseMyLocationButton } from '@/app/components/use-my-location-button'
+import { SpotMap } from '@/app/components/spot-map'
+import type { Units } from '@/lib/units'
 
 /**
  * Sprint 31 (text search plus device geolocation -- see LocationSearch's
@@ -40,7 +42,13 @@ const COASTS: { title: string; match: (region: string) => boolean; order: (a: Br
   { title: 'Hawaii', match: (r) => r.startsWith('hawaii'), order: (a, b) => a.lng - b.lng },
 ]
 
-export function LocationsSearchPage({ locations = [] }: { locations?: BrowseLocation[] }) {
+export function LocationsSearchPage({
+  locations = [],
+  units = 'imperial',
+}: {
+  locations?: BrowseLocation[]
+  units?: Units
+}) {
   const router = useRouter()
   const [selected, setSelected] = useState<{ id: string; name: string } | null>(null)
 
@@ -82,9 +90,18 @@ export function LocationsSearchPage({ locations = [] }: { locations?: BrowseLoca
           )}
 
           {locations.length > 0 && (
+            <section aria-labelledby="map-heading" className="flex flex-col gap-3">
+              <h2 id="map-heading" className="section-label">
+                Or pick one on the map
+              </h2>
+              <SpotMap units={units} spots={locations} selectedId={selected?.id ?? null} onSelect={(spot) => void handleSelect(spot)} />
+            </section>
+          )}
+
+          {locations.length > 0 && (
             <section aria-labelledby="browse-heading" className="flex flex-col gap-4">
               <h2 id="browse-heading" className="section-label">
-                Or browse every spot
+                Or browse the list
               </h2>
               {COASTS.map((coast) => {
                 const spots = locations

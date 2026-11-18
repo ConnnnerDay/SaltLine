@@ -1,7 +1,9 @@
+import { requestUnits } from '@/lib/request-units'
+import { distance, heightRange, speedRange } from '@/lib/units'
 import { Suspense } from 'react'
 import { fetchForecast } from '@/lib/get-forecast'
 import { internalApiFetch } from '@/lib/internal-api-client'
-import { formatRange, VERDICT_TEXT, type ForecastEnvelope } from './forecast-card'
+import { VERDICT_TEXT, type ForecastEnvelope } from './forecast-card'
 import { Card } from './ui'
 import { cx } from './ui/cx'
 
@@ -53,7 +55,7 @@ async function NearbyList({
     <Card className="flex flex-col gap-4">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <h2 className="section-label">Nearby spots today</h2>
-        <span className="text-xs text-text-muted">Closest curated spots within 60 miles</span>
+        <span className="text-xs text-text-muted">Closest curated spots within {distance(60, requestUnits())}</span>
       </div>
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {rows.map(({ spot, forecast }) => {
@@ -71,7 +73,7 @@ async function NearbyList({
               >
                 <span className="flex items-baseline justify-between gap-2">
                   <span className="font-bold leading-tight">{spot.name}</span>
-                  <span className="shrink-0 text-xs text-text-muted">{Math.round(spot.distance_miles)} mi</span>
+                  <span className="shrink-0 text-xs text-text-muted">{distance(Math.round(spot.distance_miles), requestUnits())}</span>
                 </span>
                 <span className="flex items-baseline gap-2">
                   <span className={cx('text-lg font-extrabold uppercase leading-none', VERDICT_TEXT[score.verdict])}>
@@ -83,8 +85,8 @@ async function NearbyList({
                 </span>
                 <span className="text-sm tabular-nums text-text-muted">
                   {[
-                    conditions.wind_range_kt && `${conditions.wind_direction ?? ''} ${formatRange(conditions.wind_range_kt)} kt`.trim(),
-                    conditions.wave_range_ft && `${formatRange(conditions.wave_range_ft, 0.5)} ft`,
+                    conditions.wind_range_kt && `${conditions.wind_direction ?? ''} ${speedRange(conditions.wind_range_kt, requestUnits())}`.trim(),
+                    conditions.wave_range_ft && heightRange(conditions.wave_range_ft, requestUnits()),
                   ]
                     .filter(Boolean)
                     .join(' · ')}

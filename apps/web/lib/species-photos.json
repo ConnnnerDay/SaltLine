@@ -3015,5 +3015,47 @@
     "license": "CC BY 4.0",
     "license_url": "https://creativecommons.org/licenses/by/4.0/",
     "source_url": "https://www.inaturalist.org/photos/151095227"
+  },
+  "red-goatfish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/474967527/medium.jpg",
+    "credit": "Frank Krasovec via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/474967527"
+  },
+  "orangespotted-filefish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/471638402/medium.jpg",
+    "credit": "Frank Krasovec via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/471638402"
+  },
+  "white-hake": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/22917775/medium.jpg",
+    "credit": "Jean-François Rousseau via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/22917775"
+  },
+  "yellowfin-sole": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/244151454/medium.jpg",
+    "credit": "Michael Verdirame via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/244151454"
+  },
+  "flathead-sole": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/128249055/medium.jpeg",
+    "credit": "Gregory C Jensen via iNaturalist",
+    "license": "CC BY-NC-ND 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/128249055"
+  },
+  "rough-scad": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/195437/medium.jpg",
+    "credit": "NOAANMFSMississippi Laboratory via iNaturalist",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/195437"
   }
 }

@@ -267,6 +267,10 @@ def test_forecast_layout_round_trips(client: TestClient) -> None:
         "extra_tabs": ["mine-1"],
         "labels": {"mine-1": "Morning check", "fish": "Species"},
         "compact": True,
+        "biting_count": 3,
+        "biting_photos": False,
+        "show_summary": False,
+        "show_weather": True,
     }
     resp = client.patch("/v1/me/preferences", json={"forecast_layout": layout})
     assert resp.status_code == 200
@@ -288,6 +292,7 @@ def test_forecast_layout_rejects_junk_ids(client: TestClient) -> None:
         {"labels": {"today": "x" * 21}},
         {"labels": {"today": "   "}},
         {"extra_tabs": ["a", "b", "c", "d"]},
+        {"biting_count": 0},
     ):
         resp = client.patch("/v1/me/preferences", json={"forecast_layout": bad})
         assert resp.status_code == 422, bad

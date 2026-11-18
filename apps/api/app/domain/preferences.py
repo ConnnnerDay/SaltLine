@@ -131,6 +131,12 @@ class ForecastLayout(BaseModel):
     extra_tabs: list[_LayoutKey] = Field(default_factory=list, max_length=3)
     labels: dict[_LayoutKey, _TabLabel] = Field(default_factory=dict, max_length=8)
     compact: bool = False
+    # Display options: how many "What's biting" picks (None = all), their
+    # photos, and the headline card's summary and current-weather lines.
+    biting_count: int | None = Field(default=None, ge=1, le=20)
+    biting_photos: bool = True
+    show_summary: bool = True
+    show_weather: bool = True
 
 
 class UserPreferences(Base):

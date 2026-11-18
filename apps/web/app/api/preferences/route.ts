@@ -42,6 +42,11 @@ export type ForecastLayout = {
   labels?: Record<string, string>
   /** Tighter spacing. */
   compact?: boolean
+  /** Display options (null/absent = defaults: all picks, photos and both lines on). */
+  biting_count?: number | null
+  biting_photos?: boolean
+  show_summary?: boolean
+  show_weather?: boolean
 }
 
 /**

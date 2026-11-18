@@ -14,7 +14,7 @@ import { SurfZone } from './surf-zone'
 import { WeatherIcon } from './weather-icon'
 import { currentTime } from '@/lib/clock'
 import { ForecastTabs } from './forecast-tabs'
-import { ForecastLayoutProvider, HeadlineStats, type StatTileData } from './forecast-layout'
+import { ForecastLayoutProvider, HeadlineStats, ShowIf, WithinBitingCount, type StatTileData } from './forecast-layout'
 import type { NearbyCam } from '@/lib/get-cams'
 import speciesPhotos from '@/lib/species-photos.json'
 
@@ -792,7 +792,7 @@ function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
 
       {guidance.species.length > 1 && (
         <p className="-mt-2 text-xs text-text-muted sm:hidden">
-          Swipe for all {guidance.species.length} picks →
+          Swipe for more picks →
         </p>
       )}
       {guidance.species.length === 0 ? (
@@ -805,11 +805,13 @@ function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
         // wider screens: a 2/3-column grid.
         <ol className="no-scrollbar -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
           {guidance.species.map((pick, index) => (
+            <WithinBitingCount key={pick.id} index={index}>
             <li
-              key={pick.id}
               className="flex w-[84%] shrink-0 snap-start flex-col gap-2.5 overflow-hidden rounded-md border sm:w-auto border-border bg-surface-raised p-3 transition-[border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/60"
             >
-              <SpeciesPhotoFigure id={pick.id} name={pick.name} compact />
+              <ShowIf option="biting_photos">
+                <SpeciesPhotoFigure id={pick.id} name={pick.name} compact />
+              </ShowIf>
               <div className="flex flex-col gap-2 px-1">
                 <div className="flex items-start justify-between gap-2">
                   <span className="text-base font-bold leading-snug text-text">{pick.name}</span>
@@ -859,6 +861,7 @@ function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
                 )}
               </div>
             </li>
+            </WithinBitingCount>
           ))}
         </ol>
       )}
@@ -1379,9 +1382,12 @@ export function ForecastCard({
             )}
           </div>
           {score?.summary && (
-            <p className="max-w-3xl text-sm leading-relaxed text-text-muted sm:text-base">{score.summary}</p>
+            <ShowIf option="show_summary">
+              <p className="max-w-3xl text-sm leading-relaxed text-text-muted sm:text-base">{score.summary}</p>
+            </ShowIf>
           )}
           {weatherNow && (
+            <ShowIf option="show_weather">
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text">
               <WeatherIcon sky={weatherNow.sky} className="h-5 w-5" />
               <span className="font-semibold">{weatherNow.short_forecast}</span>
@@ -1393,6 +1399,7 @@ export function ForecastCard({
               )}
               <span className="text-xs text-text-muted">({weatherNow.name.toLowerCase()})</span>
             </p>
+            </ShowIf>
           )}
         </div>
 

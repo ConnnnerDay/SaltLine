@@ -430,6 +430,42 @@ export function ForecastTabs({
               </div>
             )}
           </div>
+          <div className="flex w-full flex-col gap-1.5 border-t border-border pt-3" role="group" aria-label="Display">
+            <span className="text-sm font-semibold text-text">Display</span>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-text">
+              {(
+                [
+                  ['show_summary', 'Summary sentence'],
+                  ['show_weather', 'Current weather line'],
+                  ['biting_photos', 'Fish photos'],
+                ] as const
+              ).map(([option, label]) => (
+                <label key={option} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={layout[option] !== false}
+                    onChange={(event) => setLayout({ ...layout, [option]: event.target.checked })}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  {label}
+                </label>
+              ))}
+              <label className="flex items-center gap-2">
+                <span>What&apos;s biting shows</span>
+                <select
+                  value={layout.biting_count ?? 0}
+                  onChange={(event) =>
+                    setLayout({ ...layout, biting_count: Number(event.target.value) || null })
+                  }
+                  className="h-8 rounded-md border border-border bg-surface px-2 text-xs font-semibold text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                >
+                  <option value={0}>every pick</option>
+                  <option value={1}>the top pick</option>
+                  <option value={3}>the top 3</option>
+                </select>
+              </label>
+            </div>
+          </div>
           <div className="flex w-full flex-col gap-1.5 border-t border-border pt-3" role="group" aria-label="Tabs">
             <span className="text-sm text-text">
               <span className="font-semibold">Tabs</span>{' '}

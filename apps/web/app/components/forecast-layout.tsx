@@ -109,3 +109,19 @@ export function HeadlineStats({ stats }: { stats: StatTileData[] }) {
     </dl>
   )
 }
+
+type DisplayOption = 'show_summary' | 'show_weather' | 'biting_photos'
+
+/** Renders its children unless the user turned this display option off
+ * in Customize (all default to on). */
+export function ShowIf({ option, children }: { option: DisplayOption; children: React.ReactNode }) {
+  const { layout } = useForecastLayout()
+  return layout[option] === false ? null : <>{children}</>
+}
+
+/** Renders the `index`-th "What's biting" pick only within the user's
+ * chosen count (all, by default). */
+export function WithinBitingCount({ index, children }: { index: number; children: React.ReactNode }) {
+  const { layout } = useForecastLayout()
+  return layout.biting_count && index >= layout.biting_count ? null : <>{children}</>
+}

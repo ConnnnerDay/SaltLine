@@ -3141,5 +3141,75 @@
     "license": "CC BY-NC 4.0",
     "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
     "source_url": "https://www.inaturalist.org/photos/110513218"
+  },
+  "midnight-parrotfish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/617668552/medium.jpg",
+    "credit": "Curtis Hart via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/617668552"
+  },
+  "stoplight-parrotfish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/48690384/medium.jpg",
+    "credit": "Kevin Bryant via iNaturalist",
+    "license": "CC BY-NC-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/48690384"
+  },
+  "pacific-lamprey": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/1715307/medium.jpg",
+    "credit": "Chuck Sexton via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/1715307"
+  },
+  "green-sturgeon": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/507846284/medium.jpg",
+    "credit": "Sage Ono via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/507846284"
+  },
+  "white-sturgeon-sport": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/110158308/medium.jpg",
+    "credit": "Oregon Department of Fish & Wildlife via iNaturalist",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/110158308"
+  },
+  "humboldt-squid": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/202302/medium.jpg",
+    "credit": "Chris Brown via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/202302"
+  },
+  "roosterfish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/526058077/medium.jpg",
+    "credit": "bpfish via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/526058077"
+  },
+  "pacific-crevalle-jack": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/256100254/medium.jpeg",
+    "credit": "Alberto Alcalá via iNaturalist",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/256100254"
+  },
+  "kawakawa-mackerel-tuna": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/347226630/medium.jpg",
+    "credit": "Yinan Li via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/347226630"
+  },
+  "sea-lamprey-anadromous": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/449161/medium.jpg",
+    "credit": "NOAA Great Lakes Environmental Research Laboratory via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/449161"
   }
 }

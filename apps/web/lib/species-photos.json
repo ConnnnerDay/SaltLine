@@ -2084,5 +2084,103 @@
     "license": "CC BY-NC-ND 4.0",
     "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
     "source_url": "https://www.inaturalist.org/photos/92757790"
+  },
+  "sockeye-salmon-red-salmon": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/588206658/medium.jpg",
+    "credit": "TunaSimp via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/588206658"
+  },
+  "rock-sole": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/430149517/medium.jpeg",
+    "credit": "Steve Kelly via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/430149517"
+  },
+  "bocaccio": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/168880674/medium.jpg",
+    "credit": "Josh Maxwell via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/168880674"
+  },
+  "widow-rockfish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/425845/medium.jpeg",
+    "credit": "BIO Photography Group, Biodiversity Institute of Ontario via iNaturalist",
+    "license": "CC BY-NC-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/425845"
+  },
+  "tiger-rockfish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/88372494/medium.jpeg",
+    "credit": "Sara Thiebaud via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/88372494"
+  },
+  "treefish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/94893104/medium.jpg",
+    "credit": "Douglas Klug via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/94893104"
+  },
+  "gopher-rockfish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/26238/medium.jpg",
+    "credit": "Ken-ichi Ueda via iNaturalist",
+    "license": "CC BY-NC-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/26238"
+  },
+  "kelp-rockfish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/265680403/medium.jpg",
+    "credit": "Thomas Menut via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/265680403"
+  },
+  "rex-sole": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/22375212/medium.jpg",
+    "credit": "Jennifer Long via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/22375212"
+  },
+  "kumu-whitesaddle-goatfish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/2364088/medium.jpg",
+    "credit": "104623964081378888743 via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/2364088"
+  },
+  "pacific-ocean-perch": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/101126025/medium.jpg",
+    "credit": "(c) Jackson W.F. Chu, osa oikeuksista pidätetään (CC BY-NC-SA), lähettänyt Jackson W.F. Chu via iNaturalist",
+    "license": "CC BY-NC-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/101126025"
+  },
+  "rougheye-rockfish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/178840446/medium.jpg",
+    "credit": "Fisheries and Oceans Canada via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/178840446"
+  },
+  "longspine-thornyhead": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/354170148/medium.jpeg",
+    "credit": "(c) Daryll Marie, osa oikeuksista pidätetään (CC BY-NC), lähettänyt Daryll Marie via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/354170148"
+  },
+  "brown-rockfish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/110585605/medium.jpg",
+    "credit": "KJ via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/110585605"
   }
 }

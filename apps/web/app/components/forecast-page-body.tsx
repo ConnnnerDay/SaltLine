@@ -64,16 +64,22 @@ export function ForecastPageBody({
       <Container>
         <div className="flex flex-col gap-4 py-5 pb-16">
           {error && <ForecastErrorCard message={error} reason={errorReason} retryHref={retryHref} />}
-          {forecast && <ForecastCard forecast={forecast} cams={cams} profile={profile} />}
           {forecast && (
-            <NearbySpots
-              locationId={forecast.location.id}
-              currentScore={forecast.conditions?.score?.score ?? null}
-              linkBase={nearbyLinkBase}
-              userId={userId}
+            <ForecastCard
+              forecast={forecast}
+              cams={cams}
+              profile={profile}
+              nearby={
+                <NearbySpots
+                  locationId={forecast.location.id}
+                  currentScore={forecast.conditions?.score?.score ?? null}
+                  linkBase={nearbyLinkBase}
+                  userId={userId}
+                />
+              }
+              seen={<SeenNearby locationId={forecast.location.id} />}
             />
           )}
-          {forecast && <SeenNearby locationId={forecast.location.id} />}
           {children}
         </div>
       </Container>

@@ -79,7 +79,7 @@ export function NextDays({
         <h2 className="section-label">Next few days</h2>
         <span className="text-xs text-text-muted">From the NWS marine forecast</span>
       </div>
-      <ol className="no-scrollbar -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-1 pt-3 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-5">
+      <ol className="no-scrollbar -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-1 pt-3 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0">
         {days.map((day) => {
           const isBest = hasBest && day.score === topScore
           return (

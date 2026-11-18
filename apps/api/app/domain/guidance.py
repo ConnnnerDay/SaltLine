@@ -206,12 +206,18 @@ def regulation_for(species_id: str, state: str, today: date) -> Regulation | Non
     if entry is None:
         return None
     age = _months_between(data["as_of"], today)
+
+    def text(field: str) -> str | None:
+        # A few legacy entries hold a bare number ("bag_limit": 10).
+        value = entry.get(field)
+        return None if value is None else str(value)
+
     return Regulation(
         state=state,
-        min_size=entry.get("min_size"),
-        bag_limit=entry.get("bag_limit"),
-        season=entry.get("season"),
-        notes=entry.get("notes"),
+        min_size=text("min_size"),
+        bag_limit=text("bag_limit"),
+        season=text("season"),
+        notes=text("notes"),
         source_url=data["state_sources"].get(state),
         as_of=data["as_of"],
         possibly_outdated=age is None or age > _REGULATIONS_STALE_MONTHS,

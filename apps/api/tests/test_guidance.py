@@ -499,3 +499,16 @@ def test_picks_keep_boat_tidal_and_bait_fish_in_their_place() -> None:
         month=7,
     )
     assert summer.boat_species
+
+
+def test_every_regulation_entry_builds() -> None:
+    """Every state x species limit in the snapshot must load (a bare number
+    where text belongs once crashed "What's biting" for NJ sheepshead)."""
+    from datetime import date
+
+    from app.domain.guidance import load_regulations, regulation_for
+
+    today = date(2026, 6, 1)
+    for state, entries in load_regulations()["states"].items():
+        for species_id in entries:
+            assert regulation_for(species_id, state, today) is not None

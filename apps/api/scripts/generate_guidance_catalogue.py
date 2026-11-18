@@ -575,7 +575,11 @@ def _write_regulations(species: list[dict[str, object]]) -> None:
             legacy_name = str(record["legacy_name"])
             key = name_map.get(legacy_name, legacy_name)
             if key in entries:
-                states.setdefault(state, {})[str(record["id"])] = entries[key]
+                # Text fields only: a few legacy entries hold bare numbers.
+                states.setdefault(state, {})[str(record["id"])] = {
+                    field: None if value is None else str(value)
+                    for field, value in entries[key].items()
+                }
     sources = _state_sources()
     payload = {
         "_comment": (

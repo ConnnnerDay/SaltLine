@@ -99,6 +99,148 @@
         "season": "Catch-and-release only (rare stray)",
         "notes": "Common snook may stray into AL waters. Release all \u2014 no established harvest season.",
         "source": "AL DCNR Marine Resources"
+      },
+      "northern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "cobia": {
+        "min_size": "33 in FL",
+        "bag_limit": "2 per day",
+        "season": "Open year-round",
+        "notes": "Fork length minimum. Verify current rules before fishing."
+      },
+      "king-mackerel": {
+        "min_size": "24 in FL",
+        "bag_limit": "3 per day",
+        "season": "Open year-round",
+        "notes": "From a vessel: 3 per person. Verify for any vessel limit changes."
+      },
+      "atlantic-spadefish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for Atlantic spadefish. Verify current state rules."
+      },
+      "gray-triggerfish": {
+        "min_size": "12 in TL",
+        "bag_limit": "20 per person per day (10 per person in Gulf federal waters)",
+        "season": "Open year-round state waters; federal Gulf waters: open year-round",
+        "notes": "Gulf federal waters bag limit is 10 per person. Verify state rules for any changes."
+      },
+      "southern-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Verify for seasonal closures; flounder regulations have been updated in recent years."
+      },
+      "gulf-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Gulf flounder in AL coastal bays.",
+        "source": "AL DCNR"
+      },
+      "southern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "gulf-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "pinfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Pinfish common in AL coastal waters. No bag limit.",
+        "source": "AL DCNR"
+      },
+      "mangrove-snapper": {
+        "min_size": "10 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Verify current state rules for gray snapper (mangrove snapper)."
+      },
+      "jack-crevalle": {
+        "min_size": "No minimum",
+        "bag_limit": "No bag limit (FL: 10/day jack aggregate)",
+        "season": "Open year-round",
+        "notes": "Crevalle jack: no minimum size or bag limit in Alabama. Verify with Outdoor Alabama.",
+        "source": "https://www.outdooralabama.com/saltwater-fishing"
+      },
+      "blue-runner": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No state regulations for blue runner in most Gulf and SE states; excellent live bait species."
+      },
+      "ladyfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Ladyfish in AL coastal bays. No bag limit.",
+        "source": "AL DCNR"
+      },
+      "tarpon": {
+        "min_size": "No minimum harvest size",
+        "bag_limit": "1 tarpon tag per person/year",
+        "season": "Seasonal \u2014 open in summer and early fall",
+        "notes": "Tarpon harvest requires a tarpon tag (available from state wildlife agency). Catch and release is strongly encouraged and practiced by most anglers. Common along Alabama Gulf Coast piers and beaches in summer. Verify current tagging requirements.",
+        "source": "https://www.outdooralabama.com/saltwater-fishing"
+      },
+      "tripletail": {
+        "min_size": "15 in TL",
+        "bag_limit": "5 per day",
+        "season": "Open year-round",
+        "notes": "Verify current limits with ADCNR."
+      },
+      "atlantic-sharpnose-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Atlantic sharpnose in AL coastal waters. No bag limit.",
+        "source": "AL DCNR"
+      },
+      "blacktip-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (Small Coastal Shark)",
+        "season": "Open year-round",
+        "notes": "Blacktip shark in AL Gulf. No specific bag limit.",
+        "source": "AL DCNR"
+      },
+      "spinner-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (Small Coastal Shark)",
+        "season": "Open year-round",
+        "notes": "Blacktip shark in AL Gulf. No specific bag limit.",
+        "source": "AL DCNR"
+      },
+      "bonnethead-shark": {
+        "min_size": "None",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round",
+        "notes": "Bonnethead sharks managed under NOAA HMS. Requires federal HMS Angling Permit from a vessel. 1-fish vessel limit. Mostly released."
+      },
+      "bull-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Bull shark is a Large Coastal Shark. NOAA permit required to fish for them recreationally. 1 per vessel per day. No minimum size. Verify with NOAA HMS and AL state rules.",
+        "source": "NOAA Fisheries HMS; AL state agency"
+      },
+      "amaama-mullet": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Striped mullet common in AL bays. No bag limit.",
+        "source": "AL DCNR"
       }
     },
     "CA": {
@@ -159,6 +301,233 @@
         "bag_limit": "2 per day",
         "season": "Seasonal \u2014 check CDFW for current open dates",
         "notes": "Season dates and bag limits vary by area (north vs. south). Verify before fishing."
+      },
+      "walleye-surfperch": {
+        "min_size": "No minimum",
+        "bag_limit": "20 per day",
+        "season": "Open year-round",
+        "notes": "Walleye surfperch common near jetties and piers. Part of surfperch aggregate bag limit. Verify current CDFW regulations.",
+        "source": "CDFW"
+      },
+      "silver-surfperch": {
+        "min_size": "None",
+        "bag_limit": "10 per day (surfperch aggregate)",
+        "season": "Open year-round",
+        "notes": "Part of the California surfperch aggregate limit. Verify current CDFW rules."
+      },
+      "rubberlip-seaperch": {
+        "min_size": "No minimum",
+        "bag_limit": "10 per day (aggregate surfperch limit)",
+        "season": "Open year-round",
+        "notes": "California 10-fish/day aggregate limit applies to all surfperch species combined. No minimum size. Verify with CDFW for any area-specific closures.",
+        "source": "https://wildlife.ca.gov/Fishing/Ocean/Regulations"
+      },
+      "pile-perch": {
+        "min_size": "No minimum",
+        "bag_limit": "20 per day",
+        "season": "Open year-round",
+        "notes": "Walleye surfperch common near jetties and piers. Part of surfperch aggregate bag limit. Verify current CDFW regulations.",
+        "source": "CDFW"
+      },
+      "shiner-perch": {
+        "min_size": "No minimum",
+        "bag_limit": "20 per day",
+        "season": "Open year-round",
+        "notes": "Walleye surfperch common near jetties and piers. Part of surfperch aggregate bag limit. Verify current CDFW regulations.",
+        "source": "CDFW"
+      },
+      "black-perch": {
+        "min_size": "None",
+        "bag_limit": "10 per day (surfperch aggregate)",
+        "season": "Open year-round",
+        "notes": "Part of the surfperch aggregate. Verify current state rules."
+      },
+      "jacksmelt": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Jacksmelt have no bag limit in CA. A popular and easy pier catch year-round, especially fall/winter.",
+        "source": "CDFW"
+      },
+      "white-croaker": {
+        "min_size": "None",
+        "bag_limit": "20 per day",
+        "season": "Open year-round",
+        "notes": "No size limit for white croaker. Check local consumption advisories \u2014 some Southern California harbors have fish consumption warnings due to sediment contamination."
+      },
+      "starry-flounder": {
+        "min_size": "No minimum",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Starry flounder in nearshore and estuary areas. Check current CDFW/ODFW/WDFW rules. Verify current CDFW regulations.",
+        "source": "CDFW"
+      },
+      "pacific-sanddab": {
+        "min_size": "None",
+        "bag_limit": "No limit for sanddabs",
+        "season": "Open year-round",
+        "notes": "Pacific sand dabs have no bag or size limit in most Pacific states. They are among the most lightly regulated flatfish species."
+      },
+      "kelp-greenling": {
+        "min_size": "12 in TL (CA)",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Kelp greenling 12-inch minimum in California. 10-fish bag limit. Verify current CDFW/ODFW/WDFW rules."
+      },
+      "cabezon": {
+        "min_size": "15 in TL",
+        "bag_limit": "5 per day",
+        "season": "Varies by area",
+        "notes": "Season and bag limits vary by CDFW management area. Verify current rules."
+      },
+      "grass-rockfish": {
+        "min_size": "10 in TL",
+        "bag_limit": "Included in rockfish aggregate",
+        "season": "Open year-round",
+        "notes": "Grass rockfish found in kelp beds and rocky areas. Part of aggregate bag limit. Verify current CDFW regulations.",
+        "source": "CDFW"
+      },
+      "blue-rockfish": {
+        "min_size": "10 in TL",
+        "bag_limit": "Included in rockfish aggregate",
+        "season": "Open year-round",
+        "notes": "Blue rockfish are among the most common nearshore rockfish. Part of aggregate bag limit. Verify current CDFW regulations.",
+        "source": "CDFW"
+      },
+      "monkeyface-prickleback": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Pacific staghorn sculpin are common pier catch throughout the Pacific Coast. Excellent bait for halibut. Verify current CDFW regulations.",
+        "source": "CDFW"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "18 in TL",
+        "bag_limit": "2 per day (ocean/bay)",
+        "season": "Open year-round in ocean and SF Bay",
+        "notes": "Bag limit is 2 in tidal waters. Verify for Delta rules which differ."
+      },
+      "chinook-salmon": {
+        "min_size": "24 in TL",
+        "bag_limit": "2 per day",
+        "season": "Set annually; varies by zone and river system",
+        "notes": "Season dates set by CDFW and PFMC each year. ALWAYS verify before fishing \u2014 rules change frequently."
+      },
+      "coho-salmon": {
+        "min_size": "Varies by zone",
+        "bag_limit": "Varies",
+        "season": "Often closed or very restricted",
+        "notes": "Coho salmon are protected in many CA waters. Verify current rules before fishing."
+      },
+      "leopard-shark": {
+        "min_size": "24 in TL (CA)",
+        "bag_limit": "3 per day",
+        "season": "Open year-round",
+        "notes": "Leopard sharks are managed under California Leopard/Soupfin/Smoothhound complex. Verify current CDFW rules. Most anglers practice catch and release."
+      },
+      "bat-ray": {
+        "min_size": "No minimum",
+        "bag_limit": "2 per day",
+        "season": "Open year-round",
+        "notes": "Bat rays are powerful California ray species. 2 per day limit. Venomous tail spine \u2014 handle carefully. Verify current CDFW regulations.",
+        "source": "CDFW"
+      },
+      "pacific-mackerel": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No state size or bag limit for Pacific mackerel. Abundance varies with ocean conditions."
+      },
+      "kelp-bass-calico-bass": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Combined bass bag limit (kelp, sand, barred sand) may apply. Verify with CDFW."
+      },
+      "barred-sand-bass": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Combined bass bag limit (kelp, sand, barred sand) may apply. Verify with CDFW."
+      },
+      "spotted-sand-bass": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Combined bass bag limit (kelp, sand, barred sand) may apply. Verify with CDFW."
+      },
+      "california-sheephead": {
+        "min_size": "12 in TL",
+        "bag_limit": "5 per day",
+        "season": "Open year-round",
+        "notes": "California sheephead caught from kelp beds and rocky reefs. Verify CDFW rules.",
+        "source": "CDFW"
+      },
+      "opaleye": {
+        "min_size": "No minimum",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Opaleye (blue-eyed perch) are caught from Southern California piers on algae or dough bait. Verify current CDFW regulations.",
+        "source": "CDFW"
+      },
+      "halfmoon": {
+        "min_size": "No minimum",
+        "bag_limit": 10,
+        "season": "Year-round",
+        "notes": "License required."
+      },
+      "jack-mackerel": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No size or bag limit. Verify current CDFW rules."
+      },
+      "pacific-barracuda": {
+        "min_size": "28 in total length",
+        "bag_limit": "10 per day",
+        "season": "Open year-round; peak April\u2013September",
+        "notes": "Single barbless hooks required. 28 in TL minimum statewide.",
+        "official_source": "https://wildlife.ca.gov/Fishing/Ocean/Fish/Pelagic/Pacific-Barracuda"
+      },
+      "pacific-bonito": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round (seasonal, warm months)",
+        "notes": "Striped bonito are a seasonal SoCal game fish; no specific bag limit. Fast metal jigs work best.",
+        "source": "CDFW"
+      },
+      "yellowtail": {
+        "min_size": "24 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Verify current bag limits and any area restrictions with CDFW."
+      },
+      "queenfish": {
+        "min_size": "None",
+        "bag_limit": "No limit (or general nearshore limit)",
+        "season": "Open year-round",
+        "notes": "No specific bag limit. Verify current CDFW rules."
+      },
+      "shovelnose-guitarfish": {
+        "min_size": "No minimum",
+        "bag_limit": "5 per day",
+        "season": "Open year-round",
+        "notes": "Shovelnose guitarfish are common in CA bays and surf. State-specific bag limits may apply. Verify current CDFW regulations.",
+        "source": "CDFW"
+      },
+      "round-stingray": {
+        "min_size": "No minimum",
+        "bag_limit": "No bag limit",
+        "season": "Open year-round",
+        "notes": "No specific size or bag limit for round stingray in California. Catch and release is recommended \u2014 stings can be painful. Shuffle feet when wading to avoid contact. Verify with CDFW.",
+        "source": "https://wildlife.ca.gov/Fishing/Ocean/Regulations"
+      },
+      "amaama-mullet": {
+        "min_size": "No minimum",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Striped mullet in CA coastal bays and estuaries. 10 per day limit. Verify CDFW rules.",
+        "source": "CDFW"
       }
     },
     "CT": {
@@ -204,6 +573,89 @@
         "bag_limit": "10 per day",
         "season": "Seasonal \u2014 check CT DEEP for open dates",
         "notes": "Size and bag limits vary by season. Verify current rules before fishing."
+      },
+      "weakfish-gray-trout": {
+        "min_size": "13 in TL",
+        "bag_limit": "1 per day",
+        "season": "Open year-round",
+        "notes": "Very restrictive bag limit due to depleted stock. Verify."
+      },
+      "scup-porgy": {
+        "min_size": "9 in TL",
+        "bag_limit": "30 per day",
+        "season": "Open year-round",
+        "notes": "Verify current limits with CT DEEP."
+      },
+      "winter-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "8 per day",
+        "season": "Mar 1 \u2013 May 31",
+        "notes": "Shore/pier season may differ from boat season. Verify with CT DEEP."
+      },
+      "atlantic-mackerel": {
+        "min_size": "None",
+        "bag_limit": "20 per day (recreational)",
+        "season": "Open year-round",
+        "notes": "No minimum size. Federal mackerel quota applies to commercial; recreational is generally open."
+      },
+      "atlantic-bonito": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round (summer-fall)",
+        "notes": "No state regulations for Atlantic bonito in most states."
+      },
+      "american-eel": {
+        "min_size": "9 in (varies by state)",
+        "bag_limit": "25 per person per day (varies)",
+        "season": "Open year-round (elver season is separate and highly regulated)",
+        "notes": "American eel recreational regulations vary by state. Glass eel (elver) fishery is separately managed and requires specific permits in states like ME and RI. Yellow/silver eels have size and bag limits. Verify current ASMFC and state rules."
+      },
+      "northern-puffer-blowfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round (summer/fall)",
+        "notes": "Northern puffer in CT Sound in summer. No bag limit.",
+        "source": "CT DEEP"
+      },
+      "smooth-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Smooth dogfish in CT coastal waters. No bag limit.",
+        "source": "CT DEEP"
+      },
+      "spiny-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "15 per day",
+        "season": "Open year-round",
+        "notes": "Spiny dogfish present in CT waters in cooler months.",
+        "source": "CT DEEP"
+      },
+      "cobia": {
+        "min_size": "37 in FL",
+        "bag_limit": "1 per person per day",
+        "season": "Open year-round (rare summer visitor)",
+        "notes": "Cobia occasionally appear in these northern waters in summer. Verify current ASMFC coastwide rules."
+      },
+      "sandbar-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Sandbar shark is a Large Coastal Shark. NOAA recreational permit required. 1 per vessel per day. Sandbar sharks are an important coastal species; handle carefully. Verify with NOAA HMS and CT state rules.",
+        "source": "NOAA Fisheries HMS; CT state agency"
+      },
+      "bull-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Bull shark is a Large Coastal Shark. NOAA permit required to fish for them recreationally. 1 per vessel per day. No minimum size. Verify with NOAA HMS and CT state rules.",
+        "source": "NOAA Fisheries HMS; CT state agency"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "28 in TL",
+        "bag_limit": "1 per day",
+        "season": "Open year-round",
+        "notes": "Regulations may include slot limits or season closures. Verify with DEEP. Verify current ASMFC-aligned slot limits and season with CT DEEP for 2026."
       }
     },
     "DE": {
@@ -285,6 +737,89 @@
         "bag_limit": "10 per day",
         "season": "Seasonal",
         "notes": "Verify current season dates and limits with DE DNREC."
+      },
+      "weakfish-gray-trout": {
+        "min_size": "13 in TL",
+        "bag_limit": "1 per day",
+        "season": "Open year-round",
+        "notes": "Very restrictive due to population decline; verify current DE rules."
+      },
+      "scup-porgy": {
+        "min_size": "9 in TL",
+        "bag_limit": "30 per day",
+        "season": "Open year-round",
+        "notes": "Verify current limits with DE DNREC."
+      },
+      "winter-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "6 per day",
+        "season": "Apr 1 \u2013 Dec 31",
+        "notes": "Verify with DE DNREC; bag limit may change annually."
+      },
+      "atlantic-mackerel": {
+        "min_size": "None",
+        "bag_limit": "20 per day (recreational)",
+        "season": "Open year-round",
+        "notes": "No minimum size. Federal mackerel quota applies to commercial; recreational is generally open."
+      },
+      "atlantic-bonito": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round (summer-fall)",
+        "notes": "No state regulations for Atlantic bonito in most states."
+      },
+      "american-eel": {
+        "min_size": "9 in (varies by state)",
+        "bag_limit": "25 per person per day (varies)",
+        "season": "Open year-round (elver season is separate and highly regulated)",
+        "notes": "American eel recreational regulations vary by state. Glass eel (elver) fishery is separately managed and requires specific permits in states like ME and RI. Yellow/silver eels have size and bag limits. Verify current ASMFC and state rules."
+      },
+      "northern-puffer-blowfish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for northern puffer. Properly cleaning pufferfish is important \u2014 the liver, skin, and gonads contain tetrodotoxin. Only eat the skinned back-strap meat."
+      },
+      "smooth-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Smooth dogfish in DE coastal and bay waters. No specific bag limit.",
+        "source": "DE DNREC"
+      },
+      "spiny-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "15 per day",
+        "season": "Open year-round",
+        "notes": "Spiny dogfish present in DE offshore waters. Follow NOAA regulations.",
+        "source": "DE DNREC; NOAA Fisheries"
+      },
+      "cobia": {
+        "min_size": "33 in TL",
+        "bag_limit": "2 per day",
+        "season": "Seasonal (May\u2013October)",
+        "notes": "Cobia migrate up the Delmarva Peninsula in spring and into Delaware Bay in summer. 33-inch minimum TL, 2/day bag limit. Verify current rules with DE DNREC.",
+        "source": "https://dnrec.delaware.gov/fish-wildlife/fishing/saltwater-fishing/"
+      },
+      "king-mackerel": {
+        "min_size": "24 in FL",
+        "bag_limit": "3 per day",
+        "season": "Seasonal (summer\u2013fall)",
+        "notes": "King mackerel appear in Delaware coastal offshore waters in summer. 24-inch FL minimum, 3/day (federal rules). Verify with DE DNREC and NOAA.",
+        "source": "https://dnrec.delaware.gov/fish-wildlife/fishing/saltwater-fishing/"
+      },
+      "sandbar-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Sandbar shark is a Large Coastal Shark. NOAA recreational permit required. 1 per vessel per day. Sandbar sharks are an important coastal species; handle carefully. Verify with NOAA HMS and DE state rules.",
+        "source": "NOAA Fisheries HMS; DE state agency"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "28 in TL",
+        "bag_limit": "1 per day",
+        "season": "Seasonal \u2014 check DNREC for dates",
+        "notes": "Regulations may include a slot limit. Verify current rules with DE DNREC. Verify 2026 slot limits and season with DE DNREC \u2014 ASMFC measures may have been updated."
       }
     },
     "FL": {
@@ -382,6 +917,209 @@
         "bag_limit": "0 (catch and release only)",
         "season": "Open year-round (C&R only)",
         "notes": "Harvest of bonefish is prohibited in Florida. Catch and release only."
+      },
+      "weakfish-gray-trout": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Weakfish (gray trout) in Florida: 12-inch minimum, 10/day. Rare in Florida \u2014 populations severely reduced. Catch and release encouraged. Verify with FWC.",
+        "source": "https://myfwc.com/fishing/saltwater/recreational/"
+      },
+      "scup-porgy": {
+        "min_size": "9 in TL",
+        "bag_limit": "30 per day",
+        "season": "Open year-round (rare)",
+        "notes": "Scup are rare in FL waters; mostly offshore in winter. Federal rules apply.",
+        "source": "FL FWC; NOAA Fisheries"
+      },
+      "atlantic-bonito": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Unregulated in Florida state waters."
+      },
+      "northern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "american-eel": {
+        "min_size": "9 in",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "American eel in FL coastal rivers.",
+        "source": "FL FWC"
+      },
+      "cobia": {
+        "min_size": "33 in FL",
+        "bag_limit": "1 per day",
+        "season": "Open year-round",
+        "notes": "Fork length minimum. Verify current rules with FWC."
+      },
+      "king-mackerel": {
+        "min_size": "24 in FL",
+        "bag_limit": "2 per day",
+        "season": "Open year-round",
+        "notes": "Fork length minimum. Bag limits may differ in federal vs. state waters. Verify with FWC."
+      },
+      "atlantic-spadefish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for Atlantic spadefish. Verify current state rules."
+      },
+      "gray-triggerfish": {
+        "min_size": "12 in TL",
+        "bag_limit": "20 per person per day (10 per person in Gulf federal waters)",
+        "season": "Open year-round state waters; federal Gulf waters: open year-round",
+        "notes": "Gulf federal waters bag limit is 10 per person. Verify state rules for any changes."
+      },
+      "southern-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Seasonal \u2014 check FWC for closed gigging season",
+        "notes": "Southern flounder in Florida panhandle: 12-inch minimum, 10/day. Some areas have gigging season closures. Verify current rules with FWC.",
+        "source": "https://myfwc.com/fishing/saltwater/recreational/"
+      },
+      "gulf-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Gulf flounder are common in FL Gulf Coast waters. No specific bag limit; general flounder rules apply.",
+        "source": "FL FWC"
+      },
+      "southern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "gulf-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "pinfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Pinfish are extremely common throughout FL. No bag limit \u2014 important live bait fish.",
+        "source": "FL FWC"
+      },
+      "mangrove-snapper": {
+        "min_size": "10 in TL",
+        "bag_limit": "10 per day (snapper aggregate)",
+        "season": "Open year-round",
+        "notes": "Gray snapper (mangrove snapper) count toward the snapper aggregate limit in Florida. Verify current FL FWC rules."
+      },
+      "jack-crevalle": {
+        "min_size": "No minimum",
+        "bag_limit": "No bag limit (FL: 10/day jack aggregate)",
+        "season": "Open year-round",
+        "notes": "Crevalle jack are part of Florida's 10-fish/day aggregate jack limit (combined with other non-listed jacks). No minimum size. Common at bridges, piers, and inlets. Verify with FWC.",
+        "source": "https://myfwc.com/fishing/saltwater/recreational/"
+      },
+      "blue-runner": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No state regulations for blue runner in most Gulf and SE states; excellent live bait species."
+      },
+      "ladyfish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for ladyfish in Florida."
+      },
+      "tarpon": {
+        "min_size": "75 in FL",
+        "bag_limit": "1 per day (harvest tag required)",
+        "season": "Open year-round",
+        "notes": "Most anglers practice catch and release. Harvest requires a $50 tarpon tag from FWC. Minimum 75 in fork length. Strongly encouraged to release."
+      },
+      "tripletail": {
+        "min_size": "15 in TL",
+        "bag_limit": "2 per person per day",
+        "season": "Open year-round",
+        "notes": "Verify current FWC rules before fishing."
+      },
+      "permit": {
+        "min_size": "11 in FL",
+        "bag_limit": "2 per person per day",
+        "season": "Open year-round",
+        "notes": "Fork length minimum. Applies to both Atlantic and Gulf sides."
+      },
+      "great-barracuda": {
+        "min_size": "None (FL: no minimum)",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific size or bag limit for great barracuda in most SE states. Ciguatera fish poisoning risk \u2014 most anglers release large barracuda. Use wire leader."
+      },
+      "bonefish": {
+        "min_size": "None",
+        "bag_limit": "0 (catch and release only)",
+        "season": "Open year-round (C&R only)",
+        "notes": "Harvest of bonefish is prohibited in Florida. Catch and release only."
+      },
+      "atlantic-sharpnose-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "3 per person per day",
+        "season": "Year-round",
+        "notes": "Small coastal shark \u2014 no minimum size. HMS Angling Permit required."
+      },
+      "sandbar-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Sandbar shark is a Large Coastal Shark. NOAA recreational permit required. 1 per vessel per day. Sandbar sharks are an important coastal species; handle carefully. Verify with NOAA HMS and FL state rules.",
+        "source": "NOAA Fisheries HMS; FL state agency"
+      },
+      "blacktip-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "spinner-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "bonnethead-shark": {
+        "min_size": "None",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round",
+        "notes": "Bonnethead sharks managed under NOAA HMS. Requires federal HMS Angling Permit from a vessel. 1-fish vessel limit. Mostly released."
+      },
+      "bull-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Bull shark is a Large Coastal Shark. NOAA permit required to fish for them recreationally. 1 per vessel per day. No minimum size. Verify with NOAA HMS and FL state rules.",
+        "source": "NOAA Fisheries HMS; FL state agency"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "18 in TL",
+        "bag_limit": "2 per day",
+        "season": "Open year-round in Panhandle rivers; check FWC regulations",
+        "notes": "Striped bass present in FL panhandle rivers. No saltwater pier fishery. Verify FWC rules.",
+        "source": "FL FWC"
+      },
+      "kaku-barracuda": {
+        "min_size": "None (FL: no minimum)",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific size or bag limit for great barracuda in most SE states. Ciguatera fish poisoning risk \u2014 most anglers release large barracuda. Use wire leader."
+      },
+      "amaama-mullet": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Striped mullet are extremely common in FL coastal waters. Commercial season Sept 1-Jan 31. Recreational: generally open year-round.",
+        "source": "FL FWC"
       }
     },
     "GA": {
@@ -474,6 +1212,204 @@
         "season": "Open year-round",
         "notes": "Bonefish are occasional strays in GA. No bag limit but best to release.",
         "source": "GA DNR"
+      },
+      "weakfish-gray-trout": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Weakfish occasionally caught in Georgia nearshore and coastal waters; populations are historically low. Catch and release encouraged. Verify with Georgia Wildlife.",
+        "source": "https://georgiawildlife.com/fishing/regulations"
+      },
+      "scup-porgy": {
+        "min_size": "9 in TL",
+        "bag_limit": "30 per day",
+        "season": "Open year-round (winter months)",
+        "notes": "Scup (porgy) are occasional winter visitors to GA offshore reefs. Federal rules apply.",
+        "source": "GA DNR CRD; NOAA Fisheries"
+      },
+      "winter-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round (rare south of NY)",
+        "notes": "Winter flounder are uncommon south of New Jersey; verify current state rules."
+      },
+      "northern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "american-eel": {
+        "min_size": "9 in",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "American eel in GA coastal rivers.",
+        "source": "GA DNR"
+      },
+      "cobia": {
+        "min_size": "33 in FL",
+        "bag_limit": "2 per day",
+        "season": "Open year-round",
+        "notes": "Fork length minimum. Verify current GA rules."
+      },
+      "king-mackerel": {
+        "min_size": "24 in FL",
+        "bag_limit": "3 per day",
+        "season": "Open year-round",
+        "notes": "Federal rules apply offshore; verify with GA DNR."
+      },
+      "atlantic-spadefish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for Atlantic spadefish. Verify current state rules."
+      },
+      "gray-triggerfish": {
+        "min_size": "12 in TL",
+        "bag_limit": "20 per person per day (10 per person in Gulf federal waters)",
+        "season": "Open year-round state waters; federal Gulf waters: open year-round",
+        "notes": "Gulf federal waters bag limit is 10 per person. Verify state rules for any changes."
+      },
+      "southern-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "5 per day",
+        "season": "Open year-round",
+        "notes": "Verify current limits with GA DNR."
+      },
+      "southern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "gulf-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "pinfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Pinfish common in GA coastal areas. No bag limit.",
+        "source": "GA DNR"
+      },
+      "mangrove-snapper": {
+        "min_size": "10 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Verify current state rules for gray snapper (mangrove snapper)."
+      },
+      "jack-crevalle": {
+        "min_size": "No minimum",
+        "bag_limit": "No bag limit (FL: 10/day jack aggregate)",
+        "season": "Open year-round",
+        "notes": "Crevalle jack: no minimum or bag limit in Georgia. Verify with Georgia Wildlife.",
+        "source": "https://georgiawildlife.com/fishing/regulations"
+      },
+      "blue-runner": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for blue runner. Primarily used as live bait."
+      },
+      "ladyfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Ladyfish in GA coastal estuaries. No bag limit.",
+        "source": "GA DNR"
+      },
+      "tarpon": {
+        "min_size": "No minimum harvest size",
+        "bag_limit": "1 tarpon tag per person/year",
+        "season": "Seasonal \u2014 open in summer and early fall",
+        "notes": "Tarpon harvest requires a tarpon tag (available from state wildlife agency). Catch and release is strongly encouraged and practiced by most anglers. Tarpon appear along Georgia barrier island beaches and inlets in summer. Verify current tagging requirements.",
+        "source": "https://georgiawildlife.com/fishing/regulations"
+      },
+      "tripletail": {
+        "min_size": "15 in TL",
+        "bag_limit": "5 per day",
+        "season": "Open year-round",
+        "notes": "Verify current GA DNR rules."
+      },
+      "permit": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Permit are occasional in GA nearshore. No bag limit.",
+        "source": "GA DNR"
+      },
+      "great-barracuda": {
+        "min_size": "None (FL: no minimum)",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific size or bag limit for great barracuda in most SE states. Ciguatera fish poisoning risk \u2014 most anglers release large barracuda. Use wire leader."
+      },
+      "bonefish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (rare in this area)",
+        "season": "Open year-round",
+        "notes": "Bonefish are occasional strays in GA. No bag limit but best to release.",
+        "source": "GA DNR"
+      },
+      "atlantic-sharpnose-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "3 per person per day",
+        "season": "Year-round",
+        "notes": "Small coastal shark \u2014 no minimum size. HMS Angling Permit required."
+      },
+      "sandbar-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Sandbar shark is a Large Coastal Shark. NOAA recreational permit required. 1 per vessel per day. Sandbar sharks are an important coastal species; handle carefully. Verify with NOAA HMS and GA state rules.",
+        "source": "NOAA Fisheries HMS; GA state agency"
+      },
+      "blacktip-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "spinner-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "bonnethead-shark": {
+        "min_size": "None",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round",
+        "notes": "Bonnethead sharks managed under NOAA HMS. Requires federal HMS Angling Permit from a vessel. 1-fish vessel limit. Mostly released."
+      },
+      "bull-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Bull shark is a Large Coastal Shark. NOAA permit required to fish for them recreationally. 1 per vessel per day. No minimum size. Verify with NOAA HMS and GA state rules.",
+        "source": "NOAA Fisheries HMS; GA state agency"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "28\u201335 in slot limit (follows ASMFC)",
+        "bag_limit": "1 per day",
+        "season": "Open year-round in most areas",
+        "notes": "Slot limit aligns with ASMFC coastwide rules. Verify current state-specific rules before fishing."
+      },
+      "kaku-barracuda": {
+        "min_size": "None (FL: no minimum)",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific size or bag limit for great barracuda in most SE states. Ciguatera fish poisoning risk \u2014 most anglers release large barracuda. Use wire leader."
+      },
+      "amaama-mullet": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Striped mullet in GA estuaries. No recreational bag limit.",
+        "source": "GA DNR"
       }
     },
     "LA": {
@@ -555,6 +1491,162 @@
         "season": "Open year-round",
         "notes": "Bonefish are not a target species in LA. Extremely rare.",
         "source": "LA Wildlife & Fisheries"
+      },
+      "northern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "cobia": {
+        "min_size": "33 in FL",
+        "bag_limit": "2 per day",
+        "season": "Open year-round",
+        "notes": "Fork length minimum. Verify current rules with LDWF."
+      },
+      "king-mackerel": {
+        "min_size": "24 in FL",
+        "bag_limit": "3 per person per day",
+        "season": "Open year-round",
+        "notes": "Verify for any vessel limits."
+      },
+      "atlantic-spadefish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for Atlantic spadefish. Verify current state rules."
+      },
+      "gray-triggerfish": {
+        "min_size": "12 in TL",
+        "bag_limit": "20 per person per day (10 per person in Gulf federal waters)",
+        "season": "Open year-round state waters; federal Gulf waters: open year-round",
+        "notes": "Gulf federal waters bag limit is 10 per person. Verify state rules for any changes."
+      },
+      "southern-flounder": {
+        "min_size": "10 in TL",
+        "bag_limit": "15 per day",
+        "season": "Open year-round (seasonal closure Nov\u2013Dec in some years)",
+        "notes": "Flounder season may close in fall to protect spawning fish. Verify with LDWF."
+      },
+      "gulf-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Gulf flounder in LA. General flounder regulations apply.",
+        "source": "LA Wildlife & Fisheries"
+      },
+      "southern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "gulf-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "pinfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Pinfish common in LA coastal bays. No bag limit.",
+        "source": "LA Wildlife & Fisheries"
+      },
+      "mangrove-snapper": {
+        "min_size": "10 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Verify current state rules for gray snapper (mangrove snapper)."
+      },
+      "jack-crevalle": {
+        "min_size": "No minimum",
+        "bag_limit": "No bag limit (FL: 10/day jack aggregate)",
+        "season": "Open year-round",
+        "notes": "Crevalle jack: no minimum size or bag limit in Louisiana. Verify with LDWF.",
+        "source": "https://www.wlf.louisiana.gov/page/recreational-fishing-regulations"
+      },
+      "blue-runner": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No state regulations for blue runner in most Gulf and SE states; excellent live bait species."
+      },
+      "ladyfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Ladyfish common in LA coastal bays and passes. No bag limit.",
+        "source": "LA Wildlife & Fisheries"
+      },
+      "tarpon": {
+        "min_size": "No minimum harvest size",
+        "bag_limit": "1 tarpon tag per person/year",
+        "season": "Seasonal \u2014 open in summer and early fall",
+        "notes": "Tarpon harvest requires a tarpon tag (available from state wildlife agency). Catch and release is strongly encouraged and practiced by most anglers. Tarpon are found in Louisiana coastal and offshore waters in summer. Verify current tagging requirements.",
+        "source": "https://www.wlf.louisiana.gov/page/recreational-fishing-regulations"
+      },
+      "tripletail": {
+        "min_size": "15 in TL",
+        "bag_limit": "5 per day",
+        "season": "Open year-round",
+        "notes": "Verify current LDWF rules."
+      },
+      "permit": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Permit rare in LA. No specific regulation.",
+        "source": "LA Wildlife & Fisheries"
+      },
+      "bonefish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (rare in this area)",
+        "season": "Open year-round",
+        "notes": "Bonefish are not a target species in LA. Extremely rare.",
+        "source": "LA Wildlife & Fisheries"
+      },
+      "atlantic-sharpnose-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Atlantic sharpnose in LA coastal waters. No bag limit.",
+        "source": "LA Wildlife & Fisheries"
+      },
+      "blacktip-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (Small Coastal Shark)",
+        "season": "Open year-round",
+        "notes": "Blacktip shark in LA Gulf. No specific bag limit.",
+        "source": "LA Wildlife & Fisheries"
+      },
+      "spinner-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (Small Coastal Shark)",
+        "season": "Open year-round",
+        "notes": "Blacktip shark in LA Gulf. No specific bag limit.",
+        "source": "LA Wildlife & Fisheries"
+      },
+      "bonnethead-shark": {
+        "min_size": "None",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round",
+        "notes": "Bonnethead sharks managed under NOAA HMS. Requires federal HMS Angling Permit from a vessel. 1-fish vessel limit. Mostly released."
+      },
+      "bull-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Bull shark is a Large Coastal Shark. NOAA permit required to fish for them recreationally. 1 per vessel per day. No minimum size. Verify with NOAA HMS and LA state rules.",
+        "source": "NOAA Fisheries HMS; LA state agency"
+      },
+      "amaama-mullet": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Striped mullet abundant in LA. No recreational bag limit.",
+        "source": "LA Wildlife & Fisheries"
       }
     },
     "MA": {
@@ -601,6 +1693,84 @@
         "bag_limit": "8 per day",
         "season": "Seasonal \u2014 check MA DMF for open dates",
         "notes": "Season and bag limits vary. Verify current rules with MA DMF. Reviewed annually. Verify 2026 regulations with MA DMF before fishing."
+      },
+      "weakfish-gray-trout": {
+        "min_size": "13 in TL",
+        "bag_limit": "1 per day",
+        "season": "Open year-round",
+        "notes": "Weakfish stocks are depleted; bag limits are very restrictive. Verify current rules."
+      },
+      "scup-porgy": {
+        "min_size": "9 in TL",
+        "bag_limit": "30 per day",
+        "season": "Open year-round",
+        "notes": "Verify current limits with MA DMF."
+      },
+      "winter-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "5 per day",
+        "season": "Open year-round (check bay-specific closures)",
+        "notes": "Some embayments closed to protect spawning fish; verify with MA DMF."
+      },
+      "atlantic-mackerel": {
+        "min_size": "None",
+        "bag_limit": "20 per day",
+        "season": "Open year-round",
+        "notes": "No size limit; excellent bait and table fish."
+      },
+      "atlantic-bonito": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round (summer/fall)",
+        "notes": "Atlantic bonito are a premier summer/fall pier target from MA. No bag limit.",
+        "source": "MA DMF"
+      },
+      "american-eel": {
+        "min_size": "9 in (varies by state)",
+        "bag_limit": "25 per person per day (varies)",
+        "season": "Open year-round (elver season is separate and highly regulated)",
+        "notes": "American eel recreational regulations vary by state. Glass eel (elver) fishery is separately managed and requires specific permits in states like ME and RI. Yellow/silver eels have size and bag limits. Verify current ASMFC and state rules."
+      },
+      "northern-puffer-blowfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round (summer/fall)",
+        "notes": "Northern puffer in MA waters in summer. No bag limit.",
+        "source": "MA DMF"
+      },
+      "smooth-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Smooth dogfish extremely common in MA bays and nearshore. No bag limit; popular catch-and-release.",
+        "source": "MA DMF"
+      },
+      "spiny-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "15 per day",
+        "season": "Open year-round",
+        "notes": "Spiny dogfish abundant in MA waters. Federal regulations apply for commercial; recreational largely open.",
+        "source": "MA DMF; NOAA Fisheries"
+      },
+      "cobia": {
+        "min_size": "33 in TL",
+        "bag_limit": "2 per day",
+        "season": "Seasonal (July\u2013October)",
+        "notes": "Cobia occasionally move into Massachusetts waters during warm years. 33-inch minimum, 2/day. Verify current rules with MA DMF.",
+        "source": "https://www.mass.gov/saltwater-fishing-regulations"
+      },
+      "sandbar-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Sandbar shark is a Large Coastal Shark. NOAA recreational permit required. 1 per vessel per day. Sandbar sharks are an important coastal species; handle carefully. Verify with NOAA HMS and MA state rules.",
+        "source": "NOAA Fisheries HMS; MA state agency"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "28 in TL",
+        "bag_limit": "1 per day",
+        "season": "Seasonal \u2014 check MA DMF for open dates",
+        "notes": "Regulations may include a slot limit or reduced season. Verify current rules with MA DMF. ASMFC may have implemented new measures for 2025-2026. Verify current slot limits and seasonal closures with MA DMF."
       }
     },
     "MD": {
@@ -692,6 +1862,176 @@
         "season": "Open year-round",
         "notes": "Bonefish do not occur in MD. Would be a rare stray.",
         "source": "MD DNR"
+      },
+      "weakfish-gray-trout": {
+        "min_size": "13 in TL",
+        "bag_limit": "1 per day",
+        "season": "Open year-round",
+        "notes": "Stock is depleted; confirm very restrictive current limits with MD DNR."
+      },
+      "scup-porgy": {
+        "min_size": "9 in TL",
+        "bag_limit": "30 per day",
+        "season": "Seasonal (summer)",
+        "notes": "Scup are occasionally caught in Maryland coastal bays and Chesapeake Bay mouth in summer. 9-inch minimum, 30/day. Verify with MD DNR.",
+        "source": "https://dnr.maryland.gov/fisheries/pages/recreational.aspx"
+      },
+      "winter-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "5 per day",
+        "season": "Open year-round",
+        "notes": "Verify current MD DNR rules."
+      },
+      "atlantic-mackerel": {
+        "min_size": "None",
+        "bag_limit": "20 per day (recreational)",
+        "season": "Open year-round",
+        "notes": "No minimum size. Federal mackerel quota applies to commercial; recreational is generally open."
+      },
+      "atlantic-bonito": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round (summer-fall)",
+        "notes": "No state regulations for Atlantic bonito in most states."
+      },
+      "northern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "american-eel": {
+        "min_size": "9 in (varies by state)",
+        "bag_limit": "25 per person per day (varies)",
+        "season": "Open year-round (elver season is separate and highly regulated)",
+        "notes": "American eel recreational regulations vary by state. Glass eel (elver) fishery is separately managed and requires specific permits in states like ME and RI. Yellow/silver eels have size and bag limits. Verify current ASMFC and state rules."
+      },
+      "northern-puffer-blowfish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for northern puffer. Properly cleaning pufferfish is important \u2014 the liver, skin, and gonads contain tetrodotoxin. Only eat the skinned back-strap meat."
+      },
+      "smooth-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Smooth dogfish in MD coastal waters and Chesapeake Bay. No bag limit.",
+        "source": "MD DNR"
+      },
+      "spiny-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "15 per day",
+        "season": "Open year-round",
+        "notes": "Spiny dogfish in MD offshore and bay waters.",
+        "source": "MD DNR; NOAA Fisheries"
+      },
+      "cobia": {
+        "min_size": "37 in FL",
+        "bag_limit": "2 per day",
+        "season": "Open year-round",
+        "notes": "Fork length minimum. Verify current rules with MD DNR."
+      },
+      "king-mackerel": {
+        "min_size": "24 in FL",
+        "bag_limit": "3 per day",
+        "season": "Open year-round (summer-fall visitor)",
+        "notes": "King mackerel arrive offshore in summer. Verify current state rules."
+      },
+      "atlantic-spadefish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for Atlantic spadefish. Verify current state rules."
+      },
+      "southern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "gulf-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "pinfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Pinfish at southern edge of range in MD. No bag limit.",
+        "source": "MD DNR"
+      },
+      "blue-runner": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for blue runner. Primarily used as live bait."
+      },
+      "tripletail": {
+        "min_size": "15 in",
+        "bag_limit": 2,
+        "season": "Year-round",
+        "notes": ""
+      },
+      "bonefish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (rare in this area)",
+        "season": "Open year-round",
+        "notes": "Bonefish do not occur in MD. Would be a rare stray.",
+        "source": "MD DNR"
+      },
+      "atlantic-sharpnose-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "3 per person per day",
+        "season": "Year-round",
+        "notes": "Small coastal shark \u2014 no minimum size. HMS Angling Permit required."
+      },
+      "sandbar-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Sandbar shark is a Large Coastal Shark. NOAA recreational permit required. 1 per vessel per day. Sandbar sharks are an important coastal species; handle carefully. Verify with NOAA HMS and MD state rules.",
+        "source": "NOAA Fisheries HMS; MD state agency"
+      },
+      "blacktip-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "spinner-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "bonnethead-shark": {
+        "min_size": "None",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round",
+        "notes": "Bonnethead sharks managed under NOAA HMS. Requires federal HMS Angling Permit from a vessel. 1-fish vessel limit. Mostly released."
+      },
+      "bull-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Bull shark is a Large Coastal Shark. NOAA permit required to fish for them recreationally. 1 per vessel per day. No minimum size. Verify with NOAA HMS and MD state rules.",
+        "source": "NOAA Fisheries HMS; MD state agency"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "19 in TL",
+        "bag_limit": "1 per day",
+        "season": "Seasonal \u2014 Chesapeake Bay has a spring and fall season; coastal waters open most of year",
+        "notes": "Regulations vary greatly by area (Chesapeake Bay vs. coastal). Slot limits may apply. Verify with MD DNR. Chesapeake Bay and coastal rules differ and are updated seasonally. Verify 2026 slot limits with MD DNR."
+      },
+      "amaama-mullet": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Striped mullet in MD Chesapeake waters. No bag limit.",
+        "source": "MD DNR"
       }
     },
     "ME": {
@@ -737,6 +2077,66 @@
         "bag_limit": "15 per day",
         "season": "Varies annually",
         "notes": "Season and bag limit change each year. Verify with state agency."
+      },
+      "weakfish-gray-trout": {
+        "min_size": "12 in TL",
+        "bag_limit": "No bag limit",
+        "season": "Open year-round (rare)",
+        "notes": "Weakfish very rarely reach Maine coastal waters. No specific state regulations. Populations are severely depleted \u2014 catch and release strongly recommended. Verify with ME DMR.",
+        "source": "https://www.maine.gov/dmr/fisheries/recreational"
+      },
+      "scup-porgy": {
+        "min_size": "9 in TL",
+        "bag_limit": "30 per day",
+        "season": "Open year-round",
+        "notes": "Scup (porgy) reach southern Maine coastal waters in summer. 9-inch minimum, 30/day bag limit. Verify current rules with ME DMR.",
+        "source": "https://www.maine.gov/dmr/fisheries/recreational"
+      },
+      "winter-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Apr 1 \u2013 Jun 30",
+        "notes": "Verify current ME DMR season and limits."
+      },
+      "atlantic-mackerel": {
+        "min_size": "None",
+        "bag_limit": "20 per day (recreational)",
+        "season": "Open year-round",
+        "notes": "No minimum size. Federal mackerel quota applies to commercial; recreational is generally open."
+      },
+      "atlantic-bonito": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round (summer/fall)",
+        "notes": "Atlantic bonito appear in ME in summer. No bag limit; fast jigs from piers work well.",
+        "source": "ME DMRE"
+      },
+      "american-eel": {
+        "min_size": "6 in",
+        "bag_limit": "No limit (no commercial license for recreational)",
+        "season": "Open year-round",
+        "notes": "American eel in ME rivers and coastal waters. Primarily a commercial and estuarine species.",
+        "source": "ME DMRE"
+      },
+      "smooth-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Smooth dogfish (mustelus canis) are common in ME coastal waters. No specific bag limit.",
+        "source": "ME DMRE"
+      },
+      "spiny-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "15 per day",
+        "season": "Open year-round",
+        "notes": "Spiny dogfish very common in ME waters. Federally managed. Minimal state regulation.",
+        "source": "ME DMRE; NOAA Fisheries"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "28 in TL",
+        "bag_limit": "1 per day",
+        "season": "Seasonal \u2014 check ME DMR for open dates",
+        "notes": "Regulations may include slot or season restrictions. Verify with ME DMR. Verify 2026 slot limits and season dates with ME DMR."
       }
     },
     "MS": {
@@ -810,6 +2210,148 @@
         "bag_limit": "catch and release only",
         "season": "Catch-and-release only (extremely rare)",
         "notes": "Common snook are extremely rare in MS waters. Release all \u2014 no harvest authorized.",
+        "source": "MS DMR"
+      },
+      "northern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "cobia": {
+        "min_size": "33 in FL",
+        "bag_limit": "2 per day",
+        "season": "Open year-round",
+        "notes": "Fork length minimum. Verify current MDWFP rules."
+      },
+      "king-mackerel": {
+        "min_size": "24 in FL",
+        "bag_limit": "3 per day",
+        "season": "Open year-round",
+        "notes": "Verify with MDWFP; federal rules apply offshore."
+      },
+      "atlantic-spadefish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for Atlantic spadefish. Verify current state rules."
+      },
+      "gray-triggerfish": {
+        "min_size": "12 in TL",
+        "bag_limit": "20 per person per day (10 per person in Gulf federal waters)",
+        "season": "Open year-round state waters; federal Gulf waters: open year-round",
+        "notes": "Gulf federal waters bag limit is 10 per person. Verify state rules for any changes."
+      },
+      "southern-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round (seasonal restrictions may apply)",
+        "notes": "Verify current limits with MS MDWFP."
+      },
+      "gulf-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Gulf flounder in MS coastal waters.",
+        "source": "MS DMR"
+      },
+      "southern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "gulf-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "pinfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Pinfish present in MS coastal areas. No bag limit.",
+        "source": "MS DMR"
+      },
+      "mangrove-snapper": {
+        "min_size": "10 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Verify current state rules for gray snapper (mangrove snapper)."
+      },
+      "jack-crevalle": {
+        "min_size": "No minimum",
+        "bag_limit": "No bag limit (FL: 10/day jack aggregate)",
+        "season": "Open year-round",
+        "notes": "Crevalle jack: no minimum or bag limit in Mississippi. Verify with MDWFP.",
+        "source": "https://www.mdwfp.com/fishing-boating/saltwater-fishing/"
+      },
+      "blue-runner": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No state regulations for blue runner in most Gulf and SE states; excellent live bait species."
+      },
+      "ladyfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Ladyfish in MS coastal bays. No bag limit.",
+        "source": "MS DMR"
+      },
+      "tarpon": {
+        "min_size": "No minimum",
+        "bag_limit": "catch and release only",
+        "season": "Catch-and-release only",
+        "notes": "Tarpon are a catch-and-release species in MS. A tarpon tag is required to possess one.",
+        "source": "MS DMR"
+      },
+      "tripletail": {
+        "min_size": "15 in TL",
+        "bag_limit": "5 per day",
+        "season": "Open year-round",
+        "notes": "Verify current MDWFP rules."
+      },
+      "atlantic-sharpnose-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Atlantic sharpnose shark in MS coastal waters. No bag limit.",
+        "source": "MS DMR"
+      },
+      "blacktip-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (Small Coastal Shark)",
+        "season": "Open year-round",
+        "notes": "Blacktip shark in MS Gulf coastal waters. No specific bag limit.",
+        "source": "MS DMR"
+      },
+      "spinner-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (Small Coastal Shark)",
+        "season": "Open year-round",
+        "notes": "Blacktip shark in MS Gulf coastal waters. No specific bag limit.",
+        "source": "MS DMR"
+      },
+      "bonnethead-shark": {
+        "min_size": "None",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round",
+        "notes": "Bonnethead sharks managed under NOAA HMS. Requires federal HMS Angling Permit from a vessel. 1-fish vessel limit. Mostly released."
+      },
+      "bull-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Bull shark is a Large Coastal Shark. NOAA permit required to fish for them recreationally. 1 per vessel per day. No minimum size. Verify with NOAA HMS and MS state rules.",
+        "source": "NOAA Fisheries HMS; MS state agency"
+      },
+      "amaama-mullet": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Striped mullet in MS coastal waters. No bag limit.",
         "source": "MS DMR"
       }
     },
@@ -908,6 +2450,232 @@
         "season": "Open year-round",
         "notes": "Bonefish are occasional strays in NC coastal waters. No specific regulation.",
         "source": "NC DMF"
+      },
+      "weakfish-gray-trout": {
+        "min_size": "12 in TL",
+        "bag_limit": "3 per day",
+        "season": "Open year-round",
+        "notes": "Weakfish are under strict management due to population declines. Verify current ASMFC coastwide limits before fishing."
+      },
+      "scup-porgy": {
+        "min_size": "9 in TL",
+        "bag_limit": "50 per day",
+        "season": "Open year-round",
+        "notes": "Verify current limits with NC DMF."
+      },
+      "winter-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round (rare south of NY)",
+        "notes": "Winter flounder are uncommon south of New Jersey; verify current state rules."
+      },
+      "atlantic-mackerel": {
+        "min_size": "None",
+        "bag_limit": "20 per day (recreational)",
+        "season": "Open year-round",
+        "notes": "No minimum size. Federal mackerel quota applies to commercial; recreational is generally open."
+      },
+      "atlantic-bonito": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round (summer-fall)",
+        "notes": "No state regulations for Atlantic bonito in most states."
+      },
+      "northern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "american-eel": {
+        "min_size": "9 in (varies by state)",
+        "bag_limit": "25 per person per day (varies)",
+        "season": "Open year-round (elver season is separate and highly regulated)",
+        "notes": "American eel recreational regulations vary by state. Glass eel (elver) fishery is separately managed and requires specific permits in states like ME and RI. Yellow/silver eels have size and bag limits. Verify current ASMFC and state rules."
+      },
+      "northern-puffer-blowfish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for northern puffer. Properly cleaning pufferfish is important \u2014 the liver, skin, and gonads contain tetrodotoxin. Only eat the skinned back-strap meat."
+      },
+      "smooth-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Smooth dogfish in NC coastal waters. No bag limit.",
+        "source": "NC DMF"
+      },
+      "spiny-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "15 per day",
+        "season": "Open year-round",
+        "notes": "Spiny dogfish present in NC offshore waters. Federally managed.",
+        "source": "NC DMF; NOAA Fisheries"
+      },
+      "cobia": {
+        "min_size": "33 in FL",
+        "bag_limit": "2 per day",
+        "season": "Open year-round",
+        "notes": "Fork length minimum. Verify current rules with NC DMF."
+      },
+      "king-mackerel": {
+        "min_size": "24 in FL",
+        "bag_limit": "3 per day",
+        "season": "Open year-round",
+        "notes": "Fork length minimum. Verify current limits with NC DMF."
+      },
+      "atlantic-spadefish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for Atlantic spadefish. Verify current state rules."
+      },
+      "gray-triggerfish": {
+        "min_size": "12 in TL",
+        "bag_limit": "20 per person per day (10 per person in Gulf federal waters)",
+        "season": "Open year-round state waters; federal Gulf waters: open year-round",
+        "notes": "Gulf federal waters bag limit is 10 per person. Verify state rules for any changes."
+      },
+      "southern-flounder": {
+        "min_size": "14 in TL",
+        "bag_limit": "4 per day",
+        "season": "Open spring\u2013fall; seasonal closure in effect some years",
+        "notes": "NC has implemented harvest reductions in recent years. Verify current season and bag limit with NC DMF."
+      },
+      "southern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "gulf-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "pinfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Pinfish common in NC sounds and nearshore. No bag limit.",
+        "source": "NC DMF"
+      },
+      "mangrove-snapper": {
+        "min_size": "10 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Verify current state rules for gray snapper (mangrove snapper)."
+      },
+      "jack-crevalle": {
+        "min_size": "No minimum",
+        "bag_limit": "No bag limit (FL: 10/day jack aggregate)",
+        "season": "Open year-round",
+        "notes": "Crevalle jack in North Carolina: no minimum size or bag limit. Common in warm months. Verify with NC DMF.",
+        "source": "https://www.deq.nc.gov/about/divisions/marine-fisheries/recreational-fishing"
+      },
+      "blue-runner": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No state regulations for blue runner in most Gulf and SE states; excellent live bait species."
+      },
+      "ladyfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Ladyfish present in NC coastal waters in summer. No bag limit.",
+        "source": "NC DMF"
+      },
+      "tarpon": {
+        "min_size": "None",
+        "bag_limit": "0 (tag required to harvest)",
+        "season": "Open year-round (C&R or with $300 tarpon tag)",
+        "notes": "A $300 harvest tag is required. Most anglers practice catch and release."
+      },
+      "tripletail": {
+        "min_size": "15 in (varies)",
+        "bag_limit": "2 per day (varies)",
+        "season": "Open year-round",
+        "notes": "Verify current state rules for tripletail."
+      },
+      "permit": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Permit occasional in NC. No specific bag limit.",
+        "source": "NC DMF"
+      },
+      "great-barracuda": {
+        "min_size": "None (FL: no minimum)",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific size or bag limit for great barracuda in most SE states. Ciguatera fish poisoning risk \u2014 most anglers release large barracuda. Use wire leader."
+      },
+      "bonefish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (rare in this area)",
+        "season": "Open year-round",
+        "notes": "Bonefish are occasional strays in NC coastal waters. No specific regulation.",
+        "source": "NC DMF"
+      },
+      "atlantic-sharpnose-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "3 per person per day",
+        "season": "Year-round",
+        "notes": "Small coastal shark \u2014 no minimum size. HMS Angling Permit required."
+      },
+      "sandbar-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Sandbar shark is a Large Coastal Shark. NOAA recreational permit required. 1 per vessel per day. Sandbar sharks are an important coastal species; handle carefully. Verify with NOAA HMS and NC state rules.",
+        "source": "NOAA Fisheries HMS; NC state agency"
+      },
+      "blacktip-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "spinner-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "bonnethead-shark": {
+        "min_size": "None",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round",
+        "notes": "Bonnethead sharks managed under NOAA HMS. Requires federal HMS Angling Permit from a vessel. 1-fish vessel limit. Mostly released."
+      },
+      "bull-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Bull shark is a Large Coastal Shark. NOAA permit required to fish for them recreationally. 1 per vessel per day. No minimum size. Verify with NOAA HMS and NC state rules.",
+        "source": "NOAA Fisheries HMS; NC state agency"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "18 in TL",
+        "bag_limit": "5 per day (coastal)",
+        "season": "Open year-round (some areas have closed seasons)",
+        "notes": "Rules differ for Albemarle Sound, Roanoke River, and coastal waters. Verify area-specific rules with NC DMF."
+      },
+      "kaku-barracuda": {
+        "min_size": "None (FL: no minimum)",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific size or bag limit for great barracuda in most SE states. Ciguatera fish poisoning risk \u2014 most anglers release large barracuda. Use wire leader."
+      },
+      "amaama-mullet": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Striped mullet in NC sounds and piers. No recreational bag limit.",
+        "source": "NC DMF"
       }
     },
     "NJ": {
@@ -992,6 +2760,157 @@
         "season": "Open year-round",
         "notes": "Bonefish extremely rare in NJ. Release if encountered.",
         "source": "NJ DEP"
+      },
+      "weakfish-gray-trout": {
+        "min_size": "13 in TL",
+        "bag_limit": "1 per day",
+        "season": "Open year-round",
+        "notes": "Stock is depleted; bag limit is very restrictive. Verify current rules with NJ DEP."
+      },
+      "scup-porgy": {
+        "min_size": "9 in TL",
+        "bag_limit": "30 per day",
+        "season": "Open year-round",
+        "notes": "Verify current limits with NJ DEP."
+      },
+      "winter-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Verify current NJ DEP Marine rules; season and bag may change."
+      },
+      "atlantic-mackerel": {
+        "min_size": "None",
+        "bag_limit": "20 per day (recreational)",
+        "season": "Open year-round",
+        "notes": "No minimum size. Federal mackerel quota applies to commercial; recreational is generally open."
+      },
+      "atlantic-bonito": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round (summer-fall)",
+        "notes": "No state regulations for Atlantic bonito in most states."
+      },
+      "northern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "american-eel": {
+        "min_size": "9 in (varies by state)",
+        "bag_limit": "25 per person per day (varies)",
+        "season": "Open year-round (elver season is separate and highly regulated)",
+        "notes": "American eel recreational regulations vary by state. Glass eel (elver) fishery is separately managed and requires specific permits in states like ME and RI. Yellow/silver eels have size and bag limits. Verify current ASMFC and state rules."
+      },
+      "northern-puffer-blowfish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for northern puffer. Properly cleaning pufferfish is important \u2014 the liver, skin, and gonads contain tetrodotoxin. Only eat the skinned back-strap meat."
+      },
+      "smooth-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Smooth dogfish abundant in NJ waters, especially bays. No bag limit.",
+        "source": "NJ DEP"
+      },
+      "spiny-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "15 per day",
+        "season": "Open year-round",
+        "notes": "Spiny dogfish very common in NJ offshore waters. Federal regulations apply.",
+        "source": "NJ DEP Marine Fisheries"
+      },
+      "cobia": {
+        "min_size": "33 in FL",
+        "bag_limit": "1 per day",
+        "season": "Open year-round",
+        "notes": "Summer visitor to NJ. Verify current NJ DEP limits."
+      },
+      "king-mackerel": {
+        "min_size": "24 in FL",
+        "bag_limit": "3 per day",
+        "season": "Seasonal (July\u2013October)",
+        "notes": "King mackerel (kingfish) appear in New Jersey offshore waters in summer. 24-inch FL minimum, 3/day (South Atlantic federal rules). Verify 2026 federal rules with NOAA/SAFMC.",
+        "source": "https://dep.nj.gov/njfw/fishing/marine/"
+      },
+      "atlantic-spadefish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for Atlantic spadefish. Verify current state rules."
+      },
+      "southern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "gulf-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "bonefish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (rare in this area)",
+        "season": "Open year-round",
+        "notes": "Bonefish extremely rare in NJ. Release if encountered.",
+        "source": "NJ DEP"
+      },
+      "atlantic-sharpnose-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "3 per person per day",
+        "season": "Year-round",
+        "notes": "Small coastal shark \u2014 no minimum size. HMS Angling Permit required."
+      },
+      "sandbar-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Sandbar shark is a Large Coastal Shark. NOAA recreational permit required. 1 per vessel per day. Sandbar sharks are an important coastal species; handle carefully. Verify with NOAA HMS and NJ state rules.",
+        "source": "NOAA Fisheries HMS; NJ state agency"
+      },
+      "blacktip-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "spinner-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "bonnethead-shark": {
+        "min_size": "None",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round",
+        "notes": "Bonnethead sharks managed under NOAA HMS. Requires federal HMS Angling Permit from a vessel. 1-fish vessel limit. Mostly released."
+      },
+      "bull-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Bull shark is a Large Coastal Shark. NOAA permit required to fish for them recreationally. 1 per vessel per day. No minimum size. Verify with NOAA HMS and NJ state rules.",
+        "source": "NOAA Fisheries HMS; NJ state agency"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "28 in TL",
+        "bag_limit": "1 per day",
+        "season": "Seasonal \u2014 check NJ DEP for open dates",
+        "notes": "Regulations have changed in recent years and may include slot limits. Verify with NJ DEP. ASMFC measures for 2025-2026 may differ. Verify current slot limits and open seasons with NJ DEP."
+      },
+      "amaama-mullet": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Striped mullet occasional in NJ waters in summer. No bag limit.",
+        "source": "NJ DEP"
       }
     },
     "NY": {
@@ -1056,6 +2975,131 @@
         "bag_limit": "15 per day",
         "season": "Seasonal \u2014 check NY DEC for open dates",
         "notes": "Season and bag limits vary. Verify current rules with NY DEC. Minimum size and bag limit reviewed annually by NOAA/ASMFC. Verify 2026 regulations with NY DEC."
+      },
+      "weakfish-gray-trout": {
+        "min_size": "13 in TL",
+        "bag_limit": "1 per day",
+        "season": "Open year-round",
+        "notes": "Stock is depleted; bag limit is very restrictive. Verify current rules with NY DEC."
+      },
+      "scup-porgy": {
+        "min_size": "9 in TL",
+        "bag_limit": "30 per day",
+        "season": "Open year-round",
+        "notes": "Verify current limits with NY DEC."
+      },
+      "winter-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Verify current NY DEC rules; seasonal closures may apply in some bays."
+      },
+      "atlantic-mackerel": {
+        "min_size": "None",
+        "bag_limit": "20 per day (recreational)",
+        "season": "Open year-round",
+        "notes": "No minimum size. Federal mackerel quota applies to commercial; recreational is generally open."
+      },
+      "atlantic-bonito": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round (summer-fall)",
+        "notes": "No state regulations for Atlantic bonito in most states."
+      },
+      "northern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "american-eel": {
+        "min_size": "9 in (varies by state)",
+        "bag_limit": "25 per person per day (varies)",
+        "season": "Open year-round (elver season is separate and highly regulated)",
+        "notes": "American eel recreational regulations vary by state. Glass eel (elver) fishery is separately managed and requires specific permits in states like ME and RI. Yellow/silver eels have size and bag limits. Verify current ASMFC and state rules."
+      },
+      "northern-puffer-blowfish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for northern puffer. Properly cleaning pufferfish is important \u2014 the liver, skin, and gonads contain tetrodotoxin. Only eat the skinned back-strap meat."
+      },
+      "smooth-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Smooth dogfish very common in NY nearshore. No bag limit.",
+        "source": "NY DEC"
+      },
+      "spiny-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "15 per day",
+        "season": "Open year-round",
+        "notes": "Spiny dogfish common in NY offshore and near wrecks.",
+        "source": "NY DEC; NOAA Fisheries"
+      },
+      "cobia": {
+        "min_size": "33 in FL",
+        "bag_limit": "1 per day",
+        "season": "Open year-round (rare summer visitor)",
+        "notes": "Cobia are uncommon in NY waters but do occur in summer. Verify NY DEC rules."
+      },
+      "king-mackerel": {
+        "min_size": "24 in FL",
+        "bag_limit": "3 per day",
+        "season": "Seasonal (July\u2013October)",
+        "notes": "King mackerel occasionally reach New York offshore waters in warm years. 24-inch FL minimum, 3/day. Verify 2026 federal rules with NOAA before fishing.",
+        "source": "https://dec.ny.gov/things-to-do/saltwater-fishing/recreational-regulations"
+      },
+      "southern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "gulf-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "atlantic-sharpnose-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "3 per person per day",
+        "season": "Year-round",
+        "notes": "Small coastal shark \u2014 no minimum size. HMS Angling Permit required."
+      },
+      "sandbar-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Sandbar shark is a Large Coastal Shark. NOAA recreational permit required. 1 per vessel per day. Sandbar sharks are an important coastal species; handle carefully. Verify with NOAA HMS and NY state rules.",
+        "source": "NOAA Fisheries HMS; NY state agency"
+      },
+      "blacktip-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "spinner-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "bull-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Bull shark is a Large Coastal Shark. NOAA permit required to fish for them recreationally. 1 per vessel per day. No minimum size. Verify with NOAA HMS and NY state rules.",
+        "source": "NOAA Fisheries HMS; NY state agency"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "28 in TL",
+        "bag_limit": "1 per day",
+        "season": "Open year-round (some tributary closures)",
+        "notes": "Regulations may include a slot limit. Verify current rules with NY DEC. ASMFC measures for 2025-2026 may differ from prior years. Verify current slot limits with NY DEC."
       }
     },
     "OR": {
@@ -1110,6 +3154,170 @@
         "bag_limit": "5 per day",
         "season": "Seasonal \u2014 check ODFW for current open dates",
         "notes": "Season and bag limits vary by zone (north vs. south). Verify current rules with ODFW."
+      },
+      "walleye-surfperch": {
+        "min_size": "No minimum",
+        "bag_limit": "20 per day",
+        "season": "Open year-round",
+        "notes": "Walleye surfperch common near jetties and piers. Part of surfperch aggregate bag limit. Verify current ODFW regulations.",
+        "source": "ODFW"
+      },
+      "silver-surfperch": {
+        "min_size": "None",
+        "bag_limit": "Aggregate surfperch limit",
+        "season": "Open year-round",
+        "notes": "Verify current state surfperch rules."
+      },
+      "rubberlip-seaperch": {
+        "min_size": "No minimum",
+        "bag_limit": "15 per day (aggregate surfperch limit)",
+        "season": "Open year-round",
+        "notes": "Oregon 15-fish/day aggregate limit for surfperch; no minimum size. Verify current rules with ODFW.",
+        "source": "https://myodfw.com/recreation-report/fishing-report/marine-zone"
+      },
+      "pile-perch": {
+        "min_size": "No minimum",
+        "bag_limit": "20 per day",
+        "season": "Open year-round",
+        "notes": "Walleye surfperch common near jetties and piers. Part of surfperch aggregate bag limit. Verify current ODFW regulations.",
+        "source": "ODFW"
+      },
+      "shiner-perch": {
+        "min_size": "No minimum",
+        "bag_limit": "20 per day",
+        "season": "Open year-round",
+        "notes": "Walleye surfperch common near jetties and piers. Part of surfperch aggregate bag limit. Verify current ODFW regulations.",
+        "source": "ODFW"
+      },
+      "black-perch": {
+        "min_size": "None",
+        "bag_limit": "10 per day (surfperch aggregate)",
+        "season": "Open year-round",
+        "notes": "Part of the surfperch aggregate. Verify current state rules."
+      },
+      "jacksmelt": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Jacksmelt are present in OR bays and piers. No specific bag limit.",
+        "source": "ODFW"
+      },
+      "white-croaker": {
+        "min_size": "None",
+        "bag_limit": "20 per day",
+        "season": "Open year-round",
+        "notes": "No size limit for white croaker. Check local consumption advisories \u2014 some Southern California harbors have fish consumption warnings due to sediment contamination."
+      },
+      "starry-flounder": {
+        "min_size": "No minimum",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Starry flounder in nearshore and estuary areas. Check current CDFW/ODFW/WDFW rules. Verify current ODFW regulations.",
+        "source": "ODFW"
+      },
+      "pacific-sanddab": {
+        "min_size": "None",
+        "bag_limit": "No limit for sanddabs",
+        "season": "Open year-round",
+        "notes": "Pacific sand dabs have no bag or size limit in most Pacific states. They are among the most lightly regulated flatfish species."
+      },
+      "kelp-greenling": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Verify current limits with ODFW."
+      },
+      "cabezon": {
+        "min_size": "No minimum",
+        "bag_limit": "5 per day",
+        "season": "Seasonal",
+        "notes": "Verify current season dates and limits with ODFW."
+      },
+      "grass-rockfish": {
+        "min_size": "10 in TL",
+        "bag_limit": "Included in rockfish aggregate",
+        "season": "Open year-round",
+        "notes": "Grass rockfish found in kelp beds and rocky areas. Part of aggregate bag limit. Verify current ODFW regulations.",
+        "source": "ODFW"
+      },
+      "blue-rockfish": {
+        "min_size": "10 in TL",
+        "bag_limit": "Included in rockfish aggregate",
+        "season": "Open year-round",
+        "notes": "Blue rockfish are among the most common nearshore rockfish. Part of aggregate bag limit. Verify current ODFW regulations.",
+        "source": "ODFW"
+      },
+      "monkeyface-prickleback": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Pacific staghorn sculpin are common pier catch throughout the Pacific Coast. Excellent bait for halibut. Verify current ODFW regulations.",
+        "source": "ODFW"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "18 in TL",
+        "bag_limit": "2 per day",
+        "season": "Open year-round in Umpqua River system",
+        "notes": "OR coastal striped bass are in the Umpqua River system; verify current ODFW rules."
+      },
+      "chinook-salmon": {
+        "min_size": "24 in TL",
+        "bag_limit": "2 per day (ocean)",
+        "season": "Set annually by PFMC; varies by zone",
+        "notes": "OR salmon seasons are set each year and vary significantly by area. ALWAYS verify current ODFW rules."
+      },
+      "coho-salmon": {
+        "min_size": "16 in TL",
+        "bag_limit": "2 per day (ocean; varies)",
+        "season": "Set annually; varies by zone and river",
+        "notes": "Coho rules vary greatly by zone and year. Verify with ODFW before fishing."
+      },
+      "leopard-shark": {
+        "min_size": "24 in TL (CA)",
+        "bag_limit": "3 per day",
+        "season": "Open year-round",
+        "notes": "Leopard sharks are managed under California Leopard/Soupfin/Smoothhound complex. Verify current CDFW rules. Most anglers practice catch and release."
+      },
+      "bat-ray": {
+        "min_size": "No minimum",
+        "bag_limit": "2 per day",
+        "season": "Open year-round",
+        "notes": "Bat rays are powerful California ray species. 2 per day limit. Venomous tail spine \u2014 handle carefully. Verify current ODFW regulations.",
+        "source": "ODFW"
+      },
+      "pacific-mackerel": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No state size or bag limit for Pacific mackerel. Abundance varies with ocean conditions."
+      },
+      "california-sheephead": {
+        "min_size": "",
+        "bag_limit": "0",
+        "season": "Not present",
+        "notes": "California sheephead are CA-endemic and do not occur in OR waters.",
+        "source": "ODFW"
+      },
+      "jack-mackerel": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Rare; warm-water years",
+        "notes": "Pacific jack mackerel occasional in OR during warm-water years. No specific bag limit.",
+        "source": "ODFW"
+      },
+      "pacific-barracuda": {
+        "min_size": "No minimum",
+        "bag_limit": "10 per day",
+        "season": "Rare; warm-water years only",
+        "notes": "Pacific barracuda occasionally stray to OR during El Ni\u00f1o years.",
+        "source": "ODFW"
+      },
+      "yellowtail": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Rare stray (warm-water years)",
+        "notes": "Pacific yellowtail occasionally stray north to OR during El Ni\u00f1o. No specific bag limit.",
+        "source": "ODFW"
       }
     },
     "RI": {
@@ -1155,6 +3363,90 @@
         "bag_limit": "8 per day",
         "season": "Seasonal \u2014 check RI DEM for open dates",
         "notes": "Season and bag limits vary. Verify current rules with RI DEM."
+      },
+      "weakfish-gray-trout": {
+        "min_size": "13 in TL",
+        "bag_limit": "1 per day",
+        "season": "Open year-round",
+        "notes": "Very restrictive bag limit due to population decline. Verify current RI DEM rules."
+      },
+      "scup-porgy": {
+        "min_size": "9 in TL",
+        "bag_limit": "30 per day",
+        "season": "Open year-round",
+        "notes": "Verify current limits with RI DEM."
+      },
+      "winter-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "8 per day",
+        "season": "Open year-round",
+        "notes": "Verify current RI DEM rules."
+      },
+      "atlantic-mackerel": {
+        "min_size": "None",
+        "bag_limit": "20 per day (recreational)",
+        "season": "Open year-round",
+        "notes": "No minimum size. Federal mackerel quota applies to commercial; recreational is generally open."
+      },
+      "atlantic-bonito": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round (summer/fall)",
+        "notes": "Atlantic bonito excellent from RI piers in summer/fall. No bag limit.",
+        "source": "RI DEM"
+      },
+      "american-eel": {
+        "min_size": "9 in (varies by state)",
+        "bag_limit": "25 per person per day (varies)",
+        "season": "Open year-round (elver season is separate and highly regulated)",
+        "notes": "American eel recreational regulations vary by state. Glass eel (elver) fishery is separately managed and requires specific permits in states like ME and RI. Yellow/silver eels have size and bag limits. Verify current ASMFC and state rules."
+      },
+      "northern-puffer-blowfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round (summer/fall)",
+        "notes": "Northern puffer in RI coastal waters. No bag limit.",
+        "source": "RI DEM"
+      },
+      "smooth-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Smooth dogfish abundant in RI coastal waters. No bag limit.",
+        "source": "RI DEM"
+      },
+      "spiny-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "15 per day",
+        "season": "Open year-round",
+        "notes": "Spiny dogfish abundant in RI waters, especially fall. Federally managed.",
+        "source": "RI DEM; NOAA Fisheries"
+      },
+      "cobia": {
+        "min_size": "37 in FL",
+        "bag_limit": "1 per person per day",
+        "season": "Open year-round (rare summer visitor)",
+        "notes": "Cobia occasionally appear in these northern waters in summer. Verify current ASMFC coastwide rules."
+      },
+      "sandbar-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Sandbar shark is a Large Coastal Shark. NOAA recreational permit required. 1 per vessel per day. Sandbar sharks are an important coastal species; handle carefully. Verify with NOAA HMS and RI state rules.",
+        "source": "NOAA Fisheries HMS; RI state agency"
+      },
+      "bull-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Bull shark is a Large Coastal Shark. NOAA permit required to fish for them recreationally. 1 per vessel per day. No minimum size. Verify with NOAA HMS and RI state rules.",
+        "source": "NOAA Fisheries HMS; RI state agency"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "28 in TL",
+        "bag_limit": "1 per day",
+        "season": "Open year-round",
+        "notes": "May include slot restrictions. Verify current rules with RI DEM. Verify 2026 slot limits and season dates with RI DEM \u2014 ASMFC measures may have been updated."
       }
     },
     "SC": {
@@ -1248,6 +3540,210 @@
         "season": "Open year-round",
         "notes": "Bonefish rare in SC. Catch-and-release is recommended.",
         "source": "SC DNR"
+      },
+      "weakfish-gray-trout": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Weakfish populations are severely depleted coastwide; catch and release strongly encouraged in South Carolina. 12-inch minimum if retaining; verify current restrictions with SC DNR.",
+        "source": "https://www.dnr.sc.gov/marine/recreationalfishing.html"
+      },
+      "scup-porgy": {
+        "min_size": "9 in TL",
+        "bag_limit": "30 per day",
+        "season": "Seasonal (winter\u2013spring)",
+        "notes": "Scup winter off the South Carolina coast and may be caught offshore. 9-inch minimum, 30/day. Verify with SC DNR.",
+        "source": "https://www.dnr.sc.gov/marine/recreationalfishing.html"
+      },
+      "winter-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round (rare south of NY)",
+        "notes": "Winter flounder are uncommon south of New Jersey; verify current state rules."
+      },
+      "atlantic-bonito": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round (summer/fall)",
+        "notes": "Atlantic bonito occasional in SC offshore. No bag limit.",
+        "source": "SC DNR"
+      },
+      "northern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "american-eel": {
+        "min_size": "9 in",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "American eel in SC coastal rivers.",
+        "source": "SC DNR"
+      },
+      "cobia": {
+        "min_size": "33 in FL",
+        "bag_limit": "2 per day",
+        "season": "Open year-round",
+        "notes": "Fork length minimum. Verify current rules with SC DNR."
+      },
+      "king-mackerel": {
+        "min_size": "24 in FL",
+        "bag_limit": "3 per day",
+        "season": "Open year-round",
+        "notes": "Federal rules apply offshore. Verify with SC DNR."
+      },
+      "atlantic-spadefish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for Atlantic spadefish. Verify current state rules."
+      },
+      "gray-triggerfish": {
+        "min_size": "12 in TL",
+        "bag_limit": "20 per person per day (10 per person in Gulf federal waters)",
+        "season": "Open year-round state waters; federal Gulf waters: open year-round",
+        "notes": "Gulf federal waters bag limit is 10 per person. Verify state rules for any changes."
+      },
+      "southern-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "5 per day",
+        "season": "Open year-round (seasonal restrictions may apply)",
+        "notes": "Flounder regulations have been updated in recent years. Verify with SC DNR."
+      },
+      "southern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "gulf-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "pinfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Pinfish abundant in SC coastal waters and piers. No bag limit.",
+        "source": "SC DNR"
+      },
+      "mangrove-snapper": {
+        "min_size": "10 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Verify current state rules for gray snapper (mangrove snapper)."
+      },
+      "jack-crevalle": {
+        "min_size": "No minimum",
+        "bag_limit": "No bag limit (FL: 10/day jack aggregate)",
+        "season": "Open year-round",
+        "notes": "Crevalle jack in South Carolina: no minimum size or bag limit. Common nearshore and in surf around inlets. Verify with SC DNR.",
+        "source": "https://www.dnr.sc.gov/marine/recreationalfishing.html"
+      },
+      "blue-runner": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for blue runner. Primarily used as live bait."
+      },
+      "ladyfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Ladyfish in SC coastal waters. No bag limit.",
+        "source": "SC DNR"
+      },
+      "tarpon": {
+        "min_size": "None",
+        "bag_limit": "0 (C&R only)",
+        "season": "Open year-round (C&R only)",
+        "notes": "Harvest of tarpon is prohibited in SC. Catch and release only."
+      },
+      "tripletail": {
+        "min_size": "15 in TL",
+        "bag_limit": "2 per person per day",
+        "season": "Open year-round",
+        "notes": "Verify current SC DNR rules."
+      },
+      "permit": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Permit occasional in SC waters. No specific bag limit.",
+        "source": "SC DNR"
+      },
+      "great-barracuda": {
+        "min_size": "None (FL: no minimum)",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific size or bag limit for great barracuda in most SE states. Ciguatera fish poisoning risk \u2014 most anglers release large barracuda. Use wire leader."
+      },
+      "bonefish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (rare in this area)",
+        "season": "Open year-round",
+        "notes": "Bonefish rare in SC. Catch-and-release is recommended.",
+        "source": "SC DNR"
+      },
+      "atlantic-sharpnose-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "3 per person per day",
+        "season": "Year-round",
+        "notes": "Small coastal shark \u2014 no minimum size. HMS Angling Permit required."
+      },
+      "sandbar-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Sandbar shark is a Large Coastal Shark. NOAA recreational permit required. 1 per vessel per day. Sandbar sharks are an important coastal species; handle carefully. Verify with NOAA HMS and SC state rules.",
+        "source": "NOAA Fisheries HMS; SC state agency"
+      },
+      "blacktip-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "spinner-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "bonnethead-shark": {
+        "min_size": "None",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round",
+        "notes": "Bonnethead sharks managed under NOAA HMS. Requires federal HMS Angling Permit from a vessel. 1-fish vessel limit. Mostly released."
+      },
+      "bull-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Bull shark is a Large Coastal Shark. NOAA permit required to fish for them recreationally. 1 per vessel per day. No minimum size. Verify with NOAA HMS and SC state rules.",
+        "source": "NOAA Fisheries HMS; SC state agency"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "12 in TL",
+        "bag_limit": "5 per day",
+        "season": "Open year-round (Santee-Cooper area has different rules)",
+        "notes": "Rules vary by area. Verify with SC DNR."
+      },
+      "kaku-barracuda": {
+        "min_size": "None (FL: no minimum)",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific size or bag limit for great barracuda in most SE states. Ciguatera fish poisoning risk \u2014 most anglers release large barracuda. Use wire leader."
+      },
+      "amaama-mullet": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Striped mullet in SC coastal waters. No bag limit.",
+        "source": "SC DNR"
       }
     },
     "TX": {
@@ -1326,6 +3822,161 @@
         "bag_limit": "No limit (rare in this area)",
         "season": "Open year-round",
         "notes": "Bonefish are extremely rare in TX. Catch-and-release only if encountered.",
+        "source": "TX TPWD"
+      },
+      "northern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "cobia": {
+        "min_size": "37 in FL",
+        "bag_limit": "2 per day",
+        "season": "Open year-round",
+        "notes": "Fork length minimum. Verify current rules with TPWD."
+      },
+      "king-mackerel": {
+        "min_size": "24 in FL",
+        "bag_limit": "3 per day",
+        "season": "Open year-round",
+        "notes": "Fork length minimum. Verify current limits with TPWD."
+      },
+      "atlantic-spadefish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for Atlantic spadefish. Verify current state rules."
+      },
+      "gray-triggerfish": {
+        "min_size": "12 in TL",
+        "bag_limit": "20 per person per day (10 per person in Gulf federal waters)",
+        "season": "Open year-round state waters; federal Gulf waters: open year-round",
+        "notes": "Gulf federal waters bag limit is 10 per person. Verify state rules for any changes."
+      },
+      "southern-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round (seasonal closure Oct 15 \u2013 Nov 30 in some years)",
+        "notes": "Fall closures have been implemented to protect spawning fish. Verify current season with TPWD."
+      },
+      "gulf-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Gulf flounder are common in TX bays. TX has a 14 in minimum, 10 per day for all flounder.",
+        "source": "TX TPWD"
+      },
+      "southern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "gulf-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "pinfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Pinfish abundant in TX coastal bays and piers. No bag limit.",
+        "source": "TX TPWD"
+      },
+      "mangrove-snapper": {
+        "min_size": "10 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Verify current state rules for gray snapper (mangrove snapper)."
+      },
+      "jack-crevalle": {
+        "min_size": "No minimum",
+        "bag_limit": "No bag limit (FL: 10/day jack aggregate)",
+        "season": "Open year-round",
+        "notes": "Crevalle jack in Texas: no minimum size or specific state bag limit. Common inshore and nearshore. Verify with TPWD.",
+        "source": "https://tpwd.texas.gov/regulations/outdoor-annual/fishing/saltwater-fishing-limits"
+      },
+      "blue-runner": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No state regulations for blue runner in most Gulf and SE states; excellent live bait species."
+      },
+      "ladyfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Ladyfish are extremely common in TX bays. No bag limit. Fun on ultra-light tackle.",
+        "source": "TX TPWD"
+      },
+      "tarpon": {
+        "min_size": "None",
+        "bag_limit": "0 (catch and release only; tag required to harvest)",
+        "season": "Open year-round",
+        "notes": "A tarpon tag ($300) is required to harvest; most anglers practice catch and release."
+      },
+      "tripletail": {
+        "min_size": "17 in TL",
+        "bag_limit": "3 per day",
+        "season": "Open year-round",
+        "notes": "Verify current TPWD rules."
+      },
+      "permit": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Permit in TX Gulf flats. No bag limit; mostly catch-and-release.",
+        "source": "TX TPWD"
+      },
+      "bonefish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (rare in this area)",
+        "season": "Open year-round",
+        "notes": "Bonefish are extremely rare in TX. Catch-and-release only if encountered.",
+        "source": "TX TPWD"
+      },
+      "atlantic-sharpnose-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Atlantic sharpnose shark very common in TX surf and bays. No bag limit.",
+        "source": "TX TPWD"
+      },
+      "blacktip-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (Small Coastal Shark)",
+        "season": "Open year-round",
+        "notes": "Blacktip shark in TX Gulf. No bag limit. Commonly encountered in shallow Gulf waters.",
+        "source": "TX TPWD; NOAA HMS"
+      },
+      "spinner-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (Small Coastal Shark)",
+        "season": "Open year-round",
+        "notes": "Blacktip shark in TX Gulf. No bag limit. Commonly encountered in shallow Gulf waters.",
+        "source": "TX TPWD; NOAA HMS"
+      },
+      "bonnethead-shark": {
+        "min_size": "None",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round",
+        "notes": "Bonnethead sharks managed under NOAA HMS. Requires federal HMS Angling Permit from a vessel. 1-fish vessel limit. Mostly released."
+      },
+      "bull-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Bull shark is a Large Coastal Shark. NOAA permit required to fish for them recreationally. 1 per vessel per day. No minimum size. Verify with NOAA HMS and TX state rules.",
+        "source": "NOAA Fisheries HMS; TX state agency"
+      },
+      "amaama-mullet": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Striped mullet in TX bays. No recreational bag limit; commonly used as bait.",
         "source": "TX TPWD"
       }
     },
@@ -1424,6 +4075,217 @@
         "season": "Open year-round",
         "notes": "Bonefish are very rare in VA. Release if caught.",
         "source": "VA DGIF"
+      },
+      "weakfish-gray-trout": {
+        "min_size": "13 in TL",
+        "bag_limit": "1 per day",
+        "season": "Open year-round",
+        "notes": "Stock is depleted; confirm current limits with VA MRC."
+      },
+      "scup-porgy": {
+        "min_size": "9 in TL",
+        "bag_limit": "30 per day",
+        "season": "Open year-round",
+        "notes": "Verify current VA MRC limits."
+      },
+      "winter-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Verify current VA MRC rules."
+      },
+      "atlantic-mackerel": {
+        "min_size": "None",
+        "bag_limit": "20 per day (recreational)",
+        "season": "Open year-round",
+        "notes": "No minimum size. Federal mackerel quota applies to commercial; recreational is generally open."
+      },
+      "atlantic-bonito": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round (summer-fall)",
+        "notes": "No state regulations for Atlantic bonito in most states."
+      },
+      "northern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "american-eel": {
+        "min_size": "9 in (varies by state)",
+        "bag_limit": "25 per person per day (varies)",
+        "season": "Open year-round (elver season is separate and highly regulated)",
+        "notes": "American eel recreational regulations vary by state. Glass eel (elver) fishery is separately managed and requires specific permits in states like ME and RI. Yellow/silver eels have size and bag limits. Verify current ASMFC and state rules."
+      },
+      "northern-puffer-blowfish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for northern puffer. Properly cleaning pufferfish is important \u2014 the liver, skin, and gonads contain tetrodotoxin. Only eat the skinned back-strap meat."
+      },
+      "smooth-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Smooth dogfish in VA Chesapeake Bay and coastal waters. No bag limit.",
+        "source": "VA DGIF"
+      },
+      "spiny-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "15 per day",
+        "season": "Open year-round",
+        "notes": "Spiny dogfish common in VA nearshore waters in fall and winter.",
+        "source": "VA DGIF; NOAA Fisheries"
+      },
+      "cobia": {
+        "min_size": "37 in FL",
+        "bag_limit": "2 per day",
+        "season": "Open year-round",
+        "notes": "Fork length minimum. Verify current rules with VA MRC."
+      },
+      "king-mackerel": {
+        "min_size": "24 in FL",
+        "bag_limit": "3 per day",
+        "season": "Open year-round (summer-fall visitor)",
+        "notes": "King mackerel arrive off VA in summer; verify current VA MRC rules."
+      },
+      "atlantic-spadefish": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for Atlantic spadefish. Verify current state rules."
+      },
+      "gray-triggerfish": {
+        "min_size": "12 in FL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round in South Atlantic federal waters",
+        "notes": "Virginia offshore: 12-inch FL minimum, 10/day. Verify with VA MRC.",
+        "source": "https://webapps.mrc.virginia.gov/public/reports/swrecfishingrules.php"
+      },
+      "southern-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Southern flounder in Virginia: 12-inch minimum, 10/day. Found in lower Chesapeake Bay and tidal rivers. Verify current rules with VA MRC.",
+        "source": "https://webapps.mrc.virginia.gov/public/reports/swrecfishingrules.php"
+      },
+      "southern-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "gulf-kingfish": {
+        "min_size": "None specific",
+        "bag_limit": "No recreational limit in most states",
+        "season": "Open year-round",
+        "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
+      },
+      "pinfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Pinfish present in VA lower Chesapeake Bay in summer. No bag limit.",
+        "source": "VA DGIF"
+      },
+      "jack-crevalle": {
+        "min_size": "No minimum",
+        "bag_limit": "No bag limit (FL: 10/day jack aggregate)",
+        "season": "Open year-round",
+        "notes": "Crevalle jack in Virginia: no minimum size or bag limit. Summer visitor in coastal waters. Verify with VA MRC.",
+        "source": "https://webapps.mrc.virginia.gov/public/reports/swrecfishingrules.php"
+      },
+      "blue-runner": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No specific regulations for blue runner. Primarily used as live bait."
+      },
+      "ladyfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Ladyfish occasional in VA lower Chesapeake in summer. No bag limit.",
+        "source": "VA DGIF"
+      },
+      "tarpon": {
+        "min_size": "No minimum harvest size",
+        "bag_limit": "1 tarpon tag per person/year",
+        "season": "Seasonal \u2014 open in summer and early fall",
+        "notes": "Tarpon harvest requires a tarpon tag (available from state wildlife agency). Catch and release is strongly encouraged and practiced by most anglers. Tarpon occasionally appear in Virginia coastal waters and Chesapeake Bay mouth in late summer. Verify current tagging requirements.",
+        "source": "https://webapps.mrc.virginia.gov/public/reports/swrecfishingrules.php"
+      },
+      "tripletail": {
+        "min_size": "15 in",
+        "bag_limit": 2,
+        "season": "Year-round",
+        "notes": ""
+      },
+      "permit": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Permit very rare in VA waters. No specific regulation.",
+        "source": "VA DGIF"
+      },
+      "bonefish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit (rare in this area)",
+        "season": "Open year-round",
+        "notes": "Bonefish are very rare in VA. Release if caught.",
+        "source": "VA DGIF"
+      },
+      "atlantic-sharpnose-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "3 per person per day",
+        "season": "Year-round",
+        "notes": "Small coastal shark \u2014 no minimum size. HMS Angling Permit required."
+      },
+      "sandbar-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Sandbar shark is a Large Coastal Shark. NOAA recreational permit required. 1 per vessel per day. Sandbar sharks are an important coastal species; handle carefully. Verify with NOAA HMS and VA state rules.",
+        "source": "NOAA Fisheries HMS; VA state agency"
+      },
+      "blacktip-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "spinner-shark": {
+        "min_size": "54 in fork length",
+        "bag_limit": "1 per person per day",
+        "season": "Year-round",
+        "notes": "NOAA HMS Angling Permit required if targeting sharks. Catch-and-release encouraged. Never cut fins (federal shark finning ban)."
+      },
+      "bonnethead-shark": {
+        "min_size": "None",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round",
+        "notes": "Bonnethead sharks managed under NOAA HMS. Requires federal HMS Angling Permit from a vessel. 1-fish vessel limit. Mostly released."
+      },
+      "bull-shark": {
+        "min_size": "No minimum",
+        "bag_limit": "1 per vessel per day",
+        "season": "Open year-round (NOAA HMS rules)",
+        "notes": "Bull shark is a Large Coastal Shark. NOAA permit required to fish for them recreationally. 1 per vessel per day. No minimum size. Verify with NOAA HMS and VA state rules.",
+        "source": "NOAA Fisheries HMS; VA state agency"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "18 in TL",
+        "bag_limit": "2 per day",
+        "season": "Seasonal (Chesapeake Bay has spring/fall seasons; coastal waters differ)",
+        "notes": "Regulations vary by area. Slot limits may apply. Verify current rules with VA MRC or VDWR. Rules vary by area. Verify 2026 slot limits and seasons with VA MRC or VDWR."
+      },
+      "amaama-mullet": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Striped mullet in VA Chesapeake Bay area. No bag limit.",
+        "source": "VA DGIF"
       }
     },
     "WA": {
@@ -1464,6 +4326,124 @@
         "bag_limit": "5 per day",
         "season": "Seasonal \u2014 check WDFW for current open dates",
         "notes": "Season and bag limits vary by Puget Sound vs. coastal marine areas. Verify current rules with WDFW."
+      },
+      "walleye-surfperch": {
+        "min_size": "No minimum",
+        "bag_limit": "20 per day",
+        "season": "Open year-round",
+        "notes": "Walleye surfperch common near jetties and piers. Part of surfperch aggregate bag limit. Verify current WDFW regulations.",
+        "source": "WDFW"
+      },
+      "silver-surfperch": {
+        "min_size": "None",
+        "bag_limit": "Aggregate surfperch limit",
+        "season": "Open year-round",
+        "notes": "Verify current state surfperch rules."
+      },
+      "rubberlip-seaperch": {
+        "min_size": "No minimum",
+        "bag_limit": "15 per day (aggregate surfperch limit)",
+        "season": "Open year-round",
+        "notes": "Washington 15-fish/day aggregate limit for surfperch; no minimum size. Verify current rules with WDFW.",
+        "source": "https://wdfw.wa.gov/fishing/regulations"
+      },
+      "pile-perch": {
+        "min_size": "No minimum",
+        "bag_limit": "20 per day",
+        "season": "Open year-round",
+        "notes": "Walleye surfperch common near jetties and piers. Part of surfperch aggregate bag limit. Verify current WDFW regulations.",
+        "source": "WDFW"
+      },
+      "shiner-perch": {
+        "min_size": "No minimum",
+        "bag_limit": "20 per day",
+        "season": "Open year-round",
+        "notes": "Walleye surfperch common near jetties and piers. Part of surfperch aggregate bag limit. Verify current WDFW regulations.",
+        "source": "WDFW"
+      },
+      "black-perch": {
+        "min_size": "None",
+        "bag_limit": "10 per day (surfperch aggregate)",
+        "season": "Open year-round",
+        "notes": "Part of the surfperch aggregate. Verify current state rules."
+      },
+      "starry-flounder": {
+        "min_size": "No minimum",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Starry flounder in nearshore and estuary areas. Check current CDFW/ODFW/WDFW rules. Verify current WDFW regulations.",
+        "source": "WDFW"
+      },
+      "pacific-sanddab": {
+        "min_size": "None",
+        "bag_limit": "No limit for sanddabs",
+        "season": "Open year-round",
+        "notes": "Pacific sand dabs have no bag or size limit in most Pacific states. They are among the most lightly regulated flatfish species."
+      },
+      "kelp-greenling": {
+        "min_size": "12 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Verify current limits with WDFW."
+      },
+      "cabezon": {
+        "min_size": "No minimum",
+        "bag_limit": "5 per day",
+        "season": "Seasonal",
+        "notes": "Verify current season dates and limits with WDFW."
+      },
+      "blue-rockfish": {
+        "min_size": "10 in TL",
+        "bag_limit": "Included in rockfish aggregate",
+        "season": "Open year-round",
+        "notes": "Blue rockfish are among the most common nearshore rockfish. Part of aggregate bag limit. Verify current WDFW regulations.",
+        "source": "WDFW"
+      },
+      "monkeyface-prickleback": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Pacific staghorn sculpin are common pier catch throughout the Pacific Coast. Excellent bait for halibut. Verify current WDFW regulations.",
+        "source": "WDFW"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "18 in TL",
+        "bag_limit": "2 per day",
+        "season": "Open year-round",
+        "notes": "Striped bass are in the Columbia River system and some coastal areas. Verify current WDFW rules."
+      },
+      "chinook-salmon": {
+        "min_size": "24 in TL (most areas)",
+        "bag_limit": "2 per day (varies by area and season)",
+        "season": "Set annually by PFMC; varies greatly by area and month",
+        "notes": "WA salmon rules are extremely complex and change by year, area, and week. ALWAYS verify current WDFW Emergency Rules before fishing."
+      },
+      "coho-salmon": {
+        "min_size": "16 in TL (most areas)",
+        "bag_limit": "2 per day (varies)",
+        "season": "Set annually; varies by area",
+        "notes": "Verify current WDFW rules; coho seasons and quotas change frequently."
+      },
+      "california-sheephead": {
+        "min_size": "",
+        "bag_limit": "0",
+        "season": "Not present",
+        "notes": "California sheephead do not occur in WA waters \u2014 CA-endemic species.",
+        "source": "WDFW"
+      },
+      "jack-mackerel": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Rare; warm-water years",
+        "notes": "Pacific jack mackerel rare in WA; possible during El Ni\u00f1o. No specific regulation.",
+        "source": "WDFW"
+      },
+      "pacific-barracuda": {
+        "min_size": "",
+        "bag_limit": "0",
+        "season": "Not present",
+        "notes": "Pacific barracuda are a Southern California species and do not occur in WA waters.",
+        "source": "WDFW"
       }
     },
     "HI": {
@@ -1492,6 +4472,106 @@
         "season": "Year-round with area restrictions",
         "notes": "Moi (Pacific threadfin) have special cultural significance in Hawaii. Historically a royal fish (kapu), moi are now partially protected: fishing for moi at certain traditional fishponds and nearshore areas may be restricted. Check HI DLNR for current area-specific rules before targeting moi. Size and bag limits may apply in some zones.",
         "source": "https://dlnr.hawaii.gov/dar/fishing/fishing-regulations/"
+      },
+      "permit": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Permit are found in Hawaiian flats. No specific bag limit.",
+        "source": "DLNR Division of Aquatic Resources"
+      },
+      "great-barracuda": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Great barracuda (kaku) are common in Hawaii. No bag limit. Use caution with large fish (ciguatera risk in some areas).",
+        "source": "DLNR Division of Aquatic Resources"
+      },
+      "bonefish": {
+        "min_size": "None",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Oio (bonefish) regulations; most anglers practice catch and release."
+      },
+      "omilu-bluefin-trevally": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Omilu (bluefin trevally) have no specific bag or size limit in Hawaii. Excellent eating.",
+        "source": "DLNR Division of Aquatic Resources"
+      },
+      "aholehole": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Aholehole (Hawaiian flagtail) are small but numerous shore fish. No bag limit. Good bait fish.",
+        "source": "DLNR"
+      },
+      "weke-goatfish": {
+        "min_size": "No minimum size",
+        "bag_limit": "No bag limit",
+        "season": "Open year-round",
+        "notes": "No size or bag restrictions in Hawaii for recreational fishing.",
+        "official_source": "https://dlnr.hawaii.gov/dar/fishing/"
+      },
+      "akule": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No state bag or size limit for akule (bigeye scad) in Hawaii. Cast net and sabiki rig fishing allowed."
+      },
+      "toau": {
+        "min_size": "No minimum size",
+        "bag_limit": "No bag limit",
+        "season": "Open year-round",
+        "notes": "No size or bag restrictions. Salt water license not required in Hawaii for recreational fishing.",
+        "official_source": "https://dlnr.hawaii.gov/dar/fishing/"
+      },
+      "uku": {
+        "min_size": "None",
+        "bag_limit": "No state bag limit for uku specifically",
+        "season": "Open year-round",
+        "notes": "Verify current DLNR rules for any area restrictions."
+      },
+      "kaku-barracuda": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Great barracuda (kaku) are common in Hawaii. No bag limit. Use caution with large fish (ciguatera risk in some areas).",
+        "source": "DLNR Division of Aquatic Resources"
+      },
+      "nenue": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No state size or bag limit for nenue (Hawaiian chub) in Hawaii."
+      },
+      "manini": {
+        "min_size": "None",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "No state size or bag limit for manini (convict tang) in Hawaii."
+      },
+      "amaama-mullet": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Striped mullet (amaama) are a traditional Hawaiian food fish. No bag limit.",
+        "source": "DLNR Division of Aquatic Resources"
+      },
+      "mu": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Mu (bigeye emperor) are found on shallow Hawaiian reefs. No bag limit.",
+        "source": "DLNR"
+      },
+      "roi": {
+        "min_size": "No minimum size",
+        "bag_limit": "No bag limit; anglers are encouraged to keep all",
+        "season": "Open year-round",
+        "notes": "Roi is an invasive species introduced in 1956. DLNR encourages unlimited harvest to help control populations. No license required.",
+        "official_source": "https://dlnr.hawaii.gov/dar/fishing/"
       }
     },
     "NH": {
@@ -1550,6 +4630,76 @@
         "season": "Jun 1 \u2013 Feb 28",
         "notes": "Black sea bass at the northern edge of their range in NH. Follow ASMFC/NOAA regulations.",
         "source": "NH Fish & Game; ASMFC"
+      },
+      "weakfish-gray-trout": {
+        "min_size": "12 in TL",
+        "bag_limit": "1 per day",
+        "season": "Open year-round",
+        "notes": "Weakfish occasionally appear in NH estuaries. Stocks are severely depleted; 1/day limit applies.",
+        "source": "NH Fish & Game; ASMFC"
+      },
+      "scup-porgy": {
+        "min_size": "9 in TL",
+        "bag_limit": "30 per day",
+        "season": "Seasonal (summer\u2013fall)",
+        "notes": "Scup appear in New Hampshire coastal waters in summer. 9-inch minimum, 30/day. Verify with NH Fish & Game.",
+        "source": "https://www.wildlife.nh.gov/fishing"
+      },
+      "winter-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "2 per day",
+        "season": "Apr 1 \u2013 Jun 30 (spring season); check NH Fish & Game",
+        "notes": "Winter flounder stocks are depleted; confirm current season and bag limits with NH Fish & Game.",
+        "source": "NH Fish & Game"
+      },
+      "atlantic-mackerel": {
+        "min_size": "No minimum",
+        "bag_limit": "20 per day",
+        "season": "May \u2013 Nov",
+        "notes": "Atlantic mackerel caught from piers and boats in NH summer.",
+        "source": "NH Fish & Game; NOAA Fisheries"
+      },
+      "atlantic-bonito": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round (summer/fall)",
+        "notes": "Atlantic bonito in NH offshore and nearshore in summer. No bag limit.",
+        "source": "NH Fish & Game"
+      },
+      "american-eel": {
+        "min_size": "6 in",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "American eel in NH estuaries. Recreational fishing for personal use.",
+        "source": "NH Fish & Game"
+      },
+      "smooth-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Smooth dogfish in NH coastal waters. No specific bag limit.",
+        "source": "NH Fish & Game"
+      },
+      "spiny-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "15 per day",
+        "season": "Open year-round",
+        "notes": "Spiny dogfish common in NH offshore and nearshore waters.",
+        "source": "NH Fish & Game; NOAA Fisheries"
+      },
+      "cobia": {
+        "min_size": "36 in TL",
+        "bag_limit": "1 per day",
+        "season": "Rare stray \u2014 Jun\u2013Sep",
+        "notes": "Cobia are occasional warm-water strays in NH. Follow ASMFC regulations.",
+        "source": "NH Fish & Game; ASMFC"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "28 in TL",
+        "bag_limit": "1 per day",
+        "season": "Seasonal (check NH Fish & Game for dates)",
+        "notes": "New Hampshire follows ASMFC coastwide striped bass rules: 28-inch minimum, 1/day. A slot limit (28\u201335 in) may apply \u2014 verify 2026 rules with NH Fish & Game before fishing.",
+        "source": "https://www.wildlife.nh.gov/fishing"
       }
     },
     "PA": {
@@ -1622,6 +4772,55 @@
         "season": "May 19 \u2013 Feb 28",
         "notes": "Black sea bass at southern Delaware Bay nearshore reefs. Verify current regulations with PA Fish & Boat Commission.",
         "source": "PA Fish & Boat Commission; ASMFC"
+      },
+      "scup-porgy": {
+        "min_size": "9 in TL",
+        "bag_limit": "30 per day",
+        "season": "Open year-round",
+        "notes": "Scup present in Delaware Bay/River in warmer months. Federal bag limit applies.",
+        "source": "PA Fish & Boat Commission"
+      },
+      "winter-flounder": {
+        "min_size": "12 in TL",
+        "bag_limit": "2 per day",
+        "season": "Seasonal \u2014 verify with PA Fish & Boat Commission",
+        "notes": "Winter flounder occasionally enter Delaware Bay from NJ/DE. Very rare in PA waters.",
+        "source": "PA Fish & Boat Commission"
+      },
+      "atlantic-mackerel": {
+        "min_size": "No minimum",
+        "bag_limit": "20 per day",
+        "season": "Apr \u2013 Oct (rare)",
+        "notes": "Atlantic mackerel may be caught in lower Delaware Bay during their migrations.",
+        "source": "PA Fish & Boat Commission"
+      },
+      "spiny-dogfish": {
+        "min_size": "No minimum",
+        "bag_limit": "15 per day",
+        "season": "Open year-round",
+        "notes": "Spiny dogfish in Delaware Bay and offshore PA waters. Follow NOAA regulations.",
+        "source": "PA Fish & Boat Commission; NOAA Fisheries"
+      },
+      "cobia": {
+        "min_size": "36 in TL",
+        "bag_limit": "1 per day",
+        "season": "Apr 1 \u2013 Dec 31 (rare stray)",
+        "notes": "Cobia are occasional strays in Delaware Bay. Very uncommon in PA waters.",
+        "source": "PA Fish & Boat Commission"
+      },
+      "king-mackerel": {
+        "min_size": "24 in FL",
+        "bag_limit": "3 per day",
+        "season": "Summer offshore (extremely rare)",
+        "notes": "King mackerel extremely rare in PA \u2014 far out of normal range.",
+        "source": "PA Fish & Boat Commission"
+      },
+      "striped-bass-west-coast": {
+        "min_size": "28 in TL",
+        "bag_limit": "1 per day",
+        "season": "Seasonal (typically spring/fall); check PA Fish & Boat Commission",
+        "notes": "Striped bass in Delaware River/Bay. PA follows Delaware River Basin Commission (DRBC) and PRFC rules.",
+        "source": "PA Fish & Boat Commission; DRBC"
       }
     },
     "AK": {
@@ -1652,6 +4851,69 @@
         "season": "Open year-round (check for area closures)",
         "notes": "Alaska lingcod: 35-inch TL minimum (stricter than most lower-48 states), 2/day bag limit. Found in shallow rocky reefs and kelp in Southeast and Southcentral Alaska. Check AK F&G for any area-specific closures.",
         "source": "https://www.adfg.alaska.gov/index.cfm?adfg=fishing.main"
+      },
+      "starry-flounder": {
+        "min_size": "No minimum",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Starry flounder in nearshore and estuary areas. Check current CDFW/ODFW/WDFW rules. Verify current ADF&G regulations.",
+        "source": "ADF&G"
+      },
+      "kelp-greenling": {
+        "min_size": "No minimum",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Kelp greenling common throughout AK nearshore waters. Follow ADF&G regulations.",
+        "source": "ADF&G"
+      },
+      "cabezon": {
+        "min_size": "16 in TL",
+        "bag_limit": "10 per day",
+        "season": "Open year-round",
+        "notes": "Cabezon present in Southeast AK. Follow ADF&G saltwater regulations.",
+        "source": "ADF&G"
+      },
+      "blue-rockfish": {
+        "min_size": "10 in TL",
+        "bag_limit": "Included in rockfish aggregate",
+        "season": "Open year-round",
+        "notes": "Blue rockfish are among the most common nearshore rockfish. Part of aggregate bag limit. Verify current ADF&G regulations.",
+        "source": "ADF&G"
+      },
+      "copper-rockfish": {
+        "min_size": "12 in TL",
+        "bag_limit": "Included in rockfish aggregate",
+        "season": "Open year-round",
+        "notes": "Copper rockfish in SE AK. Included in rockfish aggregate bag limit.",
+        "source": "ADF&G"
+      },
+      "monkeyface-prickleback": {
+        "min_size": "No minimum",
+        "bag_limit": "No limit",
+        "season": "Open year-round",
+        "notes": "Pacific staghorn sculpin are common pier catch throughout the Pacific Coast. Excellent bait for halibut. Verify current ADF&G regulations.",
+        "source": "ADF&G"
+      },
+      "chinook-salmon": {
+        "min_size": "20 in FL minimum in most areas",
+        "bag_limit": "1 per day (most areas); 0 in some closed systems",
+        "season": "Seasonal \u2014 varies significantly by area; check AK F&G Sport Fishing Regulations",
+        "notes": "Alaska king (chinook) salmon regulations are among the most complex in the world. Limits, minimum sizes, and seasons vary dramatically by drainage, area, and even specific sections of river. Some systems are closed entirely to king salmon fishing to protect wild stocks. Always check AK F&G current emergency order closures and area-specific rules before targeting king salmon. 20-in FL general minimum in saltwater; many freshwater systems differ.",
+        "source": "https://www.adfg.alaska.gov/index.cfm?adfg=fishing.main"
+      },
+      "coho-salmon": {
+        "min_size": "No minimum",
+        "bag_limit": "6 per day (most areas)",
+        "season": "Seasonal \u2014 August through November in most areas; check AK F&G",
+        "notes": "Alaska coho (silver) salmon: generally 6/day in most saltwater and freshwater areas. Season typically August\u2013November. Some systems restrict to hatchery-marked fish only. Check AK F&G for area-specific rules and emergency orders \u2014 regulations change annually.",
+        "source": "https://www.adfg.alaska.gov/index.cfm?adfg=fishing.main"
+      },
+      "pacific-barracuda": {
+        "min_size": "",
+        "bag_limit": "0",
+        "season": "Not present",
+        "notes": "Pacific barracuda are a Southern California species and do not occur in AK waters.",
+        "source": "ADF&G"
       }
     }
   }

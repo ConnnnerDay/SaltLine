@@ -30,9 +30,11 @@ _RED_DRUM = next(s for s in load_catalogue() if s["id"] == "red-drum")
 # --- catalogue -----------------------------------------------------------
 
 
-def test_catalogue_is_limited_and_every_species_is_region_gated() -> None:
+def test_catalogue_is_curated_and_every_species_is_region_gated() -> None:
     catalogue = load_catalogue()
-    assert 0 < len(catalogue) <= 30
+    # A curated shore/pier/inshore list, not the legacy 851-species dump.
+    assert 100 <= len(catalogue) <= 250
+    assert len({species["id"] for species in catalogue}) == len(catalogue)
     regions = {
         "atlantic_north",
         "atlantic_mid",
@@ -48,6 +50,9 @@ def test_catalogue_is_limited_and_every_species_is_region_gated() -> None:
         assert species["temp_min"] <= species["temp_ideal_low"]
         assert species["temp_ideal_low"] <= species["temp_ideal_high"]
         assert species["temp_ideal_high"] <= species["temp_max"]
+    # Every region has a real choice of fish, not a handful.
+    for region in regions:
+        assert sum(region in species["regions"] for species in catalogue) >= 20, region
 
 
 def test_catalogue_ids_are_unique() -> None:
@@ -439,3 +444,21 @@ def test_no_pack_without_picks() -> None:
         ).pack
         is None
     )
+
+
+def test_every_region_month_and_temperature_builds() -> None:
+    """Every catalogue entry must survive being picked: no region, month or
+    water temperature may hit a species with a missing field."""
+    regions = {region for species in load_catalogue() for region in species["regions"]}
+    for region in sorted(regions):
+        for month in range(1, 13):
+            for temp in range(40, 92, 4):
+                result = build_fishing_guidance(
+                    region=region,
+                    water_temp_f=float(temp),
+                    water_temp_is_fallback=False,
+                    month=month,
+                    max_picks=200,
+                )
+                for pick in result.species:
+                    assert pick.bait and pick.rig, pick.id

@@ -6,14 +6,15 @@ takes that article's lead image, looks its license and author up on
 Wikimedia Commons, keeps it only if the license is free (Creative Commons
 or public domain), and saves a 480px-wide JPEG into apps/web/public/species/,
 plus apps/web/lib/species-photos.json with the credit, license and source
-page the web app must show next to each photo.
+page the web app must show next to each photo. (The license lookup goes
+through en.wikipedia.org's API, which serves Commons file metadata too.)
 
 Photos are committed and served by the site itself: nothing is hotlinked
 at view time, so the site's self-only CSP stays intact and photos keep
 working if Wikimedia is unreachable.
 
 Run from apps/api with a Python that has Pillow (needs network access to
-en.wikipedia.org, commons.wikimedia.org and upload.wikimedia.org):
+en.wikipedia.org and upload.wikimedia.org):
 
     python3 -m scripts.fetch_species_photos
 
@@ -73,6 +74,113 @@ ARTICLES: dict[str, str] = {
     "papio": "Bluefin_trevally",
     "oio-bonefish": "Albula_vulpes",
     "moi": "Polydactylus_sexfilis",
+    "weakfish-gray-trout": "Weakfish",
+    "scup-porgy": "Scup",
+    "winter-flounder": "Winter_flounder",
+    "atlantic-mackerel": "Atlantic_mackerel",
+    "false-albacore": "Little_tunny",
+    "atlantic-bonito": "Atlantic_bonito",
+    "northern-kingfish": "Northern_kingfish",
+    "cunner-bergall": "Cunner",
+    "pollock": "Pollachius_virens",
+    "white-perch": "White_perch",
+    "hickory-shad": "Hickory_shad",
+    "american-eel": "American_eel",
+    "northern-puffer-blowfish": "Northern_puffer",
+    "sea-robin": "Prionotus_carolinus",
+    "smooth-dogfish": "Smooth_dogfish",
+    "spiny-dogfish": "Spiny_dogfish",
+    "clearnose-skate": "Clearnose_skate",
+    "cobia": "Cobia",
+    "king-mackerel": "King_mackerel",
+    "atlantic-spadefish": "Atlantic_spadefish",
+    "gray-triggerfish": "Grey_triggerfish",
+    "southern-flounder": "Southern_flounder",
+    "gulf-flounder": "Gulf_flounder",
+    "southern-kingfish": "Menticirrhus_americanus",
+    "gulf-kingfish": "Gulf_kingfish",
+    "silver-perch": "Bairdiella_chrysoura",
+    "sand-seatrout-white-trout": "Sand_seatrout",
+    "silver-seatrout": "Cynoscion_nothus",
+    "pinfish": "Pinfish",
+    "mangrove-snapper": "Mangrove_red_snapper",
+    "jack-crevalle": "Crevalle_jack",
+    "blue-runner": "Blue_runner",
+    "ladyfish": "Elops_saurus",
+    "tarpon": "Atlantic_tarpon",
+    "tripletail": "Atlantic_tripletail",
+    "permit": "Permit_(fish)",
+    "lookdown": "Lookdown",
+    "great-barracuda": "Great_barracuda",
+    "bonefish": "Albula_vulpes",
+    "sand-perch": "Diplectrum_formosum",
+    "tomtate": "Tomtate_grunt",
+    "oyster-toadfish": "Oyster_toadfish",
+    "atlantic-sharpnose-shark": "Atlantic_sharpnose_shark",
+    "sandbar-shark": "Sandbar_shark",
+    "blacktip-shark": "Blacktip_shark",
+    "spinner-shark": "Spinner_shark",
+    "bonnethead-shark": "Bonnethead",
+    "bull-shark": "Bull_shark",
+    "atlantic-stingray": "Atlantic_stingray",
+    "southern-stingray": "Southern_stingray",
+    "cownose-ray": "Cownose_ray",
+    "calico-surfperch": "Calico_surfperch",
+    "walleye-surfperch": "Walleye_surfperch",
+    "silver-surfperch": "Silver_surfperch",
+    "rubberlip-seaperch": "Rubberlip_seaperch",
+    "pile-perch": "Pile_perch",
+    "striped-seaperch": "Striped_seaperch",
+    "shiner-perch": "Shiner_perch",
+    "black-perch": "Black_perch",
+    "jacksmelt": "Jacksmelt",
+    "white-croaker": "White_croaker",
+    "starry-flounder": "Starry_flounder",
+    "pacific-sanddab": "Pacific_sanddab",
+    "kelp-greenling": "Kelp_greenling",
+    "cabezon": "Cabezon_(fish)",
+    "grass-rockfish": "Grass_rockfish",
+    "blue-rockfish": "Blue_rockfish",
+    "copper-rockfish": "Copper_rockfish",
+    "monkeyface-prickleback": "Monkeyface_prickleback",
+    "striped-bass-west-coast": "Striped_bass",
+    "chinook-salmon": "Chinook_salmon",
+    "coho-salmon": "Coho_salmon",
+    "leopard-shark": "Leopard_shark",
+    "bat-ray": "Bat_ray",
+    "pacific-mackerel": "Chub_mackerel",
+    "spotfin-croaker": "Spotfin_croaker",
+    "kelp-bass-calico-bass": "Kelp_bass",
+    "barred-sand-bass": "Barred_sand_bass",
+    "spotted-sand-bass": "Spotted_sand_bass",
+    "california-sheephead": "California_sheephead",
+    "opaleye": "Opaleye",
+    "halfmoon": "Medialuna_californiensis",
+    "jack-mackerel": "Pacific_jack_mackerel",
+    "pacific-barracuda": "Pacific_barracuda",
+    "pacific-bonito": "Pacific_bonito",
+    "yellowtail": "Seriola_dorsalis",
+    "queenfish": "Seriphus_politus",
+    "sargo": "Anisotremus_davidsonii",
+    "shovelnose-guitarfish": "Shovelnose_guitarfish",
+    "round-stingray": "Round_stingray",
+    "omilu-bluefin-trevally": "Bluefin_trevally",
+    "menpachi": "Myripristis_berndti",
+    "aholehole": "Kuhlia_sandvicensis",
+    "weke-goatfish": "Mulloidichthys_flavolineatus",
+    "akule": "Selar_crumenophthalmus",
+    "opelu": "Decapterus_macarellus",
+    "taape": "Bluestripe_snapper",
+    "toau": "Lutjanus_fulvus",
+    "uku": "Green_jobfish",
+    "kaku-barracuda": "Sphyraena_barracuda",
+    "nenue": "Kyphosus_vaigiensis",
+    "kala": "Naso_unicornis",
+    "manini": "Convict_surgeonfish",
+    "uhu-parrotfish": "Scarus_rubroviolaceus",
+    "amaama-mullet": "Flathead_grey_mullet",
+    "mu": "Monotaxis_grandoculis",
+    "roi": "Peacock_grouper",
 }
 
 _FREE_LICENSE = re.compile(r"^(cc[- ]|cc0|public domain|pd)", re.IGNORECASE)
@@ -162,9 +270,9 @@ def _photo_for(article: str) -> dict[str, str] | None:
             "titles": f"File:{filename}",
         }
     )
-    pages = _get_json(f"https://commons.wikimedia.org/w/api.php?{query}")["query"][
-        "pages"
-    ]
+    # English Wikipedia's API answers for Commons ("shared") files too, with
+    # the same license metadata, and rate-limits bulk clients far less.
+    pages = _get_json(f"https://en.wikipedia.org/w/api.php?{query}")["query"]["pages"]
     info = next(iter(pages.values())).get("imageinfo", [{}])[0]
     meta = info.get("extmetadata", {})
     license_name = _plain(meta.get("LicenseShortName", {}).get("value", ""))

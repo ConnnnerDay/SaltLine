@@ -67,6 +67,120 @@ _PICKS: list[tuple[str, str, list[str]]] = [
     ("Papio (juvenile jack)", "Papio", [_H]),
     ("Bonefish (oio)", "O'io (bonefish)", [_H]),
     ("Moi (Pacific threadfin)", "Moi", [_H]),
+    # --- Expanded catalogue: more fish people actually catch from the
+    # beach, pier, jetty, bridge or a kayak, each in the regions it's
+    # commonly caught. Order within a region is the tie-break order.
+    # Northeast / Mid-Atlantic
+    ("Gray trout (weakfish)", "Weakfish (gray trout)", [_N, _M, _S]),
+    ("Scup (porgy)", "Scup (porgy)", [_N, _M]),
+    ("Winter flounder", "Winter flounder", [_N]),
+    ("Atlantic mackerel", "Atlantic mackerel", [_N]),
+    ("Little tunny (false albacore)", "False albacore", [_N, _M, _S, _G]),
+    ("Atlantic bonito", "Atlantic bonito", [_N, _M]),
+    ("Northern kingfish", "Northern kingfish", [_N, _M]),
+    ("Cunner (bergall)", "Cunner (bergall)", [_N]),
+    ("Pollock", "Pollock", [_N]),
+    ("White perch", "White perch", [_N, _M]),
+    ("Hickory shad", "Hickory shad", [_N, _M, _S]),
+    ("American eel", "American eel", [_N, _M, _S]),
+    ("Northern puffer (blowfish)", "Northern puffer (blowfish)", [_N, _M]),
+    ("Sea robin", "Sea robin", [_N, _M, _S]),
+    ("Smooth dogfish", "Smooth dogfish", [_N, _M, _S]),
+    ("Spiny dogfish", "Spiny dogfish", [_N, _M]),
+    ("Clearnose skate", "Clearnose skate", [_N, _M, _S]),
+    # Southeast / Gulf
+    ("Cobia", "Cobia", [_M, _S, _G]),
+    ("King mackerel (kingfish)", "King mackerel", [_M, _S, _G]),
+    ("Spadefish (Atlantic)", "Atlantic spadefish", [_M, _S, _G]),
+    ("Triggerfish (gray)", "Gray triggerfish", [_M, _S, _G]),
+    ("Southern flounder", "Southern flounder", [_M, _S, _G]),
+    ("Gulf flounder", "Gulf flounder", [_S, _G]),
+    ("Southern kingfish (ground mullet)", "Southern kingfish", [_M, _S, _G]),
+    ("Gulf kingfish (gulf whiting)", "Gulf kingfish", [_S, _G]),
+    ("Silver perch", "Silver perch", [_M, _S, _G]),
+    ("Sand seatrout (white trout)", "Sand seatrout (white trout)", [_G]),
+    ("Silver seatrout", "Silver seatrout", [_M, _S, _G]),
+    ("Pinfish", "Pinfish", [_M, _S, _G]),
+    ("Mangrove snapper (gray snapper)", "Mangrove snapper", [_S, _G]),
+    ("Jack crevalle", "Jack crevalle", [_M, _S, _G]),
+    ("Blue runner (hardtail)", "Blue runner", [_M, _S, _G]),
+    ("Ladyfish", "Ladyfish", [_S, _G]),
+    ("Tarpon", "Tarpon", [_S, _G]),
+    ("Tripletail", "Tripletail", [_S, _G]),
+    ("Permit", "Permit", [_S, _G]),
+    ("Lookdown", "Lookdown", [_S, _G]),
+    ("Great barracuda", "Great barracuda", [_S, _G]),
+    ("Bonefish (flats)", "Bonefish", [_S]),
+    ("Sand perch", "Sand perch", [_S, _G]),
+    ("Tomtate grunt", "Tomtate", [_S, _G]),
+    ("Oyster toadfish", "Oyster toadfish", [_M, _S]),
+    ("Atlantic sharpnose shark", "Atlantic sharpnose shark", [_M, _S, _G]),
+    ("Sandbar shark", "Sandbar shark", [_M, _S, _G]),
+    ("Blacktip shark", "Blacktip shark", [_M, _S, _G]),
+    ("Spinner shark", "Spinner shark", [_S, _G]),
+    ("Bonnethead shark", "Bonnethead shark", [_S, _G]),
+    ("Bull shark", "Bull shark", [_S, _G]),
+    ("Atlantic stingray", "Atlantic stingray", [_M, _S, _G]),
+    ("Southern stingray", "Southern stingray", [_S, _G]),
+    ("Cownose ray", "Cownose ray", [_M, _S, _G]),
+    # Pacific (central / northern California to Washington, and SoCal)
+    ("Calico surfperch", "Calico surfperch", [_P, _PS]),
+    ("Walleye surfperch", "Walleye surfperch", [_P, _PS]),
+    ("Silver surfperch", "Silver surfperch", [_P]),
+    ("Rubberlip seaperch", "Rubberlip seaperch", [_P, _PS]),
+    ("Pile perch", "Pile perch", [_P, _PS]),
+    ("Striped seaperch", "Striped seaperch", [_P]),
+    ("Shiner perch", "Shiner perch", [_P, _PS]),
+    ("Black perch", "Black perch", [_P, _PS]),
+    ("Jacksmelt", "Jacksmelt", [_P, _PS]),
+    ("White croaker (tomcod)", "White croaker", [_P, _PS]),
+    ("Starry flounder", "Starry flounder", [_P]),
+    ("Pacific sanddab", "Pacific sanddab", [_P, _PS]),
+    ("Kelp greenling", "Kelp greenling", [_P]),
+    ("Cabezon", "Cabezon", [_P, _PS]),
+    ("Grass rockfish", "Grass rockfish", [_P, _PS]),
+    ("Blue rockfish", "Blue rockfish", [_P]),
+    ("Copper rockfish", "Copper rockfish", [_P]),
+    ("Monkeyface prickleback", "Monkeyface prickleback", [_P]),
+    ("Striped bass (Sacramento)", "Striped bass (West Coast)", [_P]),
+    ("Chinook salmon (king salmon)", "Chinook salmon", [_P]),
+    ("Coho salmon (silver salmon)", "Coho salmon", [_P]),
+    ("Leopard shark", "Leopard shark", [_P, _PS]),
+    ("Bat ray", "Bat ray", [_P, _PS]),
+    ("Pacific mackerel (chub mackerel)", "Pacific mackerel", [_P, _PS]),
+    ("Spotfin croaker", "Spotfin croaker", [_PS]),
+    ("Kelp bass (calico bass)", "Kelp bass (calico bass)", [_PS]),
+    ("Sand bass (barred sand bass)", "Barred sand bass", [_PS]),
+    ("Spotted sand bass", "Spotted sand bass", [_PS]),
+    ("California sheephead", "California sheephead", [_PS]),
+    ("Opaleye", "Opaleye", [_PS]),
+    ("Halfmoon (Catalina perch)", "Halfmoon", [_PS]),
+    ("Jack mackerel (Spanish jack)", "Jack mackerel", [_PS]),
+    ("Pacific barracuda (California barracuda)", "Pacific barracuda", [_PS]),
+    ("Pacific bonito", "Pacific bonito", [_PS]),
+    ("Yellowtail (California yellowtail)", "Yellowtail", [_PS]),
+    ("Queenfish", "Queenfish", [_PS]),
+    ("Sargo", "Sargo", [_PS]),
+    ("Shovelnose guitarfish", "Shovelnose guitarfish", [_PS]),
+    ("Round stingray", "Round stingray", [_PS]),
+    # Hawaii
+    ("Bluefin trevally (omilu)", "Omilu (bluefin trevally)", [_H]),
+    ("Menpachi (soldierfish)", "Menpachi", [_H]),
+    ("Aholehole (Hawaiian flagtail)", "Aholehole", [_H]),
+    ("Weke (goatfish)", "Weke (goatfish)", [_H]),
+    ("Akule (bigeye scad)", "Akule", [_H]),
+    ("Opelu (mackerel scad)", "Opelu", [_H]),
+    ("Taape (bluestripe snapper)", "Ta'ape", [_H]),
+    ("Toau (blacktail snapper)", "To'au", [_H]),
+    ("Uku (gray snapper / jobfish)", "Uku", [_H]),
+    ("Kaku (barracuda)", "Kaku (barracuda)", [_H]),
+    ("Nenue (Hawaiian chub)", "Nenue", [_H]),
+    ("Kala (unicornfish)", "Kala", [_H]),
+    ("Manini (convict tang)", "Manini", [_H]),
+    ("Uhu (parrotfish)", "Uhu (parrotfish)", [_H]),
+    ("Amaama (striped mullet, Hawaii)", "Ama'ama (mullet)", [_H]),
+    ("Mu (bigeye emperor)", "Mu", [_H]),
+    ("Roi (peacock grouper)", "Roi", [_H]),
 ]
 
 _COPIED_FIELDS = (
@@ -86,13 +200,27 @@ _COPIED_FIELDS = (
 )
 
 
+_TEXT_FIELDS = {
+    "bait",
+    "rig",
+    "hook_size",
+    "sinker",
+    "lures",
+    "explanation_cold",
+    "explanation_warm",
+}
+
+
 def _slug(name: str) -> str:
     return (
         name.lower()
         .replace("'", "")
         .replace("(", "")
         .replace(")", "")
+        .replace(",", "")
+        .replace("/", "")
         .replace(" ", "-")
+        .replace("--", "-")
     )
 
 
@@ -128,7 +256,13 @@ def main() -> None:
             "legacy_name": legacy_name,
             "regions": regions,
         }
-        record.update({field: entry[field] for field in _COPIED_FIELDS})
+        # A few legacy entries leave a text field empty (null): store "".
+        record.update(
+            {
+                field: entry[field] or "" if field in _TEXT_FIELDS else entry[field]
+                for field in _COPIED_FIELDS
+            }
+        )
         record["conditions"] = condition_tags.get(legacy_name, [])
         record["targets"] = [
             group for group, names in target_groups.items() if legacy_name in names

@@ -4,11 +4,12 @@ recommendation explains why".
 Designs `app.domain.models.ForecastEnvelope.recommendations`, the last of
 the four opaque payloads sprint 11 reserved (21/22/34/35).
 
-**Scope.** Deliberately *not* the legacy 851-species experience, which the
-roadmap defers past v1. The catalogue is `app/data/guidance_species.json`:
-26 common surf/pier targets, each offered only in the `conditions_region`s
-it actually lives in (4-13 per region), with bait/rig/tackle copied
-verbatim from the legacy dataset by `scripts/generate_guidance_catalogue.py`.
+**Scope.** Not the legacy 851-species dump (offshore, charter, Alaska and
+freshwater entries included), but a curated `app/data/guidance_species.json`:
+about 130 fish people actually catch from the beach, pier, jetty, bridge or
+a kayak, each offered only in the `conditions_region`s it's commonly caught
+in (20-50 per region), with bait/rig/tackle copied verbatim from the legacy
+dataset by `scripts/generate_guidance_catalogue.py`.
 
 **Scoring** ports the two condition-independent parts of the legacy
 `domain/species.py:_score_species`, unchanged:

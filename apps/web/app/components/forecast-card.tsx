@@ -889,6 +889,8 @@ const _MONTH_NAMES = [
  * screen readers get each cell's level as text (the colored block is
  * decorative); the current month's column is outlined.
  */
+const CALENDAR_ROWS = 12
+
 function SpeciesCalendar({
   rows,
   currentMonth,
@@ -896,8 +898,17 @@ function SpeciesCalendar({
   rows: NonNullable<FishingGuidance['calendar']>
   currentMonth: number
 }) {
+  // In season now first (peak, then good, then off), catalogue order
+  // within each; the first CALENDAR_ROWS show, the rest on request.
+  const rank = (row: (typeof rows)[number]) =>
+    row.months[currentMonth - 1] === 'peak' ? 0 : row.months[currentMonth - 1] === 'good' ? 1 : 2
+  const sorted = rows
+    .map((row, index) => ({ row, index }))
+    .sort((a, b) => rank(a.row) - rank(b.row) || a.index - b.index)
+    .map(({ row }) => row)
+  const extra = sorted.length - CALENDAR_ROWS
   return (
-    <div className="flex min-w-0 flex-col gap-3">
+    <div className="group flex min-w-0 flex-col gap-3">
       <div className="relative max-w-full overflow-x-auto">
         <table className="w-full min-w-[520px] border-separate border-spacing-y-1 text-left text-sm sm:w-auto">
           <caption className="sr-only">Peak and good months for each species in this area</caption>
@@ -923,8 +934,11 @@ function SpeciesCalendar({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
-              <tr key={row.id}>
+            {sorted.map((row, rowIndex) => (
+              <tr
+                key={row.id}
+                className={cx(rowIndex >= CALENDAR_ROWS && 'hidden group-has-[details[open]]:table-row')}
+              >
                 <th scope="row" className="whitespace-nowrap py-0.5 pr-6 font-semibold text-text">
                   {row.name}
                 </th>
@@ -949,6 +963,14 @@ function SpeciesCalendar({
           </tbody>
         </table>
       </div>
+      {extra > 0 && (
+        <details>
+          <summary className="w-fit cursor-pointer text-sm font-semibold text-primary">
+            <span className="group-has-[details[open]]:hidden">Show all {sorted.length} species</span>
+            <span className="hidden group-has-[details[open]]:inline">Show fewer</span>
+          </summary>
+        </details>
+      )}
       <div className="flex flex-wrap gap-4 text-xs text-text-muted">
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-sm bg-tier-prime" /> Peak

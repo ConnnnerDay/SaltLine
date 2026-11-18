@@ -3057,5 +3057,89 @@
     "license": "CC BY 4.0",
     "license_url": "https://creativecommons.org/licenses/by/4.0/",
     "source_url": "https://www.inaturalist.org/photos/195437"
+  },
+  "mackerel-scad": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/188915/medium.jpg",
+    "credit": "BJ Stacey via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/188915"
+  },
+  "swordspine-snook": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/600195342/medium.jpg",
+    "credit": "James-LaFontaine via iNaturalist",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/600195342"
+  },
+  "dungeness-crab-shore": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/446850127/medium.jpg",
+    "credit": "Neil McDaniel via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/446850127"
+  },
+  "american-lobster-recreational": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/75691769/medium.jpg",
+    "credit": "Roger Rittmaster via iNaturalist",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/75691769"
+  },
+  "gulf-menhaden": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/400897849/medium.jpeg",
+    "credit": "Mitchel Buckner via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/400897849"
+  },
+  "pacific-anchovy": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/426756/medium.gif",
+    "credit": "FAO via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/426756"
+  },
+  "sheepshead-porgy": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/58909568/medium.jpg",
+    "credit": "Matteo Cassella via iNaturalist",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/58909568"
+  },
+  "dwarf-sand-perch": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/414171715/medium.jpg",
+    "credit": "Frank Krasovec via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/414171715"
+  },
+  "butter-hamlet": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/180721030/medium.jpg",
+    "credit": "Hubert Szczygieł via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/180721030"
+  },
+  "yellowfin-mojarra": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/38682675/medium.jpg",
+    "credit": "Eduardo Estrada via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/38682675"
+  },
+  "arctic-char-sea-run": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/570698345/medium.jpg",
+    "credit": "oblio1953 via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/570698345"
+  },
+  "northern-pipefish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/110513218/medium.jpg",
+    "credit": "Eric Heupel via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/110513218"
   }
 }

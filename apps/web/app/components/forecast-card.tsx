@@ -1368,14 +1368,31 @@ export function ForecastCard({
       </Card>
 
       <ForecastTabs
+        canCustomize={profile !== null}
+        layout={profile?.forecast_layout ?? null}
         tabs={[
+          { key: 'today', label: 'Today', hint: 'When to go' },
+          { key: 'conditions', label: 'Conditions', hint: 'Water, wind, tides' },
+          { key: 'fish', label: 'Fish', hint: 'Species, rigs, limits' },
+          { key: 'week', label: 'Week', hint: 'Days ahead, nearby' },
+        ]}
+        sections={[
           {
-            key: 'today',
-            label: 'Today',
-            hint: 'When to go',
+            id: 'your-day',
+            label: 'Your day',
+            tab: 'today',
             content: (
               <>
                 <YourDay forecast={forecast} profile={profile} />
+              </>
+            ),
+          },
+          {
+            id: 'when',
+            label: 'When to fish',
+            tab: 'today',
+            content: (
+              <>
                 {(bestWindow || forecast.hourly_outlook) && (
                   <Card className="flex flex-col gap-4">
                     <SectionHeader title="When to fish" aside={forecast.hourly_outlook ? 'Activity 0–100, by hour' : undefined} />
@@ -1414,13 +1431,31 @@ export function ForecastCard({
             ),
           },
           {
-            key: 'conditions',
-            label: 'Conditions',
-            hint: 'Water, wind, tides',
+            id: 'wind',
+            label: 'Wind & waves',
+            tab: 'conditions',
             content: (
               <>
                 <WindAndWaves forecast={forecast} />
+              </>
+            ),
+          },
+          {
+            id: 'surf',
+            label: 'Surf zone',
+            tab: 'conditions',
+            content: (
+              <>
                 <SurfZone forecast={forecast} />
+              </>
+            ),
+          },
+          {
+            id: 'tides',
+            label: 'Tides',
+            tab: 'conditions',
+            content: (
+              <>
                 {forecast.tides && (
                   <Card className="flex flex-col gap-4">
                     <SectionHeader title="Tides" aside="Next 24 hours" />
@@ -1438,6 +1473,15 @@ export function ForecastCard({
                     </details>
                   </Card>
                 )}
+              </>
+            ),
+          },
+          {
+            id: 'pressure',
+            label: 'Pressure & water temperature',
+            tab: 'conditions',
+            content: (
+              <>
                 <PressureAndWater
                   forecast={forecast}
                   month={Number(
@@ -1446,92 +1490,166 @@ export function ForecastCard({
                     ),
                   )}
                 />
-
+              </>
+            ),
+          },
+          {
+            id: 'sky',
+            label: 'Sun & moon',
+            tab: 'conditions',
+            content: (
+              <>
                 <SunAndMoon forecast={forecast} now={currentTime()} />
               </>
             ),
           },
           {
-            key: 'fish',
-            label: 'Fish',
-            hint: 'Species, rigs, limits',
+            id: 'biting',
+            label: "What's biting",
+            tab: 'fish',
             content: (
               <>
                 {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} />}
-                <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
+              </>
+            ),
+          },
+          {
+            id: 'rigs',
+            label: 'Rigs & tips',
+            tab: 'fish',
+            content: (
+              <>
                 {((forecast.recommendations && forecast.recommendations.species.length > 0) ||
                   watersFor(profile).length > 0) && (
-                  <CollapsibleSection
-                    title="Rigs & tips"
-                    aside={
-                      watersFor(profile).length > 0 ? (
-                        <span className="text-xs text-text-muted">
-                          Where to fish, then the rigs for today
-                        </span>
-                      ) : undefined
-                    }
-                  >
-                    <WhereToFish forecast={forecast} profile={profile} />
-                    {forecast.recommendations && forecast.recommendations.species.length > 0 && (
-                      <>
-                        {watersFor(profile).length > 0 && (
-                          <h3 className="section-label mt-2">Rigs for today</h3>
-                        )}
-                        <RigsAndTips guidance={forecast.recommendations} profile={profile} />
-                      </>
-                    )}
-                  </CollapsibleSection>
+                  <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
+                    <CollapsibleSection
+                      title="Rigs & tips"
+                      aside={
+                        watersFor(profile).length > 0 ? (
+                          <span className="text-xs text-text-muted">
+                            Where to fish, then the rigs for today
+                          </span>
+                        ) : undefined
+                      }
+                    >
+                      <WhereToFish forecast={forecast} profile={profile} />
+                      {forecast.recommendations && forecast.recommendations.species.length > 0 && (
+                        <>
+                          {watersFor(profile).length > 0 && (
+                            <h3 className="section-label mt-2">Rigs for today</h3>
+                          )}
+                          <RigsAndTips guidance={forecast.recommendations} profile={profile} />
+                        </>
+                      )}
+                    </CollapsibleSection>
+                  </Card>
                 )}
+              </>
+            ),
+          },
+          {
+            id: 'pack',
+            label: 'Pack for today',
+            tab: 'fish',
+            content: (
+              <>
                 {forecast.recommendations?.pack && (
-                  <CollapsibleSection
-                    title="Pack for today"
-                    aside={
-                      <span className="text-sm text-text-muted">
-                        {forecast.recommendations.pack.headline}
-                      </span>
-                    }
-                  >
-                    <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
-                      {forecast.recommendations.pack.rows.map((row) => (
-                        <div key={row.kind} className="contents">
-                          <dt className="section-label pt-0.5">{row.label}</dt>
-                          <dd className="text-text">{row.value}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  </CollapsibleSection>
+                  <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
+                    <CollapsibleSection
+                      title="Pack for today"
+                      aside={
+                        <span className="text-sm text-text-muted">
+                          {forecast.recommendations.pack.headline}
+                        </span>
+                      }
+                    >
+                      <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
+                        {forecast.recommendations.pack.rows.map((row) => (
+                          <div key={row.kind} className="contents">
+                            <dt className="section-label pt-0.5">{row.label}</dt>
+                            <dd className="text-text">{row.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </CollapsibleSection>
+                  </Card>
                 )}
-
+              </>
+            ),
+          },
+          {
+            id: 'limits',
+            label: 'Size & bag limits',
+            tab: 'fish',
+            content: (
+              <>
                 {forecast.recommendations?.species.some((pick) => pick.regulation) && (
-                  <CollapsibleSection title="Size & bag limits">
-                    <SizeAndBagLimits guidance={forecast.recommendations} />
-                  </CollapsibleSection>
+                  <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
+                    <CollapsibleSection title="Size & bag limits">
+                      <SizeAndBagLimits guidance={forecast.recommendations} />
+                    </CollapsibleSection>
+                  </Card>
                 )}
-
+              </>
+            ),
+          },
+          {
+            id: 'calendar',
+            label: 'Species calendar',
+            tab: 'fish',
+            content: (
+              <>
                 {forecast.recommendations?.calendar && forecast.recommendations.calendar.length > 0 && (
-                  <CollapsibleSection title="Species calendar">
-                    <SpeciesCalendar
-                      rows={forecast.recommendations.calendar}
-                      currentMonth={forecast.recommendations.basis.month}
-                    />
-                  </CollapsibleSection>
+                  <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
+                    <CollapsibleSection title="Species calendar">
+                      <SpeciesCalendar
+                        rows={forecast.recommendations.calendar}
+                        currentMonth={forecast.recommendations.basis.month}
+                      />
+                    </CollapsibleSection>
+                  </Card>
                 )}
-                </Card>
+              </>
+            ),
+          },
+          {
+            id: 'seen',
+            label: 'Fish seen nearby',
+            tab: 'fish',
+            content: (
+              <>
                 {seen}
               </>
             ),
           },
           {
-            key: 'week',
-            label: 'Week',
-            hint: 'Days ahead, nearby',
+            id: 'days',
+            label: 'Next few days',
+            tab: 'week',
             content: (
               <>
                 <NextDays forecast={forecast} profile={profile} />
+              </>
+            ),
+          },
+          {
+            id: 'nearby',
+            label: 'Nearby spots',
+            tab: 'week',
+            content: (
+              <>
                 {nearby}
+              </>
+            ),
+          },
+          {
+            id: 'cams',
+            label: 'Live cams',
+            tab: 'week',
+            content: (
+              <>
                 {cams.length > 0 && (
                   <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
-                  {cams.length > 0 && (
                     <CollapsibleSection
                       title="Live cams"
                       aside={<span className="text-xs text-text-muted">{cams.length} nearby</span>}
@@ -1557,7 +1675,6 @@ export function ForecastCard({
                         ))}
                       </ul>
                     </CollapsibleSection>
-                  )}
                   </Card>
                 )}
               </>

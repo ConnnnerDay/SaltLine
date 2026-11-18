@@ -964,6 +964,37 @@
         "title": "ForecastEnvelope",
         "type": "object"
       },
+      "ForecastLayout": {
+        "description": "How a user has arranged the forecast page's tabbed sections\n(apps/web's ForecastTabs). `tabs` maps a tab key to the section ids\nplaced there, in order -- a section can be moved to another tab, and\nany section not listed stays in its default tab, after the listed\nones. `hidden` lists sections the user hid. Ids are opaque short\nslugs owned by apps/web; unknown ones are simply ignored there.",
+        "properties": {
+          "hidden": {
+            "items": {
+              "pattern": "^[a-z][a-z-]{0,39}$",
+              "type": "string"
+            },
+            "maxItems": 40,
+            "title": "Hidden",
+            "type": "array"
+          },
+          "tabs": {
+            "maxProperties": 8,
+            "patternProperties": {
+              "^[a-z][a-z-]{0,39}$": {
+                "items": {
+                  "pattern": "^[a-z][a-z-]{0,39}$",
+                  "type": "string"
+                },
+                "maxItems": 40,
+                "type": "array"
+              }
+            },
+            "title": "Tabs",
+            "type": "object"
+          }
+        },
+        "title": "ForecastLayout",
+        "type": "object"
+      },
       "ForecastState": {
         "description": "docs/product-definition.md \u00a7 Product vocabulary \u00a7 Forecast state.",
         "enum": [
@@ -1229,6 +1260,16 @@
             ],
             "title": "Fishing Types"
           },
+          "forecast_layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ForecastLayout"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "profile_completed": {
             "default": false,
             "title": "Profile Completed",
@@ -1382,6 +1423,16 @@
               }
             ],
             "title": "Fishing Types"
+          },
+          "forecast_layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ForecastLayout"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "profile_completed": {
             "anyOf": [

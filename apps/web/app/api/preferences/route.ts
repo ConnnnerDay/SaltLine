@@ -23,6 +23,14 @@ export type Preferences = {
   target_groups: string[] | null
   fishing_times: string[] | null
   tide_preference: 'incoming' | 'outgoing' | 'high' | 'low' | null
+  /** How the forecast's tabbed sections are arranged (ForecastTabs). */
+  forecast_layout?: ForecastLayout | null
+}
+
+export type ForecastLayout = {
+  /** Tab key -> the section ids placed there, in order. */
+  tabs: Record<string, string[]>
+  hidden: string[]
 }
 
 /**

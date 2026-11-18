@@ -31,8 +31,9 @@ threshold comparisons never need a conversion step.
 from __future__ import annotations
 
 from enum import Enum
+from typing import Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StringConstraints
 from sqlalchemy import JSON, Boolean, CheckConstraint, Float, String
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -96,6 +97,24 @@ class DisplayUnits(str, Enum):
     METRIC = "metric"
 
 
+_LayoutKey = Annotated[str, StringConstraints(pattern=r"^[a-z][a-z-]{0,39}$")]
+
+
+class ForecastLayout(BaseModel):
+    """How a user has arranged the forecast page's tabbed sections
+    (apps/web's ForecastTabs). `tabs` maps a tab key to the section ids
+    placed there, in order -- a section can be moved to another tab, and
+    any section not listed stays in its default tab, after the listed
+    ones. `hidden` lists sections the user hid. Ids are opaque short
+    slugs owned by apps/web; unknown ones are simply ignored there.
+    """
+
+    tabs: dict[_LayoutKey, Annotated[list[_LayoutKey], Field(max_length=40)]] = Field(
+        default_factory=dict, max_length=8
+    )
+    hidden: list[_LayoutKey] = Field(default_factory=list, max_length=40)
+
+
 class UserPreferences(Base):
     """One row per Better Auth user id. `user_id` is Better Auth's opaque
     stable id (ADR-005) -- this table never stores an email, password, or
@@ -134,6 +153,9 @@ class UserPreferences(Base):
     target_groups: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     fishing_times: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     tide_preference: Mapped[str | None] = mapped_column(String, nullable=True)
+    forecast_layout: Mapped[dict[str, object] | None] = mapped_column(
+        JSON, nullable=True
+    )
 
 
 class PreferencesOut(BaseModel):
@@ -157,6 +179,7 @@ class PreferencesOut(BaseModel):
     target_groups: list[TargetGroup] | None = None
     fishing_times: list[FishingTime] | None = None
     tide_preference: TidePreference | None = None
+    forecast_layout: ForecastLayout | None = None
 
 
 class PreferencesUpdate(BaseModel):
@@ -183,3 +206,4 @@ class PreferencesUpdate(BaseModel):
     target_groups: list[TargetGroup] | None = Field(default=None, max_length=5)
     fishing_times: list[FishingTime] | None = Field(default=None, max_length=5)
     tide_preference: TidePreference | None = None
+    forecast_layout: ForecastLayout | None = None

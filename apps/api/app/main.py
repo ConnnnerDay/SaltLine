@@ -78,6 +78,7 @@ from app.api.v1.forecasts import router as forecasts_router
 from app.api.v1.locations import router as locations_router
 from app.api.v1.preferences import router as preferences_router
 from app.api.v1.saved_locations import router as saved_locations_router
+from app.api.v1.species import router as species_router
 from app.domain.alerts import POLL_SECONDS_DEFAULT, run_alert_check, smtp_configured
 from app.domain.forecast_cache import get_or_assemble_forecast
 from app.infra.database import create_engine, create_sessionmaker
@@ -199,6 +200,7 @@ app.include_router(catches_router)
 app.include_router(alerts_router)
 app.include_router(account_router)
 app.include_router(analytics_router)
+app.include_router(species_router)
 
 
 @app.get("/health/live")

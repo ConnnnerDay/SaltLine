@@ -10,6 +10,9 @@ import type { Preferences } from '@/app/api/preferences/route'
 import { ACCESS_LABEL, MONTH_NAMES, REGION_LABEL, TARGET_LABEL, seasonOf, type FishDetail } from '@/lib/fish'
 import { localizeText, temp, type Units } from '@/lib/units'
 import { FavoriteButton } from '../favorite-button'
+import { BestSpots } from './best-spots'
+import { Suspense } from 'react'
+import type { SavedLocation } from '@/app/api/saved-locations/route'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,10 +50,14 @@ export default async function FishDetailPage({ params }: Props) {
     if (err instanceof InternalApiError && err.status === 404) notFound()
     throw err
   }
-  const [prefs, locations] = await Promise.all([
+  const [prefs, locations, saved] = await Promise.all([
     internalApiFetch<Preferences>('/v1/me/preferences', { userId }).catch(() => null),
     internalApiFetch<{ id: string; state: string }[]>('/v1/locations').catch(() => []),
+    internalApiFetch<SavedLocation[]>('/v1/me/locations', { userId }).catch(() => [] as SavedLocation[]),
   ])
+  const spotIds = [
+    ...new Set([prefs?.default_location_id, ...saved.map((spot) => spot.location_id)].filter(Boolean)),
+  ] as string[]
   const units: Units = prefs?.units ?? 'imperial'
   const say = (text: string) => localizeText(text, units)
   const homeState = locations.find((spot) => spot.id === prefs?.default_location_id)?.state ?? null
@@ -169,6 +176,19 @@ export default async function FishDetailPage({ params }: Props) {
               </Card>
             </div>
           </div>
+
+          {fish.access !== 'incidental' && (
+            <Suspense
+              fallback={
+                <Card className="flex flex-col gap-2">
+                  <h2 className="section-label">Best of your spots today</h2>
+                  <p className="text-sm text-text-muted">Checking today&apos;s conditions at your spots…</p>
+                </Card>
+              }
+            >
+              <BestSpots speciesId={fish.id} name={fish.name} spotIds={spotIds.slice(0, 12)} units={units} />
+            </Suspense>
+          )}
 
           <Card className="flex flex-col gap-3">
             <div className="flex flex-wrap items-baseline justify-between gap-2">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useId, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react'
 import { cx } from './ui/cx'
 import type { ForecastLayout } from '@/app/api/preferences/route'
 import { chosenStats, EMPTY_LAYOUT, MAX_STATS, useForecastLayout } from './forecast-layout'
@@ -63,8 +63,10 @@ function subscribe(onChange: () => void): () => void {
 const TOOL_BUTTON =
   'inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-md border border-border bg-surface px-2 text-xs font-semibold text-text hover:border-primary disabled:opacity-40 disabled:hover:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring'
 
+const MAX_EXTRA_TABS = 3
+
 export function ForecastTabs({
-  tabs,
+  tabs: baseTabs,
   sections,
 }: {
   tabs: ForecastTab[]
@@ -78,11 +80,35 @@ export function ForecastTabs({
     () => '',
   )
   const { layout, setLayout, editing, setEditing, canCustomize, statOptions } = useForecastLayout()
+  // The built-in tabs plus any the user added, with any names they gave.
+  const labels = layout.labels ?? {}
+  const extraTabs = layout.extra_tabs ?? []
+  const tabs: ForecastTab[] = [
+    ...baseTabs,
+    ...extraTabs.map((key, index) => ({ key, label: `My tab ${index + 1}` })),
+  ].map((tab) => (labels[tab.key] ? { ...tab, label: labels[tab.key], hint: undefined } : tab))
+  const crowded = tabs.length > 4
   // The tab the page opens on: the user's choice, else the first.
   const home = tabs.find((tab) => tab.key === layout.start)?.key ?? tabs[0]?.key
   const active = tabs.find((tab) => tab.key === hash)?.key ?? home
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'error'>('idle')
   const beforeEdit = useRef<ForecastLayout>(layout)
+
+  // A sideways-scrolling tab row: keep the open tab in view.
+  useEffect(() => {
+    function reveal() {
+      const bar = listRef.current
+      const tab = bar?.querySelector<HTMLElement>(`[data-tab="${active}"]`)
+      if (!bar || !tab || bar.scrollWidth <= bar.clientWidth) return
+      const left = tab.offsetLeft - bar.offsetLeft
+      if (left < bar.scrollLeft || left + tab.offsetWidth > bar.scrollLeft + bar.clientWidth) {
+        bar.scrollLeft = left - (bar.clientWidth - tab.offsetWidth) / 2
+      }
+    }
+    reveal()
+    window.addEventListener('resize', reveal)
+    return () => window.removeEventListener('resize', reveal)
+  }, [active, crowded])
 
   const byId = new Map(sections.map((section) => [section.id, section]))
   const placement = arrange(tabs, sections, layout)
@@ -194,8 +220,41 @@ export function ForecastTabs({
     setLayout(EMPTY_LAYOUT)
   }
 
+  function renameTab(key: string, value: string) {
+    const clean = value.replace(/[<>\n\r]/g, '').slice(0, 20)
+    const next = { ...labels }
+    if (clean.trim()) next[key] = clean
+    else delete next[key]
+    setLayout({ ...layout, labels: next })
+  }
+
+  function addTab() {
+    if (extraTabs.length >= MAX_EXTRA_TABS) return
+    let n = 1
+    while (extraTabs.includes(`mine-${n}`)) n += 1
+    const key = `mine-${n}`
+    setLayout({ ...layout, extra_tabs: [...extraTabs, key] })
+    open(key)
+  }
+
+  function removeTab(key: string) {
+    // Its sections go back to their usual tabs.
+    const nextTabs = { ...layout.tabs }
+    delete nextTabs[key]
+    const nextLabels = { ...labels }
+    delete nextLabels[key]
+    setLayout({
+      ...layout,
+      tabs: nextTabs,
+      labels: nextLabels,
+      extra_tabs: extraTabs.filter((k) => k !== key),
+      start: layout.start === key ? null : layout.start,
+    })
+    if (active === key) open(baseTabs[0].key)
+  }
+
   function setStart(key: string) {
-    setLayout({ ...layout, start: key === tabs[0]?.key ? null : key })
+    setLayout({ ...layout, start: key === baseTabs[0]?.key ? null : key })
   }
 
   const availableStats = statOptions.map((option) => option.key)
@@ -208,14 +267,18 @@ export function ForecastTabs({
   }
 
   return (
-    <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
+    <div className="flex min-w-0 flex-col gap-4 sm:gap-5 in-data-[density=compact]:gap-2.5 sm:in-data-[density=compact]:gap-3">
       <div className="flex min-w-0 items-stretch gap-2">
         <div
           ref={listRef}
           role="tablist"
           aria-label="Forecast sections"
-          className="grid min-w-0 flex-1 scroll-mt-20 gap-1 rounded-lg border border-border bg-surface p-1 shadow-card"
-          style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
+          className={cx(
+            'min-w-0 flex-1 scroll-mt-20 gap-1 rounded-lg border border-border bg-surface p-1 shadow-card',
+            // More than four tabs: a row that scrolls sideways on narrow screens.
+            crowded ? 'no-scrollbar flex overflow-x-auto' : 'grid',
+          )}
+          style={crowded ? undefined : { gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
         >
           {tabs.map((tab, index) => {
             const selected = tab.key === active
@@ -232,6 +295,7 @@ export function ForecastTabs({
                 onClick={() => open(tab.key)}
                 onKeyDown={(event) => onKeyDown(event, index)}
                 className={cx(
+                  crowded && 'min-w-[5.5rem] flex-none px-3! sm:flex-1',
                   'flex min-h-11 min-w-0 flex-col items-center justify-center rounded-md px-0.5 py-1.5 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring',
                   selected ? 'bg-primary text-primary-contrast' : 'text-text-muted hover:bg-surface-raised hover:text-text',
                 )}
@@ -306,7 +370,8 @@ export function ForecastTabs({
             </button>
           </div>
           <div className="flex w-full flex-col gap-3 border-t border-border pt-3 sm:flex-row sm:items-start sm:gap-6">
-            <label className="flex shrink-0 items-center gap-2 text-sm text-text">
+            <div className="flex shrink-0 flex-col gap-2">
+            <label className="flex items-center gap-2 text-sm text-text">
               <span className="font-semibold">Open on</span>
               <select
                 value={home}
@@ -320,6 +385,17 @@ export function ForecastTabs({
                 ))}
               </select>
             </label>
+            <label className="flex items-center gap-2 text-sm text-text">
+              <input
+                type="checkbox"
+                checked={Boolean(layout.compact)}
+                onChange={(event) => setLayout({ ...layout, compact: event.target.checked })}
+                className="h-4 w-4 accent-primary"
+              />
+              <span className="font-semibold">Compact view</span>
+              <span className="text-xs text-text-muted">tighter spacing</span>
+            </label>
+            </div>
             {statOptions.length > 0 && (
               <div className="flex min-w-0 flex-col gap-1.5" role="group" aria-label="Headline numbers">
                 <span className="text-sm text-text">
@@ -354,6 +430,49 @@ export function ForecastTabs({
               </div>
             )}
           </div>
+          <div className="flex w-full flex-col gap-1.5 border-t border-border pt-3" role="group" aria-label="Tabs">
+            <span className="text-sm text-text">
+              <span className="font-semibold">Tabs</span>{' '}
+              <span className="text-xs text-text-muted">rename any tab, or add your own and move sections into it</span>
+            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              {tabs.map((tab) => {
+                const isExtra = extraTabs.includes(tab.key)
+                const fallback = baseTabs.find((t) => t.key === tab.key)?.label ?? `My tab ${extraTabs.indexOf(tab.key) + 1}`
+                return (
+                  <span key={tab.key} className="flex items-center gap-1">
+                    <input
+                      type="text"
+                      value={labels[tab.key] ?? ''}
+                      placeholder={fallback}
+                      maxLength={20}
+                      aria-label={`Name for the ${fallback} tab`}
+                      onChange={(event) => renameTab(tab.key, event.target.value)}
+                      className="h-8 w-32 rounded-md border border-border bg-surface px-2 text-xs font-semibold text-text placeholder:font-normal placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                    />
+                    {isExtra && (
+                      <button
+                        type="button"
+                        onClick={() => removeTab(tab.key)}
+                        aria-label={`Remove the ${tab.label} tab`}
+                        title="Remove this tab (its sections go back to their usual tabs)"
+                        className={TOOL_BUTTON}
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true">
+                          <path d="M6 6l12 12M18 6L6 18" />
+                        </svg>
+                      </button>
+                    )}
+                  </span>
+                )
+              })}
+              {extraTabs.length < MAX_EXTRA_TABS && (
+                <button type="button" onClick={addTab} className={TOOL_BUTTON}>
+                  + Add a tab
+                </button>
+              )}
+            </div>
+          </div>
           {saveState === 'error' && (
             <p role="alert" className="w-full text-sm text-danger-text">
               Couldn&apos;t save your layout. Try again.
@@ -373,7 +492,7 @@ export function ForecastTabs({
             id={`${id}-panel-${tab.key}`}
             aria-labelledby={`${id}-tab-${tab.key}`}
             hidden={tab.key !== active}
-            className="flex min-w-0 flex-col gap-4 sm:gap-5"
+            className="flex min-w-0 flex-col gap-4 sm:gap-5 in-data-[density=compact]:gap-2.5 sm:in-data-[density=compact]:gap-3"
           >
             {ids.map((sectionId, index) => {
               const section = byId.get(sectionId)
@@ -485,6 +604,12 @@ export function ForecastTabs({
               )
             })}
 
+            {editing && ids.length === 0 && (
+              <p className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-text-muted">
+                This tab is empty. On another tab, use a section&apos;s &ldquo;Move to {tab.label}&rdquo;
+                to put it here.
+              </p>
+            )}
             {!editing && shown.length === 0 && (
               <p className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-text-muted">
                 Nothing on this tab.

@@ -37,6 +37,11 @@ export type ForecastLayout = {
   stats?: string[]
   /** Sections shown as a one-line bar that opens on tap. */
   folded?: string[]
+  /** Tabs the user added (keys), and names they gave any tab. */
+  extra_tabs?: string[]
+  labels?: Record<string, string>
+  /** Tighter spacing. */
+  compact?: boolean
 }
 
 /**

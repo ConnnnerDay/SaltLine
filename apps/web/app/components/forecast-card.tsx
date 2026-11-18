@@ -637,7 +637,7 @@ function CollapsibleSection({
 }) {
   return (
     <details className="collapsible group min-w-0 border-t border-border first:border-t-0">
-      <summary className="flex min-h-14 items-center justify-between gap-3 px-5 py-3.5 hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring sm:px-6">
+      <summary className="flex min-h-14 items-center justify-between gap-3 px-5 py-3.5 in-data-[density=compact]:min-h-11 in-data-[density=compact]:py-2 hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring sm:px-6">
         <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
           <span className="section-label text-text!">{title}</span>
           {aside}
@@ -1346,7 +1346,7 @@ export function ForecastCard({
       canCustomize={profile !== null}
       statOptions={headlineStats.map((stat) => ({ key: stat.key, label: STAT_NAMES[stat.key] ?? stat.label }))}
     >
-    <div className="rise-in flex min-w-0 flex-col gap-4 sm:gap-5">
+    <div className="rise-in flex min-w-0 flex-col gap-4 sm:gap-5 in-data-[density=compact]:gap-2.5 sm:in-data-[density=compact]:gap-3">
       <WeatherAlerts
         alerts={(forecast.conditions as SkyConditions | null)?.alerts ?? []}
         timezone={forecast.location.timezone}

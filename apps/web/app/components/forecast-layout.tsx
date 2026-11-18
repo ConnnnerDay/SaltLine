@@ -60,7 +60,11 @@ export function ForecastLayoutProvider({
   const [editing, setEditing] = useState(false)
   return (
     <LayoutContext.Provider value={{ layout, setLayout, editing, setEditing, canCustomize, statOptions }}>
-      {children}
+      {/* `data-density` drives the compact view: Card and the section
+          stacks shrink their padding/gaps under it (in-data-[density=compact]). */}
+      <div data-density={layout.compact ? 'compact' : 'comfortable'} className="contents">
+        {children}
+      </div>
     </LayoutContext.Provider>
   )
 }

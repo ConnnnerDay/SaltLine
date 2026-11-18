@@ -97,7 +97,14 @@ class DisplayUnits(str, Enum):
     METRIC = "metric"
 
 
-_LayoutKey = Annotated[str, StringConstraints(pattern=r"^[a-z][a-z-]{0,39}$")]
+_LayoutKey = Annotated[str, StringConstraints(pattern=r"^[a-z][a-z0-9-]{0,39}$")]
+# A tab name the user typed: short, one line, no markup characters.
+_TabLabel = Annotated[
+    str,
+    StringConstraints(
+        strip_whitespace=True, min_length=1, max_length=20, pattern=r"^[^<>\n\r]+$"
+    ),
+]
 
 
 class ForecastLayout(BaseModel):
@@ -119,6 +126,11 @@ class ForecastLayout(BaseModel):
     stats: list[_LayoutKey] = Field(default_factory=list, max_length=6)
     # Sections shown folded: a one-line bar that opens on tap.
     folded: list[_LayoutKey] = Field(default_factory=list, max_length=40)
+    # Tabs the user added (keys; apps/web makes them), names they gave
+    # any tab, and the compact (tighter spacing) view.
+    extra_tabs: list[_LayoutKey] = Field(default_factory=list, max_length=3)
+    labels: dict[_LayoutKey, _TabLabel] = Field(default_factory=dict, max_length=8)
+    compact: bool = False
 
 
 class UserPreferences(Base):

@@ -967,9 +967,23 @@
       "ForecastLayout": {
         "description": "How a user has arranged the forecast page's tabbed sections\n(apps/web's ForecastTabs). `tabs` maps a tab key to the section ids\nplaced there, in order -- a section can be moved to another tab, and\nany section not listed stays in its default tab, after the listed\nones. `hidden` lists sections the user hid. Ids are opaque short\nslugs owned by apps/web; unknown ones are simply ignored there.",
         "properties": {
+          "compact": {
+            "default": false,
+            "title": "Compact",
+            "type": "boolean"
+          },
+          "extra_tabs": {
+            "items": {
+              "pattern": "^[a-z][a-z0-9-]{0,39}$",
+              "type": "string"
+            },
+            "maxItems": 3,
+            "title": "Extra Tabs",
+            "type": "array"
+          },
           "folded": {
             "items": {
-              "pattern": "^[a-z][a-z-]{0,39}$",
+              "pattern": "^[a-z][a-z0-9-]{0,39}$",
               "type": "string"
             },
             "maxItems": 40,
@@ -978,17 +992,30 @@
           },
           "hidden": {
             "items": {
-              "pattern": "^[a-z][a-z-]{0,39}$",
+              "pattern": "^[a-z][a-z0-9-]{0,39}$",
               "type": "string"
             },
             "maxItems": 40,
             "title": "Hidden",
             "type": "array"
           },
+          "labels": {
+            "maxProperties": 8,
+            "patternProperties": {
+              "^[a-z][a-z0-9-]{0,39}$": {
+                "maxLength": 20,
+                "minLength": 1,
+                "pattern": "^[^<>\\n\\r]+$",
+                "type": "string"
+              }
+            },
+            "title": "Labels",
+            "type": "object"
+          },
           "start": {
             "anyOf": [
               {
-                "pattern": "^[a-z][a-z-]{0,39}$",
+                "pattern": "^[a-z][a-z0-9-]{0,39}$",
                 "type": "string"
               },
               {
@@ -999,7 +1026,7 @@
           },
           "stats": {
             "items": {
-              "pattern": "^[a-z][a-z-]{0,39}$",
+              "pattern": "^[a-z][a-z0-9-]{0,39}$",
               "type": "string"
             },
             "maxItems": 6,
@@ -1009,9 +1036,9 @@
           "tabs": {
             "maxProperties": 8,
             "patternProperties": {
-              "^[a-z][a-z-]{0,39}$": {
+              "^[a-z][a-z0-9-]{0,39}$": {
                 "items": {
-                  "pattern": "^[a-z][a-z-]{0,39}$",
+                  "pattern": "^[a-z][a-z0-9-]{0,39}$",
                   "type": "string"
                 },
                 "maxItems": 40,

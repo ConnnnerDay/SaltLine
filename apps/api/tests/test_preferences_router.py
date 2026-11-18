@@ -261,6 +261,8 @@ def test_forecast_layout_round_trips(client: TestClient) -> None:
     layout = {
         "tabs": {"today": ["tides", "when"], "fish": ["biting"]},
         "hidden": ["sky", "cams"],
+        "start": "conditions",
+        "stats": ["water", "tide", "air", "wind"],
     }
     resp = client.patch("/v1/me/preferences", json={"forecast_layout": layout})
     assert resp.status_code == 200
@@ -276,6 +278,8 @@ def test_forecast_layout_rejects_junk_ids(client: TestClient) -> None:
         {"tabs": {"today": ["<script>"]}},
         {"hidden": ["x" * 80]},
         {"hidden": ["a"] * 41},
+        {"stats": ["water"] * 7},
+        {"start": "Bad Tab"},
     ):
         resp = client.patch("/v1/me/preferences", json={"forecast_layout": bad})
         assert resp.status_code == 422, bad

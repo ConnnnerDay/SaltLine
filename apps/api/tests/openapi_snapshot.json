@@ -976,6 +976,27 @@
             "title": "Hidden",
             "type": "array"
           },
+          "start": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z][a-z-]{0,39}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start"
+          },
+          "stats": {
+            "items": {
+              "pattern": "^[a-z][a-z-]{0,39}$",
+              "type": "string"
+            },
+            "maxItems": 6,
+            "title": "Stats",
+            "type": "array"
+          },
           "tabs": {
             "maxProperties": 8,
             "patternProperties": {

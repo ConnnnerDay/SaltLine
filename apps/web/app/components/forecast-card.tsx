@@ -14,6 +14,7 @@ import { SurfZone } from './surf-zone'
 import { WeatherIcon } from './weather-icon'
 import { currentTime } from '@/lib/clock'
 import { ForecastTabs } from './forecast-tabs'
+import { ForecastLayoutProvider, HeadlineStats, type StatTileData } from './forecast-layout'
 import type { NearbyCam } from '@/lib/get-cams'
 import speciesPhotos from '@/lib/species-photos.json'
 
@@ -624,26 +625,6 @@ function ScoreRing({ score, colorClass }: { score: number; colorClass: string })
 
 /** One stat tile in the "Today's forecast" strip (legacy `.stat-card`):
  * colored top rule, uppercase label, big value, small muted note. */
-function StatTile({
-  label,
-  value,
-  note,
-  rule,
-}: {
-  label: string
-  value: string
-  note?: string
-  rule: string
-}) {
-  return (
-    <div className={cx('flex h-full flex-col gap-1 border-t-2 px-5 py-4 sm:px-6', rule)}>
-      <dt className="section-label">{label}</dt>
-      <dd className="text-2xl font-bold tracking-tight text-text">{value}</dd>
-      {note && <dd className="text-xs text-text-muted">{note}</dd>}
-    </div>
-  )
-}
-
 /** A legacy-style collapsible section row ("TODAY'S TIDES ⌄"). */
 function CollapsibleSection({
   title,
@@ -1268,7 +1249,103 @@ export function ForecastCard({
     } | null
   )?.weather?.now
 
+  // Every headline number this spot has, in default order; the user picks
+  // which (up to four) show, in Customize (./forecast-layout).
+  const tz = forecast.location.timezone
+  const clock = (iso: string) =>
+    new Intl.DateTimeFormat('en-US', { timeZone: tz, hour: 'numeric', minute: '2-digit' }).format(new Date(iso))
+  const now = currentTime().getTime()
+  const upcomingTides = (forecast.tides?.predictions ?? []).filter((tide) => new Date(tide.time).getTime() > now)
+  const sunTimes = (forecast.conditions as SkyConditions | null)?.sun_times
+  const barometer = (
+    forecast.conditions as { weather?: { barometer?: { latest_mb: number; trend: string } | null } | null } | null
+  )?.weather?.barometer
+  const statCandidates: (StatTileData | false | null | undefined)[] = [
+    waterTemp && {
+      key: 'water',
+      label: 'Water temp',
+      value: `${waterTemp.value.toFixed(1)}°F`,
+      note: waterTemp.is_fallback ? 'monthly avg' : 'live reading',
+      rule: 'border-t-tier-high',
+    },
+    {
+      key: 'wind',
+      label: 'Wind',
+      value: conditions?.wind_range_kt
+        ? `${conditions.wind_direction ? `${compassLabel(conditions.wind_direction)} ` : ''}${formatRange(conditions.wind_range_kt)} kt`
+        : '—',
+      note: conditions?.wind_range_kt ? 'next 24 h' : 'unavailable',
+      rule: 'border-t-border',
+    },
+    {
+      key: 'waves',
+      label: 'Waves',
+      value: conditions?.wave_range_ft ? `${formatRange(conditions.wave_range_ft, 0.5)} ft` : '—',
+      note: conditions?.wave_range_ft ? 'next 24 h' : 'unavailable',
+      rule: 'border-t-border',
+    },
+    {
+      key: 'confidence',
+      label: 'Confidence',
+      value: capitalize(forecast.confidence.level),
+      note: `Updated ${generatedAtLabel}`,
+      rule:
+        forecast.state === 'fresh'
+          ? 'border-t-go-border'
+          : forecast.state === 'unavailable'
+            ? 'border-t-nogo-border'
+            : 'border-t-marginal-border',
+    },
+    weatherNow?.temperature_f != null && {
+      key: 'air',
+      label: 'Air temp',
+      value: `${Math.round(weatherNow.temperature_f)}°F`,
+      note: weatherNow.short_forecast,
+      rule: 'border-t-border',
+    },
+    weatherNow?.precip_pct != null && {
+      key: 'rain',
+      label: 'Rain',
+      value: `${weatherNow.precip_pct}%`,
+      note: `chance, ${weatherNow.name.toLowerCase()}`,
+      rule: 'border-t-border',
+    },
+    upcomingTides.length > 0 && {
+      key: 'tide',
+      label: `Next ${upcomingTides[0].kind} tide`,
+      value: clock(upcomingTides[0].time),
+      note: `${upcomingTides[0].height_ft.toFixed(1)} ft${
+        upcomingTides[1] ? ` · then ${upcomingTides[1].kind} ${clock(upcomingTides[1].time)}` : ''
+      }`,
+      rule: 'border-t-tier-high',
+    },
+    barometer && {
+      key: 'pressure',
+      label: 'Barometer',
+      value: `${barometer.latest_mb.toFixed(0)} mb`,
+      note: barometer.trend,
+      rule: 'border-t-border',
+    },
+    sunTimes && {
+      key: 'sun',
+      ...(now < new Date(sunTimes.sunrise).getTime()
+        ? { label: 'Sunrise', value: clock(sunTimes.sunrise), note: `sunset ${clock(sunTimes.sunset)}` }
+        : { label: 'Sunset', value: clock(sunTimes.sunset), note: `sunrise was ${clock(sunTimes.sunrise)}` }),
+      rule: 'border-t-border',
+    },
+  ]
+  const headlineStats = statCandidates.filter((stat): stat is StatTileData => Boolean(stat))
+  const STAT_NAMES: Record<string, string> = {
+    water: 'Water temp', wind: 'Wind', waves: 'Waves', confidence: 'Confidence', air: 'Air temp',
+    rain: 'Rain chance', tide: 'Next tide', pressure: 'Barometer', sun: 'Sunrise / sunset',
+  }
+
   return (
+    <ForecastLayoutProvider
+      initial={profile?.forecast_layout ?? null}
+      canCustomize={profile !== null}
+      statOptions={headlineStats.map((stat) => ({ key: stat.key, label: STAT_NAMES[stat.key] ?? stat.label }))}
+    >
     <div className="rise-in flex min-w-0 flex-col gap-4 sm:gap-5">
       <WeatherAlerts
         alerts={(forecast.conditions as SkyConditions | null)?.alerts ?? []}
@@ -1319,57 +1396,10 @@ export function ForecastCard({
           )}
         </div>
 
-        <dl className="grid grid-cols-2 gap-px border-t border-border bg-border sm:grid-cols-4">
-          {waterTemp && (
-            <div className="bg-surface">
-              <StatTile
-                label="Water temp"
-                value={`${waterTemp.value.toFixed(1)}°F`}
-                note={waterTemp.is_fallback ? 'monthly avg' : 'live reading'}
-                rule="border-t-tier-high"
-              />
-            </div>
-          )}
-          <div className="bg-surface">
-            <StatTile
-              label="Wind"
-              value={
-                conditions?.wind_range_kt
-                  ? `${conditions.wind_direction ? `${compassLabel(conditions.wind_direction)} ` : ''}${formatRange(conditions.wind_range_kt)} kt`
-                  : '—'
-              }
-              note={conditions?.wind_range_kt ? 'next 24 h' : 'unavailable'}
-              rule="border-t-border"
-            />
-          </div>
-          <div className="bg-surface">
-            <StatTile
-              label="Waves"
-              value={conditions?.wave_range_ft ? `${formatRange(conditions.wave_range_ft, 0.5)} ft` : '—'}
-              note={conditions?.wave_range_ft ? 'next 24 h' : 'unavailable'}
-              rule="border-t-border"
-            />
-          </div>
-          <div className="bg-surface">
-            <StatTile
-              label="Confidence"
-              value={capitalize(forecast.confidence.level)}
-              note={`Updated ${generatedAtLabel}`}
-              rule={
-                forecast.state === 'fresh'
-                  ? 'border-t-go-border'
-                  : forecast.state === 'unavailable'
-                    ? 'border-t-nogo-border'
-                    : 'border-t-marginal-border'
-              }
-            />
-          </div>
-        </dl>
+        <HeadlineStats stats={headlineStats} />
       </Card>
 
       <ForecastTabs
-        canCustomize={profile !== null}
-        layout={profile?.forecast_layout ?? null}
         tabs={[
           { key: 'today', label: 'Today', hint: 'When to go' },
           { key: 'conditions', label: 'Conditions', hint: 'Water, wind, tides' },
@@ -1715,6 +1745,7 @@ export function ForecastCard({
         </Card>
       )}
     </div>
+    </ForecastLayoutProvider>
   )
 }
 

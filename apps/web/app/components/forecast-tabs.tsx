@@ -3,6 +3,7 @@
 import { useId, useRef, useState, useSyncExternalStore } from 'react'
 import { cx } from './ui/cx'
 import type { ForecastLayout } from '@/app/api/preferences/route'
+import { chosenStats, EMPTY_LAYOUT, MAX_STATS, useForecastLayout } from './forecast-layout'
 
 /**
  * Splits the forecast below its headline card into a few short tabs
@@ -19,7 +20,8 @@ import type { ForecastLayout } from '@/app/api/preferences/route'
  * Signed-in users can "Customize" the page: move a section up or down,
  * send it to another tab, or hide it. That arrangement is saved to their
  * profile (`forecast_layout`, a PATCH to /api/preferences), so it follows
- * them to every spot and device. Sections that render nothing for this
+ * them to every spot and device. The editor also picks the tab the page
+ * opens on and the headline numbers (shared via ./forecast-layout). Sections that render nothing for this
  * spot (no surf zone forecast here, say) collapse away, toolbar and all.
  */
 
@@ -32,8 +34,6 @@ export type ForecastSection = {
   tab: string
   content: React.ReactNode
 }
-
-const EMPTY_LAYOUT: ForecastLayout = { tabs: {}, hidden: [] }
 
 /** Each tab's section ids, in order: the user's placements first, then
  * every other section still in its default tab, in default order. */
@@ -65,14 +65,9 @@ const TOOL_BUTTON =
 export function ForecastTabs({
   tabs,
   sections,
-  layout: savedLayout = null,
-  canCustomize = false,
 }: {
   tabs: ForecastTab[]
   sections: ForecastSection[]
-  layout?: ForecastLayout | null
-  /** Signed in (the arrangement saves to their profile). */
-  canCustomize?: boolean
 }) {
   const id = useId()
   const listRef = useRef<HTMLDivElement>(null)
@@ -81,9 +76,10 @@ export function ForecastTabs({
     () => window.location.hash.slice(1),
     () => '',
   )
-  const active = tabs.find((tab) => tab.key === hash)?.key ?? tabs[0]?.key
-  const [layout, setLayout] = useState<ForecastLayout>(savedLayout ?? EMPTY_LAYOUT)
-  const [editing, setEditing] = useState(false)
+  const { layout, setLayout, editing, setEditing, canCustomize, statOptions } = useForecastLayout()
+  // The tab the page opens on: the user's choice, else the first.
+  const home = tabs.find((tab) => tab.key === layout.start)?.key ?? tabs[0]?.key
+  const active = tabs.find((tab) => tab.key === hash)?.key ?? home
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'error'>('idle')
   const beforeEdit = useRef<ForecastLayout>(layout)
 
@@ -93,7 +89,7 @@ export function ForecastTabs({
 
   function open(key: string, focus = false) {
     const url = new URL(window.location.href)
-    url.hash = key === tabs[0]?.key ? '' : key
+    url.hash = key === home ? '' : key
     window.history.replaceState(window.history.state, '', url)
     window.dispatchEvent(new HashChangeEvent('hashchange'))
     if (focus) listRef.current?.querySelector<HTMLButtonElement>(`[data-tab="${key}"]`)?.focus()
@@ -124,7 +120,7 @@ export function ForecastTabs({
     const nextTabs = Object.fromEntries(Object.entries(placement).map(([key, ids]) => [key, [...ids]]))
     const nextHidden = new Set(hidden)
     change(nextTabs, nextHidden)
-    setLayout({ tabs: nextTabs, hidden: [...nextHidden] })
+    setLayout({ ...layout, tabs: nextTabs, hidden: [...nextHidden] })
   }
 
   function move(sectionId: string, tabKey: string, delta: number) {
@@ -187,6 +183,19 @@ export function ForecastTabs({
 
   function resetLayout() {
     setLayout(EMPTY_LAYOUT)
+  }
+
+  function setStart(key: string) {
+    setLayout({ ...layout, start: key === tabs[0]?.key ? null : key })
+  }
+
+  const availableStats = statOptions.map((option) => option.key)
+  const stats = chosenStats(layout, availableStats)
+
+  function toggleStat(key: string) {
+    const next = stats.includes(key) ? stats.filter((k) => k !== key) : [...stats, key]
+    if (next.length === 0 || next.length > MAX_STATS) return
+    setLayout({ ...layout, stats: next })
   }
 
   return (
@@ -262,7 +271,7 @@ export function ForecastTabs({
         <div
           role="region"
           aria-label="Customize the forecast"
-          className="sticky top-16 z-20 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-primary bg-surface px-4 py-3 shadow-card"
+          className="z-20 flex flex-wrap sm:sticky sm:top-16 items-center gap-x-3 gap-y-2 rounded-lg border border-primary bg-surface px-4 py-3 shadow-card"
         >
           <p className="min-w-0 flex-1 text-sm text-text">
             <span className="font-semibold">Customizing.</span>{' '}
@@ -286,6 +295,55 @@ export function ForecastTabs({
             >
               {saveState === 'saving' ? 'Saving…' : 'Done'}
             </button>
+          </div>
+          <div className="flex w-full flex-col gap-3 border-t border-border pt-3 sm:flex-row sm:items-start sm:gap-6">
+            <label className="flex shrink-0 items-center gap-2 text-sm text-text">
+              <span className="font-semibold">Open on</span>
+              <select
+                value={home}
+                onChange={(event) => setStart(event.target.value)}
+                className="h-8 rounded-md border border-border bg-surface px-2 text-xs font-semibold text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+              >
+                {tabs.map((tab) => (
+                  <option key={tab.key} value={tab.key}>
+                    {tab.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {statOptions.length > 0 && (
+              <div className="flex min-w-0 flex-col gap-1.5" role="group" aria-label="Headline numbers">
+                <span className="text-sm text-text">
+                  <span className="font-semibold">Headline numbers</span>{' '}
+                  <span className="text-xs text-text-muted">
+                    pick up to {MAX_STATS}, in the order you tap them
+                  </span>
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {statOptions.map((option) => {
+                    const on = stats.includes(option.key)
+                    return (
+                      <button
+                        key={option.key}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() => toggleStat(option.key)}
+                        disabled={!on && stats.length >= MAX_STATS}
+                        className={cx(
+                          'rounded-full border px-2.5 py-1 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring disabled:opacity-40',
+                          on
+                            ? 'border-primary bg-primary text-primary-contrast'
+                            : 'border-border text-text-muted hover:border-primary hover:text-text',
+                        )}
+                      >
+                        {on && <span className="mr-1 tabular-nums">{stats.indexOf(option.key) + 1}</span>}
+                        {option.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
           {saveState === 'error' && (
             <p role="alert" className="w-full text-sm text-danger-text">

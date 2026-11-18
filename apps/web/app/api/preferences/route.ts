@@ -31,6 +31,10 @@ export type ForecastLayout = {
   /** Tab key -> the section ids placed there, in order. */
   tabs: Record<string, string[]>
   hidden: string[]
+  /** The tab the forecast opens on (default: the first). */
+  start?: string | null
+  /** Headline stat tiles, in order (default: water, wind, waves, confidence). */
+  stats?: string[]
 }
 
 /**

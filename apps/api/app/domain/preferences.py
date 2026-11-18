@@ -113,6 +113,10 @@ class ForecastLayout(BaseModel):
         default_factory=dict, max_length=8
     )
     hidden: list[_LayoutKey] = Field(default_factory=list, max_length=40)
+    # The tab the forecast opens on, and the headline stat tiles (in
+    # order); None / empty means apps/web's defaults.
+    start: _LayoutKey | None = None
+    stats: list[_LayoutKey] = Field(default_factory=list, max_length=6)
 
 
 class UserPreferences(Base):

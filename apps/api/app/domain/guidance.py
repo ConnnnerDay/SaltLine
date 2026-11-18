@@ -4,11 +4,15 @@ recommendation explains why".
 Designs `app.domain.models.ForecastEnvelope.recommendations`, the last of
 the four opaque payloads sprint 11 reserved (21/22/34/35).
 
-**Scope.** Deliberately *not* the legacy 851-species experience, which the
-roadmap defers past v1. The catalogue is `app/data/guidance_species.json`:
-26 common surf/pier targets, each offered only in the `conditions_region`s
-it actually lives in (4-13 per region), with bait/rig/tackle copied
-verbatim from the legacy dataset by `scripts/generate_guidance_catalogue.py`.
+**Scope.** `app/data/guidance_species.json` holds every fish in the legacy
+dataset once (~580; variants like "Bluefish (small)" merged, protected and
+encounter-only species left out), each in the `conditions_region`s it
+lives in, with bait/rig/tackle copied verbatim by
+`scripts/generate_guidance_catalogue.py`. Each carries an `access` tag:
+`shore` fish are picks for everyone; `boat` (offshore/charter) and
+`tidal` (brackish/freshwater-edge) fish are ranked into their own lists,
+which app.domain.personalize merges in for anglers who fish that way;
+`incidental` fish (bait fish, nuisance fish, non-targets) are never picked.
 
 **Scoring** ports the two condition-independent parts of the legacy
 `domain/species.py:_score_species`, unchanged:
@@ -169,6 +173,12 @@ class FishingGuidance(BaseModel):
     species: list[SpeciesPick]
     tackle_note: str | None = None
     pack: PackForToday | None = None
+    boat_species: list[SpeciesPick] = []
+    """Top boat-only picks (offshore/charter fish), merged into `species`
+    by app.domain.personalize for anglers who fish from a boat."""
+    tidal_species: list[SpeciesPick] = []
+    """Top brackish/freshwater-edge picks (tidal creeks and rivers), merged
+    in for kayak, wade, bridge and inshore-boat anglers."""
     calendar: list[CalendarRow] = []
     """Every catalogue species offered in the region, month by month --
     the legacy "Species Calendar" (`build_species_calendar`)."""
@@ -464,6 +474,8 @@ def build_species_calendar(
     for species in load_catalogue():
         if region not in species["regions"]:
             continue
+        if species.get("access", "shore") not in ("shore", "tidal"):
+            continue
         months: list[CalendarLevel] = []
         for month in range(1, 13):
             temp = (monthly_temps or {}).get(month)
@@ -498,9 +510,16 @@ def build_fishing_guidance(
     hour: int | None = None,
     max_picks: int = MAX_PICKS,
 ) -> FishingGuidance:
-    picks: list[tuple[float, SpeciesPick]] = []
+    picks: dict[str, list[tuple[float, SpeciesPick]]] = {
+        "shore": [],
+        "boat": [],
+        "tidal": [],
+    }
     for species in load_catalogue():
         if region not in species["regions"]:
+            continue
+        access = species.get("access", "shore")
+        if access not in picks:  # bait fish and non-targets: never a pick
             continue
         temp_points = _temperature_points(species, water_temp_f)
         if temp_points is None:
@@ -521,7 +540,7 @@ def build_fishing_guidance(
             if water_temp_f < _COLD_BOUNDARY_F
             else species["explanation_warm"]
         )
-        picks.append(
+        picks[access].append(
             (
                 score,
                 SpeciesPick(
@@ -553,9 +572,10 @@ def build_fishing_guidance(
         )
 
     # Stable: ties keep catalogue order (roughly most-targeted first).
-    picks.sort(key=lambda item: item[0], reverse=True)
+    for pool in picks.values():
+        pool.sort(key=lambda item: item[0], reverse=True)
 
-    top_picks = [pick for _, pick in picks[:max_picks]]
+    top_picks = [pick for _, pick in picks["shore"][:max_picks]]
     return FishingGuidance(
         basis=GuidanceBasis(
             water_temp_f=water_temp_f,
@@ -564,6 +584,8 @@ def build_fishing_guidance(
             region=region,
         ),
         species=top_picks,
+        boat_species=[pick for _, pick in picks["boat"][:max_picks]],
+        tidal_species=[pick for _, pick in picks["tidal"][:max_picks]],
         tackle_note=_tackle_note(wave_range_ft),
         pack=build_pack_for_today(
             top_picks,

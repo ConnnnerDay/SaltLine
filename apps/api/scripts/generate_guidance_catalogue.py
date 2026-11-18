@@ -569,7 +569,7 @@ def _write_regulations(species: list[dict[str, object]]) -> None:
     species and keyed by catalogue id, plus each state's official source."""
     legacy = json.loads(_LEGACY_REGS_PATH.read_text())
     name_map: dict[str, str] = legacy["name_map"]
-    states: dict[str, dict[str, dict[str, str]]] = {}
+    states: dict[str, dict[str, dict[str, str | None]]] = {}
     for state, entries in legacy["states"].items():
         for record in species:
             legacy_name = str(record["legacy_name"])

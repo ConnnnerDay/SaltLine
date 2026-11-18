@@ -2014,5 +2014,75 @@
     "license": "CC BY 4.0",
     "license_url": "https://creativecommons.org/licenses/by/4.0/",
     "source_url": "https://www.inaturalist.org/photos/71434536"
+  },
+  "hapuupuu-hawaiian-grouper": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/213625/medium.jpg",
+    "credit": "Randall, J.E. via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/213625"
+  },
+  "striped-marlin": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/33570742/medium.jpeg",
+    "credit": "Fernando Olea via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/33570742"
+  },
+  "acadian-redfish-ocean-perch": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/25977998/medium.jpeg",
+    "credit": "J.D. Willson via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/25977998"
+  },
+  "petrale-sole": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/493179291/medium.jpg",
+    "credit": "Jacob via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/493179291"
+  },
+  "english-sole": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/167067247/medium.jpg",
+    "credit": "KJ via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/167067247"
+  },
+  "arrowtooth-flounder": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/415106509/medium.jpeg",
+    "credit": "Matt Muir via iNaturalist",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/415106509"
+  },
+  "cusk": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/64021544/medium.jpg",
+    "credit": "Michael Verdirame via iNaturalist",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/64021544"
+  },
+  "china-rockfish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/26381/medium.jpg",
+    "credit": "Pat Kight via iNaturalist",
+    "license": "CC BY-NC-ND 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/26381"
+  },
+  "black-and-yellow-rockfish": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/86651491/medium.jpg",
+    "credit": "(c) Brenna Green, osa oikeuksista pidätetään (CC BY-NC-ND), lähettänyt Brenna Green via iNaturalist",
+    "license": "CC BY-NC-ND 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/86651491"
+  },
+  "surf-smelt-pacific": {
+    "src": "https://inaturalist-open-data.s3.amazonaws.com/photos/92757790/medium.jpeg",
+    "credit": "Mieke Ahnna Lee via iNaturalist",
+    "license": "CC BY-NC-ND 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+    "source_url": "https://www.inaturalist.org/photos/92757790"
   }
 }

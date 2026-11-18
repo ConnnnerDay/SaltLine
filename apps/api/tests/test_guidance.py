@@ -32,8 +32,14 @@ _RED_DRUM = next(s for s in load_catalogue() if s["id"] == "red-drum")
 
 def test_catalogue_is_curated_and_every_species_is_region_gated() -> None:
     catalogue = load_catalogue()
-    # A curated shore/pier/inshore list, not the legacy 851-species dump.
-    assert 100 <= len(catalogue) <= 250
+    # Every legacy fish once (variants merged, protected species left out).
+    assert 500 <= len(catalogue) <= 700
+    assert {species.get("access") for species in catalogue} <= {
+        "shore",
+        "boat",
+        "tidal",
+        "incidental",
+    }
     assert len({species["id"] for species in catalogue}) == len(catalogue)
     regions = {
         "atlantic_north",
@@ -207,7 +213,12 @@ def test_calendar_lists_every_region_species_with_12_months() -> None:
     from app.domain.guidance import build_species_calendar
 
     rows = build_species_calendar("atlantic_mid")
-    region_ids = [s["id"] for s in load_catalogue() if "atlantic_mid" in s["regions"]]
+    region_ids = [
+        s["id"]
+        for s in load_catalogue()
+        if "atlantic_mid" in s["regions"]
+        and s.get("access", "shore") in ("shore", "tidal")
+    ]
     assert [row.id for row in rows] == region_ids
     assert all(len(row.months) == 12 for row in rows)
 
@@ -462,3 +473,29 @@ def test_every_region_month_and_temperature_builds() -> None:
                 )
                 for pick in result.species:
                     assert pick.bait and pick.rig, pick.id
+
+
+def test_picks_keep_boat_tidal_and_bait_fish_in_their_place() -> None:
+    access = {
+        species["id"]: species.get("access", "shore") for species in load_catalogue()
+    }
+    for region, temp, month in (
+        ("atlantic_south", 78.0, 6),
+        ("gulf", 82.0, 8),
+        ("pacific", 56.0, 7),
+    ):
+        result = build_fishing_guidance(
+            region=region, water_temp_f=temp, water_temp_is_fallback=False, month=month
+        )
+        assert result.species
+        assert {access[pick.id] for pick in result.species} == {"shore"}
+        assert {access[pick.id] for pick in result.boat_species} <= {"boat"}
+        assert {access[pick.id] for pick in result.tidal_species} <= {"tidal"}
+    # Florida in summer has plenty of offshore fish to offer boat anglers.
+    summer = build_fishing_guidance(
+        region="atlantic_south",
+        water_temp_f=80.0,
+        water_temp_is_fallback=False,
+        month=7,
+    )
+    assert summer.boat_species

@@ -20,6 +20,9 @@ en.wikipedia.org and upload.wikimedia.org):
 
 `--trim-existing` only re-trims letterbox borders on the committed photos.
 `--inat` fills in species still missing a photo from iNaturalist instead
+(species with no Wikipedia article mapped -- the bulk of the catalogue --
+are matched by exact common name and *linked*, not copied: the site's CSP
+already allows iNaturalist's photo hosts, and it keeps the repo small)
 (api.inaturalist.org, by exact scientific name, Creative Commons photos
 only, credited the same way) -- for fish Wikipedia has no free lead image
 for, or while Wikimedia is rate-limiting.
@@ -439,6 +442,31 @@ def _photo_from_inat(scientific: str) -> dict[str, str] | None:
     }
 
 
+def _photo_from_inat_name(name: str) -> dict[str, str] | None:
+    """Like `_photo_from_inat`, by common name: the animal (Animalia, rank
+    species) whose iNaturalist common name is exactly *name* without its
+    parenthetical note -- or the note itself ("Opakapaka (pink snapper)")."""
+    candidates = [re.sub(r"\s*\([^)]*\)", "", name).strip()]
+    candidates += [
+        part.split(",")[0].strip() for part in re.findall(r"\(([^)]*)\)", name)
+    ]
+    for candidate in [c for c in candidates if c]:
+        query = urllib.parse.urlencode(
+            {"q": candidate, "rank": "species", "taxon_id": 1, "per_page": 10}
+        )
+        results = _get_json(f"https://api.inaturalist.org/v1/taxa?{query}")["results"]
+        for taxon in results:
+            names = {
+                str(taxon.get("preferred_common_name", "")).lower(),
+                str(taxon.get("name", "")).lower(),
+            }
+            if candidate.lower() in names:
+                return _photo_from_inat(str(taxon["name"]))
+        time.sleep(1)
+    print(f"  skip {name}: no iNaturalist species by that name")
+    return None
+
+
 def _photo_for(article: str) -> dict[str, str] | None:
     lead = _get_json(
         "https://en.wikipedia.org/w/api.php?"
@@ -530,7 +558,10 @@ def main() -> None:
     )
     for species in catalogue:
         species_id = species["id"]
-        if species_id in manifest and (_PHOTO_DIR / f"{species_id}.jpg").exists():
+        if species_id in manifest and (
+            manifest[species_id]["src"].startswith("https://")
+            or (_PHOTO_DIR / f"{species_id}.jpg").exists()
+        ):
             manifest[species_id]["credit"] = _plain(manifest[species_id]["credit"])
             continue
         article = ARTICLES.get(species_id)
@@ -538,6 +569,23 @@ def main() -> None:
         try:
             if inat and scientific:
                 photo = _photo_from_inat(scientific)
+            elif inat and not article:
+                # Bulk catalogue: by common name, linked rather than copied.
+                photo = _photo_from_inat_name(str(species["name"]))
+                if photo is not None:
+                    manifest[species_id] = {
+                        "src": photo["image_url"],
+                        "credit": photo["credit"],
+                        "license": photo["license"],
+                        "license_url": photo["license_url"],
+                        "source_url": photo["source_url"],
+                    }
+                    print(f"  linked {species_id}: {photo['license']}")
+                    # Saved as it goes: a long run that stops loses nothing.
+                    _MANIFEST.write_text(
+                        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
+                    )
+                continue
             elif article:
                 photo = _photo_for(article)
             else:

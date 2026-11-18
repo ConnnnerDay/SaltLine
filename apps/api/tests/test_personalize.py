@@ -305,3 +305,36 @@ def test_no_usual_times_means_no_window() -> None:
     out = personalize(_timed_envelope(), PreferencesOut())
     assert out.hourly_outlook is not None
     assert "your_window" not in out.hourly_outlook
+
+
+def test_boat_and_tidal_fish_join_the_picks_only_for_those_anglers() -> None:
+    from app.domain.guidance import build_fishing_guidance
+    from app.domain.preferences import FishingType
+
+    guidance = build_fishing_guidance(
+        region="atlantic_south",
+        water_temp_f=80.0,
+        water_temp_is_fallback=False,
+        month=7,
+    ).model_dump(mode="json")
+    assert guidance["boat_species"] and guidance["tidal_species"]
+    envelope = _envelope().model_copy(update={"recommendations": guidance})
+    shore_ids = [pick["id"] for pick in guidance["species"]]
+    boat_ids = {pick["id"] for pick in guidance["boat_species"]}
+    tidal_ids = {pick["id"] for pick in guidance["tidal_species"]}
+
+    def picks(*kinds: FishingType) -> list[str]:
+        prefs = PreferencesOut(fishing_types=list(kinds) or None)
+        out = personalize(envelope, prefs).recommendations or {}
+        return [pick["id"] for pick in out["species"]]
+
+    # Surf anglers: shore fish only, unchanged.
+    assert picks(FishingType.SURF) == shore_ids
+    assert picks() == shore_ids
+    # Offshore boat: boat fish can take a place; never tidal-creek fish.
+    offshore = picks(FishingType.OFFSHORE)
+    assert set(offshore) & boat_ids and not set(offshore) & tidal_ids
+    # Kayak: tidal fish can join; never boat-only ones.
+    kayak = picks(FishingType.KAYAK)
+    assert not set(kayak) & boat_ids
+    assert len(kayak) == len(shore_ids)

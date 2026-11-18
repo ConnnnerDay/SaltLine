@@ -13,7 +13,9 @@ from __future__ import annotations
 
 import ast
 import json
+import re
 from pathlib import Path
+from typing import Any
 
 _API_ROOT = Path(__file__).resolve().parent.parent
 _LEGACY_PATH = _API_ROOT.parent.parent / "storage" / "species_data.json"
@@ -211,6 +213,203 @@ _TEXT_FIELDS = {
 }
 
 
+_QUALIFIERS = r"(small|large|adult|juvenile|school|pier|shore|surf|flats|tidal|inshore|nearshore|offshore|early season|winter|gigging|sport|harvest|common|catch-and-release|catch-release|invasive|sea-run|summer run|daytime deep-drop|charter|large bull|slot size|near-pier|anadromous)"
+_ALIASES = {
+    "fluke": "flounder",
+    "summer flounder": "flounder",
+    "redfish": "red drum",
+    "spotted seatrout": "speckled trout",
+    "weakfish": "weakfish",
+    "gray trout": "weakfish",
+    "delaware bay weakfish": "weakfish",
+    "florida pompano": "pompano",
+    "atlantic spanish mackerel": "spanish mackerel",
+    "dolphinfish": "mahi-mahi",
+    "dorado": "mahi-mahi",
+    "california corbina": "corbina",
+    "pacific yellowtail": "yellowtail",
+    "yellowtail amberjack": "yellowtail",
+    "kingfish": "whiting",
+    "crevalle jack": "jack crevalle",
+    "bonito": "atlantic bonito",
+    "atlantic blacktip shark": "blacktip shark",
+    "pufferfish": "northern puffer",
+    "oio": "o'io",
+    "common snook": "snook",
+    "pileperch": "pile perch",
+    "rubberlip perch": "rubberlip seaperch",
+    "rubberlip surfperch": "rubberlip seaperch",
+    "halfmoon perch": "halfmoon",
+    "pacific jack mackerel": "jack mackerel",
+    "menhaden": "atlantic menhaden",
+    "graysby grouper": "graysby",
+    "coney grouper": "coney",
+    "rock hind grouper": "rock hind",
+    "striped surfperch": "striped seaperch",
+    "surfperch": "shiner perch",
+    "boston mackerel": "atlantic mackerel",
+    "gray snapper": "mangrove snapper",
+    "steelhead": "steelhead trout",
+    "olympic peninsula steelhead": "steelhead trout",
+    "skeena steelhead": "steelhead trout",
+    "pacific whiting": "pacific hake",
+    "puget sound king salmon": "chinook salmon",
+    "halibut": "pacific halibut",
+    "yellowjack": "yellow jack",
+    "atlantic blue marlin": "blue marlin",
+    "skipjack": "skipjack tuna",
+    "spot croaker": "spot",
+    "hybrid striped bass": "striped bass",
+    "sea bream": "pinfish",
+    "bergall": "cunner",
+    "tog": "tautog",
+    "rockfish": "black rockfish",
+    "albacore": "albacore tuna",
+    "longfin albacore": "albacore tuna",
+    "atlantic bluefin tuna": "bluefin tuna",
+    "mangrove red snapper": "mangrove snapper",
+    "speckled sand dab": "speckled sanddab",
+    "pacific sand dab": "pacific sanddab",
+    "ulua": "giant trevally",
+    "omilu": "bluefin trevally",
+    "papio": "papio",
+    "nenue": "nenue",
+    "uku": "uku",
+    "kaku": "kaku",
+    "weke": "weke",
+    "mu": "mu",
+    "nairagi": "striped marlin",
+    "kahala": "greater amberjack",
+    "lehi": "lehi",
+    "permit": "permit",
+    "bonefish": "bonefish",
+    "tarpon": "tarpon",
+    "snook": "snook",
+    "cobia": "cobia",
+    "wahoo": "wahoo",
+    "sailfish": "sailfish",
+    "mako shark": "shortfin mako shark",
+    "broadnose sevengill shark": "sevengill shark",
+    "puget sound coho": "coho salmon",
+    "columbia river spring chinook": "chinook salmon",
+    "sacramento river fall chinook": "chinook salmon",
+    "klamath river fall chinook": "chinook salmon",
+    "atlantic tripletail": "tripletail",
+    "atlantic pollock": "pollock",
+    "soupfin shark": "tope shark",
+    "green moray": "green moray eel",
+    "spotted moray": "spotted moray eel",
+    "puddingwife wrasse": "puddingwife",
+    "sailors choice": "sailor's choice grunt",
+    "sailor grunt": "sailor's choice grunt",
+    "crab harvest": "stone crab",
+    "spotted eagle ray": "eagle ray",
+    "treefish rockfish": "treefish",
+    "bluestriped grunt": "blue-striped grunt",
+    "ocean surgeonfish": "ocean surgeon",
+    "burfish": "striped burrfish",
+    "pacific crevalle jack": "jack crevalle (pacific)",
+    "yellowfin grouper": "kitty mitchell",
+    "chub mackerel": "pacific mackerel",
+    "alaska pollock": "walleye pollock",
+    "silver hake": "silver hake",
+    "white hake": "white hake",
+}
+
+
+def _fish_key(name: str) -> str:
+    """A fish's dedupe key: its name without parenthetical notes or
+    size/place qualifiers, then mapped through _ALIASES."""
+    text = name.lower()
+    paren = re.findall(r"\(([^)]*)\)", text)
+    text = re.sub(r"\s*\([^)]*\)\s*", " ", text)
+    text = re.sub(rf"\b{_QUALIFIERS}\b", " ", text)
+    text = re.sub(r"\s+", " ", text).strip(" -")
+    if text in _ALIASES:
+        return _ALIASES[text]
+    # "Oio (bonefish, Hawaii)" / "Redfish (red drum) juvenile": try the note.
+    for note in paren:
+        note = note.split(",")[0].strip()
+        if note in _ALIASES:
+            return _ALIASES[note]
+    return text
+
+
+# Not fish anyone targets (or not a catch at all): never added.
+_SKIP = {"Northern sea cucumber", "Blood worm (tidal)", "Crab (stone) harvest"}
+# Freshwater fish that also turn up in tidal creeks and rivers.
+_TIDAL = re.compile(
+    r"bass \(tidal\)|largemouth|bluegill|warmouth|redear|catfish|\bgar\b|pickerel|bowfin|"
+    r"walleye \(coastal\)|yellow perch|freshwater drum|tilapia|channel|blue catfish|flathead catfish",
+    re.IGNORECASE,
+)
+# Bait fish: caught for bait (sabiki, cast net), never a "what's biting" pick.
+_BAIT = re.compile(
+    r"menhaden|herring|anchov|sardine|silverside|killifish|mummichog|ballyhoo|halfbeak|scad|saury|"
+    r"eulachon|bumper|alewife|blueback|thread herring|shad \(tidal\)|gizzard shad|bay anchovy|"
+    r"butterfish|harvestfish|pacific saury",
+    re.IGNORECASE,
+)
+_NOT_A_TARGET = re.compile(
+    r"not a hook-and-line target|do not target|not a target", re.IGNORECASE
+)
+
+
+def _access(entry: dict[str, Any], boat: set[str], nuisance: set[str]) -> str:
+    """Who a fish is a "what's biting" pick for: shore (everyone), boat
+    (inshore/offshore boat anglers), tidal (kayak/wade/bridge/boat), or
+    incidental (bait fish, nuisance fish and non-targets: listed, never
+    picked)."""
+    name = entry["name"]
+    if (
+        _NOT_A_TARGET.search(f"{entry['rig']} {entry['bait']}")
+        or _BAIT.search(name)
+        or name in nuisance
+    ):
+        return "incidental"
+    if name in boat:
+        return "boat"
+    if _TIDAL.search(name):
+        return "tidal"
+    return "shore"
+
+
+def _auto_regions(entry: dict[str, Any]) -> list[str]:
+    """Regions for a fish with no hand-picked ones: its legacy coast, split
+    by its survivable water-temperature range and any place in its name.
+    (The temperature-fit scoring then does the fine filtering.)"""
+    name = entry["name"].lower()
+    low, high = entry["temp_min"], entry["temp_max"]
+    if entry["coast"] == "hawaii":
+        return [_H]
+    if entry["coast"] == "west":
+        if re.search(r"california|socal|catalina|baja", name):
+            return [_PS] if low >= 54 else [_P, _PS]
+        if re.search(
+            r"alaska|puget|columbia|olympic|skeena|oregon|klamath|sacramento|arctic|washington",
+            name,
+        ):
+            return [_P]
+        if low >= 60:
+            return [_PS]
+        if high <= 62:
+            return [_P]
+        return [_P, _PS]
+    if "gulf" in name:
+        return [_G]
+    if re.search(r"chesapeake|delaware|hudson|new england|ne pier|maine", name):
+        return [_N, _M]
+    if re.search(r"florida|caribbean|keys", name) or low >= 66:
+        return [_S, _G]
+    if high <= 66:
+        return [_N]
+    if high <= 75:
+        return [_N, _M]
+    if low <= 52:
+        return [_N, _M, _S, _G]
+    return [_M, _S, _G]
+
+
 def _slug(name: str) -> str:
     return (
         name.lower()
@@ -267,13 +466,57 @@ def main() -> None:
         record["targets"] = [
             group for group, names in target_groups.items() if legacy_name in names
         ]
+        record["access"] = "shore"
+        species.append(record)
+
+    # Every other legacy fish, once each: variants of a fish already in
+    # ("Bluefish (small)", "Redfish (surf)") merge into it, and protected /
+    # encounter-only species (the legacy "excluded" list) are left out.
+    classifications = json.loads(_LEGACY_CLASSIFICATIONS.read_text())
+    excluded = set(classifications["excluded"]) | _SKIP
+    boat = set(classifications["fishing_type"]["offshore_only"]) | set(
+        classifications["fishing_type"]["charter"]
+    )
+    picked = {str(r["legacy_name"]) for r in species}
+    seen = {_fish_key(str(r[k])) for r in species for k in ("name", "legacy_name")}
+    ids = {str(r["id"]) for r in species}
+    for legacy_name, entry in legacy.items():
+        if legacy_name in excluded or legacy_name in picked:
+            continue
+        fish = _fish_key(legacy_name)
+        if fish in seen:
+            continue
+        seen.add(fish)
+        species_id = _slug(legacy_name)
+        while species_id in ids:
+            species_id += "-2"
+        ids.add(species_id)
+        record = {
+            "id": species_id,
+            "name": legacy_name,
+            "legacy_name": legacy_name,
+            "regions": _auto_regions(entry),
+        }
+        record.update(
+            {
+                field: entry[field] or "" if field in _TEXT_FIELDS else entry[field]
+                for field in _COPIED_FIELDS
+            }
+        )
+        record["conditions"] = condition_tags.get(legacy_name, [])
+        record["targets"] = [
+            group for group, names in target_groups.items() if legacy_name in names
+        ]
+        record["access"] = _access(entry, boat, set(classifications["nuisance"]))
         species.append(record)
 
     payload = {
         "_comment": (
-            "Sprint 35 curated fishing-guidance catalogue: common surf/pier "
-            "targets only, region-gated by conditions_region. Every field "
-            "except id/name/regions is copied verbatim from the legacy "
+            "Fishing-guidance catalogue: hand-picked shore targets first, then "
+            "every other legacy fish once (variants merged, protected species "
+            "left out), region-gated by conditions_region and tagged with "
+            "access (shore/boat/tidal/incidental). Every field except "
+            "id/name/regions/access is copied verbatim from the legacy "
             "storage/species_data.json entry named in legacy_name "
             "(provisional dataset, see docs/CANONICAL_ROADMAP.md). Generated "
             "by scripts/generate_guidance_catalogue.py; regenerate rather "

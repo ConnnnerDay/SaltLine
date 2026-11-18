@@ -28,7 +28,12 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from app.domain.guidance import GuidanceTier, SpeciesPick, build_pack_for_today
+from app.domain.guidance import (
+    MAX_PICKS,
+    GuidanceTier,
+    SpeciesPick,
+    build_pack_for_today,
+)
 from app.domain.models import ForecastEnvelope, Warning, WarningSeverity
 from app.domain.preferences import PreferencesOut
 from app.infra.timezones import safe_zone
@@ -229,6 +234,23 @@ def _filter_pack(pack: dict[str, Any], prefs: PreferencesOut) -> dict[str, Any]:
     return {**pack, "rows": rows}
 
 
+def _rebuilt_pack(
+    recommendations: dict[str, Any],
+    conditions: dict[str, Any] | None,
+    envelope: ForecastEnvelope,
+) -> dict[str, Any] | None:
+    """ "Pack for today" rebuilt for the (re-ranked / merged) picks."""
+    basis = recommendations.get("basis") or {}
+    rebuilt = build_pack_for_today(
+        [SpeciesPick.model_validate(pick) for pick in recommendations["species"]],
+        water_temp_f=float(basis.get("water_temp_f", 65.0)),
+        wind_range_kt=_pair((conditions or {}).get("wind_range_kt")),
+        wave_range_ft=_pair((conditions or {}).get("wave_range_ft")),
+        hour=_local_hour(envelope.generated_at, envelope.location.timezone),
+    )
+    return rebuilt.model_dump(mode="json") if rebuilt else None
+
+
 def personalize(envelope: ForecastEnvelope, prefs: PreferencesOut) -> ForecastEnvelope:
     """A personalized copy of *envelope*; the input is never mutated."""
     conditions = dict(envelope.conditions) if envelope.conditions else None
@@ -256,20 +278,42 @@ def personalize(envelope: ForecastEnvelope, prefs: PreferencesOut) -> ForecastEn
             )
         )
 
+    # Boat-only and tidal-creek fish join the picks for anglers who fish
+    # that way (app.domain.guidance keeps them in their own lists).
+    fishing = {str(getattr(kind, "value", kind)) for kind in prefs.fishing_types or []}
+    extra_pools = [
+        pool
+        for pool, kinds in (
+            ("boat_species", {"inshore", "offshore"}),
+            ("tidal_species", {"kayak", "wade", "bridge", "inshore"}),
+        )
+        if fishing & kinds
+    ]
+    if recommendations and extra_pools:
+        # Best score first; among equal scores, alternate between the pools
+        # (shore 1, boat 1, shore 2, boat 2...) so each kind gets a share.
+        pools = [list(recommendations.get("species") or [])] + [
+            list(recommendations.get(pool) or []) for pool in extra_pools
+        ]
+        ranked = [
+            (-float(pick.get("score", 0)), rank, which, pick)
+            for which, pool in enumerate(pools)
+            for rank, pick in enumerate(pool)
+        ]
+        ranked.sort(key=lambda item: item[:3])
+        merged = [pick for *_, pick in ranked]
+        recommendations["species"] = merged[:MAX_PICKS]
+        if not prefs.target_groups:
+            recommendations["pack"] = _rebuilt_pack(
+                recommendations, conditions, envelope
+            )
+
     if recommendations and prefs.target_groups and recommendations.get("species"):
         targets = [str(getattr(group, "value", group)) for group in prefs.target_groups]
         recommendations["species"] = _rerank_for_targets(
             recommendations["species"], targets
         )
-        basis = recommendations.get("basis") or {}
-        rebuilt = build_pack_for_today(
-            [SpeciesPick.model_validate(pick) for pick in recommendations["species"]],
-            water_temp_f=float(basis.get("water_temp_f", 65.0)),
-            wind_range_kt=_pair((conditions or {}).get("wind_range_kt")),
-            wave_range_ft=_pair((conditions or {}).get("wave_range_ft")),
-            hour=_local_hour(envelope.generated_at, envelope.location.timezone),
-        )
-        recommendations["pack"] = rebuilt.model_dump(mode="json") if rebuilt else None
+        recommendations["pack"] = _rebuilt_pack(recommendations, conditions, envelope)
 
     if recommendations and recommendations.get("pack"):
         pack = _filter_pack(recommendations["pack"], prefs)

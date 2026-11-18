@@ -78,7 +78,7 @@ def comfort_breaches(
         and wind[1] > prefs.wind_threshold_kt
     ):
         reasons.append(
-            f"wind up to {wind[1]:g} kt (your limit {prefs.wind_threshold_kt:g})"
+            f"wind up to {wind[1]:g} kt (your limit {prefs.wind_threshold_kt:g} kt)"
         )
     waves = conditions.get("wave_range_ft")
     if (
@@ -87,7 +87,7 @@ def comfort_breaches(
         and waves[1] > prefs.surf_threshold_ft
     ):
         reasons.append(
-            f"surf up to {waves[1]:g} ft (your limit {prefs.surf_threshold_ft:g})"
+            f"surf up to {waves[1]:g} ft (your limit {prefs.surf_threshold_ft:g} ft)"
         )
     return reasons
 

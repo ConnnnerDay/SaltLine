@@ -1,5 +1,7 @@
 'use client'
 
+import { unitLabel } from '@/lib/units'
+import { useUnitInput } from '@/lib/use-unit-input'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button, Card, Field } from '@/app/components/ui'
 import { cx } from '@/app/components/ui/cx'
@@ -108,15 +110,6 @@ const EXPERIENCE_OPTIONS = [
   { value: 'experienced', label: 'Experienced' },
 ]
 
-function toInputValue(value: number | null): string {
-  return value === null ? '' : String(value)
-}
-
-function fromInputValue(value: string): number | null {
-  if (value.trim() === '') return null
-  const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : null
-}
 
 export function PreferencesForm({
   locationNames = {},
@@ -143,6 +136,13 @@ export function PreferencesForm({
   const [saved, setSaved] = useState(false)
   const [homeName, setHomeName] = useState<string | null>(null)
   const requestIdRef = useRef(0)
+  // Limits are typed in the chosen units, stored in knots / feet.
+  const windInput = useUnitInput(preferences.wind_threshold_kt, 'speed', preferences.units, (value) =>
+    setPreferences((p) => ({ ...p, wind_threshold_kt: value })),
+  )
+  const surfInput = useUnitInput(preferences.surf_threshold_ft, 'height', preferences.units, (value) =>
+    setPreferences((p) => ({ ...p, surf_threshold_ft: value })),
+  )
 
   const load = useCallback(() => {
     const requestId = ++requestIdRef.current
@@ -310,32 +310,21 @@ export function PreferencesForm({
         >
           <div className="grid grid-cols-2 gap-3 [&>div]:mb-0">
             <Field
-              label="Max wind (kt)"
+              label={`Max wind (${unitLabel('speed', preferences.units)})`}
               type="number"
               inputMode="decimal"
               min={0}
-              max={100}
-              value={toInputValue(preferences.wind_threshold_kt)}
-              onChange={(event) =>
-                setPreferences((p) => ({
-                  ...p,
-                  wind_threshold_kt: fromInputValue(event.target.value),
-                }))
-              }
+              max={preferences.units === 'metric' ? 185 : 100}
+              {...windInput}
             />
             <Field
-              label="Max surf (ft)"
+              label={`Max surf (${unitLabel('height', preferences.units)})`}
               type="number"
               inputMode="decimal"
+              step="any"
               min={0}
-              max={60}
-              value={toInputValue(preferences.surf_threshold_ft)}
-              onChange={(event) =>
-                setPreferences((p) => ({
-                  ...p,
-                  surf_threshold_ft: fromInputValue(event.target.value),
-                }))
-              }
+              max={preferences.units === 'metric' ? 18 : 60}
+              {...surfInput}
             />
           </div>
         </Group>

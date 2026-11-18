@@ -13,6 +13,8 @@ import { PressureAndWater } from './pressure-water'
 import { SurfZone } from './surf-zone'
 import { WeatherIcon } from './weather-icon'
 import { currentTime } from '@/lib/clock'
+import { requestUnits } from '@/lib/request-units'
+import { distance, height, heightRange, localizeText, speedRange, temp } from '@/lib/units'
 import { ForecastTabs } from './forecast-tabs'
 import { ForecastLayoutProvider, HeadlineStats, ShowIf, WithinBitingCount, type StatTileData } from './forecast-layout'
 import type { NearbyCam } from '@/lib/get-cams'
@@ -296,7 +298,7 @@ function TideChart({ tides, timezone }: { tides: ForecastTides; timezone: string
               )}
             >
               <span className="block font-bold text-text">
-                {high ? 'High' : 'Low'} {prediction.height_ft.toFixed(1)} ft
+                {high ? 'High' : 'Low'} {height(prediction.height_ft, requestUnits())}
               </span>
               <span className="block text-text-muted">
                 {timeFormatter.format(new Date(prediction.time))}
@@ -362,7 +364,7 @@ function TideTable({
                 <td className="py-1.5 pr-4 text-text sm:pr-12">
                   {prediction.kind === 'high' ? 'High' : 'Low'}
                 </td>
-                <td className="py-1.5 text-text">{prediction.height_ft.toFixed(1)} ft</td>
+                <td className="py-1.5 text-text">{height(prediction.height_ft, requestUnits())}</td>
               </tr>
             ))}
           </tbody>
@@ -773,7 +775,7 @@ function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
         aside={
           guidance.basis.water_temp_is_fallback
             ? 'Based on the monthly average water temperature'
-            : `Ranked for ${Math.round(guidance.basis.water_temp_f)}°F water`
+            : `Ranked for ${temp(guidance.basis.water_temp_f, requestUnits())} water`
         }
       />
 
@@ -798,7 +800,7 @@ function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
       {guidance.species.length === 0 ? (
         <p className="text-sm text-text-muted">
           None of the common surf and pier targets for this area are in range at{' '}
-          {Math.round(guidance.basis.water_temp_f)}°F right now.
+          {temp(guidance.basis.water_temp_f, requestUnits())} right now.
         </p>
       ) : (
         // Phones: a swipeable row (snap per card, next card peeking in);
@@ -1065,14 +1067,14 @@ function RigsAndTips({
                       </span>
                     )}
                   </h3>
-                  <p className="text-sm leading-relaxed text-text-muted">{rig.summary}</p>
+                  <p className="text-sm leading-relaxed text-text-muted">{localizeText(rig.summary, requestUnits())}</p>
                   {waterTips(id).map(({ water, tip }) => (
                     <p
                       key={water}
                       className="rounded-md border-l-4 border-l-primary bg-primary-tint px-3 py-2 text-sm text-text"
                     >
                       <span className="font-semibold">{WATER_PHRASE[water]}: </span>
-                      {tip}
+                      {localizeText(tip ?? '', requestUnits())}
                     </p>
                   ))}
                 </div>
@@ -1086,7 +1088,7 @@ function RigsAndTips({
                           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-border text-[0.6875rem] font-bold tabular-nums text-text">
                             {index + 1}
                           </span>
-                          <span className="leading-relaxed">{step}</span>
+                          <span className="leading-relaxed">{localizeText(step, requestUnits())}</span>
                         </li>
                       ))}
                     </ul>
@@ -1097,7 +1099,7 @@ function RigsAndTips({
                       {rig.tips.map((tip) => (
                         <li key={tip} className="flex gap-2.5">
                           <span aria-hidden="true" className="mt-[0.55rem] h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                          <span className="leading-relaxed">{tip}</span>
+                          <span className="leading-relaxed">{localizeText(tip, requestUnits())}</span>
                         </li>
                       ))}
                     </ul>
@@ -1255,6 +1257,7 @@ export function ForecastCard({
   // Every headline number this spot has, in default order; the user picks
   // which (up to four) show, in Customize (./forecast-layout).
   const tz = forecast.location.timezone
+  const units = requestUnits()
   const clock = (iso: string) =>
     new Intl.DateTimeFormat('en-US', { timeZone: tz, hour: 'numeric', minute: '2-digit' }).format(new Date(iso))
   const now = currentTime().getTime()
@@ -1267,7 +1270,7 @@ export function ForecastCard({
     waterTemp && {
       key: 'water',
       label: 'Water temp',
-      value: `${waterTemp.value.toFixed(1)}°F`,
+      value: temp(waterTemp.value, units, 1),
       note: waterTemp.is_fallback ? 'monthly avg' : 'live reading',
       rule: 'border-t-tier-high',
     },
@@ -1275,7 +1278,7 @@ export function ForecastCard({
       key: 'wind',
       label: 'Wind',
       value: conditions?.wind_range_kt
-        ? `${conditions.wind_direction ? `${compassLabel(conditions.wind_direction)} ` : ''}${formatRange(conditions.wind_range_kt)} kt`
+        ? `${conditions.wind_direction ? `${compassLabel(conditions.wind_direction)} ` : ''}${speedRange(conditions.wind_range_kt, units)}`
         : '—',
       note: conditions?.wind_range_kt ? 'next 24 h' : 'unavailable',
       rule: 'border-t-border',
@@ -1283,7 +1286,7 @@ export function ForecastCard({
     {
       key: 'waves',
       label: 'Waves',
-      value: conditions?.wave_range_ft ? `${formatRange(conditions.wave_range_ft, 0.5)} ft` : '—',
+      value: conditions?.wave_range_ft ? heightRange(conditions.wave_range_ft, units) : '—',
       note: conditions?.wave_range_ft ? 'next 24 h' : 'unavailable',
       rule: 'border-t-border',
     },
@@ -1302,7 +1305,7 @@ export function ForecastCard({
     weatherNow?.temperature_f != null && {
       key: 'air',
       label: 'Air temp',
-      value: `${Math.round(weatherNow.temperature_f)}°F`,
+      value: temp(weatherNow.temperature_f, units),
       note: weatherNow.short_forecast,
       rule: 'border-t-border',
     },
@@ -1317,7 +1320,7 @@ export function ForecastCard({
       key: 'tide',
       label: `Next ${upcomingTides[0].kind} tide`,
       value: clock(upcomingTides[0].time),
-      note: `${upcomingTides[0].height_ft.toFixed(1)} ft${
+      note: `${height(upcomingTides[0].height_ft, units)}${
         upcomingTides[1] ? ` · then ${upcomingTides[1].kind} ${clock(upcomingTides[1].time)}` : ''
       }`,
       rule: 'border-t-tier-high',
@@ -1392,7 +1395,7 @@ export function ForecastCard({
               <WeatherIcon sky={weatherNow.sky} className="h-5 w-5" />
               <span className="font-semibold">{weatherNow.short_forecast}</span>
               {weatherNow.temperature_f !== null && (
-                <span className="tabular-nums">· {Math.round(weatherNow.temperature_f)}°F</span>
+                <span className="tabular-nums">· {temp(weatherNow.temperature_f, units)}</span>
               )}
               {weatherNow.precip_pct !== null && (
                 <span className="text-text-muted tabular-nums">· {weatherNow.precip_pct}% chance of rain</span>
@@ -1699,7 +1702,7 @@ export function ForecastCard({
                           >
                             <span className="section-label text-primary!">{cam.cam_type} cam</span>
                             <span className="font-bold text-text">{cam.name}</span>
-                            <span className="text-xs text-text-muted">{cam.distance_miles} miles away</span>
+                            <span className="text-xs text-text-muted">{distance(cam.distance_miles, units)} away</span>
                             <a
                               href={cam.url}
                               target="_blank"

@@ -11,6 +11,7 @@ import type { Preferences } from '@/app/api/preferences/route'
 import type { SavedLocation } from '@/app/api/saved-locations/route'
 import type { SwitcherSpot } from '@/app/components/spot-switcher'
 import { fetchForecast } from '@/lib/get-forecast'
+import { setRequestUnits } from '@/lib/request-units'
 import { fetchNearbyCams } from '@/lib/get-cams'
 import { logForecastFailure, userFacingReason } from '@/lib/diagnose-api'
 import { InternalApiError, internalApiFetch } from '@/lib/internal-api-client'
@@ -83,6 +84,7 @@ export default async function ForecastPage({ params }: Props) {
 
   // The location bar's quick switcher: home spot first, then saved spots.
   const [profile, saved] = await Promise.all([profilePromise, savedPromise])
+  setRequestUnits(profile?.units)
   const homeId = profile?.default_location_id ?? null
   const switcherSpots: SwitcherSpot[] = saved
     .map((spot) => ({ id: spot.location_id, name: spot.name, state: spot.state, home: spot.location_id === homeId }))

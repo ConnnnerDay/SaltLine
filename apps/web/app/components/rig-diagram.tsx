@@ -1,3 +1,5 @@
+import { requestUnits } from '@/lib/request-units'
+import { localizeText } from '@/lib/units'
 import type { RigId } from '@/lib/rigs'
 
 /**
@@ -266,7 +268,7 @@ const DRAWINGS: Record<RigId, () => React.ReactNode> = {
 
 export function RigDiagram({ id, className }: { id: RigId; className?: string }) {
   return (
-    <svg viewBox={VIEWBOX[id]} role="img" aria-label={DESCRIPTIONS[id]} className={className}>
+    <svg viewBox={VIEWBOX[id]} role="img" aria-label={localizeText(DESCRIPTIONS[id], requestUnits())} className={className}>
       {DRAWINGS[id]()}
     </svg>
   )

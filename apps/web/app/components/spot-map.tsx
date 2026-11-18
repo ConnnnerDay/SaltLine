@@ -6,6 +6,7 @@ import { feature, mesh } from 'topojson-client'
 import type { GeometryCollection, Topology } from 'topojson-specification'
 import usStates from 'us-atlas/states-10m.json'
 import { cx } from './ui/cx'
+import { distance, localizeText, type Units } from '@/lib/units'
 import type { ResolvedLocation } from '@/app/api/locations/resolve/route'
 
 /**
@@ -72,7 +73,9 @@ export function SpotMap({
   spots,
   selectedId,
   onSelect,
+  units = 'imperial',
 }: {
+  units?: Units
   spots: MapSpot[]
   selectedId?: string | null
   onSelect: (spot: MapSpot) => void
@@ -167,7 +170,7 @@ export function SpotMap({
         return
       }
       const resolved = (await response.json()) as ResolvedLocation
-      const spot = { id: resolved.id, name: resolved.name, state: resolved.state, lat: resolved.lat, lng: resolved.lng }
+      const spot = { id: resolved.id, name: localizeText(resolved.name, units), state: resolved.state, lat: resolved.lat, lng: resolved.lng }
       setCustom(spot)
       setPinStatus('idle')
       pick(spot)
@@ -353,7 +356,7 @@ export function SpotMap({
                     <span className="text-text-muted">, {spot.state}</span>
                   </span>
                   <span className="shrink-0 text-xs tabular-nums text-text-muted">
-                    {miles < 10 ? miles.toFixed(1) : Math.round(miles)} mi
+                    {distance(miles, units)}
                   </span>
                 </button>
               </li>

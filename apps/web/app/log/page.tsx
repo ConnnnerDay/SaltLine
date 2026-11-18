@@ -7,6 +7,7 @@ import type { SavedLocation } from '@/app/api/saved-locations/route'
 import { auth } from '@/lib/auth'
 import { homeLocationId } from '@/lib/home-location'
 import { internalApiFetch } from '@/lib/internal-api-client'
+import type { Preferences } from '@/app/api/preferences/route'
 import { CatchLog, type LocationOption } from './catch-log'
 
 export const dynamic = 'force-dynamic'
@@ -35,13 +36,16 @@ export default async function LogPage({ searchParams }: Props) {
     error = 'Could not load your catch log.'
   }
 
-  const [saved, curated, species, home] = await Promise.all([
+  const [saved, curated, species, home, units] = await Promise.all([
     internalApiFetch<SavedLocation[]>('/v1/me/locations', { userId }).catch(() => []),
     internalApiFetch<{ id: string; name: string; state: string }[]>('/v1/locations').catch(
       () => [],
     ),
     internalApiFetch<string[]>('/v1/me/catches/species', { userId }).catch(() => []),
     homeLocationId(userId),
+    internalApiFetch<Preferences>('/v1/me/preferences', { userId })
+      .then((prefs) => prefs.units)
+      .catch(() => 'imperial' as const),
   ])
 
   const names = new Map<string, string>()
@@ -69,6 +73,7 @@ export default async function LogPage({ searchParams }: Props) {
             </p>
           </header>
           <CatchLog
+            units={units}
             initialCatches={catches}
             initialError={error}
             mySpots={mine}

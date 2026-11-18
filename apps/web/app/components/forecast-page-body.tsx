@@ -1,4 +1,6 @@
 import { LocationBar } from './location-bar'
+import { requestUnits } from '@/lib/request-units'
+import { localizeDeep, localizeText } from '@/lib/units'
 import type { SwitcherSpot } from './spot-switcher'
 import type { NearbyCam } from '@/lib/get-cams'
 import { Container } from './ui'
@@ -57,6 +59,11 @@ export function ForecastPageBody({
    * block. */
   children?: React.ReactNode
 }) {
+  // apps/api writes its prose (summaries, reasons, regulations, place
+  // names like "12 mi NW of …") in US units; show it in the reader's.
+  const units = requestUnits()
+  forecast = localizeDeep(forecast, units)
+  switcherSpots = switcherSpots?.map((spot) => ({ ...spot, name: localizeText(spot.name, units) }))
   return (
     <main>
       <LocationBar

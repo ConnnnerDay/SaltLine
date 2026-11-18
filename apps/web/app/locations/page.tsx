@@ -2,6 +2,7 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { internalApiFetch } from '@/lib/internal-api-client'
+import type { Preferences } from '@/app/api/preferences/route'
 import { type BrowseLocation, LocationsSearchPage } from './locations-search'
 
 /**
@@ -28,5 +29,9 @@ export default async function LocationsPage() {
   // The browse list is a nice-to-have: if the API is down, search still works.
   const locations = await internalApiFetch<BrowseLocation[]>('/v1/locations').catch(() => [])
 
-  return <LocationsSearchPage locations={locations} />
+  const units = await internalApiFetch<Preferences>('/v1/me/preferences', { userId: session.user.id })
+    .then((prefs) => prefs.units)
+    .catch(() => 'imperial' as const)
+
+  return <LocationsSearchPage locations={locations} units={units} />
 }

@@ -1,9 +1,11 @@
 'use client'
 
+import { fromDisplay, heightRange, length, speedRange, temp, unitLabel, weight, type Units } from '@/lib/units'
+
 import { useId, useState, type FormEvent } from 'react'
 import { Button, Card } from '@/app/components/ui'
 import type { CatchEntry } from '@/app/api/catches/route'
-import { compassLabel, formatRange } from '@/app/components/forecast-card'
+import { compassLabel } from '@/app/components/forecast-card'
 import { CatchInsights } from './catch-insights'
 
 export type LocationOption = { id: string; label: string }
@@ -25,18 +27,18 @@ function numberOrNull(value: FormDataEntryValue | null): number | null {
   return text === '' ? null : Number(text)
 }
 
-function conditionsLine(entry: CatchEntry): string | null {
+function conditionsLine(entry: CatchEntry, units: Units): string | null {
   const c = entry.conditions
   if (!c) return null
   const parts: string[] = []
   if (c.verdict) parts.push(c.score !== null ? `${c.verdict} ${c.score}/100` : c.verdict)
   if (c.water_temp_f !== null)
-    parts.push(`water ${Math.round(c.water_temp_f)}°F${c.water_temp_is_fallback ? ' (avg)' : ''}`)
+    parts.push(`water ${temp(c.water_temp_f, units)}${c.water_temp_is_fallback ? ' (avg)' : ''}`)
   if (c.wind_range_kt)
     parts.push(
-      `wind ${c.wind_direction ? `${compassLabel(c.wind_direction)} ` : ''}${formatRange(c.wind_range_kt)} kt`,
+      `wind ${c.wind_direction ? `${compassLabel(c.wind_direction)} ` : ''}${speedRange(c.wind_range_kt, units)}`,
     )
-  if (c.wave_range_ft) parts.push(`waves ${formatRange(c.wave_range_ft, 0.5)} ft`)
+  if (c.wave_range_ft) parts.push(`waves ${heightRange(c.wave_range_ft, units)}`)
   if (c.tide) parts.push(`${c.tide} tide`)
   if (c.moon_phase) parts.push(c.moon_phase.toLowerCase())
   if (c.solunar) parts.push(`${c.solunar} solunar`)
@@ -50,7 +52,9 @@ export function CatchLog({
   otherSpots,
   speciesOptions,
   defaultLocationId,
+  units = 'imperial',
 }: {
+  units?: Units
   initialCatches: CatchEntry[] | null
   initialError: string | null
   mySpots: LocationOption[]
@@ -59,6 +63,9 @@ export function CatchLog({
   defaultLocationId: string
 }) {
   const [catches, setCatches] = useState<CatchEntry[]>(initialCatches ?? [])
+  // Typed in the reader's units; stored in inches / pounds.
+  const inUs = (value: number | null, convert: (value: number, units: Units) => number) =>
+    value === null ? null : convert(value, units)
   const [error, setError] = useState<string | null>(initialError)
   const [saving, setSaving] = useState(false)
   const [formKey, setFormKey] = useState(0)
@@ -77,8 +84,8 @@ export function CatchLog({
           location_id: form.get('location_id'),
           species: String(form.get('species') ?? '').trim(),
           caught_at: new Date(String(form.get('caught_at'))).toISOString(),
-          length_in: numberOrNull(form.get('length_in')),
-          weight_lb: numberOrNull(form.get('weight_lb')),
+          length_in: inUs(numberOrNull(form.get('length_in')), fromDisplay.length),
+          weight_lb: inUs(numberOrNull(form.get('weight_lb')), fromDisplay.weight),
           kept: form.get('kept') === 'on',
           bait: String(form.get('bait') ?? '').trim() || null,
           notes: String(form.get('notes') ?? '').trim() || null,
@@ -176,13 +183,13 @@ export function CatchLog({
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className={LABEL}>Length (in, optional)</span>
-            <input name="length_in" type="number" min="0.1" max="120" step="0.1" className={INPUT} />
+            <span className={LABEL}>Length ({unitLabel('length', units)}, optional)</span>
+            <input name="length_in" type="number" min="0.1" max={units === 'metric' ? 305 : 120} step="0.1" className={INPUT} />
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className={LABEL}>Weight (lb, optional)</span>
-            <input name="weight_lb" type="number" min="0.1" max="500" step="0.1" className={INPUT} />
+            <span className={LABEL}>Weight ({unitLabel('weight', units)}, optional)</span>
+            <input name="weight_lb" type="number" min="0.05" max={units === 'metric' ? 225 : 500} step="0.01" className={INPUT} />
           </label>
 
           <label className="flex flex-col gap-1.5">
@@ -214,7 +221,7 @@ export function CatchLog({
         </p>
       )}
 
-      <CatchInsights catches={catches} />
+      <CatchInsights catches={catches} units={units} />
 
       <section aria-labelledby="log-heading" className="flex flex-col gap-3">
         <h2 id="log-heading" className="section-label">
@@ -225,10 +232,10 @@ export function CatchLog({
         ) : (
           <ul className="flex flex-col gap-3">
             {catches.map((entry) => {
-              const conditions = conditionsLine(entry)
+              const conditions = conditionsLine(entry, units)
               const size = [
-                entry.length_in !== null && `${entry.length_in} in`,
-                entry.weight_lb !== null && `${entry.weight_lb} lb`,
+                entry.length_in !== null && length(entry.length_in, units),
+                entry.weight_lb !== null && weight(entry.weight_lb, units),
               ]
                 .filter(Boolean)
                 .join(' · ')

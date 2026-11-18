@@ -1,4 +1,6 @@
-import { compassLabel, formatRange, type ForecastEnvelope } from './forecast-card'
+import { requestUnits } from '@/lib/request-units'
+import { height, heightRange, speedRange } from '@/lib/units'
+import { compassLabel, type ForecastEnvelope } from './forecast-card'
 import { Card } from './ui'
 import { cx } from './ui/cx'
 
@@ -111,6 +113,7 @@ export function WindAndWaves({ forecast }: { forecast: ForecastEnvelope }) {
   const direction = conditions.wind_direction ? compassLabel(conditions.wind_direction) : null
   const windFrom = direction ? (BEARING[direction] ?? null) : null
   if (!effect && swell.length === 0) return null
+  const units = requestUnits()
 
   return (
     <Card className="flex flex-col gap-5">
@@ -124,7 +127,7 @@ export function WindAndWaves({ forecast }: { forecast: ForecastEnvelope }) {
             </span>
             <span className="text-sm font-semibold tabular-nums text-text">
               {direction ? `From the ${direction}` : 'Direction unknown'}
-              {conditions.wind_range_kt && ` · ${formatRange(conditions.wind_range_kt)} kt`}
+              {conditions.wind_range_kt && ` · ${speedRange(conditions.wind_range_kt, units)}`}
             </span>
             <p className="text-sm leading-relaxed text-text-muted">
               {effect?.relation
@@ -145,7 +148,7 @@ export function WindAndWaves({ forecast }: { forecast: ForecastEnvelope }) {
           <h3 className="text-sm font-semibold text-text">
             What the waves are made of
             {conditions.wave_range_ft && (
-              <span className="font-normal text-text-muted"> · seas {formatRange(conditions.wave_range_ft, 0.5)} ft</span>
+              <span className="font-normal text-text-muted"> · seas {heightRange(conditions.wave_range_ft, units)}</span>
             )}
           </h3>
           {swell.length === 0 ? (
@@ -165,7 +168,7 @@ export function WindAndWaves({ forecast }: { forecast: ForecastEnvelope }) {
                   </svg>
                   <span className="flex flex-col gap-0.5 text-sm">
                     <span className="font-semibold tabular-nums text-text">
-                      {train.height_ft} ft at {train.period_s} s{' '}
+                      {height(train.height_ft, units, 0)} at {train.period_s} s{' '}
                       <span className="font-normal text-text-muted">from the {train.direction}</span>
                     </span>
                     <span className={cx('text-xs', train.period_s >= 10 ? 'text-marginal-text' : 'text-text-muted')}>

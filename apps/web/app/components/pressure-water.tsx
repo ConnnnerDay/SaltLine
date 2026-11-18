@@ -1,3 +1,5 @@
+import { requestUnits } from '@/lib/request-units'
+import { temp, tempDelta } from '@/lib/units'
 import type { ForecastEnvelope } from './forecast-card'
 import { Card } from './ui'
 import { cx } from './ui/cx'
@@ -143,13 +145,14 @@ function WaterPanel({
   const points = normals.map((value, index): [number, number] => [x(index), y(value)])
   const normal = normals[month - 1]
   const diff = current !== null && normal !== undefined ? current - normal : null
+  const units = requestUnits()
 
   return (
     <section className="flex flex-col gap-2">
       <h3 className="text-sm font-semibold text-text">Water temperature vs normal</h3>
       <p className="flex flex-wrap items-baseline gap-x-2">
         <span className="text-2xl font-bold tabular-nums text-text">
-          {current !== null ? `${current.toFixed(1)}°F` : '—'}
+          {current !== null ? temp(current, units, 1) : '—'}
         </span>
         {diff !== null && !isFallback && (
           <span
@@ -160,7 +163,7 @@ function WaterPanel({
           >
             {Math.abs(diff) < 1
               ? `About normal for ${MONTH_NAMES[month - 1]}`
-              : `${Math.abs(diff).toFixed(0)}°F ${diff > 0 ? 'warmer' : 'cooler'} than normal for ${MONTH_NAMES[month - 1]}`}
+              : `${tempDelta(Math.abs(diff), units)} ${diff > 0 ? 'warmer' : 'cooler'} than normal for ${MONTH_NAMES[month - 1]}`}
           </span>
         )}
       </p>

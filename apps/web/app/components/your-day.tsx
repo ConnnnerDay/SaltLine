@@ -1,3 +1,5 @@
+import { requestUnits } from '@/lib/request-units'
+import { height, heightRange, speed, speedRange } from '@/lib/units'
 import type { Preferences } from '@/app/api/preferences/route'
 import {
   FISHING_TIMES,
@@ -71,21 +73,18 @@ function ProfileChips({ profile }: { profile: Preferences }) {
   )
 }
 
-function fmt(value: number): string {
-  return `${Math.round(value * 2) / 2}`.replace(/\.0$/, '')
-}
 
 /** One "today vs your limit" row: a scale from 0, today's range as a
  * band (green up to the limit, red beyond it, the verdict also in words),
  * and the limit as a marked line. */
 function LimitGauge({
   title,
-  unit,
+  kind,
   range,
   limit,
 }: {
   title: string
-  unit: string
+  kind: 'speed' | 'height'
   range: [number, number]
   limit: Limit
 }) {
@@ -102,6 +101,7 @@ function LimitGauge({
     over: `Over ${whose}`,
   }[state]
   const split = Math.min(Math.max(limit.value, low), high)
+  const units = requestUnits()
 
   return (
     <div className="flex flex-col gap-2">
@@ -109,7 +109,7 @@ function LimitGauge({
         <span className="text-sm font-semibold text-text">
           {title}{' '}
           <span className="font-bold tabular-nums">
-            {fmt(low) === fmt(high) ? fmt(high) : `${fmt(low)}–${fmt(high)}`} {unit}
+            {kind === 'speed' ? speedRange(range, units) : heightRange(range, units)}
           </span>
         </span>
         <span
@@ -142,7 +142,7 @@ function LimitGauge({
         <div className="absolute top-0 h-7 w-0.5 rounded-full bg-text" style={{ left: at(limit.value) }} />
       </div>
       <span className="text-xs text-text-muted">
-        {limit.source}: {fmt(limit.value)} {unit}
+        {limit.source}: {kind === 'speed' ? speed(limit.value, units) : height(limit.value, units, 1)}
       </span>
     </div>
   )
@@ -174,10 +174,10 @@ export function YourDay({
 
   const gauges = [
     limits.wind && conditions?.wind_range_kt && (
-      <LimitGauge key="wind" title="Wind" unit="kt" range={conditions.wind_range_kt} limit={limits.wind} />
+      <LimitGauge key="wind" title="Wind" kind="speed" range={conditions.wind_range_kt} limit={limits.wind} />
     ),
     limits.waves && conditions?.wave_range_ft && (
-      <LimitGauge key="waves" title="Waves" unit="ft" range={conditions.wave_range_ft} limit={limits.waves} />
+      <LimitGauge key="waves" title="Waves" kind="height" range={conditions.wave_range_ft} limit={limits.waves} />
     ),
   ].filter(Boolean)
 
@@ -214,7 +214,7 @@ export function YourDay({
                 <span className="font-semibold text-text">
                   {timeFormatter.format(new Date(tide.next.time))}
                 </span>{' '}
-                ({tide.next.height_ft.toFixed(1)} ft)
+                ({height(tide.next.height_ft, requestUnits())})
               </p>
               {preferred && (
                 <p

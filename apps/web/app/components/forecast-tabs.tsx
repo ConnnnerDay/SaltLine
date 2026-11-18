@@ -21,7 +21,8 @@ import { chosenStats, EMPTY_LAYOUT, MAX_STATS, useForecastLayout } from './forec
  * send it to another tab, or hide it. That arrangement is saved to their
  * profile (`forecast_layout`, a PATCH to /api/preferences), so it follows
  * them to every spot and device. The editor also picks the tab the page
- * opens on and the headline numbers (shared via ./forecast-layout). Sections that render nothing for this
+ * opens on and the headline numbers (shared via ./forecast-layout), and
+ * can "fold" a section down to a one-line bar that opens on tap. Sections that render nothing for this
  * spot (no surf zone forecast here, say) collapse away, toolbar and all.
  */
 
@@ -86,6 +87,7 @@ export function ForecastTabs({
   const byId = new Map(sections.map((section) => [section.id, section]))
   const placement = arrange(tabs, sections, layout)
   const hidden = new Set(layout.hidden)
+  const folded = new Set(layout.folded ?? [])
 
   function open(key: string, focus = false) {
     const url = new URL(window.location.href)
@@ -139,6 +141,13 @@ export function ForecastTabs({
       next[fromTab] = next[fromTab].filter((sid) => sid !== sectionId)
       next[toTab].push(sectionId)
     })
+  }
+
+  function toggleFolded(sectionId: string) {
+    const next = new Set(folded)
+    if (next.has(sectionId)) next.delete(sectionId)
+    else next.add(sectionId)
+    setLayout({ ...layout, folded: [...next] })
   }
 
   function toggleHidden(sectionId: string) {
@@ -276,7 +285,7 @@ export function ForecastTabs({
           <p className="min-w-0 flex-1 text-sm text-text">
             <span className="font-semibold">Customizing.</span>{' '}
             <span className="text-text-muted">
-              Move, hide or send sections to another tab.
+              Move, fold, hide or send sections to another tab.
               <span className="hidden sm:inline"> Switch tabs to arrange those too.</span>
             </span>
           </p>
@@ -370,6 +379,7 @@ export function ForecastTabs({
               const section = byId.get(sectionId)
               if (!section) return null
               const isHidden = hidden.has(sectionId)
+              const isFolded = folded.has(sectionId)
               // Hidden sections stay mounted (so un-hiding is instant)
               // but out of sight outside edit mode.
               return (
@@ -378,7 +388,7 @@ export function ForecastTabs({
                   data-section={sectionId}
                   hidden={isHidden && !editing}
                   className={cx(
-                    'flex min-w-0 flex-col gap-2 has-[>.section-body:empty]:hidden',
+                    'flex min-w-0 flex-col gap-2 has-[.section-body:empty]:hidden',
                     editing && 'rounded-lg border border-dashed border-border p-2',
                   )}
                 >
@@ -386,7 +396,11 @@ export function ForecastTabs({
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="min-w-0 flex-1 text-sm font-semibold text-text">
                         {section.label}
-                        {isHidden && <span className="ml-2 text-xs font-normal text-text-muted">Hidden</span>}
+                        {isHidden ? (
+                          <span className="ml-2 text-xs font-normal text-text-muted">Hidden</span>
+                        ) : (
+                          isFolded && <span className="ml-2 text-xs font-normal text-text-muted">Folded</span>
+                        )}
                       </span>
                       <button
                         type="button"
@@ -427,6 +441,16 @@ export function ForecastTabs({
                       </select>
                       <button
                         type="button"
+                        onClick={() => toggleFolded(sectionId)}
+                        aria-pressed={isFolded}
+                        disabled={isHidden}
+                        title="Folded sections show as a one-line bar you tap to open"
+                        className={TOOL_BUTTON}
+                      >
+                        {isFolded ? 'Unfold' : 'Fold'}
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => toggleHidden(sectionId)}
                         aria-pressed={isHidden}
                         className={TOOL_BUTTON}
@@ -435,9 +459,28 @@ export function ForecastTabs({
                       </button>
                     </div>
                   )}
-                  <div className={cx('section-body flex min-w-0 flex-col', editing && isHidden && 'hidden')}>
-                    {section.content}
-                  </div>
+                  {isFolded && !editing ? (
+                    // Folded: a one-line bar that opens to the full section.
+                    <details className="group flex min-w-0 flex-col">
+                      {/* Closed: a bar with the section's name. Open: the section
+                          itself (which has its own heading), with a small
+                          "Fold up" link under it. */}
+                      <summary className="order-2 flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-lg border border-border bg-surface px-5 py-3 shadow-card hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring group-open:mt-1 group-open:min-h-0 group-open:justify-end group-open:border-0 group-open:bg-transparent group-open:px-1 group-open:py-0 group-open:shadow-none group-open:hover:bg-transparent sm:px-6 [&::-webkit-details-marker]:hidden">
+                        <span className="section-label text-text! group-open:hidden">{section.label}</span>
+                        <span className="hidden text-xs font-semibold text-text-muted hover:text-text group-open:inline">
+                          Fold up
+                        </span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0 text-text-muted group-open:h-3.5 group-open:w-3.5 group-open:rotate-180">
+                          <path d="M6 9 L12 15 L18 9" />
+                        </svg>
+                      </summary>
+                      <div className="section-body order-1 flex min-w-0 flex-col">{section.content}</div>
+                    </details>
+                  ) : (
+                    <div className={cx('section-body flex min-w-0 flex-col', editing && isHidden && 'hidden')}>
+                      {section.content}
+                    </div>
+                  )}
                 </div>
               )
             })}

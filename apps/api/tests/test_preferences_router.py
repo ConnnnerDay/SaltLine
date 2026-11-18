@@ -263,6 +263,7 @@ def test_forecast_layout_round_trips(client: TestClient) -> None:
         "hidden": ["sky", "cams"],
         "start": "conditions",
         "stats": ["water", "tide", "air", "wind"],
+        "folded": ["pressure"],
     }
     resp = client.patch("/v1/me/preferences", json={"forecast_layout": layout})
     assert resp.status_code == 200

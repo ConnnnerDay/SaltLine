@@ -35,6 +35,8 @@ export type ForecastLayout = {
   start?: string | null
   /** Headline stat tiles, in order (default: water, wind, waves, confidence). */
   stats?: string[]
+  /** Sections shown as a one-line bar that opens on tap. */
+  folded?: string[]
 }
 
 /**

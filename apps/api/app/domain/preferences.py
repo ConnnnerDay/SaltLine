@@ -117,6 +117,8 @@ class ForecastLayout(BaseModel):
     # order); None / empty means apps/web's defaults.
     start: _LayoutKey | None = None
     stats: list[_LayoutKey] = Field(default_factory=list, max_length=6)
+    # Sections shown folded: a one-line bar that opens on tap.
+    folded: list[_LayoutKey] = Field(default_factory=list, max_length=40)
 
 
 class UserPreferences(Base):

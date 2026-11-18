@@ -186,8 +186,9 @@ ARTICLES: dict[str, str] = {
 _FREE_LICENSE = re.compile(r"^(cc[- ]|cc0|public domain|pd)", re.IGNORECASE)
 
 
-def _fetch(url: str, attempts: int = 5) -> bytes:
-    """GET with Wikimedia-friendly pacing: back off on 429/503."""
+def _fetch(url: str, attempts: int = 8) -> bytes:
+    """GET with Wikimedia-friendly pacing: on 429/503, wait as long as the
+    server's Retry-After asks (else a growing backoff), then retry."""
     for attempt in range(attempts):
         request = urllib.request.Request(url, headers={"User-Agent": _USER_AGENT})
         try:
@@ -196,7 +197,10 @@ def _fetch(url: str, attempts: int = 5) -> bytes:
         except urllib.error.HTTPError as exc:
             if exc.code not in (429, 503) or attempt == attempts - 1:
                 raise
-            time.sleep(5 * (attempt + 1))
+            retry_after = exc.headers.get("Retry-After", "")
+            wait = int(retry_after) + 1 if retry_after.isdigit() else 10 * (attempt + 1)
+            print(f"  rate-limited; waiting {wait}s")
+            time.sleep(min(wait, 300))
     raise RuntimeError("unreachable")
 
 

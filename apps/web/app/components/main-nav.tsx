@@ -51,6 +51,17 @@ const NAV_ITEMS: NavItem[] = [
     icon: <path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V4.5a1 1 0 0 1 1-1z" />,
   },
   {
+    href: '/fish',
+    label: 'Fish',
+    isActive: (path) => path.startsWith('/fish'),
+    icon: (
+      <>
+        <path d="M3 12c3.5-4.5 9.5-6 15-2.5L21 7v10l-3-2.5C12.5 18 6.5 16.5 3 12z" />
+        <circle cx="8.5" cy="11" r="0.9" fill="currentColor" />
+      </>
+    ),
+  },
+  {
     href: '/log',
     label: 'Log',
     isActive: (path) => path.startsWith('/log'),

@@ -861,7 +861,7 @@
       },
       "halfmoon": {
         "min_size": "No minimum",
-        "bag_limit": 10,
+        "bag_limit": "10",
         "season": "Year-round",
         "notes": "License required."
       },
@@ -5236,7 +5236,7 @@
       },
       "tripletail": {
         "min_size": "15 in",
-        "bag_limit": 2,
+        "bag_limit": "2",
         "season": "Year-round",
         "notes": ""
       },
@@ -7479,7 +7479,7 @@
       },
       "sheepshead": {
         "min_size": "10 in",
-        "bag_limit": 10,
+        "bag_limit": "10",
         "season": "Year-round",
         "notes": ""
       },
@@ -8036,7 +8036,7 @@
       },
       "sheepshead-porgy": {
         "min_size": "10 in",
-        "bag_limit": 10,
+        "bag_limit": "10",
         "season": "Year-round",
         "notes": ""
       },
@@ -8091,7 +8091,7 @@
       },
       "sheepshead": {
         "min_size": "10 in",
-        "bag_limit": 10,
+        "bag_limit": "10",
         "season": "Year-round",
         "notes": ""
       },
@@ -8586,7 +8586,7 @@
       },
       "sheepshead-porgy": {
         "min_size": "10 in",
-        "bag_limit": 10,
+        "bag_limit": "10",
         "season": "Year-round",
         "notes": ""
       },
@@ -11517,7 +11517,7 @@
       },
       "tripletail": {
         "min_size": "15 in",
-        "bag_limit": 2,
+        "bag_limit": "2",
         "season": "Year-round",
         "notes": ""
       },
@@ -13885,7 +13885,7 @@
       },
       "chum-salmon-dog-salmon": {
         "min_size": "20 in",
-        "bag_limit": 6,
+        "bag_limit": "6",
         "season": "Aug-Oct",
         "notes": "Check ADFG."
       },

@@ -343,3 +343,28 @@ def test_boat_and_tidal_fish_join_the_picks_only_for_those_anglers() -> None:
     assert not set(kayak) & boat_ids
     assert kayak[0] in shore_ids and kayak[1] in tidal_ids
     assert len(kayak) == len(shore_ids)
+
+
+def test_favorite_fish_lead_when_biting() -> None:
+    from app.domain.guidance import build_fishing_guidance
+
+    guidance = build_fishing_guidance(
+        region="atlantic_south",
+        water_temp_f=80.0,
+        water_temp_is_fallback=False,
+        month=7,
+    ).model_dump(mode="json")
+    envelope = _envelope().model_copy(update={"recommendations": guidance})
+    shore = [pick["id"] for pick in guidance["species"]]
+    # Tarpon (shore) and mahi (a boat fish) are biting in Florida in July;
+    # winter flounder isn't here at all.
+    favorites = ["mahi-mahi-dolphinfish", "winter-flounder", "tarpon"]
+    out = personalize(envelope, PreferencesOut(favorite_species=favorites))
+    picks = (out.recommendations or {})["species"]
+    ids = [pick["id"] for pick in picks]
+    assert ids[0] in {"mahi-mahi-dolphinfish", "tarpon"}
+    assert {"mahi-mahi-dolphinfish", "tarpon"} <= set(ids)
+    assert "winter-flounder" not in ids
+    assert len(ids) == len(shore)
+    fav = next(pick for pick in picks if pick["id"] == "tarpon")
+    assert "One of your fish" in fav["reasons"] and fav["matches_profile"]

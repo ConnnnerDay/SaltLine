@@ -1306,6 +1306,22 @@
               }
             ]
           },
+          "favorite_species": {
+            "anyOf": [
+              {
+                "items": {
+                  "pattern": "^[a-z][a-z0-9-]{0,39}$",
+                  "type": "string"
+                },
+                "maxItems": 60,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Favorite Species"
+          },
           "fishing_style": {
             "anyOf": [
               {
@@ -1467,6 +1483,22 @@
                 "type": "null"
               }
             ]
+          },
+          "favorite_species": {
+            "anyOf": [
+              {
+                "items": {
+                  "pattern": "^[a-z][a-z0-9-]{0,39}$",
+                  "type": "string"
+                },
+                "maxItems": 60,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Favorite Species"
           },
           "fishing_style": {
             "anyOf": [
@@ -1662,6 +1694,85 @@
           "recent"
         ],
         "title": "RecentSightings",
+        "type": "object"
+      },
+      "Regulation": {
+        "description": "Recreational limits for one species in one state, from the legacy\nsnapshot (provisional -- always shown with its age and official link).",
+        "properties": {
+          "as_of": {
+            "title": "As Of",
+            "type": "string"
+          },
+          "bag_limit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bag Limit"
+          },
+          "min_size": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Size"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "possibly_outdated": {
+            "title": "Possibly Outdated",
+            "type": "boolean"
+          },
+          "season": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Season"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "as_of",
+          "possibly_outdated"
+        ],
+        "title": "Regulation",
         "type": "object"
       },
       "ResolvedLocation": {
@@ -1973,6 +2084,207 @@
           "as_of"
         ],
         "title": "SourceStatus",
+        "type": "object"
+      },
+      "SpeciesDetail": {
+        "properties": {
+          "access": {
+            "title": "Access",
+            "type": "string"
+          },
+          "bait": {
+            "title": "Bait",
+            "type": "string"
+          },
+          "conditions": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Conditions",
+            "type": "array"
+          },
+          "explanation_cold": {
+            "title": "Explanation Cold",
+            "type": "string"
+          },
+          "explanation_warm": {
+            "title": "Explanation Warm",
+            "type": "string"
+          },
+          "good_months": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Good Months",
+            "type": "array"
+          },
+          "hook_size": {
+            "title": "Hook Size",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "lures": {
+            "title": "Lures",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "peak_months": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Peak Months",
+            "type": "array"
+          },
+          "regions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Regions",
+            "type": "array"
+          },
+          "regulations": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/Regulation"
+            },
+            "title": "Regulations",
+            "type": "array"
+          },
+          "rig": {
+            "title": "Rig",
+            "type": "string"
+          },
+          "sinker": {
+            "title": "Sinker",
+            "type": "string"
+          },
+          "targets": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Targets",
+            "type": "array"
+          },
+          "temp_ideal_high": {
+            "title": "Temp Ideal High",
+            "type": "number"
+          },
+          "temp_ideal_low": {
+            "title": "Temp Ideal Low",
+            "type": "number"
+          },
+          "temp_max": {
+            "title": "Temp Max",
+            "type": "number"
+          },
+          "temp_min": {
+            "title": "Temp Min",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "regions",
+          "access",
+          "temp_min",
+          "temp_max",
+          "temp_ideal_low",
+          "temp_ideal_high",
+          "peak_months",
+          "good_months",
+          "bait",
+          "rig",
+          "hook_size",
+          "sinker",
+          "lures",
+          "explanation_cold",
+          "explanation_warm"
+        ],
+        "title": "SpeciesDetail",
+        "type": "object"
+      },
+      "SpeciesSummary": {
+        "properties": {
+          "access": {
+            "title": "Access",
+            "type": "string"
+          },
+          "good_months": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Good Months",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "peak_months": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Peak Months",
+            "type": "array"
+          },
+          "regions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Regions",
+            "type": "array"
+          },
+          "targets": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Targets",
+            "type": "array"
+          },
+          "temp_ideal_high": {
+            "title": "Temp Ideal High",
+            "type": "number"
+          },
+          "temp_ideal_low": {
+            "title": "Temp Ideal Low",
+            "type": "number"
+          },
+          "temp_max": {
+            "title": "Temp Max",
+            "type": "number"
+          },
+          "temp_min": {
+            "title": "Temp Min",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "regions",
+          "access",
+          "temp_min",
+          "temp_max",
+          "temp_ideal_low",
+          "temp_ideal_high",
+          "peak_months",
+          "good_months"
+        ],
+        "title": "SpeciesSummary",
         "type": "object"
       },
       "TargetGroup": {
@@ -2945,6 +3257,73 @@
         "summary": "Update Preferences",
         "tags": [
           "preferences"
+        ]
+      }
+    },
+    "/v1/species": {
+      "get": {
+        "operationId": "list_species_v1_species_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SpeciesSummary"
+                  },
+                  "title": "Response List Species V1 Species Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Species",
+        "tags": [
+          "species"
+        ]
+      }
+    },
+    "/v1/species/{species_id}": {
+      "get": {
+        "operationId": "get_species_v1_species__species_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "species_id",
+            "required": true,
+            "schema": {
+              "title": "Species Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpeciesDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Species",
+        "tags": [
+          "species"
         ]
       }
     }

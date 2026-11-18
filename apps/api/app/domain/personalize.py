@@ -290,17 +290,21 @@ def personalize(envelope: ForecastEnvelope, prefs: PreferencesOut) -> ForecastEn
         if fishing & kinds
     ]
     if recommendations and extra_pools:
-        # Best score first; among equal scores, alternate between the pools
-        # (shore 1, boat 1, shore 2, boat 2...) so each kind gets a share.
-        pools = [list(recommendations.get("species") or [])] + [
-            list(recommendations.get(pool) or []) for pool in extra_pools
-        ]
+        # Take turns between the lists (shore 1, boat 1, shore 2, boat 2...)
+        # rather than pure score order: shore fish earn condition bonuses
+        # the legacy data never gave offshore fish, so a straight sort would
+        # bury them. Someone who doesn't fish from shore at all gets their
+        # own kind first (offshore-only anglers: boat fish lead).
+        shore_kinds = {"surf", "pier", "jetty", "bridge", "wade", "kayak", "inshore"}
+        shore = [list(recommendations.get("species") or [])]
+        extras = [list(recommendations.get(pool) or []) for pool in extra_pools]
+        pools = shore + extras if fishing & shore_kinds else extras + shore
         ranked = [
-            (-float(pick.get("score", 0)), rank, which, pick)
+            (rank, which, pick)
             for which, pool in enumerate(pools)
             for rank, pick in enumerate(pool)
         ]
-        ranked.sort(key=lambda item: item[:3])
+        ranked.sort(key=lambda item: item[:2])
         merged = [pick for *_, pick in ranked]
         recommendations["species"] = merged[:MAX_PICKS]
         if not prefs.target_groups:

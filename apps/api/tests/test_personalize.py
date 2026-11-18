@@ -331,10 +331,15 @@ def test_boat_and_tidal_fish_join_the_picks_only_for_those_anglers() -> None:
     # Surf anglers: shore fish only, unchanged.
     assert picks(FishingType.SURF) == shore_ids
     assert picks() == shore_ids
-    # Offshore boat: boat fish can take a place; never tidal-creek fish.
+    # Offshore only: boat fish lead; never tidal-creek fish.
     offshore = picks(FishingType.OFFSHORE)
-    assert set(offshore) & boat_ids and not set(offshore) & tidal_ids
+    assert offshore[0] in boat_ids and not set(offshore) & tidal_ids
+    # Surf and offshore: the lists take turns, shore first -- even when
+    # shore fish score higher (condition bonuses offshore fish never get).
+    mixed = picks(FishingType.SURF, FishingType.OFFSHORE)
+    assert mixed[0] in shore_ids and mixed[1] in boat_ids and mixed[2] in shore_ids
     # Kayak: tidal fish can join; never boat-only ones.
     kayak = picks(FishingType.KAYAK)
     assert not set(kayak) & boat_ids
+    assert kayak[0] in shore_ids and kayak[1] in tidal_ids
     assert len(kayak) == len(shore_ids)

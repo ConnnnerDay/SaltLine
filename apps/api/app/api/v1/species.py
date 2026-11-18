@@ -6,24 +6,36 @@
 - `GET /v1/species/{id}` is one fish in full: bait, rig, tackle, both
   seasonal write-ups, and its recreational limits in every state the
   regulations snapshot covers (each with that state's official source).
+- `GET /v1/species/{id}/spots?ids=...` ranks the given spots (the user's
+  home and saved spots) for this fish today: each spot's current forecast
+  (the same 4-hour cache the forecast page uses), scored for this one fish
+  exactly as "What's biting" scores it.
 
 Read-only, profile-independent data; signed like every apps/api route.
 """
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
+from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
+from app.api.deps import AppState, get_app_state, resolve_location_id
 from app.api.internal_auth import require_internal_signature
+from app.domain.forecast_cache import get_or_assemble_forecast
 from app.domain.guidance import (
     Regulation,
+    build_fishing_guidance,
     load_catalogue,
     load_regulations,
     regulation_for,
 )
+from app.domain.scoring import wind_orientation_for_region
+from app.infra.timezones import safe_zone
+from app.providers.locations import load_water_temp_profiles
 
 router = APIRouter(
     prefix="/v1/species",
@@ -84,3 +96,107 @@ async def get_species(species_id: str) -> SpeciesDetail:
     return SpeciesDetail.model_validate(
         {**_summary(species), "regulations": regulations}
     )
+
+
+MAX_SPOTS = 12
+_DAY_RANK = {"Excellent": 4, "Good": 3, "Fair": 2, "Challenging": 1, "Poor": 0}
+
+
+class SpotForSpecies(BaseModel):
+    location_id: str
+    label: str
+    biting: bool
+    """In range and in season enough to be a "What's biting" pick here."""
+    score: int | None = None
+    tier: str | None = None
+    reasons: list[str] = []
+    water_temp_f: float | None = None
+    day_verdict: str | None = None
+    """The spot's overall verdict today (wind, waves...)."""
+
+
+def _pair(value: Any) -> tuple[float, float] | None:
+    if isinstance(value, list | tuple) and len(value) == 2:
+        return float(value[0]), float(value[1])
+    return None
+
+
+async def _spot_for(
+    species_id: str, location_id: str, state: AppState, now: datetime
+) -> SpotForSpecies | None:
+    try:
+        location = await resolve_location_id(location_id, state)
+        envelope = await get_or_assemble_forecast(
+            state.forecast_cache,
+            location,
+            state.http_client,
+            load_water_temp_profiles(),
+            now=now,
+        )
+    except HTTPException:  # an unknown or out-of-range spot just drops out
+        return None
+    conditions = envelope.conditions or {}
+    basis = (envelope.recommendations or {}).get("basis") or {}
+    water = (conditions.get("water_temperature") or {}).get("value")
+    verdict = (conditions.get("score") or {}).get("verdict")
+    out = SpotForSpecies(
+        location_id=location.id,
+        label=envelope.location.label,
+        biting=False,
+        water_temp_f=water,
+        day_verdict=verdict,
+    )
+    if water is None:
+        return out
+    every = build_fishing_guidance(
+        region=location.conditions_region,
+        water_temp_f=float(water),
+        water_temp_is_fallback=bool(basis.get("water_temp_is_fallback", True)),
+        month=int(basis.get("month") or now.month),
+        wave_range_ft=_pair(conditions.get("wave_range_ft")),
+        coast=wind_orientation_for_region(location.conditions_region),
+        wind_direction=conditions.get("wind_direction"),
+        wind_range_kt=_pair(conditions.get("wind_range_kt")),
+        hour=now.astimezone(safe_zone(location.timezone)).hour,
+        max_picks=10_000,
+    )
+    pick = next(
+        (
+            p
+            for p in [*every.species, *every.boat_species, *every.tidal_species]
+            if p.id == species_id
+        ),
+        None,
+    )
+    if pick is not None:
+        out.biting = True
+        out.score = pick.score
+        out.tier = pick.tier.value
+        out.reasons = pick.reasons
+    return out
+
+
+@router.get("/{species_id}/spots")
+async def spots_for_species(
+    species_id: str,
+    ids: list[str] = Query(default=[], max_length=MAX_SPOTS),  # noqa: B008
+    state: AppState = Depends(get_app_state),  # noqa: B008
+) -> list[SpotForSpecies]:
+    """*ids* (the user's spots) ranked for this fish today: biting spots by
+    score, best first; the rest after, in the order given."""
+    if not any(s["id"] == species_id for s in load_catalogue()):
+        raise HTTPException(status_code=404, detail="unknown species")
+    now = datetime.now(UTC)
+    unique = list(dict.fromkeys(ids))[:MAX_SPOTS]
+    found = await asyncio.gather(
+        *(_spot_for(species_id, i, state, now) for i in unique)
+    )
+    spots = [spot for spot in found if spot is not None]
+    # Best for this fish first; on a tie, the spot with the better day overall
+    # (wind, waves) -- the same fish at a calmer beach is the better trip.
+    biting = sorted(
+        (s for s in spots if s.biting),
+        key=lambda s: (s.score or 0, _DAY_RANK.get(s.day_verdict or "", 0)),
+        reverse=True,
+    )
+    return biting + [s for s in spots if not s.biting]

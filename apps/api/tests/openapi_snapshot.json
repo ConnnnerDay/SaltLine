@@ -2287,6 +2287,81 @@
         "title": "SpeciesSummary",
         "type": "object"
       },
+      "SpotForSpecies": {
+        "properties": {
+          "biting": {
+            "title": "Biting",
+            "type": "boolean"
+          },
+          "day_verdict": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day Verdict"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "location_id": {
+            "title": "Location Id",
+            "type": "string"
+          },
+          "reasons": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "tier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tier"
+          },
+          "water_temp_f": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Temp F"
+          }
+        },
+        "required": [
+          "location_id",
+          "label",
+          "biting"
+        ],
+        "title": "SpotForSpecies",
+        "type": "object"
+      },
       "TargetGroup": {
         "description": "The original profile's \"What are you mostly fishing for?\".",
         "enum": [
@@ -3322,6 +3397,67 @@
           }
         },
         "summary": "Get Species",
+        "tags": [
+          "species"
+        ]
+      }
+    },
+    "/v1/species/{species_id}/spots": {
+      "get": {
+        "description": "*ids* (the user's spots) ranked for this fish today: biting spots by\nscore, best first; the rest after, in the order given.",
+        "operationId": "spots_for_species_v1_species__species_id__spots_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "species_id",
+            "required": true,
+            "schema": {
+              "title": "Species Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ids",
+            "required": false,
+            "schema": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 12,
+              "title": "Ids",
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SpotForSpecies"
+                  },
+                  "title": "Response Spots For Species V1 Species  Species Id  Spots Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Spots For Species",
         "tags": [
           "species"
         ]

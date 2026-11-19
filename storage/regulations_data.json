@@ -3818,9 +3818,9 @@
     "FL": {
       "red_drum": {
         "min_size": "18 in TL",
-        "bag_limit": "1 per day (inshore/nearshore)",
+        "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Slot limit: 18–27 in TL inshore/nearshore; 18 in minimum offshore with 5/day limit. Rules vary by zone — verify with FWC."
+        "notes": "Slot limit: 18–27 in TL. 1 per person per day; vessel limits vary by region, and the Indian River Lagoon is catch-and-release only. No harvest in federal (offshore) waters. Verify with FWC."
       },
       "spotted_seatrout": {
         "min_size": "15 in TL",

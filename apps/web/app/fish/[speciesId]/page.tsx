@@ -19,6 +19,7 @@ import { Identify } from './identify'
 import { HookIt } from '@/app/components/hook-it'
 import { hooksFor } from '@/lib/hook-bait'
 import { RUNS } from '@/lib/runs'
+import { sizeText } from '@/lib/size-rule'
 import { KeepCheck } from '@/app/components/keep-check'
 import { Suspense } from 'react'
 import type { SavedLocation } from '@/app/api/saved-locations/route'
@@ -318,7 +319,7 @@ export default async function FishDetailPage({ params }: Props) {
                           {rule.state}
                           {rule.state === homeState && <span className="ml-1.5 text-xs font-semibold text-primary">your state</span>}
                         </th>
-                        <td className="py-2 pr-3 text-text">{rule.min_size ? say(rule.min_size) : '—'}</td>
+                        <td className="py-2 pr-3 text-text">{rule.min_size ? say(sizeText(rule) ?? rule.min_size) : '—'}</td>
                         <td className="py-2 pr-3 text-text">{rule.bag_limit ? say(rule.bag_limit) : '—'}</td>
                         <td className="py-2 pr-3 text-text-muted">{rule.season ? say(rule.season) : 'Open'}</td>
                         <td className="py-2 text-right">

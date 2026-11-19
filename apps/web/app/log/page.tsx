@@ -61,6 +61,9 @@ export default async function LogPage({ searchParams }: Props) {
   const others: LocationOption[] = curated
     .filter((spot) => !mine.some((option) => option.id === spot.id))
     .map((spot) => ({ id: spot.id, label: `${spot.name}, ${spot.state}` }))
+    // The catalogue's own order runs New York south and then jumps around;
+    // alphabetical is what people scan a long list by.
+    .sort((a, b) => a.label.localeCompare(b.label))
 
   return (
     <main>

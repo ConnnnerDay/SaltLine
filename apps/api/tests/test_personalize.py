@@ -170,7 +170,7 @@ def _pick(pick_id: str, score: int, targets: list[str]) -> dict[str, object]:
         "id": pick_id,
         "name": pick_id.title(),
         "score": score,
-        "tier": "prime" if score >= 65 else "good" if score >= 50 else "fair",
+        "tier": "prime" if score >= 88 else "good" if score >= 70 else "fair",
         "reasons": ["Water in range"],
         "explanation": "",
         "bait": "Fresh shrimp; cut mullet",
@@ -216,7 +216,7 @@ def test_target_groups_boost_and_rerank_with_reason() -> None:
     assert species[0]["score"] == 76
     assert species[0]["matches_profile"] is True
     assert "Matches what you fish for (bottom fish)" in species[0]["reasons"]
-    assert species[2]["tier"] == "good"  # 40 + 10 = 50
+    assert species[0]["tier"] == "good"  # 66 + 10 = 76 crosses into "good"
     assert out.recommendations["pack"]["headline"].startswith("Tackle for Red-Drum")
 
 

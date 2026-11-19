@@ -55,6 +55,6 @@ export async function sendResetPasswordEmail(to: string, url: string): Promise<v
   await sendMail(
     to,
     'Reset your Saltline password',
-    `Reset your Saltline password:\n\n${url}\n\nIf you didn't request this, you can ignore this email -- your password won't change.`,
+    `Reset your Saltline password:\n\n${url}\n\nIf you didn't request this, you can ignore this email and your password won't change.`,
   )
 }

@@ -15,7 +15,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Saltline',
     short_name: 'Saltline',
     description:
-      'Clear go/no-go fishing forecasts for surf and pier anglers, built from real tide, wind, and wave data.',
+      'Fishing forecasts for surf and pier anglers, built from live tide, wind and wave data.',
     start_url: '/',
     display: 'standalone',
     // Matches app/layout.tsx's light-mode viewport.themeColor -- the

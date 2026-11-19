@@ -448,8 +448,8 @@ async def test_score_prefers_marine_zone_range_over_buoy_when_both_present() -> 
 
     conditions = ForecastConditions.model_validate(envelope.conditions)
     descriptions = " ".join(f.description for f in conditions.score.factors)
-    assert "10-15 kt" in descriptions
-    assert "2-3 ft" in descriptions
+    assert "10–15 kt" in descriptions
+    assert "2–3 ft" in descriptions
     # The reconciled range exposed on ForecastConditions matches exactly
     # what score_conditions was given -- the marine-zone range, not the
     # buoy's degenerate one.

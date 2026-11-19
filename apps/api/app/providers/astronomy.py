@@ -118,7 +118,14 @@ class SolunarTimes(BaseModel):
 
 
 def _ensure_tz(dt: datetime, tz: ZoneInfo) -> datetime:
-    return dt if dt.tzinfo is not None else dt.replace(tzinfo=tz)
+    """`dt` as local time at the location. A naive `dt` is taken to be
+    local already; an aware one (the forecast passes UTC "now") is
+    converted. Everything below reads the clock hour, UTC offset and
+    calendar date off this value, so leaving it in UTC shifted every
+    moon and solunar time by the location's UTC offset and could put
+    evening sun times on the next day.
+    """
+    return dt.replace(tzinfo=tz) if dt.tzinfo is None else dt.astimezone(tz)
 
 
 def _eqtime(gamma: float) -> float:

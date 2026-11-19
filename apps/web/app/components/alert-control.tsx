@@ -88,8 +88,8 @@ export function AlertControl({ locationId }: { locationId: string }) {
       )}
       {loaded && !emailConfigured && (
         <p className="text-xs text-marginal-text">
-          Email isn&apos;t set up on this Saltline server yet, so alerts can&apos;t be sent.
-          Re-run ./install.sh and enter your mail settings when it asks.
+          Email alerts aren&apos;t turned on for this site yet, so nothing will be sent.
+          (If you run this server: add mail settings with ./install.sh.)
         </p>
       )}
       {error && (

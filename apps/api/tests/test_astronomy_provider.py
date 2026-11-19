@@ -207,3 +207,30 @@ def test_solunar_periods_always_end_after_they_start() -> None:
         )
         for period in [*times.major_periods, *times.minor_periods]:
             assert period.end > period.start
+
+
+def test_utc_now_gives_the_same_local_times_as_local_now() -> None:
+    """The forecast passes UTC "now". Moon, solunar and sun times must come
+    out the same as for the same instant in local time, not shifted by the
+    UTC offset (they were 5 hours late on the East Coast)."""
+    from datetime import UTC
+
+    from app.providers.astronomy import compute_lunar_details, compute_sun_times
+
+    lat, lng, tz_name = 35.95, -75.62, "America/New_York"
+    local = datetime(2026, 11, 19, 15, 21, tzinfo=ZoneInfo(tz_name))
+    utc = local.astimezone(UTC)
+
+    a = compute_solunar_times(local, lat, lng, tz_name)
+    b = compute_solunar_times(utc, lat, lng, tz_name)
+    assert [p.start for p in a.major_periods] == [p.start for p in b.major_periods]
+    assert [p.start for p in a.minor_periods] == [p.start for p in b.minor_periods]
+    assert compute_lunar_details(local, lng, tz_name) == compute_lunar_details(
+        utc, lng, tz_name
+    )
+
+    # 9 PM Eastern is already the next day in UTC; sunrise must stay on
+    # the local date.
+    evening = datetime(2026, 11, 19, 21, 0, tzinfo=ZoneInfo(tz_name))
+    sun = compute_sun_times(evening.astimezone(UTC), lat, lng, tz_name)
+    assert sun.sunrise.astimezone(ZoneInfo(tz_name)).date() == evening.date()

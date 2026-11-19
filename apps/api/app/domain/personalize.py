@@ -32,7 +32,9 @@ from datetime import datetime
 from typing import Any
 
 from app.domain.guidance import (
+    GOOD_SCORE,
     MAX_PICKS,
+    PRIME_SCORE,
     GuidanceTier,
     SpeciesPick,
     build_fishing_guidance,
@@ -103,9 +105,9 @@ def comfort_breaches(
 
 
 def _tier(score: float) -> str:
-    if score >= 65:
+    if score >= PRIME_SCORE:
         return GuidanceTier.PRIME.value
-    if score >= 50:
+    if score >= GOOD_SCORE:
         return GuidanceTier.GOOD.value
     return GuidanceTier.FAIR.value
 

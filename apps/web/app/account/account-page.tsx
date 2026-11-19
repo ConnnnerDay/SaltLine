@@ -47,8 +47,8 @@ export function AccountPage() {
         <div>
           <h2 className="font-semibold text-text">Export your data</h2>
           <p className="mt-1 text-sm text-text-muted">
-            Download everything Saltline holds for your account -- your profile,
-            preferences, and saved locations -- as a JSON file.
+            Download everything Saltline holds for your account as a JSON file: your
+            profile and preferences, saved spots, catch log and email alerts.
           </p>
         </div>
         <Button variant="secondary" href="/api/account/export" className="w-fit">
@@ -60,8 +60,8 @@ export function AccountPage() {
         <div>
           <h2 className="font-semibold text-text">Delete your account</h2>
           <p className="mt-1 text-sm text-text-muted">
-            Permanently deletes your account, preferences, and saved locations.
-            This can't be undone.
+            Permanently deletes your account along with your preferences, saved spots,
+            catch log and email alerts. This can&apos;t be undone.
           </p>
         </div>
 

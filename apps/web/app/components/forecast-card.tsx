@@ -498,11 +498,15 @@ export type BestWindow = { hours: HourlyActivity[]; tag: ActivityTag }
  * already on hand, no extra fetch, per `app.domain.timing`'s own
  * docstring flagging this as the natural follow-up. The longest
  * contiguous run of hours at the day's best activity tag (ties broken
- * by whichever run comes first); `null` when the day never reaches
- * `high` (a `low`/`med`-only day has no window worth calling out).
+ * by whichever run comes first), among the hours that haven't ended
+ * yet; `null` when the rest of the day never reaches `high` (a
+ * `low`/`med`-only stretch has no window worth calling out).
  */
-export function deriveBestWindow(outlook: HourlyOutlook): BestWindow | null {
-  const bestRank = Math.max(...outlook.hours.map((hour) => TAG_RANK[hour.tag]))
+export function deriveBestWindow(outlook: HourlyOutlook, now: number = Date.now()): BestWindow | null {
+  // Only hours that haven't ended yet: at 3 PM, a 1 AM window is no use.
+  const hours = outlook.hours.filter((hour) => new Date(hour.time).getTime() + 3_600_000 > now)
+  if (hours.length === 0) return null
+  const bestRank = Math.max(...hours.map((hour) => TAG_RANK[hour.tag]))
   if (bestRank < TAG_RANK.high) return null
   const bestTag = (Object.keys(TAG_RANK) as ActivityTag[]).find(
     (tag) => TAG_RANK[tag] === bestRank,
@@ -510,7 +514,7 @@ export function deriveBestWindow(outlook: HourlyOutlook): BestWindow | null {
 
   let bestRun: HourlyActivity[] = []
   let currentRun: HourlyActivity[] = []
-  for (const hour of outlook.hours) {
+  for (const hour of hours) {
     if (hour.tag === bestTag) {
       currentRun = [...currentRun, hour]
       if (currentRun.length > bestRun.length) bestRun = currentRun
@@ -1136,8 +1140,8 @@ function RigsAndTips({
                                 <span className="text-text-muted"> · {knot.use}</span>
                               </span>
                               <span className="flex shrink-0 items-center gap-2 text-xs text-text-muted">
-                                <span title="Rough knot strength, as a share of the line's breaking strength">
-                                  {knot.strength} strength
+                                <span>
+                                  {knot.strength}
                                 </span>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="transition-transform group-open:rotate-180">
                                   <path d="M6 9 L12 15 L18 9" />
@@ -1733,7 +1737,16 @@ export function ForecastCard({
                       }
                     >
                       <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
-                        {forecast.recommendations.pack.rows.map((row) => (
+                        {forecast.recommendations.pack.rows
+                          // "Sinker for today's water" (Rigs & tips) sizes the lead
+                          // for today's surf; the species' usual weight here
+                          // would contradict it.
+                          .filter(
+                            (row) =>
+                              row.kind !== 'weight' ||
+                              sinkerAdvice(watersFor(profile).slice(0, 3), conditions?.wave_range_ft, conditions?.wind_range_kt).length === 0,
+                          )
+                          .map((row) => (
                           <div key={row.kind} className="contents">
                             <dt className="section-label pt-0.5">{row.label}</dt>
                             <dd className="text-text">{row.value}</dd>
@@ -1940,8 +1953,8 @@ export function ForecastErrorCard({
     <Card>
       <h2 className="font-semibold text-text">Couldn&apos;t load the forecast</h2>
       <p className="mt-1 text-sm text-text-muted">
-        This is usually temporary -- live tide, wind, and wave data couldn&apos;t be reached
-        just now. Try again in a moment.
+        Live tide, wind and wave data couldn&apos;t be reached just now. This is usually
+        temporary, so try again in a moment.
       </p>
       {reason && <p className="mt-3 break-words text-sm text-text">{reason}</p>}
       {isDev && (

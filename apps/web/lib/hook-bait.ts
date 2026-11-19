@@ -194,7 +194,13 @@ export function hookFor(bait: string): BaitHow | null {
 export function hooksFor(baitLine: string): BaitHow[] {
   const seen = new Set<string>()
   const out: BaitHow[] = []
-  for (const part of baitLine.split(/[;,]|\bor\b|\band\b/i)) {
+  const parts = baitLine.split(/[;,]|\bor\b|\band\b/i)
+  // "Live or frozen anchovy": the bare "Live" borrows the next part's noun.
+  const STATE = /^\s*(live|fresh|frozen|dead|whole)\s*$/i
+  const LEADING = /^\s*(live|fresh|frozen|dead|whole)\s+/i
+  for (const [index, raw] of parts.entries()) {
+    const next = parts[index + 1]
+    const part = STATE.test(raw) && next ? `${raw.trim()} ${next.replace(LEADING, '')}` : raw
     // Lures, flies, trolling rigs, roe and gear (traps, pots, nets) have no
     // how-to here.
     if (/jig|plug|spoon|lure|feather|dart|soft plastic|\bfl(y|ies)\b|troll|rigged|\btraps?\b|\bpots?\b|\brings?\b|\bnets?\b|\broe\b/i.test(part)) continue

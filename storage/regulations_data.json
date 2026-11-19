@@ -1960,10 +1960,10 @@
         "notes": "Pacific yellowfin tuna are regulated under NOAA HMS. Verify current state and federal bag limits."
       },
       "pacific_bluefin_tuna": {
-        "min_size": "27 in curved fork length",
-        "bag_limit": "3 per day (ICCAT/NOAA western Atlantic and Pacific bluefin quota may apply)",
-        "season": "Open year-round offshore; quota may close season early",
-        "notes": "Pacific bluefin tuna are under international quota management (IATTC). Verify current NOAA HMS rules before fishing — seasons may be shortened based on quota."
+        "min_size": "No minimum",
+        "bag_limit": "2 per day",
+        "season": "Open year-round",
+        "notes": "Federal 2-fish daily bag limit off California, with a higher possession limit on multi-day trips. No size limit. Verify current NOAA and CDFW rules."
       },
       "green_moray": {
         "min_size": "None",
@@ -2092,10 +2092,10 @@
         "notes": "No specific regulations. Verify current CDFW rules."
       },
       "pacific_bluefin_tuna_juvenile": {
-        "min_size": "27 in (curved fork length)",
+        "min_size": "No minimum",
         "bag_limit": "2 per day",
         "season": "Open year-round",
-        "notes": "Pacific bluefin tuna have a 27-inch minimum and 2-fish bag limit in California. Bag limit may change annually — check current CDFW and PFMC rules before fishing."
+        "notes": "Same rules as any Pacific bluefin: 2 per day, no size limit. Verify current NOAA and CDFW rules."
       },
       "treefish_rockfish": {
         "min_size": "12 in TL (general rockfish)",
@@ -2795,10 +2795,10 @@
         "notes": "Shore/pier season may differ from boat season. Verify with CT DEEP."
       },
       "atlantic_bluefin_tuna": {
-        "min_size": "73 in curved fork length (school/large school); 27 in (Highly Migratory Species)",
-        "bag_limit": "Varies by HMS permit category; General category: 1 per vessel per trip",
-        "season": "General category: June 1 – Nov 14 (approx); varies by NOAA in-season adjustments",
-        "notes": "Bluefin tuna require a federal Highly Migratory Species permit. Size categories and quotas change in-season — ALWAYS verify current NOAA HMS rules before fishing."
+        "min_size": "27 in curved fork length",
+        "bag_limit": "Set by NOAA each season, per vessel",
+        "season": "Set by NOAA; limits change during the season",
+        "notes": "Federal HMS Angling permit required. School fish are 27–47 in, large school/small medium 47–73 in; giants (73 in and up) are trophy fish with separate limits. Check NOAA's current bluefin limits before you go."
       },
       "atlantic_mackerel": {
         "min_size": "None",
@@ -3375,10 +3375,10 @@
         "notes": "Verify with DE DNREC; bag limit may change annually."
       },
       "atlantic_bluefin_tuna": {
-        "min_size": "73 in curved fork length (school/large school); 27 in (Highly Migratory Species)",
-        "bag_limit": "Varies by HMS permit category; General category: 1 per vessel per trip",
-        "season": "General category: June 1 – Nov 14 (approx); varies by NOAA in-season adjustments",
-        "notes": "Bluefin tuna require a federal Highly Migratory Species permit. Size categories and quotas change in-season — ALWAYS verify current NOAA HMS rules before fishing."
+        "min_size": "27 in curved fork length",
+        "bag_limit": "Set by NOAA each season, per vessel",
+        "season": "Set by NOAA; limits change during the season",
+        "notes": "Federal HMS Angling permit required. School fish are 27–47 in, large school/small medium 47–73 in; giants (73 in and up) are trophy fish with separate limits. Check NOAA's current bluefin limits before you go."
       },
       "atlantic_mackerel": {
         "min_size": "None",
@@ -8227,10 +8227,10 @@
         "notes": "No size limit; excellent bait and table fish."
       },
       "atlantic_bluefin_tuna": {
-        "min_size": "73 in curved fork length (school/large school); 27 in (Highly Migratory Species)",
-        "bag_limit": "Varies by HMS permit category; General category: 1 per vessel per trip",
-        "season": "General category: June 1 – Nov 14 (approx); varies by NOAA in-season adjustments",
-        "notes": "Bluefin tuna require a federal Highly Migratory Species permit. Size categories and quotas change in-season — ALWAYS verify current NOAA HMS rules before fishing."
+        "min_size": "27 in curved fork length",
+        "bag_limit": "Set by NOAA each season, per vessel",
+        "season": "Set by NOAA; limits change during the season",
+        "notes": "Federal HMS Angling permit required. School fish are 27–47 in, large school/small medium 47–73 in; giants (73 in and up) are trophy fish with separate limits. Check NOAA's current bluefin limits before you go."
       },
       "porbeagle_shark": {
         "min_size": "None (prohibited to harvest)",
@@ -8848,10 +8848,10 @@
         "notes": "Verify current MD DNR rules."
       },
       "atlantic_bluefin_tuna": {
-        "min_size": "73 in curved fork length (school/large school); 27 in (Highly Migratory Species)",
-        "bag_limit": "Varies by HMS permit category; General category: 1 per vessel per trip",
-        "season": "General category: June 1 – Nov 14 (approx); varies by NOAA in-season adjustments",
-        "notes": "Bluefin tuna require a federal Highly Migratory Species permit. Size categories and quotas change in-season — ALWAYS verify current NOAA HMS rules before fishing."
+        "min_size": "27 in curved fork length",
+        "bag_limit": "Set by NOAA each season, per vessel",
+        "season": "Set by NOAA; limits change during the season",
+        "notes": "Federal HMS Angling permit required. School fish are 27–47 in, large school/small medium 47–73 in; giants (73 in and up) are trophy fish with separate limits. Check NOAA's current bluefin limits before you go."
       },
       "atlantic_mackerel": {
         "min_size": "None",
@@ -11210,10 +11210,10 @@
         "notes": "A $300 harvest tag is required. Most anglers practice catch and release."
       },
       "atlantic_bluefin_tuna": {
-        "min_size": "73 in curved fork length (school/large school); 27 in (Highly Migratory Species)",
-        "bag_limit": "Varies by HMS permit category; General category: 1 per vessel per trip",
-        "season": "General category: June 1 – Nov 14 (approx); varies by NOAA in-season adjustments",
-        "notes": "Bluefin tuna require a federal Highly Migratory Species permit. Size categories and quotas change in-season — ALWAYS verify current NOAA HMS rules before fishing."
+        "min_size": "27 in curved fork length",
+        "bag_limit": "Set by NOAA each season, per vessel",
+        "season": "Set by NOAA; limits change during the season",
+        "notes": "Federal HMS Angling permit required. School fish are 27–47 in, large school/small medium 47–73 in; giants (73 in and up) are trophy fish with separate limits. Check NOAA's current bluefin limits before you go."
       },
       "atlantic_mackerel": {
         "min_size": "None",
@@ -12821,10 +12821,10 @@
         "notes": "Summer visitor to NJ. Verify current NJ DEP limits."
       },
       "atlantic_bluefin_tuna": {
-        "min_size": "73 in curved fork length (school/large school); 27 in (Highly Migratory Species)",
-        "bag_limit": "Varies by HMS permit category; General category: 1 per vessel per trip",
-        "season": "General category: June 1 – Nov 14 (approx); varies by NOAA in-season adjustments",
-        "notes": "Bluefin tuna require a federal Highly Migratory Species permit. Size categories and quotas change in-season — ALWAYS verify current NOAA HMS rules before fishing."
+        "min_size": "27 in curved fork length",
+        "bag_limit": "Set by NOAA each season, per vessel",
+        "season": "Set by NOAA; limits change during the season",
+        "notes": "Federal HMS Angling permit required. School fish are 27–47 in, large school/small medium 47–73 in; giants (73 in and up) are trophy fish with separate limits. Check NOAA's current bluefin limits before you go."
       },
       "atlantic_mackerel": {
         "min_size": "None",
@@ -13771,10 +13771,10 @@
         "notes": "Cobia are uncommon in NY waters but do occur in summer. Verify NY DEC rules."
       },
       "atlantic_bluefin_tuna": {
-        "min_size": "73 in curved fork length (school/large school); 27 in (Highly Migratory Species)",
-        "bag_limit": "Varies by HMS permit category; General category: 1 per vessel per trip",
-        "season": "General category: June 1 – Nov 14 (approx); varies by NOAA in-season adjustments",
-        "notes": "Bluefin tuna require a federal Highly Migratory Species permit. Size categories and quotas change in-season — ALWAYS verify current NOAA HMS rules before fishing."
+        "min_size": "27 in curved fork length",
+        "bag_limit": "Set by NOAA each season, per vessel",
+        "season": "Set by NOAA; limits change during the season",
+        "notes": "Federal HMS Angling permit required. School fish are 27–47 in, large school/small medium 47–73 in; giants (73 in and up) are trophy fish with separate limits. Check NOAA's current bluefin limits before you go."
       },
       "atlantic_mackerel": {
         "min_size": "None",
@@ -14957,7 +14957,7 @@
         "notes": "Verify current state rules."
       },
       "pacific_bluefin_tuna_juvenile": {
-        "min_size": "27 in",
+        "min_size": "See current PFMC and state rules",
         "bag_limit": "2 per day",
         "season": "Open year-round",
         "notes": "Check current PFMC and state rules for Pacific bluefin tuna."
@@ -15563,10 +15563,10 @@
         "notes": "Very restrictive bag limit due to population decline. Verify current RI DEM rules."
       },
       "atlantic_bluefin_tuna": {
-        "min_size": "73 in curved fork length (school/large school); 27 in (Highly Migratory Species)",
-        "bag_limit": "Varies by HMS permit category; General category: 1 per vessel per trip",
-        "season": "General category: June 1 – Nov 14 (approx); varies by NOAA in-season adjustments",
-        "notes": "Bluefin tuna require a federal Highly Migratory Species permit. Size categories and quotas change in-season — ALWAYS verify current NOAA HMS rules before fishing."
+        "min_size": "27 in curved fork length",
+        "bag_limit": "Set by NOAA each season, per vessel",
+        "season": "Set by NOAA; limits change during the season",
+        "notes": "Federal HMS Angling permit required. School fish are 27–47 in, large school/small medium 47–73 in; giants (73 in and up) are trophy fish with separate limits. Check NOAA's current bluefin limits before you go."
       },
       "atlantic_mackerel": {
         "min_size": "None",
@@ -18763,10 +18763,10 @@
         "notes": "Verify current VA MRC rules."
       },
       "atlantic_bluefin_tuna": {
-        "min_size": "73 in curved fork length (school/large school); 27 in (Highly Migratory Species)",
-        "bag_limit": "Varies by HMS permit category; General category: 1 per vessel per trip",
-        "season": "General category: June 1 – Nov 14 (approx); varies by NOAA in-season adjustments",
-        "notes": "Bluefin tuna require a federal Highly Migratory Species permit. Size categories and quotas change in-season — ALWAYS verify current NOAA HMS rules before fishing."
+        "min_size": "27 in curved fork length",
+        "bag_limit": "Set by NOAA each season, per vessel",
+        "season": "Set by NOAA; limits change during the season",
+        "notes": "Federal HMS Angling permit required. School fish are 27–47 in, large school/small medium 47–73 in; giants (73 in and up) are trophy fish with separate limits. Check NOAA's current bluefin limits before you go."
       },
       "atlantic_mackerel": {
         "min_size": "None",
@@ -20170,7 +20170,7 @@
         "notes": "Verify current state rules."
       },
       "pacific_bluefin_tuna_juvenile": {
-        "min_size": "27 in",
+        "min_size": "See current PFMC and state rules",
         "bag_limit": "2 per day",
         "season": "Open year-round",
         "notes": "Check current PFMC and state rules for Pacific bluefin tuna."

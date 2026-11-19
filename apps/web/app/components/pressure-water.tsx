@@ -195,9 +195,11 @@ function WaterPanel({
           ? 'No live reading right now, so this is the monthly average.'
           : diff !== null && Math.abs(diff) >= 3
             ? diff > 0
-              ? 'Warmer than usual: warm-water species may linger or arrive early.'
-              : 'Cooler than usual: fish may run deeper and slower; downsize baits.'
-            : 'Close to the usual for this time of year.'}
+              ? 'Warmer than usual, so warm-water species may stay later or arrive early.'
+              : 'Cooler than usual, so fish may sit deeper and feed slower. Try smaller baits.'
+            : diff !== null && Math.abs(diff) >= 1
+              ? 'A little off the usual for this time of year, not enough to change much.'
+              : 'Right about the usual for this time of year.'}
         <span className="ml-1 inline-flex items-center gap-1 text-xs">
           <span aria-hidden="true" className="inline-block h-0.5 w-3 bg-text-muted" /> monthly normal
         </span>

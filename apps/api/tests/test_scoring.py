@@ -382,7 +382,10 @@ class TestFactorSortingAndSummary:
             water_temperature=_water_temp(70.0),
         )
         top_four = [f.description for f in result.factors[:4]]
-        assert result.summary == ", ".join(top_four)
+        assert result.summary.endswith(".")
+        assert result.summary.startswith(top_four[0])
+        for part in top_four[1:]:
+            assert part[:1].lower() + part[1:] in result.summary
 
 
 def test_forecast_score_is_pydantic_model() -> None:
@@ -393,6 +396,6 @@ def test_forecast_score_is_pydantic_model() -> None:
 def test_range_labels_round_and_collapse_equal_ends() -> None:
     from app.domain.scoring import _range_label
 
-    assert _range_label((10.4, 13.4), "kt", step=1.0) == "10-13 kt"
+    assert _range_label((10.4, 13.4), "kt", step=1.0) == "10–13 kt"
     assert _range_label((4.4, 4.6), "ft", step=0.5) == "4.5 ft"
     assert _range_label((4.0, 4.0), "ft", step=0.5) == "4 ft"

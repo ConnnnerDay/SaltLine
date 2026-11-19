@@ -104,7 +104,7 @@ export default async function SharedForecastPage({ params }: Props) {
       {!session && (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-surface shadow-card px-5 py-6 text-center">
           <p className="text-sm text-text">
-            Want a straight go/no-go answer for your own spot?
+            Want a forecast for your own spot?
           </p>
           <Button variant="primary" href="/register">
             Create a free account

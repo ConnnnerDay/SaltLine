@@ -561,3 +561,19 @@ def test_temperature_just_off_the_ideal_edge_shows_the_decimal() -> None:
         _temperature_reason(species, 50.0, False)
         == "Water 50°F is below its ideal 58–74°F, but within range"
     )
+
+
+def test_pack_lists_are_clean() -> None:
+    """Entries come from several species' free text: no lures under Bait,
+    no rig named twice, and every entry starts with a capital."""
+    pack = _pack()
+    rows = {row.kind: row.value for row in pack.rows}
+    bait = rows["bait"].lower()
+    assert not any(word in bait for word in ("plug", "lure", "spoon", "swimbait"))
+    rigs = [rig.lower() for rig in rows["rig"].split(" · ")]
+    assert not any(a != b and a in b for a in rigs for b in rigs)
+    for kind in ("lure", "bait", "rig"):
+        assert all(
+            entry[:1].isupper() or not entry[:1].isalpha()
+            for entry in rows[kind].split(" · ")
+        )

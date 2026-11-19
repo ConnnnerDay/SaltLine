@@ -1737,7 +1737,16 @@ export function ForecastCard({
                       }
                     >
                       <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
-                        {forecast.recommendations.pack.rows.map((row) => (
+                        {forecast.recommendations.pack.rows
+                          // "Sinker for today's water" (Rigs & tips) sizes the lead
+                          // for today's surf; the species' usual weight here
+                          // would contradict it.
+                          .filter(
+                            (row) =>
+                              row.kind !== 'weight' ||
+                              sinkerAdvice(watersFor(profile).slice(0, 3), conditions?.wave_range_ft, conditions?.wind_range_kt).length === 0,
+                          )
+                          .map((row) => (
                           <div key={row.kind} className="contents">
                             <dt className="section-label pt-0.5">{row.label}</dt>
                             <dd className="text-text">{row.value}</dd>

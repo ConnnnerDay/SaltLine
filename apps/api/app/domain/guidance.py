@@ -43,6 +43,7 @@ seasonal expectation, not a live read.
 from __future__ import annotations
 
 import json
+import re
 from datetime import date, datetime
 from enum import Enum
 from functools import lru_cache
@@ -420,7 +421,12 @@ def _tackle_note(wave_range: tuple[float, float] | None) -> str | None:
     )
 
 
-_NOT_A_LURE = ("not a primary", "rarely taken", "not typically")
+_NOT_A_LURE = ("not a primary", "rarely", "not typically", "occasionally")
+# Lures and gear that turn up in some species' bait lines.
+_NOT_A_BAIT = re.compile(
+    r"\b(plugs?|lures?|jigs?|spoons?|swimbaits?|soft plastics?|flies|fly)\b",
+    re.IGNORECASE,
+)
 
 
 def _tokens(values: list[str]) -> list[str]:
@@ -432,6 +438,33 @@ def _tokens(values: list[str]) -> list[str]:
             if token and token.lower() not in {t.lower() for t in seen}:
                 seen.append(token)
     return seen
+
+
+def _item(token: str) -> str:
+    """One list entry, starting with a capital: entries come from several
+    species' free text, some starting lowercase ("cut mullet")."""
+    return token[:1].upper() + token[1:]
+
+
+def _list(tokens: list[str]) -> str:
+    # " · " rather than ", ": entries can contain their own commas.
+    return " · ".join(_item(token) for token in tokens)
+
+
+def _distinct_rigs(values: list[str]) -> list[str]:
+    """Rig lines split on "or" too, dropping one that another already names
+    ("Fish finder rig" next to "Fish finder rig with sliding egg sinker")."""
+    parts: list[str] = []
+    for token in _tokens(values):
+        parts.extend(p.strip() for p in re.split(r"\bor\b", token) if p.strip())
+    distinct: list[str] = []
+    for part in parts:
+        low = part.lower()
+        if any(low in kept.lower() for kept in distinct):
+            continue
+        distinct = [kept for kept in distinct if kept.lower() not in low]
+        distinct.append(part)
+    return distinct
 
 
 def _join_names(names: list[str]) -> str:
@@ -471,7 +504,7 @@ def build_pack_for_today(
     if lures:
         if low_light and warm and not any("topwater" in lure.lower() for lure in lures):
             lures = ["Topwater plugs (early/late)", *lures[:3]]
-        rows.append(PackRow(kind="lure", label="Lures", value=", ".join(lures)))
+        rows.append(PackRow(kind="lure", label="Lures", value=_list(lures)))
     if murky:
         color = "Chartreuse, white or bright orange — murky water today"
     elif cold:
@@ -482,12 +515,16 @@ def build_pack_for_today(
         color = ""
     if color and lures:
         rows.append(PackRow(kind="color", label="Color/action", value=color))
-    baits = _tokens([pick.bait for pick in working])[:4]
+    baits = [
+        bait
+        for bait in _tokens([pick.bait for pick in working])
+        if not _NOT_A_BAIT.search(bait)
+    ][:4]
     if baits:
-        rows.append(PackRow(kind="bait", label="Bait", value=", ".join(baits)))
-    rigs = _tokens([pick.rig for pick in working])[:2]
+        rows.append(PackRow(kind="bait", label="Bait", value=_list(baits)))
+    rigs = _distinct_rigs([pick.rig for pick in working])[:2]
     if rigs:
-        rows.append(PackRow(kind="rig", label="Rig", value=", ".join(rigs)))
+        rows.append(PackRow(kind="rig", label="Rig", value=_list(rigs)))
     primary = working[0]
     if primary.hook_size:
         rows.append(PackRow(kind="hook", label="Hook", value=primary.hook_size))

@@ -170,7 +170,9 @@ async def _spot_for(
         region=location.conditions_region,
         water_temp_f=float(water),
         water_temp_is_fallback=bool(basis.get("water_temp_is_fallback", True)),
-        month=int(basis.get("month") or now.month),
+        month=int(
+            basis.get("month") or now.astimezone(safe_zone(location.timezone)).month
+        ),
         wave_range_ft=_pair(conditions.get("wave_range_ft")),
         coast=wind_orientation_for_region(location.conditions_region),
         wind_direction=conditions.get("wind_direction"),

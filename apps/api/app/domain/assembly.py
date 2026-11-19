@@ -504,7 +504,9 @@ async def assemble_forecast(
             location.temp_region, location.temp_offset, water_temp_profiles
         )
         water_temperature = Observation(
-            value=fallback_temps[now.month],
+            # The spot's local month: on the evening of the last day of a
+            # month, UTC is already in the next one.
+            value=fallback_temps[now.astimezone(safe_zone(location.timezone)).month],
             unit="degF",
             provider="noaa_coops",
             station_id=None,

@@ -62,7 +62,14 @@ function count<T>(items: T[], keyOf: (item: T) => string | null, order?: string[
 }
 
 function timeOfDay(entry: CatchEntry): string {
-  const hour = new Date(entry.caught_at).getHours()
+  // The hour at the spot, not on the viewer's (or server's) clock.
+  const hour = Number(
+    new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      hourCycle: 'h23',
+      ...(entry.timezone ? { timeZone: entry.timezone } : {}),
+    }).format(new Date(entry.caught_at)),
+  )
   return TIME_BUCKETS.find((bucket) => bucket.hours.includes(hour))?.label ?? 'Night'
 }
 

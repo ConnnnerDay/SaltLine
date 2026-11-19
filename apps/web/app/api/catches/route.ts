@@ -22,6 +22,8 @@ export type CatchEntry = {
   id: number
   location_id: string
   location_name: string
+  /** The spot's IANA time zone (older API responses may omit it). */
+  timezone?: string | null
   species: string
   caught_at: string
   length_in: number | null

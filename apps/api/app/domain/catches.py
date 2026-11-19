@@ -72,6 +72,8 @@ class CatchOut(BaseModel):
     id: int
     location_id: str
     location_name: str
+    timezone: str | None = None
+    """The spot's IANA time zone, so a catch shows in local time there."""
     species: str
     caught_at: datetime
     length_in: float | None

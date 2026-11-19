@@ -372,6 +372,26 @@ def _season_reason(species: dict[str, Any], month: int) -> str:
     return f"Off-season in {name}"
 
 
+def _spawn_reasons(
+    species: dict[str, Any], month: int, water_temp_f: float
+) -> list[str]:
+    """A note when *month* is in the fish's spawning season (legacy
+    SPAWNING_DATA): information for the angler, not a score change. Says
+    whether the water is in the spawning range too."""
+    spawn = species.get("spawn")
+    if not spawn or month not in spawn["months"]:
+        return []
+    low, high = spawn["temp_low"], spawn["temp_high"]
+    if low <= water_temp_f <= high:
+        return [
+            (
+                f"Spawning season, and the water is in their {low:g}–{high:g}°F "
+                "spawning range: go easy on the big breeders"
+            )
+        ]
+    return ["Spawning season"]
+
+
 def _tackle_note(wave_range: tuple[float, float] | None) -> str | None:
     if wave_range is None or wave_range[1] < _ROUGH_SURF_FT:
         return None
@@ -559,6 +579,7 @@ def build_fishing_guidance(
                             species, water_temp_f, water_temp_is_fallback
                         ),
                         _season_reason(species, month),
+                        *_spawn_reasons(species, month, water_temp_f),
                         *condition_reasons,
                     ],
                     explanation=explanation,

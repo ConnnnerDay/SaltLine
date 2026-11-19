@@ -699,7 +699,7 @@ const GUIDANCE_TIER_PILL: Record<GuidanceTier, string> = {
  * cards. Each card shows apps/api's own `reasons` (the exact numbers the
  * pick was scored on) so no recommendation appears without its "why".
  */
-function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
+function WhatsBiting({ guidance, linkFish = false }: { guidance: FishingGuidance; linkFish?: boolean }) {
   // Reasons every pick shares (today's wind, surf, season) are said once,
   // above the cards; each card keeps only what's particular to that fish.
   const shared =
@@ -756,7 +756,11 @@ function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
               </ShowIf>
               <div className="flex flex-col gap-2 px-1">
                 <div className="flex items-start justify-between gap-2">
-                  <a href={`/fish/${encodeURIComponent(pick.id)}`} className="text-base font-bold leading-snug text-text no-underline hover:underline">{pick.name}</a>
+                  {linkFish ? (
+                    <a href={`/fish/${encodeURIComponent(pick.id)}`} className="text-base font-bold leading-snug text-text no-underline hover:underline">{pick.name}</a>
+                  ) : (
+                    <span className="text-base font-bold leading-snug text-text">{pick.name}</span>
+                  )}
                   <span
                     aria-label={`Rank ${index + 1}`}
                     className="flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-border px-1.5 text-xs font-bold tabular-nums text-text"
@@ -834,9 +838,12 @@ const CALENDAR_ROWS = 12
 function SpeciesCalendar({
   rows,
   currentMonth,
+  linkFish = false,
 }: {
   rows: NonNullable<FishingGuidance['calendar']>
   currentMonth: number
+  /** Signed in: names open the Fish guide (the public share page has none). */
+  linkFish?: boolean
 }) {
   // In season now first (peak, then good, then off), catalogue order
   // within each; the first CALENDAR_ROWS show, the rest on request.
@@ -880,9 +887,13 @@ function SpeciesCalendar({
                 className={cx(rowIndex >= CALENDAR_ROWS && 'hidden group-has-[details[open]]:table-row')}
               >
                 <th scope="row" className="whitespace-nowrap py-0.5 pr-6 font-semibold text-text">
-                  <a href={`/fish/${encodeURIComponent(row.id)}`} className="text-text no-underline hover:underline">
-                    {row.name}
-                  </a>
+                  {linkFish ? (
+                    <a href={`/fish/${encodeURIComponent(row.id)}`} className="text-text no-underline hover:underline">
+                      {row.name}
+                    </a>
+                  ) : (
+                    row.name
+                  )}
                 </th>
                 {row.months.map((level, index) => (
                   <td key={index} className="px-0.5 py-0.5">
@@ -1552,7 +1563,7 @@ export function ForecastCard({
             tab: 'fish',
             content: (
               <>
-                {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} />}
+                {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} linkFish={profile !== null} />}
               </>
             ),
           },
@@ -1648,6 +1659,7 @@ export function ForecastCard({
                       <SpeciesCalendar
                         rows={forecast.recommendations.calendar}
                         currentMonth={forecast.recommendations.basis.month}
+                        linkFish={profile !== null}
                       />
                     </CollapsibleSection>
                   </Card>

@@ -1,7 +1,7 @@
 'use client'
 
 import { HookIt } from '@/app/components/hook-it'
-import { hookFor } from '@/lib/hook-bait'
+import { hooksFor } from '@/lib/hook-bait'
 import { useState } from 'react'
 import baitData from '@/lib/baits.json'
 import { cx } from '@/app/components/ui/cx'
@@ -82,9 +82,9 @@ export function BaitThisMonth({ region, month, units }: { region: string; month:
                 </span>
               </span>
               <span className="text-xs leading-relaxed text-text-muted">{say(noteFor(bait))}</span>
-              {hookFor(bait.name) && (
+              {hooksFor(bait.name).length > 0 && (
                 <div className="text-xs">
-                  <HookIt hows={[hookFor(bait.name)!]} say={say} />
+                  <HookIt hows={hooksFor(bait.name)} say={say} />
                 </div>
               )}
               {bait.targets.length > 0 && (

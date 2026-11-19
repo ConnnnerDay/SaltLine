@@ -133,7 +133,9 @@ export function SpotMap({
     const points = new Map<string, [number, number]>()
     for (const spot of spots) {
       const xy = projection([spot.lng, spot.lat])
-      if (xy) points.set(spot.id, xy as [number, number])
+      // Rounded: the server and the browser disagree in the last float
+      // digit, which React reports as a hydration mismatch.
+      if (xy) points.set(spot.id, [Math.round(xy[0] * 10) / 10, Math.round(xy[1] * 10) / 10])
     }
     return { path: geoPath(projection), points, projection }
   }, [coast, spots, visible])

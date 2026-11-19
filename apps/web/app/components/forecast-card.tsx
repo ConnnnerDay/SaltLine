@@ -1944,8 +1944,8 @@ export function ForecastErrorCard({
     <Card>
       <h2 className="font-semibold text-text">Couldn&apos;t load the forecast</h2>
       <p className="mt-1 text-sm text-text-muted">
-        This is usually temporary -- live tide, wind, and wave data couldn&apos;t be reached
-        just now. Try again in a moment.
+        Live tide, wind and wave data couldn&apos;t be reached just now. This is usually
+        temporary, so try again in a moment.
       </p>
       {reason && <p className="mt-3 break-words text-sm text-text">{reason}</p>}
       {isDev && (

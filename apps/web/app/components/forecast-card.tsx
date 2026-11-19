@@ -1,4 +1,5 @@
 import { Badge, type BadgeVariant, Button, Card } from './ui'
+import { SinkerIcon } from './how-art'
 import { HookIt } from './hook-it'
 import { hooksFor } from '@/lib/hook-bait'
 import { runsFor } from '@/lib/runs'
@@ -1022,13 +1023,16 @@ function RigsAndTips({
           <h4 className="section-label">Sinker for today&apos;s water</h4>
           <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {sinkers.map((advice) => (
-              <li key={advice.water} className="flex flex-col gap-1 text-sm">
+              <li key={advice.water} className="flex gap-3 text-sm">
+                <SinkerIcon kind={advice.kind} className="h-11 w-11 shrink-0" />
+                <span className="flex min-w-0 flex-col gap-1">
                 <span className="flex flex-wrap items-baseline gap-x-2">
                   <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">{WATER_LABEL[advice.water]}</span>
                   <span className="text-lg font-bold tabular-nums text-text">{localizeText(advice.weight, requestUnits())}</span>
                   <span className="font-semibold text-text">{advice.kind}</span>
                 </span>
                 <span className="text-text-muted">{localizeText(advice.why, requestUnits())}</span>
+                </span>
               </li>
             ))}
           </ul>

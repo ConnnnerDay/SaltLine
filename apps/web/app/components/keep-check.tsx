@@ -2,6 +2,7 @@
 
 import { useId, useState } from 'react'
 import { cx } from './ui/cx'
+import { MeasureArt } from './how-art'
 import { MEASURE_HOW, parseSizeRule } from '@/lib/size-rule'
 import { length as showLength, localizeText, unitLabel, type Units } from '@/lib/units'
 import { useUnitInput } from '@/lib/use-unit-input'
@@ -129,12 +130,17 @@ export function KeepCheck({
       </div>
 
       {rule.kind === 'size' && (
-        <p className="text-xs leading-relaxed text-text-muted">
-          <span className="font-semibold text-text">
-            {option.state}: {rule.max !== null ? `${span(rule.min, rule.max)} slot` : `${size(rule.min)} minimum`}.
-          </span>{' '}
-          {MEASURE_HOW[rule.measure]}
-        </p>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+          <div className="w-full max-w-56 shrink-0 empty:hidden">
+            <MeasureArt measure={rule.measure} />
+          </div>
+          <p className="text-xs leading-relaxed text-text-muted">
+            <span className="font-semibold text-text">
+              {option.state}: {rule.max !== null ? `${span(rule.min, rule.max)} slot` : `${size(rule.min)} minimum`}.
+            </span>{' '}
+            {MEASURE_HOW[rule.measure]}
+          </p>
+        </div>
       )}
 
       {verdict && (

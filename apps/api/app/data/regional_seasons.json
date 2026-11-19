@@ -1,0 +1,90 @@
+{
+  "_comment": "Hand-maintained. The species catalogue has one set of peak/good months per fish, written for the Carolinas, and serves every region. Where a fish's timing differs by region, the months here replace the catalogue's for that region only (app.domain.guidance.for_region). Broad patterns from the regions' main seasons, not day-precise; regions not listed keep the catalogue's months.",
+  "seasons": {
+    "striped-bass": {
+      "atlantic_north": {"peak": [5, 6, 10, 11], "good": [4, 7, 9, 12]},
+      "atlantic_mid": {"peak": [11, 12, 1, 2], "good": [3, 4, 5, 10]}
+    },
+    "bluefish": {
+      "atlantic_north": {"peak": [5, 6, 9, 10], "good": [7, 8, 11]},
+      "atlantic_south": {"peak": [11, 12, 1, 2, 3], "good": [4, 10]}
+    },
+    "flounder": {
+      "atlantic_north": {"peak": [6, 7, 8, 9], "good": [5, 10]}
+    },
+    "tautog": {
+      "atlantic_north": {"peak": [4, 5, 10, 11], "good": [6, 9, 12]}
+    },
+    "black-sea-bass": {
+      "atlantic_north": {"peak": [6, 7, 8, 9, 10], "good": [5, 11]},
+      "atlantic_mid": {"peak": [5, 6, 10, 11], "good": [7, 8, 9, 12]}
+    },
+    "weakfish-gray-trout": {
+      "atlantic_north": {"peak": [5, 6, 9, 10], "good": [7, 8]}
+    },
+    "northern-kingfish": {
+      "atlantic_north": {"peak": [6, 7, 8, 9], "good": [5, 10]}
+    },
+    "scup-porgy": {
+      "atlantic_north": {"peak": [6, 7, 8, 9], "good": [5, 10]},
+      "atlantic_mid": {"peak": [5, 6, 9, 10], "good": [7, 8, 11]}
+    },
+    "atlantic-bonito": {
+      "atlantic_north": {"peak": [7, 8, 9, 10], "good": [6, 11]},
+      "atlantic_mid": {"peak": [4, 5, 10, 11], "good": [3, 9, 12]}
+    },
+    "false-albacore": {
+      "atlantic_north": {"peak": [8, 9, 10], "good": [11]},
+      "atlantic_mid": {"peak": [10, 11], "good": [9, 12]},
+      "atlantic_south": {"peak": [12, 1, 2, 3], "good": [4, 11]},
+      "gulf": {"peak": [11, 12, 1, 2, 3], "good": [4, 10]}
+    },
+    "spiny-dogfish": {
+      "atlantic_north": {"peak": [4, 5, 10, 11], "good": [3, 6, 9, 12]}
+    },
+    "smooth-dogfish": {
+      "atlantic_north": {"peak": [6, 7, 8, 9], "good": [5, 10]}
+    },
+    "american-shad": {
+      "atlantic_north": {"peak": [5, 6], "good": [4]},
+      "atlantic_mid": {"peak": [3, 4], "good": [2, 5]}
+    },
+    "northern-puffer-blowfish": {
+      "atlantic_north": {"peak": [6, 7, 8, 9], "good": [5, 10]},
+      "atlantic_mid": {"peak": [4, 5, 10, 11], "good": [6, 9]}
+    },
+    "sea-robin": {
+      "atlantic_north": {"peak": [6, 7, 8, 9], "good": [5, 10]},
+      "atlantic_mid": {"peak": [4, 5, 10, 11], "good": [6, 9]}
+    },
+    "red-drum": {
+      "atlantic_south": {"peak": [9, 10, 11], "good": [1, 2, 3, 4, 5, 6, 7, 8, 12]},
+      "gulf": {"peak": [9, 10, 11, 12], "good": [1, 2, 3, 4, 5, 6, 7, 8]}
+    },
+    "spanish-mackerel": {
+      "atlantic_south": {"peak": [4, 5, 6, 9, 10], "good": [3, 7, 8, 11]},
+      "gulf": {"peak": [4, 5, 6, 9, 10], "good": [3, 7, 8, 11]}
+    },
+    "king-mackerel": {
+      "atlantic_mid": {"peak": [5, 6, 9, 10, 11], "good": [7, 8]},
+      "atlantic_south": {"peak": [4, 5, 10, 11], "good": [3, 6, 7, 8, 9, 12]},
+      "gulf": {"peak": [4, 5, 6, 9, 10], "good": [7, 8, 11]}
+    },
+    "cobia": {
+      "atlantic_south": {"peak": [2, 3, 4, 5], "good": [1, 6, 12]},
+      "gulf": {"peak": [3, 4, 5], "good": [6, 7, 8, 9]}
+    },
+    "pompano": {
+      "atlantic_south": {"peak": [3, 4, 10, 11, 12], "good": [1, 2, 5, 9]},
+      "gulf": {"peak": [3, 4, 5, 9, 10], "good": [6, 11]}
+    },
+    "tarpon": {
+      "atlantic_south": {"peak": [5, 6, 7, 8, 9], "good": [4, 10]},
+      "gulf": {"peak": [5, 6, 7], "good": [4, 8, 9, 10]}
+    },
+    "snook": {
+      "atlantic_south": {"peak": [5, 6, 7, 8, 9, 10], "good": [3, 4, 11]},
+      "gulf": {"peak": [5, 6, 7, 8, 9, 10], "good": [3, 4, 11]}
+    }
+  }
+}

@@ -577,3 +577,34 @@ def test_pack_lists_are_clean() -> None:
             entry[:1].isupper() or not entry[:1].isalpha()
             for entry in rows[kind].split(" · ")
         )
+
+
+def test_regional_seasons_replace_the_catalogue_months_for_that_region() -> None:
+    from app.domain.guidance import CalendarLevel, build_species_calendar, for_region
+
+    striper = next(s for s in load_catalogue() if s["id"] == "striped-bass")
+    north = for_region(striper, "atlantic_north")
+    # New England stripers are a late-spring and fall fish, not a winter one.
+    assert 1 not in north["peak_months"] and 5 in north["peak_months"]
+    # A region without an override keeps the catalogue's months.
+    assert for_region(striper, "gulf")["peak_months"] == striper["peak_months"]
+
+    calendar = {row.id: row.months for row in build_species_calendar("atlantic_north")}
+    assert calendar["striped-bass"][0] is CalendarLevel.NONE  # January
+    assert calendar["striped-bass"][4] is CalendarLevel.PEAK  # May
+
+
+def test_regional_seasons_only_name_real_species_and_regions() -> None:
+    import json
+    from pathlib import Path
+
+    data = json.loads(
+        (Path(__file__).parent.parent / "app/data/regional_seasons.json").read_text()
+    )
+    catalogue = {s["id"]: s for s in load_catalogue()}
+    for species_id, regions in data["seasons"].items():
+        assert species_id in catalogue, species_id
+        for region, months in regions.items():
+            assert region in catalogue[species_id]["regions"], (species_id, region)
+            assert not set(months["peak"]) & set(months["good"]), species_id
+            assert all(1 <= m <= 12 for m in months["peak"] + months["good"])

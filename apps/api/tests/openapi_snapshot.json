@@ -1696,6 +1696,30 @@
         "title": "RecentSightings",
         "type": "object"
       },
+      "RegionSeason": {
+        "properties": {
+          "good_months": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Good Months",
+            "type": "array"
+          },
+          "peak_months": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Peak Months",
+            "type": "array"
+          }
+        },
+        "required": [
+          "peak_months",
+          "good_months"
+        ],
+        "title": "RegionSeason",
+        "type": "object"
+      },
       "Regulation": {
         "description": "Recreational limits for one species in one state, from the legacy\nsnapshot (provisional -- always shown with its age and official link).",
         "properties": {
@@ -2193,6 +2217,14 @@
             "title": "Rig",
             "type": "string"
           },
+          "season_by_region": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RegionSeason"
+            },
+            "default": {},
+            "title": "Season By Region",
+            "type": "object"
+          },
           "sinker": {
             "title": "Sinker",
             "type": "string"
@@ -2288,6 +2320,14 @@
             },
             "title": "Regions",
             "type": "array"
+          },
+          "season_by_region": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RegionSeason"
+            },
+            "default": {},
+            "title": "Season By Region",
+            "type": "object"
           },
           "spawn": {
             "anyOf": [

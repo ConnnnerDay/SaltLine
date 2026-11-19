@@ -48,6 +48,8 @@ export function FishGuide({
   const mine = useMemo(() => new Set(favorites), [favorites])
 
   const order = useMemo(() => new Map(species.map((fish, index) => [fish.id, index])), [species])
+  // Seasons differ by coast; with a region picked, use that region's months.
+  const regionKey = region === 'all' ? null : region
   const results = useMemo(() => {
     const q = query.trim().toLowerCase()
     return species
@@ -56,7 +58,7 @@ export function FishGuide({
       .filter((fish) => kinds.includes(fish.access))
       .filter((fish) => !q || fish.name.toLowerCase().includes(q))
       .filter((fish) => {
-        const now = seasonOf(fish, month)
+        const now = seasonOf(fish, month, regionKey)
         if (season === 'spawn') return spawningIn(fish, month)
         return season === 'all' || (season === 'peak' ? now === 'peak' : now !== 'off')
       })
@@ -64,7 +66,7 @@ export function FishGuide({
       // targeted shore fish lead), not the alphabet.
       .sort(
         (a, b) =>
-          SEASON_RANK[seasonOf(a, month)] - SEASON_RANK[seasonOf(b, month)] ||
+          SEASON_RANK[seasonOf(a, month, regionKey)] - SEASON_RANK[seasonOf(b, month, regionKey)] ||
           order.get(a.id)! - order.get(b.id)!,
       )
   }, [species, order, query, region, season, kinds, month, mineOnly, mine])
@@ -168,7 +170,7 @@ export function FishGuide({
       ) : (
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {results.slice(0, shown).map((fish) => {
-            const now = seasonOf(fish, month)
+            const now = seasonOf(fish, month, regionKey)
             return (
               <li key={fish.id}>
                 <Link

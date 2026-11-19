@@ -138,7 +138,7 @@ export default function RegisterPage() {
           <header>
             <h1 className="text-3xl font-bold text-text sm:text-4xl">Create your account</h1>
             <p className="mt-3 text-text-muted">
-              Save a home spot and get a straight go/no-go answer every time.
+              Save a home spot and it opens to that forecast every time.
             </p>
           </header>
 

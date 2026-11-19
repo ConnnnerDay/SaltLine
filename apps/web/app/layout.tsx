@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: '%s — Saltline',
   },
   description:
-    'Clear go/no-go fishing forecasts for surf and pier anglers, built from real tide, wind, and wave data.',
+    'Fishing forecasts for surf and pier anglers: a rating for today, the best hours, and what’s biting, from live tide, wind and wave data.',
   openGraph: {
     siteName: 'Saltline',
     type: 'website',

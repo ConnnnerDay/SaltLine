@@ -20,8 +20,8 @@ import { Button, Container } from './components/ui'
  */
 const FEATURES = [
   {
-    title: 'One clear verdict',
-    body: 'Go, marginal, or skip it — with the reasoning shown, not hidden behind a score.',
+    title: 'A rating for today',
+    body: 'A score out of 100, from Poor to Excellent, with the wind, surf, water and moon behind it spelled out.',
     color: 'text-[#38c0ff]',
     icon: (
       <>
@@ -31,14 +31,14 @@ const FEATURES = [
     ),
   },
   {
-    title: 'Every source shown',
-    body: 'Marine zone, buoy, tide station — each labeled fresh, degraded, or down. No hidden guesses.',
+    title: 'Live data, with sources',
+    body: 'NWS marine forecasts, NOAA buoys and tide stations. Each source shows whether its data came through.',
     color: 'text-[#ff6b4a]',
     icon: <path d="M2 9c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0" />,
   },
   {
-    title: 'The best hour',
-    body: "Tide swings and solunar windows narrowed down to when it's actually worth showing up.",
+    title: 'When and what',
+    body: 'The best hours of the day, the fish that are biting, and the rig and bait to catch them.',
     color: 'text-[#34d399]',
     icon: (
       <>
@@ -75,8 +75,8 @@ export default async function Home() {
             </span>
           </h1>
           <p className="max-w-md font-serif text-lg italic leading-snug text-white/75">
-            Know before you go — real tide, wind, and wave data turned into one
-            honest answer: go, wait, or skip it.
+            Live tide, wind and wave data for your beach or pier, turned into a
+            rating for today and the best time to go.
           </p>
           <div className="mt-2 flex w-full flex-col gap-3">
             <Button variant="primary" href="/locations" className="w-full">

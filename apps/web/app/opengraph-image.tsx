@@ -58,7 +58,7 @@ export default function OpengraphImage() {
           Saltline
         </div>
         <div style={{ fontSize: 28, color: '#9fc3cc' }}>
-          Clear go/no-go fishing forecasts for surf and pier anglers
+          Fishing forecasts for surf and pier anglers
         </div>
       </div>
     ),

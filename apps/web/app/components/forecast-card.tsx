@@ -3,6 +3,7 @@ import { cx } from './ui/cx'
 import { HourlyChart } from './hourly-chart'
 import { RigDiagram } from './rig-diagram'
 import { RIGS, rigsFor, type RigId } from '@/lib/rigs'
+import { KNOTS, RIG_KNOTS } from '@/lib/knots'
 import { RIG_FIT, RIG_WATER_TIPS, WATER_NOUN, WATER_PHRASE, watersFor } from '@/lib/fishing-style'
 import type { Preferences } from '@/app/api/preferences/route'
 import { WhereToFish, YourDay } from './your-day'
@@ -1068,6 +1069,45 @@ function RigsAndTips({
                     </ul>
                   </section>
                 </div>
+
+                <section className="flex flex-col gap-2 border-t border-border pt-3">
+                  <h4 className="section-label">Knots for this rig</h4>
+                  <ul className="flex flex-col gap-1.5">
+                    {RIG_KNOTS[id].map((knotId) => {
+                      const knot = KNOTS[knotId]
+                      return (
+                        <li key={knotId}>
+                          <details className="group rounded-md border border-border bg-surface">
+                            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring [&::-webkit-details-marker]:hidden">
+                              <span className="min-w-0">
+                                <span className="font-semibold text-text">{knot.name}</span>
+                                <span className="text-text-muted"> · {knot.use}</span>
+                              </span>
+                              <span className="flex shrink-0 items-center gap-2 text-xs text-text-muted">
+                                <span title="Rough knot strength, as a share of the line's breaking strength">
+                                  {knot.strength} strength
+                                </span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="transition-transform group-open:rotate-180">
+                                  <path d="M6 9 L12 15 L18 9" />
+                                </svg>
+                              </span>
+                            </summary>
+                            <ol className="flex flex-col gap-1.5 border-t border-border px-3 py-2.5 text-sm text-text">
+                              {knot.steps.map((step, index) => (
+                                <li key={step} className="flex gap-2.5">
+                                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-border text-[0.6875rem] font-bold tabular-nums">
+                                    {index + 1}
+                                  </span>
+                                  <span className="leading-relaxed">{localizeText(step, requestUnits())}</span>
+                                </li>
+                              ))}
+                            </ol>
+                          </details>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </section>
 
                 <section className="flex flex-col gap-2 border-t border-border pt-3">
                   <h4 className="section-label">Hook &amp; sinker for today&apos;s fish</h4>

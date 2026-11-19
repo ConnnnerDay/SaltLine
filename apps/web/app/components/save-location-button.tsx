@@ -4,19 +4,20 @@ import { useState } from 'react'
 import { Button } from './ui'
 
 /**
- * Sprint 37's one piece of UI on the forecast page itself. Deliberately
- * doesn't check on page load whether this location is already saved
- * (that would need an extra apps/api round trip just to render a
- * button correctly, for a property that rarely changes) -- instead,
- * a click always ends in "Saved" state, whether this click is what
- * saved it or apps/api's 409 says it already was: from the visitor's
- * side, the location being saved is what they wanted, not which of the
- * two happened. The one real cost is the initial render can say "Save
- * this spot" for an already-saved location until clicked; a real
- * indicator is a follow-up, not attempted here.
+ * Sprint 37's one piece of UI on the forecast page itself. The page
+ * already loads the visitor's saved spots, so `initiallySaved` starts it
+ * as "Saved" for a spot that's on the list (it used to say "Save this
+ * spot" until clicked). A click always ends in "Saved", whether this
+ * click saved it or apps/api's 409 says it already was.
  */
-export function SaveLocationButton({ locationId }: { locationId: string }) {
-  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+export function SaveLocationButton({
+  locationId,
+  initiallySaved = false,
+}: {
+  locationId: string
+  initiallySaved?: boolean
+}) {
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>(initiallySaved ? 'saved' : 'idle')
 
   async function handleClick() {
     setStatus('saving')

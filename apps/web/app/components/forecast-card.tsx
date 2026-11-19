@@ -1,4 +1,6 @@
 import { Badge, type BadgeVariant, Button, Card } from './ui'
+import { HookIt } from './hook-it'
+import { hooksFor } from '@/lib/hook-bait'
 import { runsFor } from '@/lib/runs'
 import { sinkerAdvice } from '@/lib/sinker'
 import { KeepCheck } from './keep-check'
@@ -1180,6 +1182,16 @@ function RigsAndTips({
           )
         })}
       </ol>
+      {hooksFor(guidance.species.map((pick) => pick.bait).join('; ')).length > 0 && (
+        <section className="flex flex-col gap-2 rounded-md border border-border bg-surface-raised p-4 sm:p-5">
+          <h4 className="section-label">Today&apos;s baits</h4>
+          <HookIt
+            hows={hooksFor(guidance.species.map((pick) => pick.bait).join('; '))}
+            say={(text) => localizeText(text, requestUnits())}
+            label="How to hook today's baits"
+          />
+        </section>
+      )}
       <p className="text-xs text-text-muted">{guidance.disclaimer}</p>
     </>
   )

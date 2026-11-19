@@ -16,6 +16,8 @@ import { KNOTS, RIG_KNOTS } from '@/lib/knots'
 import { setRequestUnits } from '@/lib/request-units'
 import { BestSpots } from './best-spots'
 import { Identify } from './identify'
+import { HookIt } from '@/app/components/hook-it'
+import { hooksFor } from '@/lib/hook-bait'
 import { RUNS } from '@/lib/runs'
 import { KeepCheck } from '@/app/components/keep-check'
 import { Suspense } from 'react'
@@ -196,6 +198,7 @@ export default async function FishDetailPage({ params }: Props) {
                 <h2 className="section-label">How to catch it</h2>
                 <dl className="flex flex-col gap-3">
                   <Fact label="Bait" value={say(fish.bait)} />
+                  <HookIt hows={hooksFor(fish.bait)} say={say} label="How to hook these baits" />
                   <Fact label="Rig" value={say(fish.rig)} />
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <Fact label="Hook" value={say(fish.hook_size)} />

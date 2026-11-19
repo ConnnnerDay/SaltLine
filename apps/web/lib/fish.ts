@@ -12,6 +12,9 @@ export type FishSummary = {
   temp_ideal_high: number
   peak_months: number[]
   good_months: number[]
+  /** Peak/good months for regions where the timing differs from the above
+   * (apps/api's regional_seasons.json). */
+  season_by_region?: Record<string, { peak_months: number[]; good_months: number[] }>
   targets: string[]
   /** When and at what water temperature it spawns (not every fish has it). */
   spawn?: { months: number[]; temp_low: number; temp_high: number; note: string } | null
@@ -75,8 +78,14 @@ export const MONTH_NAMES = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
-export function seasonOf(fish: FishSummary, month: number): 'peak' | 'good' | 'off' {
-  return fish.peak_months.includes(month) ? 'peak' : fish.good_months.includes(month) ? 'good' : 'off'
+/** A fish's peak/good months, for one region when it has its own. */
+export function monthsFor(fish: FishSummary, region?: string | null): { peak_months: number[]; good_months: number[] } {
+  return (region && fish.season_by_region?.[region]) || fish
+}
+
+export function seasonOf(fish: FishSummary, month: number, region?: string | null): 'peak' | 'good' | 'off' {
+  const { peak_months, good_months } = monthsFor(fish, region)
+  return peak_months.includes(month) ? 'peak' : good_months.includes(month) ? 'good' : 'off'
 }
 
 export function spawningIn(fish: FishSummary, month: number): boolean {

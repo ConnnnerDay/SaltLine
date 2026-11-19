@@ -113,6 +113,16 @@ def test_spots_rank_the_users_spots_for_this_fish(
         forecast_cache=None, http_client=None
     )
     monkeypatch.setattr(species_router, "get_or_assemble_forecast", fake_forecast)
+
+    # Pin the clock: the hour feeds time-of-day reasons ("Bites slower in
+    # midday sun"), which otherwise broke the Wrightsville/Destin tie
+    # depending on when the test ran. 23:30 UTC is after dark at both.
+    class _Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):  # type: ignore[no-untyped-def, override]
+            return datetime(2026, 11, 18, 23, 30, tzinfo=UTC)
+
+    monkeypatch.setattr(species_router, "datetime", _Clock)
     resp = client.get(
         "/v1/species/red-drum/spots",
         params=[

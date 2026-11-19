@@ -563,10 +563,10 @@
   "states": {
     "AL": {
       "red_drum": {
-        "min_size": "18 in TL",
+        "min_size": "16–26 in TL (slot limit)",
         "bag_limit": "3 per day",
         "season": "Open year-round",
-        "notes": "Slot limit: 18–27 in TL. Verify current rules before fishing."
+        "notes": "16–26 in slot, 3 per day. Check Alabama Marine Resources for any allowance over 26 in before fishing."
       },
       "spotted_seatrout": {
         "min_size": "12 in TL",
@@ -587,10 +587,10 @@
         "notes": "Verify current limits with official source."
       },
       "cobia": {
-        "min_size": "33 in FL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day (2 per boat)",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules before fishing."
+        "notes": "1 per person or 2 per boat, whichever is less; 36 in fork length. Federal Gulf and Atlantic rules match. Check the state's current rules."
       },
       "red_snapper": {
         "min_size": "16 in TL",
@@ -2570,10 +2570,10 @@
         "source": "CDFW; NOAA Fisheries"
       },
       "black_sea_bass": {
-        "min_size": "28 in TL",
-        "bag_limit": "1 per year",
-        "season": "Apr 16 – Dec 31",
-        "notes": "Giant (Pacific) black sea bass are a severely depleted species in CA. Extremely strict 1/year limit. Verify CDFW rules.",
+        "min_size": null,
+        "bag_limit": "0",
+        "season": "Not present",
+        "notes": "Black sea bass are an Atlantic fish. California's giant sea bass is a different, protected species: it may not be kept.",
         "source": "CDFW"
       },
       "redtail_surfperch": {
@@ -2747,10 +2747,10 @@
     },
     "CT": {
       "striped_bass": {
-        "min_size": "28 in TL",
+        "min_size": "28–31 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Regulations may include slot limits or season closures. Verify with DEEP. Verify current ASMFC-aligned slot limits and season with CT DEEP for 2026."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "summer_flounder": {
         "min_size": "13 in TL",
@@ -2843,10 +2843,10 @@
         "notes": "Atlantic wolffish are a species of concern. Retention is prohibited in US federal waters. Release immediately."
       },
       "cobia": {
-        "min_size": "37 in FL",
-        "bag_limit": "1 per person per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Open year-round (rare summer visitor)",
-        "notes": "Cobia occasionally appear in these northern waters in summer. Verify current ASMFC coastwide rules."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "atlantic_bonito": {
         "min_size": "None",
@@ -3321,10 +3321,10 @@
     },
     "DE": {
       "striped_bass": {
-        "min_size": "28 in TL",
+        "min_size": "28–31 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal — check DNREC for dates",
-        "notes": "Regulations may include a slot limit. Verify current rules with DE DNREC. Verify 2026 slot limits and season with DE DNREC — ASMFC measures may have been updated."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "summer_flounder": {
         "min_size": "16 in TL",
@@ -3682,10 +3682,10 @@
         "source": "https://dnrec.delaware.gov/fish-wildlife/fishing/saltwater-fishing/"
       },
       "cobia": {
-        "min_size": "33 in TL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Seasonal (May–October)",
-        "notes": "Cobia migrate up the Delmarva Peninsula in spring and into Delaware Bay in summer. 33-inch minimum TL, 2/day bag limit. Verify current rules with DE DNREC.",
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season.",
         "source": "https://dnrec.delaware.gov/fish-wildlife/fishing/saltwater-fishing/"
       },
       "spanish_mackerel": {
@@ -3829,10 +3829,10 @@
         "notes": "Bag limit and size vary by zone (Northeast, East Central, Brevard, Southwest, etc.). Verify your zone's rules with FWC."
       },
       "snook": {
-        "min_size": "28 in TL",
+        "min_size": "28–32 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Open season varies by zone — check FWC",
-        "notes": "Slot limit: 28–33 in TL. Season closed portions of year depending on Atlantic vs. Gulf side. Verify with FWC."
+        "notes": "Atlantic coast slot 28–32 in; Gulf coast slot 28–33 in. Closed seasons and some catch-and-release zones vary by region, and a snook permit is required to keep one. Check FWC before fishing."
       },
       "tarpon": {
         "min_size": "75 in FL",
@@ -3841,10 +3841,10 @@
         "notes": "Most anglers practice catch and release. Harvest requires a $50 tarpon tag from FWC. Minimum 75 in fork length. Strongly encouraged to release."
       },
       "cobia": {
-        "min_size": "33 in FL",
-        "bag_limit": "1 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day (2 per boat)",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules with FWC."
+        "notes": "1 per person or 2 per boat, whichever is less; 36 in fork length. Federal Gulf and Atlantic rules match. Check the state's current rules."
       },
       "spanish_mackerel": {
         "min_size": "12 in FL",
@@ -5626,10 +5626,10 @@
     },
     "GA": {
       "red_drum": {
-        "min_size": "15 in TL",
+        "min_size": "14–23 in TL (slot limit)",
         "bag_limit": "5 per day",
         "season": "Open year-round",
-        "notes": "Verify current limits with GA DNR."
+        "notes": "Georgia has proposed changing this to a 15–24 in slot and 3 per day to meet the 2026 interstate plan. Check GA DNR for whether it's in effect."
       },
       "spotted_seatrout": {
         "min_size": "14 in TL",
@@ -5662,10 +5662,10 @@
         "notes": "Verify current limits with GA DNR."
       },
       "cobia": {
-        "min_size": "33 in FL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current GA rules."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "bluefish": {
         "min_size": "None",
@@ -5686,10 +5686,10 @@
         "notes": "Gulf federal waters bag limit is 10 per person. Verify state rules for any changes."
       },
       "striped_bass": {
-        "min_size": "28–35 in slot limit (follows ASMFC)",
+        "min_size": "See current GA DNR rules",
         "bag_limit": "1 per day",
         "season": "Open year-round in most areas",
-        "notes": "Slot limit aligns with ASMFC coastwide rules. Verify current state-specific rules before fishing."
+        "notes": "Georgia's coastal rivers set their own striped bass limits. Check GA DNR before fishing."
       },
       "winter_flounder": {
         "min_size": "12 in TL",
@@ -5722,10 +5722,10 @@
         "notes": "Silky shark are prohibited species in US Atlantic and Gulf waters. Must be released immediately."
       },
       "black_sea_bass": {
-        "min_size": "15 in TL",
-        "bag_limit": "15 per day",
+        "min_size": "13 in TL",
+        "bag_limit": "7 per day",
         "season": "Varies annually",
-        "notes": "Season and bag limit change each year. Verify with state agency."
+        "notes": "South Atlantic rule: 13 in total length, 7 per person. Check the state's current rules."
       },
       "sailfish": {
         "min_size": "63 in LJFL",
@@ -6996,10 +6996,10 @@
     },
     "LA": {
       "red_drum": {
-        "min_size": "18 in TL",
-        "bag_limit": "5 per day",
+        "min_size": "18–27 in TL (slot limit)",
+        "bag_limit": "4 per day",
         "season": "Open year-round",
-        "notes": "Slot limit: 18–27 in TL. Verify current rules with LDWF."
+        "notes": "Since June 20, 2024: 18–27 in slot, 4 per angler, no fish over 27 in. Captain and crew of for-hire trips may not keep red drum."
       },
       "spotted_seatrout": {
         "min_size": "12 in TL",
@@ -7020,10 +7020,10 @@
         "notes": "Verify current limits with LDWF."
       },
       "cobia": {
-        "min_size": "33 in FL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day (2 per boat)",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules with LDWF."
+        "notes": "1 per person or 2 per boat, whichever is less; 36 in fork length. Federal Gulf and Atlantic rules match. Check the state's current rules."
       },
       "red_snapper": {
         "min_size": "16 in TL",
@@ -8136,10 +8136,10 @@
     },
     "MA": {
       "striped_bass": {
-        "min_size": "28 in TL",
+        "min_size": "28–31 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal — check MA DMF for open dates",
-        "notes": "Regulations may include a slot limit or reduced season. Verify current rules with MA DMF. ASMFC may have implemented new measures for 2025-2026. Verify current slot limits and seasonal closures with MA DMF."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "summer_flounder": {
         "min_size": "14 in TL",
@@ -8605,10 +8605,10 @@
         "notes": "Blood worms are harvested commercially in Maine for sale as bait throughout the Northeast."
       },
       "cobia": {
-        "min_size": "33 in TL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Seasonal (July–October)",
-        "notes": "Cobia occasionally move into Massachusetts waters during warm years. 33-inch minimum, 2/day. Verify current rules with MA DMF.",
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season.",
         "source": "https://www.mass.gov/saltwater-fishing-regulations"
       },
       "spanish_mackerel": {
@@ -8782,16 +8782,16 @@
     },
     "MD": {
       "striped_bass": {
-        "min_size": "19 in TL",
+        "min_size": "28–31 in TL (slot limit)",
         "bag_limit": "1 per day",
-        "season": "Seasonal — Chesapeake Bay has a spring and fall season; coastal waters open most of year",
-        "notes": "Regulations vary greatly by area (Chesapeake Bay vs. coastal). Slot limits may apply. Verify with MD DNR. Chesapeake Bay and coastal rules differ and are updated seasonally. Verify 2026 slot limits with MD DNR."
+        "season": "Ocean open year-round; Chesapeake Bay has closed periods",
+        "notes": "Atlantic coast waters: 28–31 in slot, 1 per day. Chesapeake Bay is a 19–24 in slot, 1 per day, with closed and catch-and-release periods. Check MD DNR before fishing."
       },
       "red_drum": {
-        "min_size": "18 in TL",
+        "min_size": "18–26 in TL (slot limit)",
         "bag_limit": "3 per day",
         "season": "Open year-round (coastal)",
-        "notes": "Verify current limits with MD DNR."
+        "notes": "Changed in 2026 under the ASMFC red drum plan (Addendum II), matching Virginia and the Potomac. Check MD DNR before fishing."
       },
       "summer_flounder": {
         "min_size": "14 in TL",
@@ -8824,10 +8824,10 @@
         "notes": "Stock is depleted; confirm very restrictive current limits with MD DNR."
       },
       "cobia": {
-        "min_size": "37 in FL",
-        "bag_limit": "2 per day",
-        "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules with MD DNR."
+        "min_size": "43 in TL",
+        "bag_limit": "1 per day",
+        "season": "Jun 15 – Sep 20 (2026)",
+        "notes": "Maryland's 2026 season and size. Check MD DNR before fishing."
       },
       "spanish_mackerel": {
         "min_size": "12 in FL",
@@ -9763,10 +9763,10 @@
     },
     "ME": {
       "striped_bass": {
-        "min_size": "28 in TL",
+        "min_size": "28–31 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal — check ME DMR for open dates",
-        "notes": "Regulations may include slot or season restrictions. Verify with ME DMR. Verify 2026 slot limits and season dates with ME DMR."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "bluefish": {
         "min_size": "10 in TL",
@@ -10160,10 +10160,10 @@
         "notes": "Verify with MDWFP; federal rules apply offshore."
       },
       "cobia": {
-        "min_size": "33 in FL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day (2 per boat)",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current MDWFP rules."
+        "notes": "1 per person or 2 per boat, whichever is less; 36 in fork length. Federal Gulf and Atlantic rules match. Check the state's current rules."
       },
       "greater_amberjack": {
         "min_size": "28 in FL",
@@ -11101,16 +11101,16 @@
         "notes": "NC has implemented harvest reductions in recent years. Verify current season and bag limit with NC DMF."
       },
       "striped_bass": {
-        "min_size": "18 in TL",
-        "bag_limit": "5 per day (coastal)",
+        "min_size": "28–31 in TL (slot limit)",
+        "bag_limit": "1 per day",
         "season": "Open year-round (some areas have closed seasons)",
-        "notes": "Rules differ for Albemarle Sound, Roanoke River, and coastal waters. Verify area-specific rules with NC DMF."
+        "notes": "Ocean and coastal waters follow the coastwide 28–31 in slot. The Albemarle Sound, Roanoke River and other inland areas have their own seasons and limits: check NC DMF proclamations."
       },
       "black_sea_bass": {
         "min_size": "11 in TL",
         "bag_limit": "10 per day",
         "season": "Seasonal",
-        "notes": "Season dates and bag limits vary. Verify current rules with NC DMF. Verify 2026 regulations with NC DMF."
+        "notes": "North of Cape Hatteras follows the mid-Atlantic rules; south of Hatteras is 13 in total length and 7 per person. Check NC DMF before fishing."
       },
       "bluefish": {
         "min_size": "10 in TL",
@@ -11131,10 +11131,10 @@
         "notes": "Verify current limits with NC DMF."
       },
       "cobia": {
-        "min_size": "33 in FL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules with NC DMF."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "spanish_mackerel": {
         "min_size": "12 in FL",
@@ -12729,10 +12729,10 @@
     },
     "NJ": {
       "striped_bass": {
-        "min_size": "28 in TL",
+        "min_size": "28–31 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal — check NJ DEP for open dates",
-        "notes": "Regulations have changed in recent years and may include slot limits. Verify with NJ DEP. ASMFC measures for 2025-2026 may differ. Verify current slot limits and open seasons with NJ DEP."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "summer_flounder": {
         "min_size": "16 in TL",
@@ -12771,10 +12771,10 @@
         "notes": "Stock is depleted; bag limit is very restrictive. Verify current rules with NJ DEP."
       },
       "red_drum": {
-        "min_size": "18 in TL",
-        "bag_limit": "5 per day",
+        "min_size": "18–27 in TL (slot limit)",
+        "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Verify current limits with NJ DEP."
+        "notes": "18–27 in slot, 1 per day. Check NJ DEP before fishing."
       },
       "longfin_squid": {
         "min_size": "No minimum size",
@@ -12815,10 +12815,10 @@
         "notes": "Summer visitor to NJ; verify current NJ DEP rules."
       },
       "cobia": {
-        "min_size": "33 in FL",
+        "min_size": "36 in FL",
         "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Summer visitor to NJ. Verify current NJ DEP limits."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "atlantic_bluefin_tuna": {
         "min_size": "27 in curved fork length",
@@ -13705,10 +13705,10 @@
     },
     "NY": {
       "striped_bass": {
-        "min_size": "28 in TL",
+        "min_size": "28–31 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Open year-round (some tributary closures)",
-        "notes": "Regulations may include a slot limit. Verify current rules with NY DEC. ASMFC measures for 2025-2026 may differ from prior years. Verify current slot limits with NY DEC."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "summer_flounder": {
         "min_size": "17 in TL",
@@ -13765,10 +13765,10 @@
         "notes": "Pollock are accessible on fall and winter cod trips."
       },
       "cobia": {
-        "min_size": "33 in FL",
+        "min_size": "36 in FL",
         "bag_limit": "1 per day",
         "season": "Open year-round (rare summer visitor)",
-        "notes": "Cobia are uncommon in NY waters but do occur in summer. Verify NY DEC rules."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "atlantic_bluefin_tuna": {
         "min_size": "27 in curved fork length",
@@ -15503,10 +15503,10 @@
     },
     "RI": {
       "striped_bass": {
-        "min_size": "28 in TL",
+        "min_size": "28–31 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "May include slot restrictions. Verify current rules with RI DEM. Verify 2026 slot limits and season dates with RI DEM — ASMFC measures may have been updated."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "summer_flounder": {
         "min_size": "14 in TL",
@@ -15611,10 +15611,10 @@
         "notes": "Atlantic wolffish are a species of concern. Retention is prohibited in US federal waters. Release immediately."
       },
       "cobia": {
-        "min_size": "37 in FL",
-        "bag_limit": "1 per person per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Open year-round (rare summer visitor)",
-        "notes": "Cobia occasionally appear in these northern waters in summer. Verify current ASMFC coastwide rules."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "little_tunny": {
         "min_size": "None",
@@ -16082,10 +16082,10 @@
     },
     "SC": {
       "red_drum": {
-        "min_size": "15 in TL",
-        "bag_limit": "5 per day",
+        "min_size": "18–25 in TL (slot limit)",
+        "bag_limit": "1 per day (2 per boat)",
         "season": "Open year-round",
-        "notes": "Verify current limits with SC DNR."
+        "notes": "New limits from July 1, 2026 (state law S.961): 18–25 in slot, 1 per person, 2 per boat. Check SCDNR for hook rules."
       },
       "spotted_seatrout": {
         "min_size": "14 in TL",
@@ -16100,10 +16100,10 @@
         "notes": "Flounder regulations have been updated in recent years. Verify with SC DNR."
       },
       "black_sea_bass": {
-        "min_size": "11 in TL",
-        "bag_limit": "10 per day",
+        "min_size": "13 in TL",
+        "bag_limit": "7 per day",
         "season": "Seasonal",
-        "notes": "Verify current season dates and limits with SC DNR."
+        "notes": "South Atlantic rule: 13 in total length, 7 per person. Check the state's current rules."
       },
       "sheepshead": {
         "min_size": "12 in TL",
@@ -16112,10 +16112,10 @@
         "notes": "Verify current limits with SC DNR."
       },
       "cobia": {
-        "min_size": "33 in FL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules with SC DNR."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "pompano": {
         "min_size": "10 in TL",
@@ -17530,10 +17530,10 @@
         "notes": "Fall closures have been implemented to protect spawning fish. Verify current season with TPWD."
       },
       "cobia": {
-        "min_size": "37 in FL",
+        "min_size": "See current TPWD rules",
         "bag_limit": "2 per day",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules with TPWD."
+        "notes": "Texas sets its own cobia size and bag. Check TPWD before fishing."
       },
       "spanish_mackerel": {
         "min_size": "14 in FL",
@@ -18667,16 +18667,16 @@
     },
     "VA": {
       "striped_bass": {
-        "min_size": "18 in TL",
-        "bag_limit": "2 per day",
+        "min_size": "28–31 in TL (slot limit)",
+        "bag_limit": "1 per day",
         "season": "Seasonal (Chesapeake Bay has spring/fall seasons; coastal waters differ)",
-        "notes": "Regulations vary by area. Slot limits may apply. Verify current rules with VA MRC or VDWR. Rules vary by area. Verify 2026 slot limits and seasons with VA MRC or VDWR."
+        "notes": "Atlantic coast waters: 28–31 in slot, 1 per day. Chesapeake Bay and its tributaries have their own slot and seasons. Check VMRC before fishing."
       },
       "red_drum": {
-        "min_size": "18 in TL",
+        "min_size": "18–26 in TL (slot limit)",
         "bag_limit": "3 per day",
         "season": "Open year-round",
-        "notes": "Verify current rules with VA MRC."
+        "notes": "18–26 in slot and 3 per day under the 2026 ASMFC red drum plan (Addendum II), shared with Maryland and the Potomac. Check VMRC before fishing."
       },
       "spotted_seatrout": {
         "min_size": "14 in TL",
@@ -18709,10 +18709,10 @@
         "notes": "Bag limit and season vary. Verify current rules with VA MRC."
       },
       "cobia": {
-        "min_size": "37 in FL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules with VA MRC."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "weakfish": {
         "min_size": "13 in TL",
@@ -21173,10 +21173,10 @@
         "source": "https://www.wildlife.nh.gov/fishing"
       },
       "striped_bass": {
-        "min_size": "28 in TL",
+        "min_size": "28–31 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal (check NH Fish & Game for dates)",
-        "notes": "New Hampshire follows ASMFC coastwide striped bass rules: 28-inch minimum, 1/day. A slot limit (28–35 in) may apply — verify 2026 rules with NH Fish & Game before fishing.",
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules.",
         "source": "https://www.wildlife.nh.gov/fishing"
       },
       "tautog": {
@@ -21257,10 +21257,10 @@
         "source": "NH Fish & Game; NOAA Fisheries"
       },
       "cobia": {
-        "min_size": "36 in TL",
+        "min_size": "36 in FL",
         "bag_limit": "1 per day",
         "season": "Rare stray — Jun–Sep",
-        "notes": "Cobia are occasional warm-water strays in NH. Follow ASMFC regulations.",
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season.",
         "source": "NH Fish & Game; ASMFC"
       },
       "greater_amberjack": {
@@ -21390,10 +21390,10 @@
         "source": "PA Fish & Boat Commission"
       },
       "striped_bass": {
-        "min_size": "28 in TL",
+        "min_size": "28–31 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal (typically spring/fall); check PA Fish & Boat Commission",
-        "notes": "Striped bass in Delaware River/Bay. PA follows Delaware River Basin Commission (DRBC) and PRFC rules.",
+        "notes": "Delaware estuary: 28–31 in slot most of the year, with a different spring slot. Check the PA Fish & Boat Commission before fishing.",
         "source": "PA Fish & Boat Commission; DRBC"
       },
       "bluefish": {
@@ -21439,10 +21439,10 @@
         "source": "PA Fish & Boat Commission"
       },
       "cobia": {
-        "min_size": "36 in TL",
+        "min_size": "36 in FL",
         "bag_limit": "1 per day",
         "season": "Apr 1 – Dec 31 (rare stray)",
-        "notes": "Cobia are occasional strays in Delaware Bay. Very uncommon in PA waters.",
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season.",
         "source": "PA Fish & Boat Commission"
       },
       "spanish_mackerel": {

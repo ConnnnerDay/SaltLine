@@ -79,15 +79,17 @@ export default async function Home() {
             rating for today and the best time to go.
           </p>
           <div className="mt-2 flex w-full flex-col gap-3">
-            <Button variant="primary" href="/locations" className="w-full">
-              Find your spot
+            {/* Search and forecasts need an account (product-definition.md);
+                "Find your spot" used to bounce here straight to a login form. */}
+            <Button variant="primary" href="/register?next=/locations" className="w-full">
+              Create free account
             </Button>
             <Button
               variant="secondary"
-              href="/register"
+              href="/login?next=/locations"
               className="w-full border-white/20 bg-white/10 text-white hover:border-white/40"
             >
-              Create free account
+              Log in
             </Button>
           </div>
         </div>
@@ -127,7 +129,7 @@ export default async function Home() {
       <Container>
         <section aria-labelledby="popular-spots-heading" className="mx-auto flex max-w-xl flex-col gap-3 py-10 pb-16">
           <h2 id="popular-spots-heading" className="section-label">
-            Popular spots
+            See today&apos;s forecast, no account needed
           </h2>
           <div className="flex flex-col gap-2.5">
             {POPULAR_SPOTS.map((spot) => (

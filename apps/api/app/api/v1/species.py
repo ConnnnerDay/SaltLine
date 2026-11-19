@@ -54,6 +54,11 @@ class Spawn(BaseModel):
     note: str
 
 
+class RegionSeason(BaseModel):
+    peak_months: list[int]
+    good_months: list[int]
+
+
 class SpeciesSummary(BaseModel):
     id: str
     name: str
@@ -66,6 +71,8 @@ class SpeciesSummary(BaseModel):
     temp_ideal_high: float
     peak_months: list[int]
     good_months: list[int]
+    season_by_region: dict[str, RegionSeason] = {}
+    """Peak/good months for regions where they differ from the above."""
     targets: list[str] = []
     spawn: Spawn | None = None
 

@@ -7,7 +7,7 @@ import { SpeciesPhotoFigure } from '@/app/components/species-photo'
 import { auth } from '@/lib/auth'
 import { InternalApiError, internalApiFetch } from '@/lib/internal-api-client'
 import type { Preferences } from '@/app/api/preferences/route'
-import { ACCESS_LABEL, MONTH_NAMES, REGION_LABEL, TARGET_LABEL, monthSpan, seasonOf, spawningIn, type FishDetail } from '@/lib/fish'
+import { ACCESS_LABEL, MONTH_NAMES, REGION_LABEL, TARGET_LABEL, monthSpan, monthsFor, seasonOf, spawningIn, type FishDetail } from '@/lib/fish'
 import { localizeText, temp, type Units } from '@/lib/units'
 import { FavoriteButton } from '../favorite-button'
 import { RigDiagram } from '@/app/components/rig-diagram'
@@ -62,7 +62,7 @@ export default async function FishDetailPage({ params }: Props) {
   }
   const [prefs, locations, saved, catalogue] = await Promise.all([
     internalApiFetch<Preferences>('/v1/me/preferences', { userId }).catch(() => null),
-    internalApiFetch<{ id: string; state: string }[]>('/v1/locations').catch(() => []),
+    internalApiFetch<{ id: string; state: string; conditions_region: string }[]>('/v1/locations').catch(() => []),
     internalApiFetch<SavedLocation[]>('/v1/me/locations', { userId }).catch(() => [] as SavedLocation[]),
     internalApiFetch<{ id: string; name: string }[]>('/v1/species').catch(() => []),
   ])
@@ -75,9 +75,14 @@ export default async function FishDetailPage({ params }: Props) {
   // The rigs this fish's setup describes (Rigs & tips' matcher), at most 2.
   const rigIds = rigsFor(`${fish.rig} ${fish.sinker}`).slice(0, 2)
   const say = (text: string) => localizeText(text, units)
-  const homeState = locations.find((spot) => spot.id === prefs?.default_location_id)?.state ?? null
+  const home = locations.find((spot) => spot.id === prefs?.default_location_id)
+  const homeState = home?.state ?? null
+  // The season calendar follows the home spot's region when this fish's
+  // timing there differs from the catalogue's (regional_seasons.json).
+  const seasonRegion = home && fish.season_by_region?.[home.conditions_region] ? home.conditions_region : null
+  const months = monthsFor(fish, seasonRegion)
   const month = new Date().getMonth() + 1
-  const now = seasonOf(fish, month)
+  const now = seasonOf(fish, month, seasonRegion)
   const regulations = [...fish.regulations].sort(
     (a, b) => Number(b.state === homeState) - Number(a.state === homeState) || a.state.localeCompare(b.state),
   )
@@ -144,7 +149,7 @@ export default async function FishDetailPage({ params }: Props) {
                 <div>
                   <div className="grid grid-cols-12 gap-0.5" aria-hidden="true">
                     {MONTH_NAMES.map((name, index) => {
-                      const level = seasonOf(fish, index + 1)
+                      const level = seasonOf(fish, index + 1, seasonRegion)
                       return (
                         <span
                           key={name}
@@ -165,12 +170,13 @@ export default async function FishDetailPage({ params }: Props) {
                     ))}
                   </div>
                   <p className="sr-only">
-                    Peak: {fish.peak_months.map((m) => MONTH_NAMES[m - 1]).join(', ') || 'none'}. Good:{' '}
-                    {fish.good_months.map((m) => MONTH_NAMES[m - 1]).join(', ') || 'none'}.
+                    Peak: {months.peak_months.map((m) => MONTH_NAMES[m - 1]).join(', ') || 'none'}. Good:{' '}
+                    {months.good_months.map((m) => MONTH_NAMES[m - 1]).join(', ') || 'none'}.
                   </p>
                   <p className="mt-2 flex gap-3 text-xs text-text-muted">
                     <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm bg-tier-prime" /> Peak</span>
                     <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm bg-tier-high" /> Good</span>
+                    {seasonRegion && <span>Season for the {REGION_LABEL[seasonRegion] ?? seasonRegion}, where your home spot is</span>}
                   </p>
                 </div>
                 <dl className="grid grid-cols-2 gap-3">

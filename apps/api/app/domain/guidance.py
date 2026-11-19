@@ -57,6 +57,7 @@ from app.infra.timezones import safe_zone
 
 _DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 _CATALOGUE_PATH = _DATA_DIR / "guidance_species.json"
+_REGIONAL_SEASONS_PATH = _DATA_DIR / "regional_seasons.json"
 _REGULATIONS_PATH = _DATA_DIR / "guidance_regulations.json"
 _REGULATIONS_STALE_MONTHS = 6
 """Legacy regulations.py's `_STALE_MONTHS`: older snapshots get flagged."""
@@ -228,7 +229,32 @@ def regulation_for(species_id: str, state: str, today: date) -> Regulation | Non
 @lru_cache(maxsize=1)
 def load_catalogue() -> tuple[dict[str, Any], ...]:
     data = json.loads(_CATALOGUE_PATH.read_text())
-    return tuple(data["species"])
+    seasons = _regional_seasons()
+    return tuple(
+        {**species, "season_by_region": seasons.get(species["id"], {})}
+        for species in data["species"]
+    )
+
+
+@lru_cache(maxsize=1)
+def _regional_seasons() -> dict[str, dict[str, dict[str, list[int]]]]:
+    """app/data/regional_seasons.json: per-region peak/good months for fish
+    whose timing differs by coast (the catalogue has one set, written for
+    the Carolinas)."""
+    data = json.loads(_REGIONAL_SEASONS_PATH.read_text())
+    return {
+        species_id: {
+            region: {"peak_months": months["peak"], "good_months": months["good"]}
+            for region, months in regions.items()
+        }
+        for species_id, regions in data["seasons"].items()
+    }
+
+
+def for_region(species: dict[str, Any], region: str) -> dict[str, Any]:
+    """*species* with its peak/good months for *region*, where they differ."""
+    override = species.get("season_by_region", {}).get(region)
+    return {**species, **override} if override else species
 
 
 def _temperature_points(species: dict[str, Any], water_temp: float) -> float | None:
@@ -554,6 +580,7 @@ def build_species_calendar(
     for species in load_catalogue():
         if region not in species["regions"]:
             continue
+        species = for_region(species, region)
         if species.get("access", "shore") not in ("shore", "tidal"):
             continue
         months: list[CalendarLevel] = []
@@ -598,6 +625,7 @@ def build_fishing_guidance(
     for species in load_catalogue():
         if region not in species["regions"]:
             continue
+        species = for_region(species, region)
         access = species.get("access", "shore")
         if access not in picks:  # bait fish and non-targets: never a pick
             continue

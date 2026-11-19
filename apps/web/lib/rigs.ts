@@ -23,11 +23,14 @@ export type Rig = {
   summary: string
   tie: string[]
   tips: string[]
+  /** Main line and leader to spool and tie it with. */
+  line: { main: string; leader: string }
 }
 
 export const RIGS: Record<RigId, Rig> = {
   fish_finder: {
     id: 'fish_finder',
+    line: { main: '20–30 lb braid with a 40–50 lb shock leader', leader: '18–36 in of 20–30 lb fluorocarbon' },
     name: 'Fish-finder rig',
     summary:
       'A sliding sinker on the main line above a swivel and a long leader. A fish can pick up the bait and swim off without feeling the weight. With an egg sinker it is the Carolina rig.',
@@ -47,6 +50,7 @@ export const RIGS: Record<RigId, Rig> = {
   },
   hi_lo: {
     id: 'hi_lo',
+    line: { main: '15–20 lb mono or braid', leader: '30–40 lb mono with two dropper loops' },
     name: 'Hi-lo (two-hook bottom) rig',
     summary:
       'Two short droppers, one above the other, with the sinker at the bottom. It puts two baits at two heights just off the bottom, the go-to for panfish.',
@@ -65,6 +69,7 @@ export const RIGS: Record<RigId, Rig> = {
   },
   pompano: {
     id: 'pompano',
+    line: { main: '15–20 lb mono or braid', leader: '30–40 lb mono with two dropper loops and float beads' },
     name: 'Pompano rig',
     summary:
       'A hi-lo rig with a small foam float on each dropper. The floats lift the baits off the bottom, away from crabs, and the bright color draws strikes.',
@@ -83,6 +88,7 @@ export const RIGS: Record<RigId, Rig> = {
   },
   knocker: {
     id: 'knocker',
+    line: { main: '30–50 lb braid', leader: '12–24 in of 30–50 lb fluorocarbon' },
     name: 'Knocker rig',
     summary:
       'An egg sinker that slides down the leader and rests on the hook eye. The bait stays pinned to structure, you feel every nibble, and it snags less than a separate sinker.',
@@ -100,6 +106,7 @@ export const RIGS: Record<RigId, Rig> = {
   },
   popping_cork: {
     id: 'popping_cork',
+    line: { main: '15–20 lb braid', leader: '18–36 in of 15–20 lb fluorocarbon' },
     name: 'Popping-cork rig',
     summary:
       'A cork with clacking beads above a leader and a live shrimp or small jig. Popping the cork mimics feeding fish and pulls trout and reds in from a distance.',
@@ -118,6 +125,7 @@ export const RIGS: Record<RigId, Rig> = {
   },
   float: {
     id: 'float',
+    line: { main: '15–30 lb mono or braid', leader: '2–4 ft of wire or 30–50 lb fluorocarbon' },
     name: 'Float rig',
     summary:
       'A float suspends a live bait at the depth fish are feeding, then drifts it along the pier or current line. Leave off the float to free-line the bait.',
@@ -136,6 +144,7 @@ export const RIGS: Record<RigId, Rig> = {
   },
   jig: {
     id: 'jig',
+    line: { main: '10–20 lb braid', leader: '2–3 ft of 15–30 lb fluorocarbon' },
     name: 'Jig',
     summary:
       'A weighted jig head with a soft plastic or swimbait body. Hopped along the bottom or jigged straight down over structure, it covers water fast.',

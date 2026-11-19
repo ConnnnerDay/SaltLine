@@ -16,6 +16,7 @@ import { KNOTS, RIG_KNOTS } from '@/lib/knots'
 import { setRequestUnits } from '@/lib/request-units'
 import { BestSpots } from './best-spots'
 import { Identify } from './identify'
+import { RUNS } from '@/lib/runs'
 import { KeepCheck } from '@/app/components/keep-check'
 import { Suspense } from 'react'
 import type { SavedLocation } from '@/app/api/saved-locations/route'
@@ -122,6 +123,21 @@ export default async function FishDetailPage({ params }: Props) {
                   {fish.regions.map((key) => REGION_LABEL[key] ?? key).join(' · ')}
                 </p>
                 <p className="text-xs text-text-muted">{ACCESS_NOTE[fish.access]}</p>
+                {RUNS.some((run) => run.fish.includes(fish.id)) && (
+                  <ul className="flex flex-col gap-1.5 text-xs">
+                    {RUNS.filter((run) => run.fish.includes(fish.id)).map((run) => (
+                      <li key={run.id} className="flex flex-col rounded-md border border-border bg-surface-raised px-2.5 py-1.5">
+                        <span className="font-semibold text-text">
+                          {run.title}
+                          {run.months.includes(month) && <span className="ml-1.5 font-bold text-accent">On now</span>}
+                        </span>
+                        <span className="text-text-muted">
+                          {monthSpan(run.months)} · {run.regions.map((key) => REGION_LABEL[key] ?? key).join(', ')}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 <div>
                   <div className="grid grid-cols-12 gap-0.5" aria-hidden="true">
                     {MONTH_NAMES.map((name, index) => {
@@ -202,6 +218,12 @@ export default async function FishDetailPage({ params }: Props) {
                           <div className="flex flex-col gap-1.5">
                             <h3 className="font-bold text-text">{rig.name}</h3>
                             <p className="text-sm leading-relaxed text-text-muted">{say(rig.summary)}</p>
+                            <p className="text-xs text-text-muted">
+                              <span className="font-semibold text-text">Line: </span>
+                              {say(rig.line.main)}
+                              <span className="font-semibold text-text"> · Leader: </span>
+                              {say(rig.line.leader)}
+                            </p>
                             <p className="text-xs text-text-muted">
                               Knots: {RIG_KNOTS[rigId].map((knot) => KNOTS[knot].name).join(', ')}
                             </p>

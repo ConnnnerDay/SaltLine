@@ -1072,6 +1072,12 @@ function RigsAndTips({
                     )}
                   </h3>
                   <p className="text-sm leading-relaxed text-text-muted">{localizeText(rig.summary, requestUnits())}</p>
+                  <p className="text-xs text-text-muted">
+                    <span className="font-semibold text-text">Line: </span>
+                    {localizeText(rig.line.main, requestUnits())}
+                    <span className="font-semibold text-text"> · Leader: </span>
+                    {localizeText(rig.line.leader, requestUnits())}
+                  </p>
                   {waterTips(id).map(({ water, tip }) => (
                     <p
                       key={water}

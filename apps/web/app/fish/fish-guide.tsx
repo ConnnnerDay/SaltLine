@@ -1,5 +1,6 @@
 'use client'
 
+import { pickWarning } from '@/lib/fish-id'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { cx } from '@/app/components/ui/cx'
@@ -208,6 +209,7 @@ export function FishGuide({
                         <span className="rounded-full bg-marginal-bg px-2 py-0.5 font-bold text-marginal-text">Spawning</span>
                       )}
                       {fish.access !== 'shore' && <span className="text-text-muted">{ACCESS_LABEL[fish.access]}</span>}
+                      {pickWarning(fish.id) && <span className="font-semibold text-nogo-text">⚠ {pickWarning(fish.id)}</span>}
                     </span>
                     <span className="text-xs text-text-muted">
                       {temp(fish.temp_ideal_low, units)}–{temp(fish.temp_ideal_high, units)} water ·{' '}

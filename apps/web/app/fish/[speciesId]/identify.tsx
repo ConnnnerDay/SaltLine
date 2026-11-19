@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Card } from '@/app/components/ui'
 import { SPECIES_PHOTOS } from '@/app/components/species-photo'
 import { fishNotes } from '@/lib/fish-id'
+import { HandleArt, handleArtFor } from '@/app/components/how-art'
 
 /**
  * "Know it when you land it": the fish this one gets mistaken for and how
@@ -72,10 +73,26 @@ export function Identify({
       {handle.length > 0 && (
         <section className="flex flex-col gap-1.5">
           <h3 className="text-sm font-bold text-text">Handle with care</h3>
-          <ul className="flex list-disc flex-col gap-1 pl-5 text-sm leading-relaxed text-text">
-            {handle.map((line) => (
-              <li key={line}>{say(line)}</li>
-            ))}
+          <ul className="flex flex-col gap-3 text-sm leading-relaxed text-text">
+            {handle.map((line) => {
+              const art = handleArtFor(line)
+              return (
+                <li key={line} className={art.length ? 'flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4' : 'flex gap-2'}>
+                  {art.length ? (
+                    <div className="flex w-full shrink-0 gap-2 sm:w-auto">
+                      {art.map((id) => (
+                        <div key={id} className="w-full max-w-56 sm:w-44">
+                          <HandleArt id={id} />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <span aria-hidden="true" className="text-marginal-text">•</span>
+                  )}
+                  <span>{say(line)}</span>
+                </li>
+              )
+            })}
           </ul>
         </section>
       )}

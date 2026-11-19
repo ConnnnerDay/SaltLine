@@ -9,29 +9,29 @@
  * without one just shows its caption.
  */
 
-const INK = '#1c1917'
-const PAPER = '#fffaf0'
-const HOOK = '#a8b0bb'
-const RED = '#e63946'
+export const INK = '#1c1917'
+export const PAPER = '#fffaf0'
+export const HOOK = '#a8b0bb'
+export const RED = '#e63946'
 const SHRIMP = '#f4a582'
 const SHRIMP_DARK = '#d9774f'
-const FISH = '#bcd4e6'
-const FISH_BACK = '#7d9fb8'
+export const FISH = '#bcd4e6'
+export const FISH_BACK = '#7d9fb8'
 const MEAT = '#f2a7a0'
-const SAND = '#f3e2b3'
-const CRAB = '#e76f51'
+export const SAND = '#f3e2b3'
+export const CRAB = '#e76f51'
 const FIDDLER = '#d4a373'
 const WORM = '#d4625a'
 const CLAM = '#f5deb3'
 const SQUID = '#f3e4ea'
-const GREEN = '#6a994e'
-const THREAD = '#2a7de1'
-const WATER = '#cfe8f7'
+export const GREEN = '#6a994e'
+export const THREAD = '#2a7de1'
+export const WATER = '#cfe8f7'
 
-const ink = { stroke: INK, strokeWidth: 3, strokeLinejoin: 'round' as const, strokeLinecap: 'round' as const }
+export const ink = { stroke: INK, strokeWidth: 3, strokeLinejoin: 'round' as const, strokeLinecap: 'round' as const }
 
 /** A J hook: eye at the origin, shank straight down, point up on the right. */
-function Hook({ x, y, s = 1, r = 0 }: { x: number; y: number; s?: number; r?: number }) {
+export function Hook({ x, y, s = 1, r = 0 }: { x: number; y: number; s?: number; r?: number }) {
   const d = 'M0 0 L0 44 C0 64 28 64 28 44 L28 32'
   return (
     <g transform={`translate(${x} ${y}) rotate(${r}) scale(${s})`}>
@@ -47,7 +47,7 @@ function Hook({ x, y, s = 1, r = 0 }: { x: number; y: number; s?: number; r?: nu
 }
 
 /** The hook's route: a red dashed arrow. */
-function Route({ d }: { d: string }) {
+export function Route({ d }: { d: string }) {
   return (
     <g>
       <path d={d} fill="none" stroke={RED} strokeWidth="3" strokeDasharray="7 5" strokeLinecap="round" markerEnd="url(#bait-arrow)" />
@@ -56,7 +56,7 @@ function Route({ d }: { d: string }) {
 }
 
 /** A shout-out label with a pointer line to (tx, ty). */
-function Label({ x, y, text, tx, ty, color = INK }: { x: number; y: number; text: string; tx?: number; ty?: number; color?: string }) {
+export function Label({ x, y, text, tx, ty, color = INK }: { x: number; y: number; text: string; tx?: number; ty?: number; color?: string }) {
   return (
     <g>
       {tx !== undefined && ty !== undefined && <path d={`M${x} ${y + 3} L${tx} ${ty}`} stroke={INK} strokeWidth="1.5" />}
@@ -80,7 +80,7 @@ function Label({ x, y, text, tx, ty, color = INK }: { x: number; y: number; text
 }
 
 /** A little "pop" star for emphasis. */
-function Pop({ x, y, r = 10, fill = '#ffd166' }: { x: number; y: number; r?: number; fill?: string }) {
+export function Pop({ x, y, r = 10, fill = '#ffd166' }: { x: number; y: number; r?: number; fill?: string }) {
   const points = Array.from({ length: 16 }, (_, i) => {
     const radius = i % 2 === 0 ? r : r * 0.5
     const angle = (Math.PI * i) / 8
@@ -89,7 +89,7 @@ function Pop({ x, y, r = 10, fill = '#ffd166' }: { x: number; y: number; r?: num
   return <polygon points={points} fill={fill} {...ink} strokeWidth={2} />
 }
 
-function Dot({ x, y }: { x: number; y: number }) {
+export function Dot({ x, y }: { x: number; y: number }) {
   return <circle cx={x} cy={y} r="3.5" fill={RED} stroke={INK} strokeWidth="1.5" />
 }
 
@@ -117,7 +117,7 @@ function Shrimp({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
 }
 
 /** A baitfish facing left, mouth at (x, y+18). */
-function Baitfish({ x, y, s = 1, w = 120 }: { x: number; y: number; s?: number; w?: number }) {
+export function Baitfish({ x, y, s = 1, w = 120 }: { x: number; y: number; s?: number; w?: number }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${s})`}>
       <path d={`M${w - 10} 18 L${w + 18} 0 L${w + 12} 18 L${w + 18} 36 Z`} fill={FISH_BACK} {...ink} />
@@ -192,9 +192,9 @@ function Worm({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
   )
 }
 
-function Panel({ children, label }: { children: React.ReactNode; label: string }) {
+export function Panel({ children, label, h = 140 }: { children: React.ReactNode; label: string; h?: number }) {
   return (
-    <svg viewBox="0 0 200 140" role="img" aria-label={label} className="block h-auto w-full">
+    <svg viewBox={`0 0 200 ${h}`} role="img" aria-label={label} className="block h-auto w-full">
       <defs>
         <marker id="bait-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
           <path d="M0 0 L10 5 L0 10 Z" fill={RED} />
@@ -203,10 +203,10 @@ function Panel({ children, label }: { children: React.ReactNode; label: string }
           <circle cx="2" cy="2" r="1" fill="#f0e2c4" />
         </pattern>
       </defs>
-      <rect x="2" y="2" width="196" height="136" rx="10" fill={PAPER} />
-      <rect x="2" y="2" width="196" height="136" rx="10" fill="url(#bait-dots)" />
+      <rect x="2" y="2" width="196" height={h - 4} rx="10" fill={PAPER} />
+      <rect x="2" y="2" width="196" height={h - 4} rx="10" fill="url(#bait-dots)" />
       {children}
-      <rect x="2" y="2" width="196" height="136" rx="10" fill="none" stroke={INK} strokeWidth="3" />
+      <rect x="2" y="2" width="196" height={h - 4} rx="10" fill="none" stroke={INK} strokeWidth="3" />
     </svg>
   )
 }

@@ -1,9 +1,9 @@
 /**
- * Comic-style panels for "How to hook it" (lib/hook-bait.ts): one panel
- * per step, drawn in bold ink outlines and flat colors, with a red dashed
- * arrow for the hook's path and short shout-out labels. The panels keep
- * their own light "paper" in both themes, like a printed comic, so the
- * ink reads the same everywhere.
+ * Drawn panels for "How to hook it" (lib/hook-bait.ts): one panel per
+ * step, in ink outlines and flat colors, with a red dashed arrow for the
+ * hook's path and short plain labels naming the parts. The panels keep
+ * their own light background in both themes so the drawings read the
+ * same everywhere.
  *
  * `BAIT_ART[baitId][stepIndex]` is the drawing for that step; a step
  * without one just shows its caption.
@@ -79,35 +79,25 @@ export function Label({ x, y, text, tx, ty, color = INK }: { x: number; y: numbe
   )
 }
 
-/** A little "pop" star for emphasis. */
-export function Pop({ x, y, r = 10, fill = '#ffd166' }: { x: number; y: number; r?: number; fill?: string }) {
-  const points = Array.from({ length: 16 }, (_, i) => {
-    const radius = i % 2 === 0 ? r : r * 0.5
-    const angle = (Math.PI * i) / 8
-    return `${(x + radius * Math.cos(angle)).toFixed(1)},${(y + radius * Math.sin(angle)).toFixed(1)}`
-  }).join(' ')
-  return <polygon points={points} fill={fill} {...ink} strokeWidth={2} />
-}
-
 export function Dot({ x, y }: { x: number; y: number }) {
   return <circle cx={x} cy={y} r="3.5" fill={RED} stroke={INK} strokeWidth="1.5" />
 }
 
 // ---------- baits ----------
 
-/** A shrimp facing right; head (horn, eye, dark brain spot) near x+100. */
-function Shrimp({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
+/** A shrimp facing right; head (horn, eye, dark spot) near x+100. */
+function Shrimp({ x, y, s = 1, body = SHRIMP, dark = SHRIMP_DARK, tail = true }: { x: number; y: number; s?: number; body?: string; dark?: string; tail?: boolean }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${s})`}>
-      <path d="M2 30 L-18 16 L-13 30 L-18 44 Z" fill={SHRIMP_DARK} {...ink} />
+      {tail && <path d="M2 30 L-18 16 L-13 30 L-18 44 Z" fill={dark} {...ink} />}
       {[46, 54, 62, 70, 78, 86].map((lx) => (
         <path key={lx} d={`M${lx} 40 l-4 12`} {...ink} strokeWidth={2} fill="none" />
       ))}
-      <path d="M2 30 C10 6 70 0 100 14 C114 22 114 34 100 38 C72 48 24 50 2 30 Z" fill={SHRIMP} {...ink} />
+      <path d="M2 30 C10 6 70 0 100 14 C114 22 114 34 100 38 C72 48 24 50 2 30 Z" fill={body} {...ink} />
       {[28, 46, 64].map((sx) => (
-        <path key={sx} d={`M${sx} 10 Q${sx + 5} 26 ${sx} 44`} fill="none" stroke={SHRIMP_DARK} strokeWidth="2" />
+        <path key={sx} d={`M${sx} 10 Q${sx + 5} 26 ${sx} 44`} fill="none" stroke={dark} strokeWidth="2" />
       ))}
-      <path d="M100 14 L126 4 L106 22 Z" fill={SHRIMP_DARK} {...ink} strokeWidth={2.5} />
+      <path d="M100 14 L126 4 L106 22 Z" fill={dark} {...ink} strokeWidth={2.5} />
       <path d="M108 20 C128 10 146 16 162 4" fill="none" {...ink} strokeWidth={2} />
       <path d="M108 26 C132 26 146 34 166 28" fill="none" {...ink} strokeWidth={2} />
       <circle cx="90" cy="24" r="6" fill="#5b3a29" stroke={INK} strokeWidth="1.5" />
@@ -221,18 +211,18 @@ const ART: Record<string, Art[]> = {
         <Hook x={126} y={34} s={0.62} />
         <Dot x={126} y={66} />
         <Dot x={143} y={57} />
-        <Label x={72} y={128} text="MISS THE DARK SPOT!" tx={112} ty={88} color={RED} />
+        <Label x={72} y={128} text="AVOID THE DARK SPOT" tx={112} ty={88} color={RED} />
         <Label x={130} y={22} text="UNDER THE HORN" />
       </Panel>
     ),
     (label) => (
       <Panel label={label}>
-        <Shrimp x={40} y={48} s={0.95} />
+        <Shrimp x={40} y={48} s={0.95} tail={false} />
         <Route d="M14 80 C40 84 62 94 96 94" />
         <Dot x={30} y={78} />
         <Dot x={98} y={88} />
         <Label x={46} y={124} text="IN: TAIL" tx={30} ty={84} />
-        <Label x={148} y={124} text="OUT: BELLY" tx={100} ty={94} />
+        <Label x={142} y={124} text="OUT: UNDERSIDE" tx={100} ty={94} />
       </Panel>
     ),
     (label) => (
@@ -243,8 +233,8 @@ const ART: Record<string, Art[]> = {
         <path d="M94 34 l8 6 l-8 6" fill="none" {...ink} />
         <Hook x={140} y={28} s={0.9} />
         <path d="M128 62 C128 50 160 50 160 62 C160 76 128 76 128 62 Z" fill={SHRIMP} {...ink} />
-        <Label x={56} y={84} text="PEEL IT" />
-        <Label x={138} y={120} text="BURY THE POINT" tx={150} ty={74} />
+        <Label x={56} y={84} text="PEELED" />
+        <Label x={138} y={120} text="SHANK COVERED" tx={150} ty={74} />
       </Panel>
     ),
   ],
@@ -265,7 +255,7 @@ const ART: Record<string, Art[]> = {
         <Baitfish x={36} y={70} />
         <Hook x={86} y={38} s={0.7} />
         <Label x={138} y={52} text="ABOVE THE SPINE" tx={104} ty={72} />
-        <Label x={100} y={128} text="SWIMS AWAY FROM YOU" />
+        <Label x={100} y={128} text="UNDER A FLOAT" />
       </Panel>
     ),
     (label) => (
@@ -274,7 +264,7 @@ const ART: Record<string, Art[]> = {
         <Hook x={60} y={30} s={0.7} />
         <Dot x={62} y={66} />
         <Label x={40} y={40} text="NOSE" tx={58} ty={64} />
-        <Label x={110} y={124} text="FOR SLOW-TROLLING" />
+        <Label x={110} y={124} text="THROUGH THE NOSTRILS" />
       </Panel>
     ),
     (label) => (
@@ -289,8 +279,8 @@ const ART: Record<string, Art[]> = {
         ))}
         <path d="M132 112 L170 30" {...ink} strokeWidth={2.5} />
         <rect x="160" y="16" width="26" height="18" rx="3" fill="#ffd166" {...ink} strokeWidth={2.5} />
-        <Label x={173} y={50} text="AIR" />
-        <Label x={60} y={26} text="KEEP 'EM KICKING" />
+        <Label x={173} y={50} text="PUMP" />
+        <Label x={64} y={26} text="AERATED BUCKET" />
       </Panel>
     ),
   ],
@@ -310,7 +300,7 @@ const ART: Record<string, Art[]> = {
         <Hook x={86} y={30} s={0.85} />
         <Dot x={86} y={60} />
         <Label x={62} y={24} text="THROUGH THE SKIN" tx={84} ty={56} />
-        <Label x={136} y={126} text="POINT CLEAR!" tx={112} ty={66} color={RED} />
+        <Label x={136} y={126} text="POINT EXPOSED" tx={112} ty={66} />
       </Panel>
     ),
     (label) => (
@@ -320,30 +310,34 @@ const ART: Record<string, Art[]> = {
         <path d="M56 32 v6 M90 66 h-6 M56 100 v-6 M22 66 h6" {...ink} strokeWidth={2} />
         <Chunk x={112} y={50} w={64} h={30} pale />
         <path d="M120 100 l12 0 M160 100 l12 0" {...ink} strokeWidth={2} />
-        <Label x={144} y={44} text="WASHED OUT?" />
-        <Label x={100} y={126} text="FRESH ONE EVERY 15–20 MIN" />
+        <Label x={144} y={44} text="WASHED OUT" />
+        <Label x={100} y={126} text="REBAIT EVERY 15–20 MIN" />
       </Panel>
     ),
   ],
   squid: [
     (label) => (
       <Panel label={label}>
-        <path d="M24 70 C24 50 100 46 140 58 L168 50 L162 70 L168 90 L140 82 C100 94 24 90 24 70 Z" fill={SQUID} {...ink} />
-        {[60, 88, 116].map((cx) => (
-          <path key={cx} d={`M${cx - 4} 52 L${cx + 4} 88`} stroke={RED} strokeWidth="3" strokeDasharray="6 4" />
+        {/* The squid's body tube (mantle) with its fins, head end cut off. */}
+        <path d="M150 70 C170 50 186 60 186 70 C186 80 170 90 150 70 Z" fill={SQUID} {...ink} strokeWidth={2.5} />
+        <path d="M30 52 L150 56 C172 62 184 68 186 70 C184 72 172 78 150 84 L30 88 Z" fill={SQUID} {...ink} />
+        <path d="M30 52 C24 62 24 78 30 88" fill="none" {...ink} strokeWidth={2} />
+        {[40, 60, 80, 100, 120].map((cx) => (
+          <circle key={cx} cx={cx} cy={cx % 40 === 0 ? 64 : 76} r="2.5" fill="#c77d9b" />
         ))}
-        {[34, 54, 74, 94].map((cx) => (
-          <circle key={cx} cx={cx} cy={64 + (cx % 3)} r="2.5" fill="#c77d9b" />
+        {[62, 70, 78].map((cy) => (
+          <path key={cy} d={`M28 ${cy} L170 ${cy + (70 - cy) * 0.6}`} stroke={RED} strokeWidth="2.5" strokeDasharray="6 4" />
         ))}
-        <Label x={100} y={124} text="LONG, TAPERED STRIPS" />
+        <Label x={100} y={30} text="BODY TUBE, SLIT OPEN" />
+        <Label x={100} y={124} text="SLICE LENGTHWISE" />
       </Panel>
     ),
     (label) => (
       <Panel label={label}>
         <path d="M70 70 L96 64 C120 74 150 96 176 120 C140 108 112 96 96 84 Z" fill={SQUID} {...ink} />
         <Hook x={78} y={36} s={0.8} />
-        <Label x={56} y={110} text="WIDE END ON" tx={84} ty={80} />
-        <Label x={150} y={64} text="TAIL FLUTTERS" tx={150} ty={100} />
+        <Label x={50} y={112} text="WIDE END" tx={84} ty={80} />
+        <Label x={146} y={40} text="LOOSE END" tx={146} ty={98} />
       </Panel>
     ),
   ],
@@ -359,9 +353,9 @@ const ART: Record<string, Art[]> = {
     ),
     (label) => (
       <Panel label={label}>
-        <SandFlea x={46} y={42} s={1.25} eggs />
-        <Pop x={160} y={34} r={16} />
-        <Label x={100} y={124} text="SOFT + ORANGE EGGS = GOLD" />
+        <SandFlea x={46} y={34} s={1.25} eggs />
+        <Label x={150} y={30} text="SOFT SHELL" tx={120} ty={44} />
+        <Label x={100} y={110} text="ORANGE EGGS" tx={98} ty={88} color={SHRIMP_DARK} />
       </Panel>
     ),
   ],
@@ -379,10 +373,9 @@ const ART: Record<string, Art[]> = {
       <Panel label={label}>
         <Fiddler x={44} y={56} s={1.2} clawless />
         <path d="M150 40 C168 30 186 36 184 48 C182 58 166 58 154 52 Z" fill="#f2e2c4" {...ink} />
-        <Pop x={140} y={52} r={9} />
         <Hook x={124} y={34} s={0.6} r={20} />
-        <Label x={150} y={24} text="SNAP!" color={RED} />
-        <Label x={90} y={128} text="HOOK THROUGH THE HOLE" />
+        <Label x={162} y={24} text="CLAW OFF" />
+        <Label x={90} y={128} text="HOOK IN THE SOCKET" />
       </Panel>
     ),
   ],
@@ -394,7 +387,7 @@ const ART: Record<string, Art[]> = {
         <path d="M100 36 L104 104" stroke={RED} strokeWidth="3" strokeDasharray="6 4" />
         <path d="M96 64 C90 66 90 86 96 88 M110 64 C116 66 116 86 110 88" fill="#f6d5c3" {...ink} strokeWidth={2} />
         <Hook x={150} y={30} s={0.6} />
-        <Label x={100} y={124} text="HALVES, CLAWS OFF" />
+        <Label x={100} y={124} text="CLAWS OFF, CUT IN HALF" />
       </Panel>
     ),
     (label) => (
@@ -406,8 +399,8 @@ const ART: Record<string, Art[]> = {
         <path d="M44 68 L28 60 L44 78 Z M156 68 L172 60 L156 78 Z" fill={CRAB} {...ink} strokeWidth={2.5} />
         <Hook x={150} y={30} s={0.7} />
         <Dot x={152} y={64} />
-        <Label x={100} y={30} text="THROUGH THE CORNER" tx={146} ty={60} />
-        <Label x={100} y={128} text="STAYS ALIVE" />
+        <Label x={90} y={30} text="CORNER OF THE SHELL" tx={146} ty={60} />
+        <Label x={100} y={128} text="MISS THE BODY" />
       </Panel>
     ),
   ],
@@ -419,9 +412,8 @@ const ART: Record<string, Art[]> = {
         <path d="M60 34 L60 70 C60 86 86 86 88 72" fill="none" stroke={WORM} strokeWidth="9" strokeLinecap="round" />
         <path d="M88 72 C96 60 112 80 124 68" fill="none" stroke={INK} strokeWidth="12" strokeLinecap="round" />
         <path d="M88 72 C96 60 112 80 124 68" fill="none" stroke={WORM} strokeWidth="7" strokeLinecap="round" />
-        <Label x={146} y={44} text="HEAD FIRST" tx={66} ty={40} />
-        <Label x={146} y={100} text="TAIL WIGGLES" tx={122} ty={72} />
-        <Label x={72} y={128} text="WATCH THE BITE!" color={RED} />
+        <Label x={146} y={44} text="THREADED ON" tx={66} ty={40} />
+        <Label x={146} y={100} text="SHORT END FREE" tx={122} ty={72} />
       </Panel>
     ),
     (label) => (
@@ -430,7 +422,7 @@ const ART: Record<string, Art[]> = {
         {[60, 72, 84].map((cx) => (
           <path key={cx} d={`M${cx} 58 l-6 26`} stroke={THREAD} strokeWidth="2.5" />
         ))}
-        <Label x={100} y={124} text="A FEW WRAPS OF THREAD" color={THREAD} />
+        <Label x={100} y={124} text="WRAPPED WITH BAIT THREAD" color={THREAD} />
       </Panel>
     ),
   ],
@@ -443,7 +435,7 @@ const ART: Record<string, Art[]> = {
         <path d="M98 76 h14 M106 70 l8 6 l-8 6" fill="none" {...ink} />
         <Hook x={150} y={28} s={0.9} />
         <path d="M134 70 C134 58 166 58 168 70 C168 84 134 84 134 70 Z" fill="#f6b38a" {...ink} />
-        <Label x={100} y={124} text="THREAD ON THE TOUGH FOOT" />
+        <Label x={100} y={124} text="HOOK THE FIRM FOOT" />
       </Panel>
     ),
     (label) => (
@@ -453,7 +445,7 @@ const ART: Record<string, Art[]> = {
         {[0, 1, 2, 3].map((i) => (
           <path key={i} d={`M${72 + i * 12} 52 l12 28`} stroke={THREAD} strokeWidth="3" />
         ))}
-        <Label x={100} y={124} text="WRAP IT OR LOSE IT" color={THREAD} />
+        <Label x={100} y={124} text="WRAPPED WITH BAIT THREAD" color={THREAD} />
       </Panel>
     ),
   ],
@@ -465,8 +457,8 @@ const ART: Record<string, Art[]> = {
         <path d="M98 66 h14 M106 60 l8 6 l-8 6" fill="none" {...ink} />
         <Hook x={150} y={28} s={0.9} />
         <path d="M136 64 L164 64 L164 78 L136 78 Z" fill="#ff8fab" {...ink} />
-        <Label x={60} y={44} text="1-IN STRIP" />
-        <Label x={100} y={124} text="HOOK ONCE OR TWICE" />
+        <Label x={60} y={44} text="1-IN. PIECE" />
+        <Label x={100} y={124} text="HOOK THROUGH THE MESH" />
       </Panel>
     ),
   ],
@@ -485,7 +477,7 @@ const ART: Record<string, Art[]> = {
         <path d="M60 40 L60 90" stroke={RED} strokeWidth="3" markerEnd="url(#bait-arrow)" markerStart="url(#bait-arrow)" />
         <Baitfish x={140} y={54} s={0.4} />
         <Baitfish x={146} y={80} s={0.4} />
-        <Label x={64} y={128} text="SLOW UP & DOWN" />
+        <Label x={64} y={128} text="JIG SLOWLY" />
       </Panel>
     ),
     (label) => (
@@ -493,9 +485,8 @@ const ART: Record<string, Art[]> = {
         <path d="M60 50 q20 6 16 30" fill="none" stroke={HOOK} strokeWidth="6" />
         <path d="M60 50 q20 6 16 30" fill="none" stroke={INK} strokeWidth="1.5" />
         <circle cx="76" cy="82" r="6" fill={SHRIMP} {...ink} strokeWidth={2} />
-        <Pop x={130} y={62} r={20} />
-        <Label x={130} y={66} text="TIP IT" />
-        <Label x={100} y={124} text="A SPECK OF SHRIMP" />
+        <Label x={124} y={70} text="TINY PIECE" tx={84} ty={80} />
+        <Label x={100} y={124} text="ON EVERY HOOK" />
       </Panel>
     ),
     (label) => (
@@ -505,7 +496,7 @@ const ART: Record<string, Art[]> = {
           <path key={cx} d={`M${cx} 50 L${cx + 6} 92`} stroke={INK} strokeWidth="1.5" />
         ))}
         <Label x={100} y={40} text="POOL NOODLE" />
-        <Label x={100} y={124} text="NO TANGLES, NO OUCH" />
+        <Label x={100} y={124} text="WRAP IT UP TO STORE" />
       </Panel>
     ),
   ],
@@ -528,33 +519,36 @@ const ART: Record<string, Art[]> = {
         {[0, 1, 2].map((i) => (
           <path key={i} d={`M${86 + i * 10} 56 l8 34`} stroke={THREAD} strokeWidth="3" />
         ))}
-        <Label x={100} y={124} text="WRAP & TIE ON" />
+        <Label x={100} y={124} text="TIED ON WITH THREAD" />
       </Panel>
     ),
   ],
   'ghost-shrimp': [
     (label) => (
       <Panel label={label}>
-        <path d="M30 70 C40 50 120 50 150 62 C166 70 160 86 144 86 C110 92 46 92 30 70 Z" fill="#f7e1e8" {...ink} />
-        <path d="M150 62 C170 52 182 60 176 70 C170 76 160 74 154 70" fill="#f7e1e8" {...ink} strokeWidth={2.5} />
-        <path d="M30 70 L14 60 L16 82 Z" fill="#f0c6d3" {...ink} strokeWidth={2.5} />
-        <Route d="M14 100 C40 96 80 96 120 90" />
-        <Label x={100} y={124} text="THREAD IN AT THE TAIL" />
+        <Shrimp x={30} y={40} s={0.95} body="#f7e1e8" dark="#e0aabb" />
+        <Route d="M10 90 C40 92 80 90 116 82" />
+        <Label x={100} y={124} text="IN AT THE TAIL" />
       </Panel>
     ),
     (label) => (
       <Panel label={label}>
-        <path d="M40 70 C50 50 130 50 160 62 C170 70 164 86 150 86 C116 92 56 92 40 70 Z" fill="#f7e1e8" {...ink} />
-        {[70, 90, 110, 130].map((cx) => (
-          <path key={cx} d={`M${cx} 52 l-8 38`} stroke={THREAD} strokeWidth="3" />
+        <Shrimp x={30} y={40} s={0.95} body="#f7e1e8" dark="#e0aabb" />
+        {[54, 70, 86, 102].map((cx) => (
+          <path key={cx} d={`M${cx} 46 l-6 44`} stroke={THREAD} strokeWidth="3" />
         ))}
-        <Label x={100} y={124} text="SOFT? WRAP IT." color={THREAD} />
+        <Label x={100} y={124} text="WRAPPED WITH BAIT THREAD" color={THREAD} />
       </Panel>
     ),
   ],
 }
 
-/** The comic panel for one step of a bait how-to, or null. */
+/** Whether a step of a bait how-to has a drawing. */
+export function hasBaitArt(id: string, step: number): boolean {
+  return Boolean(ART[id]?.[step])
+}
+
+/** The drawn panel for one step of a bait how-to, or null. */
 export function BaitArt({ id, step, label }: { id: string; step: number; label: string }) {
   const art = ART[id]?.[step]
   return art ? <>{art(label)}</> : null

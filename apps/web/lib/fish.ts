@@ -13,6 +13,8 @@ export type FishSummary = {
   peak_months: number[]
   good_months: number[]
   targets: string[]
+  /** When and at what water temperature it spawns (not every fish has it). */
+  spawn?: { months: number[]; temp_low: number; temp_high: number; note: string } | null
 }
 
 export type FishRegulation = {
@@ -75,4 +77,31 @@ export const MONTH_NAMES = [
 
 export function seasonOf(fish: FishSummary, month: number): 'peak' | 'good' | 'off' {
   return fish.peak_months.includes(month) ? 'peak' : fish.good_months.includes(month) ? 'good' : 'off'
+}
+
+export function spawningIn(fish: FishSummary, month: number): boolean {
+  return Boolean(fish.spawn?.months.includes(month))
+}
+
+/** Months as ranges: "Aug–Nov", across the new year "Dec–Feb", and split
+ * seasons as "Mar–May, Sep–Nov". */
+export function monthSpan(months: number[]): string {
+  const sorted = [...new Set(months)].sort((a, b) => a - b)
+  if (sorted.length === 0) return ''
+  if (sorted.length === 12) return 'All year'
+  const short = (m: number) => MONTH_NAMES[m - 1].slice(0, 3)
+  // Runs of consecutive months; a run ending in December joins one
+  // starting in January.
+  const runs: number[][] = []
+  for (const m of sorted) {
+    const last = runs[runs.length - 1]
+    if (last && m === last[last.length - 1] + 1) last.push(m)
+    else runs.push([m])
+  }
+  if (runs.length > 1 && runs[0][0] === 1 && runs[runs.length - 1].at(-1) === 12) {
+    runs[0] = [...runs.pop()!, ...runs[0]]
+  }
+  return runs
+    .map((run) => (run.length === 1 ? short(run[0]) : `${short(run[0])}–${short(run[run.length - 1])}`))
+    .join(', ')
 }

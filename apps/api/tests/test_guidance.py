@@ -148,6 +148,8 @@ def test_red_drum_in_october_at_65f_is_a_prime_pick_with_reasons() -> None:
     assert red_drum.reasons == [
         "Water 65°F is in its ideal 55–75°F range",
         "October is a peak month",
+        # Aug-Nov spawners, but 65°F is below their 70-82°F spawning water.
+        "Spawning season",
     ]
     assert red_drum.rig and red_drum.bait and red_drum.hook_size and red_drum.sinker
 
@@ -512,3 +514,34 @@ def test_every_regulation_entry_builds() -> None:
     for state, entries in load_regulations()["states"].items():
         for species_id in entries:
             assert regulation_for(species_id, state, today) is not None
+
+
+def test_spawning_fish_say_so() -> None:
+    # Red drum spawn Aug-Nov in 70-82F water.
+    in_range = build_fishing_guidance(
+        region="atlantic_south",
+        water_temp_f=75.0,
+        water_temp_is_fallback=False,
+        month=9,
+        max_picks=200,
+    )
+    red = next(pick for pick in in_range.species if pick.id == "red-drum")
+    assert any("spawning range" in reason for reason in red.reasons)
+    cooler = build_fishing_guidance(
+        region="atlantic_mid",
+        water_temp_f=62.0,
+        water_temp_is_fallback=False,
+        month=11,
+        max_picks=200,
+    )
+    red = next(pick for pick in cooler.species if pick.id == "red-drum")
+    assert "Spawning season" in red.reasons
+    spring = build_fishing_guidance(
+        region="atlantic_mid",
+        water_temp_f=62.0,
+        water_temp_is_fallback=False,
+        month=4,
+        max_picks=200,
+    )
+    red = next(pick for pick in spring.species if pick.id == "red-drum")
+    assert not any("pawning" in reason for reason in red.reasons)

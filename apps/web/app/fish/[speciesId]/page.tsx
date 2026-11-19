@@ -7,10 +7,19 @@ import { SpeciesPhotoFigure } from '@/app/components/species-photo'
 import { auth } from '@/lib/auth'
 import { InternalApiError, internalApiFetch } from '@/lib/internal-api-client'
 import type { Preferences } from '@/app/api/preferences/route'
-import { ACCESS_LABEL, MONTH_NAMES, REGION_LABEL, TARGET_LABEL, seasonOf, type FishDetail } from '@/lib/fish'
+import { ACCESS_LABEL, MONTH_NAMES, REGION_LABEL, TARGET_LABEL, monthSpan, seasonOf, spawningIn, type FishDetail } from '@/lib/fish'
 import { localizeText, temp, type Units } from '@/lib/units'
 import { FavoriteButton } from '../favorite-button'
+import { RigDiagram } from '@/app/components/rig-diagram'
+import { RIGS, rigsFor } from '@/lib/rigs'
+import { KNOTS, RIG_KNOTS } from '@/lib/knots'
+import { setRequestUnits } from '@/lib/request-units'
 import { BestSpots } from './best-spots'
+import { Identify } from './identify'
+import { HookIt } from '@/app/components/hook-it'
+import { hooksFor } from '@/lib/hook-bait'
+import { RUNS } from '@/lib/runs'
+import { KeepCheck } from '@/app/components/keep-check'
 import { Suspense } from 'react'
 import type { SavedLocation } from '@/app/api/saved-locations/route'
 
@@ -50,15 +59,20 @@ export default async function FishDetailPage({ params }: Props) {
     if (err instanceof InternalApiError && err.status === 404) notFound()
     throw err
   }
-  const [prefs, locations, saved] = await Promise.all([
+  const [prefs, locations, saved, catalogue] = await Promise.all([
     internalApiFetch<Preferences>('/v1/me/preferences', { userId }).catch(() => null),
     internalApiFetch<{ id: string; state: string }[]>('/v1/locations').catch(() => []),
     internalApiFetch<SavedLocation[]>('/v1/me/locations', { userId }).catch(() => [] as SavedLocation[]),
+    internalApiFetch<{ id: string; name: string }[]>('/v1/species').catch(() => []),
   ])
+  const names = new Map(catalogue.map((entry) => [entry.id, entry.name]))
   const spotIds = [
     ...new Set([prefs?.default_location_id, ...saved.map((spot) => spot.location_id)].filter(Boolean)),
   ] as string[]
   const units: Units = prefs?.units ?? 'imperial'
+  setRequestUnits(units)
+  // The rigs this fish's setup describes (Rigs & tips' matcher), at most 2.
+  const rigIds = rigsFor(`${fish.rig} ${fish.sinker}`).slice(0, 2)
   const say = (text: string) => localizeText(text, units)
   const homeState = locations.find((spot) => spot.id === prefs?.default_location_id)?.state ?? null
   const month = new Date().getMonth() + 1
@@ -111,6 +125,21 @@ export default async function FishDetailPage({ params }: Props) {
                   {fish.regions.map((key) => REGION_LABEL[key] ?? key).join(' · ')}
                 </p>
                 <p className="text-xs text-text-muted">{ACCESS_NOTE[fish.access]}</p>
+                {RUNS.some((run) => run.fish.includes(fish.id)) && (
+                  <ul className="flex flex-col gap-1.5 text-xs">
+                    {RUNS.filter((run) => run.fish.includes(fish.id)).map((run) => (
+                      <li key={run.id} className="flex flex-col rounded-md border border-border bg-surface-raised px-2.5 py-1.5">
+                        <span className="font-semibold text-text">
+                          {run.title}
+                          {run.months.includes(month) && <span className="ml-1.5 font-bold text-accent">On now</span>}
+                        </span>
+                        <span className="text-text-muted">
+                          {monthSpan(run.months)} · {run.regions.map((key) => REGION_LABEL[key] ?? key).join(', ')}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 <div>
                   <div className="grid grid-cols-12 gap-0.5" aria-hidden="true">
                     {MONTH_NAMES.map((name, index) => {
@@ -147,6 +176,20 @@ export default async function FishDetailPage({ params }: Props) {
                   <Fact label="Best water" value={`${temp(fish.temp_ideal_low, units)}–${temp(fish.temp_ideal_high, units)}`} />
                   <Fact label="Found in" value={`${temp(fish.temp_min, units)}–${temp(fish.temp_max, units)}`} />
                 </dl>
+                {fish.spawn && (
+                  <div className="flex flex-col gap-1 border-t border-border pt-3">
+                    <h3 className="flex flex-wrap items-center gap-2 text-sm font-semibold text-text">
+                      Spawning
+                      <span className="font-normal text-text-muted">
+                        {monthSpan(fish.spawn.months)} · {temp(fish.spawn.temp_low, units)}–{temp(fish.spawn.temp_high, units)} water
+                      </span>
+                      {spawningIn(fish, month) && (
+                        <span className="rounded-full bg-marginal-bg px-2 py-0.5 text-xs font-bold text-marginal-text">Spawning now</span>
+                      )}
+                    </h3>
+                    <p className="text-xs leading-relaxed text-text-muted">{say(fish.spawn.note)}</p>
+                  </div>
+                )}
               </Card>
             </div>
 
@@ -155,6 +198,7 @@ export default async function FishDetailPage({ params }: Props) {
                 <h2 className="section-label">How to catch it</h2>
                 <dl className="flex flex-col gap-3">
                   <Fact label="Bait" value={say(fish.bait)} />
+                  <HookIt hows={hooksFor(fish.bait)} say={say} label="How to hook these baits" />
                   <Fact label="Rig" value={say(fish.rig)} />
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <Fact label="Hook" value={say(fish.hook_size)} />
@@ -163,6 +207,49 @@ export default async function FishDetailPage({ params }: Props) {
                   <Fact label="Lures" value={say(fish.lures)} />
                 </dl>
               </Card>
+              {rigIds.length > 0 && (
+                <Card className="flex flex-col gap-4">
+                  <h2 className="section-label">How to rig it</h2>
+                  {rigIds.map((rigId) => {
+                    const rig = RIGS[rigId]
+                    return (
+                      <section key={rigId} className="flex flex-col gap-3 border-t border-border pt-3 first-of-type:border-t-0 first-of-type:pt-0">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,14rem)_1fr]">
+                          <div className="rounded-md border border-border bg-bg/60 p-2">
+                            <RigDiagram id={rigId} className="h-auto w-full" />
+                          </div>
+                          <div className="flex flex-col gap-1.5">
+                            <h3 className="font-bold text-text">{rig.name}</h3>
+                            <p className="text-sm leading-relaxed text-text-muted">{say(rig.summary)}</p>
+                            <p className="text-xs text-text-muted">
+                              <span className="font-semibold text-text">Line: </span>
+                              {say(rig.line.main)}
+                              <span className="font-semibold text-text"> · Leader: </span>
+                              {say(rig.line.leader)}
+                            </p>
+                            <p className="text-xs text-text-muted">
+                              Knots: {RIG_KNOTS[rigId].map((knot) => KNOTS[knot].name).join(', ')}
+                            </p>
+                          </div>
+                        </div>
+                        <details className="group">
+                          <summary className="w-fit cursor-pointer text-sm font-semibold text-primary">How to tie it</summary>
+                          <ol className="mt-2 flex flex-col gap-1.5 text-sm text-text">
+                            {rig.tie.map((step, index) => (
+                              <li key={step} className="flex gap-2.5">
+                                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-border text-[0.6875rem] font-bold tabular-nums">
+                                  {index + 1}
+                                </span>
+                                <span className="leading-relaxed">{say(step)}</span>
+                              </li>
+                            ))}
+                          </ol>
+                        </details>
+                      </section>
+                    )
+                  })}
+                </Card>
+              )}
               <Card className="flex flex-col gap-3">
                 <h2 className="section-label">What they&apos;re doing</h2>
                 <p className="text-sm leading-relaxed text-text">
@@ -176,6 +263,8 @@ export default async function FishDetailPage({ params }: Props) {
               </Card>
             </div>
           </div>
+
+          <Identify id={fish.id} names={names} say={say} />
 
           {fish.access !== 'incidental' && (
             <Suspense
@@ -199,6 +288,13 @@ export default async function FishDetailPage({ params }: Props) {
                 </span>
               )}
             </div>
+            {regulations.length > 0 && (
+              <KeepCheck
+                units={units}
+                asOf={regulations[0].as_of}
+                options={regulations.map((rule) => ({ ...rule, key: rule.state, label: rule.state }))}
+              />
+            )}
             {regulations.length === 0 ? (
               <p className="text-sm text-text-muted">
                 No state limits on file for this fish. Check your state&apos;s fishing regulations.

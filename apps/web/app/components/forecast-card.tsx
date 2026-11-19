@@ -1,9 +1,16 @@
 import { Badge, type BadgeVariant, Button, Card } from './ui'
+import { HookIt } from './hook-it'
+import { hooksFor } from '@/lib/hook-bait'
+import { runsFor } from '@/lib/runs'
+import { sinkerAdvice } from '@/lib/sinker'
+import { KeepCheck } from './keep-check'
+import { pickWarning } from '@/lib/fish-id'
 import { cx } from './ui/cx'
 import { HourlyChart } from './hourly-chart'
 import { RigDiagram } from './rig-diagram'
 import { RIGS, rigsFor, type RigId } from '@/lib/rigs'
-import { RIG_FIT, RIG_WATER_TIPS, WATER_NOUN, WATER_PHRASE, watersFor } from '@/lib/fishing-style'
+import { KNOTS, RIG_KNOTS } from '@/lib/knots'
+import { RIG_FIT, RIG_WATER_TIPS, WATER_LABEL, WATER_NOUN, WATER_PHRASE, watersFor } from '@/lib/fishing-style'
 import type { Preferences } from '@/app/api/preferences/route'
 import { WhereToFish, YourDay } from './your-day'
 import { SunAndMoon, WeatherAlerts, type SkyConditions } from './sky'
@@ -698,7 +705,7 @@ const GUIDANCE_TIER_PILL: Record<GuidanceTier, string> = {
  * cards. Each card shows apps/api's own `reasons` (the exact numbers the
  * pick was scored on) so no recommendation appears without its "why".
  */
-function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
+function WhatsBiting({ guidance, linkFish = false }: { guidance: FishingGuidance; linkFish?: boolean }) {
   // Reasons every pick shares (today's wind, surf, season) are said once,
   // above the cards; each card keeps only what's particular to that fish.
   const shared =
@@ -755,7 +762,11 @@ function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
               </ShowIf>
               <div className="flex flex-col gap-2 px-1">
                 <div className="flex items-start justify-between gap-2">
-                  <a href={`/fish/${encodeURIComponent(pick.id)}`} className="text-base font-bold leading-snug text-text no-underline hover:underline">{pick.name}</a>
+                  {linkFish ? (
+                    <a href={`/fish/${encodeURIComponent(pick.id)}`} className="text-base font-bold leading-snug text-text no-underline hover:underline">{pick.name}</a>
+                  ) : (
+                    <span className="text-base font-bold leading-snug text-text">{pick.name}</span>
+                  )}
                   <span
                     aria-label={`Rank ${index + 1}`}
                     className="flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-border px-1.5 text-xs font-bold tabular-nums text-text"
@@ -775,6 +786,11 @@ function WhatsBiting({ guidance }: { guidance: FishingGuidance }) {
                   {pick.matches_profile && (
                     <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-primary-contrast">
                       Your target
+                    </span>
+                  )}
+                  {pickWarning(pick.id) && (
+                    <span className="rounded-full border border-marginal-border bg-marginal-bg px-2 py-0.5 text-xs font-bold text-marginal-text">
+                      ⚠ {pickWarning(pick.id)}
                     </span>
                   )}
                 </div>
@@ -833,9 +849,12 @@ const CALENDAR_ROWS = 12
 function SpeciesCalendar({
   rows,
   currentMonth,
+  linkFish = false,
 }: {
   rows: NonNullable<FishingGuidance['calendar']>
   currentMonth: number
+  /** Signed in: names open the Fish guide (the public share page has none). */
+  linkFish?: boolean
 }) {
   // In season now first (peak, then good, then off), catalogue order
   // within each; the first CALENDAR_ROWS show, the rest on request.
@@ -879,9 +898,13 @@ function SpeciesCalendar({
                 className={cx(rowIndex >= CALENDAR_ROWS && 'hidden group-has-[details[open]]:table-row')}
               >
                 <th scope="row" className="whitespace-nowrap py-0.5 pr-6 font-semibold text-text">
-                  <a href={`/fish/${encodeURIComponent(row.id)}`} className="text-text no-underline hover:underline">
-                    {row.name}
-                  </a>
+                  {linkFish ? (
+                    <a href={`/fish/${encodeURIComponent(row.id)}`} className="text-text no-underline hover:underline">
+                      {row.name}
+                    </a>
+                  ) : (
+                    row.name
+                  )}
                 </th>
                 {row.months.map((level, index) => (
                   <td key={index} className="px-0.5 py-0.5">
@@ -945,11 +968,14 @@ function formatAsOf(asOf: string): string {
 function RigsAndTips({
   guidance,
   profile = null,
+  conditions = null,
 }: {
   guidance: FishingGuidance
   profile?: Preferences | null
+  conditions?: { wind_range_kt: [number, number] | null; wave_range_ft: [number, number] | null } | null
 }) {
   const waters = watersFor(profile)
+  const sinkers = sinkerAdvice(waters.slice(0, 3), conditions?.wave_range_ft, conditions?.wind_range_kt)
   // Lure-only rigs are skipped for someone who never fishes lures.
   const skipJig = profile?.uses_lures === 'no'
   const groups = new Map<RigId, { main: SpeciesPick[]; also: SpeciesPick[] }>()
@@ -991,6 +1017,23 @@ function RigsAndTips({
           Jig rigs are hidden because your profile says you don&apos;t fish lures.
         </p>
       )}
+      {sinkers.length > 0 && (
+        <section className="flex flex-col gap-2.5 rounded-md border border-border bg-surface-raised p-4 sm:p-5">
+          <h4 className="section-label">Sinker for today&apos;s water</h4>
+          <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {sinkers.map((advice) => (
+              <li key={advice.water} className="flex flex-col gap-1 text-sm">
+                <span className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">{WATER_LABEL[advice.water]}</span>
+                  <span className="text-lg font-bold tabular-nums text-text">{localizeText(advice.weight, requestUnits())}</span>
+                  <span className="font-semibold text-text">{advice.kind}</span>
+                </span>
+                <span className="text-text-muted">{localizeText(advice.why, requestUnits())}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       <ol className="flex flex-col gap-4">
         {ordered.map(([id, group]) => {
           const rig = RIGS[id]
@@ -1031,6 +1074,12 @@ function RigsAndTips({
                     )}
                   </h3>
                   <p className="text-sm leading-relaxed text-text-muted">{localizeText(rig.summary, requestUnits())}</p>
+                  <p className="text-xs text-text-muted">
+                    <span className="font-semibold text-text">Line: </span>
+                    {localizeText(rig.line.main, requestUnits())}
+                    <span className="font-semibold text-text"> · Leader: </span>
+                    {localizeText(rig.line.leader, requestUnits())}
+                  </p>
                   {waterTips(id).map(({ water, tip }) => (
                     <p
                       key={water}
@@ -1070,6 +1119,45 @@ function RigsAndTips({
                 </div>
 
                 <section className="flex flex-col gap-2 border-t border-border pt-3">
+                  <h4 className="section-label">Knots for this rig</h4>
+                  <ul className="flex flex-col gap-1.5">
+                    {RIG_KNOTS[id].map((knotId) => {
+                      const knot = KNOTS[knotId]
+                      return (
+                        <li key={knotId}>
+                          <details className="group rounded-md border border-border bg-surface">
+                            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring [&::-webkit-details-marker]:hidden">
+                              <span className="min-w-0">
+                                <span className="font-semibold text-text">{knot.name}</span>
+                                <span className="text-text-muted"> · {knot.use}</span>
+                              </span>
+                              <span className="flex shrink-0 items-center gap-2 text-xs text-text-muted">
+                                <span title="Rough knot strength, as a share of the line's breaking strength">
+                                  {knot.strength} strength
+                                </span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="transition-transform group-open:rotate-180">
+                                  <path d="M6 9 L12 15 L18 9" />
+                                </svg>
+                              </span>
+                            </summary>
+                            <ol className="flex flex-col gap-1.5 border-t border-border px-3 py-2.5 text-sm text-text">
+                              {knot.steps.map((step, index) => (
+                                <li key={step} className="flex gap-2.5">
+                                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-border text-[0.6875rem] font-bold tabular-nums">
+                                    {index + 1}
+                                  </span>
+                                  <span className="leading-relaxed">{localizeText(step, requestUnits())}</span>
+                                </li>
+                              ))}
+                            </ol>
+                          </details>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </section>
+
+                <section className="flex flex-col gap-2 border-t border-border pt-3">
                   <h4 className="section-label">Hook &amp; sinker for today&apos;s fish</h4>
                   <ul className="flex flex-col gap-2.5">
                     {fish.map((pick) => (
@@ -1094,8 +1182,75 @@ function RigsAndTips({
           )
         })}
       </ol>
+      {hooksFor(guidance.species.map((pick) => pick.bait).join('; ')).length > 0 && (
+        <section className="flex flex-col gap-2 rounded-md border border-border bg-surface-raised p-4 sm:p-5">
+          <h4 className="section-label">Today&apos;s baits</h4>
+          <HookIt
+            hows={hooksFor(guidance.species.map((pick) => pick.bait).join('; '))}
+            say={(text) => localizeText(text, requestUnits())}
+            label="How to hook today's baits"
+          />
+        </section>
+      )}
       <p className="text-xs text-text-muted">{guidance.disclaimer}</p>
     </>
+  )
+}
+
+/** "Runs & migrations": the seasonal runs on now in this region and the
+ * ones starting in the next two months (lib/runs.ts), each with what's
+ * happening and how to fish it. */
+function RunsAndMigrations({ guidance, linkFish }: { guidance: FishingGuidance; linkFish: boolean }) {
+  const runs = runsFor(guidance.basis.region, guidance.basis.month)
+  if (runs.length === 0) return null
+  const names = new Map<string, string>([
+    ...(guidance.calendar ?? []).map((row) => [row.id, row.name] as [string, string]),
+    ...guidance.species.map((pick) => [pick.id, pick.name] as [string, string]),
+  ])
+  const units = requestUnits()
+  return (
+    <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      {runs.map(({ run, status, startsIn }) => {
+        const fish = run.fish.filter((id) => names.has(id))
+        return (
+          <li key={run.id} className="flex flex-col gap-2 rounded-md border border-border bg-surface-raised p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="font-bold text-text">{run.title}</span>
+              <span
+                className={cx(
+                  'rounded-full px-2.5 py-0.5 text-xs font-bold',
+                  status === 'now' ? 'bg-accent-tint text-accent' : 'bg-border text-text-muted',
+                )}
+              >
+                {status === 'now'
+                  ? 'On now'
+                  : `Starts in ${_MONTH_NAMES[(guidance.basis.month - 1 + (startsIn ?? 1)) % 12]}`}
+              </span>
+            </div>
+            <p className="text-sm leading-relaxed text-text">{localizeText(run.what, units)}</p>
+            <p className="text-sm leading-relaxed text-text-muted">
+              <span className="font-semibold text-text">How: </span>
+              {localizeText(run.how, units)}
+            </p>
+            {fish.length > 0 && (
+              <p className="flex flex-wrap gap-1.5 text-xs">
+                {fish.map((id) =>
+                  linkFish ? (
+                    <a key={id} href={`/fish/${id}`} className="rounded-full bg-primary-tint px-2 py-0.5 font-semibold text-primary no-underline hover:underline">
+                      {names.get(id)}
+                    </a>
+                  ) : (
+                    <span key={id} className="rounded-full bg-primary-tint px-2 py-0.5 font-semibold text-primary">
+                      {names.get(id)}
+                    </span>
+                  ),
+                )}
+              </p>
+            )}
+          </li>
+        )
+      })}
+    </ul>
   )
 }
 
@@ -1104,6 +1259,12 @@ function RigsAndTips({
 function SizeAndBagLimits({ guidance }: { guidance: FishingGuidance }) {
   const picks = guidance.species.filter((pick) => pick.regulation)
   return (
+    <div className="flex flex-col gap-4">
+    <KeepCheck
+      units={requestUnits()}
+      asOf={formatAsOf(picks[0].regulation!.as_of)}
+      options={picks.map((pick) => ({ key: pick.id, label: pick.name, ...pick.regulation! }))}
+    />
     <ul className="flex flex-col divide-y divide-border">
       {picks.map((pick) => {
         const regulation = pick.regulation!
@@ -1144,6 +1305,7 @@ function SizeAndBagLimits({ guidance }: { guidance: FishingGuidance }) {
         )
       })}
     </ul>
+    </div>
   )
 }
 
@@ -1512,7 +1674,7 @@ export function ForecastCard({
             tab: 'fish',
             content: (
               <>
-                {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} />}
+                {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} linkFish={profile !== null} />}
               </>
             ),
           },
@@ -1541,7 +1703,7 @@ export function ForecastCard({
                           {watersFor(profile).length > 0 && (
                             <h3 className="section-label mt-2">Rigs for today</h3>
                           )}
-                          <RigsAndTips guidance={forecast.recommendations} profile={profile} />
+                          <RigsAndTips guidance={forecast.recommendations} profile={profile} conditions={conditions} />
                         </>
                       )}
                     </CollapsibleSection>
@@ -1608,7 +1770,27 @@ export function ForecastCard({
                       <SpeciesCalendar
                         rows={forecast.recommendations.calendar}
                         currentMonth={forecast.recommendations.basis.month}
+                        linkFish={profile !== null}
                       />
+                    </CollapsibleSection>
+                  </Card>
+                )}
+              </>
+            ),
+          },
+          {
+            id: 'runs',
+            label: 'Runs & migrations',
+            tab: 'fish',
+            content: (
+              <>
+                {forecast.recommendations && runsFor(forecast.recommendations.basis.region, forecast.recommendations.basis.month).length > 0 && (
+                  <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
+                    <CollapsibleSection
+                      title="Runs & migrations"
+                      aside={<span className="text-xs text-text-muted">Seasonal runs here, now and next</span>}
+                    >
+                      <RunsAndMigrations guidance={forecast.recommendations} linkFish={profile !== null} />
                     </CollapsibleSection>
                   </Card>
                 )}

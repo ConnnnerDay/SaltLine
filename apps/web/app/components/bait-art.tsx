@@ -1,0 +1,561 @@
+/**
+ * Comic-style panels for "How to hook it" (lib/hook-bait.ts): one panel
+ * per step, drawn in bold ink outlines and flat colors, with a red dashed
+ * arrow for the hook's path and short shout-out labels. The panels keep
+ * their own light "paper" in both themes, like a printed comic, so the
+ * ink reads the same everywhere.
+ *
+ * `BAIT_ART[baitId][stepIndex]` is the drawing for that step; a step
+ * without one just shows its caption.
+ */
+
+const INK = '#1c1917'
+const PAPER = '#fffaf0'
+const HOOK = '#a8b0bb'
+const RED = '#e63946'
+const SHRIMP = '#f4a582'
+const SHRIMP_DARK = '#d9774f'
+const FISH = '#bcd4e6'
+const FISH_BACK = '#7d9fb8'
+const MEAT = '#f2a7a0'
+const SAND = '#f3e2b3'
+const CRAB = '#e76f51'
+const FIDDLER = '#d4a373'
+const WORM = '#d4625a'
+const CLAM = '#f5deb3'
+const SQUID = '#f3e4ea'
+const GREEN = '#6a994e'
+const THREAD = '#2a7de1'
+const WATER = '#cfe8f7'
+
+const ink = { stroke: INK, strokeWidth: 3, strokeLinejoin: 'round' as const, strokeLinecap: 'round' as const }
+
+/** A J hook: eye at the origin, shank straight down, point up on the right. */
+function Hook({ x, y, s = 1, r = 0 }: { x: number; y: number; s?: number; r?: number }) {
+  const d = 'M0 0 L0 44 C0 64 28 64 28 44 L28 32'
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${r}) scale(${s})`}>
+      <circle cx="0" cy="-6" r="6" fill="none" stroke={INK} strokeWidth={7 / s} />
+      <circle cx="0" cy="-6" r="6" fill="none" stroke={HOOK} strokeWidth={3.5 / s} />
+      <path d={d} fill="none" stroke={INK} strokeWidth={8 / s} strokeLinecap="round" />
+      <path d={d} fill="none" stroke={HOOK} strokeWidth={4 / s} strokeLinecap="round" />
+      <path d="M28 32 L20 42" stroke={INK} strokeWidth={6 / s} strokeLinecap="round" />
+      <path d="M28 32 L20 42" stroke={HOOK} strokeWidth={2.5 / s} strokeLinecap="round" />
+      <path d="M2 8 L2 36" stroke="#fff" strokeWidth={1.5 / s} strokeLinecap="round" opacity="0.8" />
+    </g>
+  )
+}
+
+/** The hook's route: a red dashed arrow. */
+function Route({ d }: { d: string }) {
+  return (
+    <g>
+      <path d={d} fill="none" stroke={RED} strokeWidth="3" strokeDasharray="7 5" strokeLinecap="round" markerEnd="url(#bait-arrow)" />
+    </g>
+  )
+}
+
+/** A shout-out label with a pointer line to (tx, ty). */
+function Label({ x, y, text, tx, ty, color = INK }: { x: number; y: number; text: string; tx?: number; ty?: number; color?: string }) {
+  return (
+    <g>
+      {tx !== undefined && ty !== undefined && <path d={`M${x} ${y + 3} L${tx} ${ty}`} stroke={INK} strokeWidth="1.5" />}
+      <text
+        x={x}
+        y={y}
+        textAnchor="middle"
+        fontSize="11"
+        fontWeight="900"
+        fontFamily="ui-rounded, 'Comic Sans MS', system-ui, sans-serif"
+        fill={color}
+        stroke={PAPER}
+        strokeWidth="4"
+        paintOrder="stroke"
+        letterSpacing="0.3"
+      >
+        {text}
+      </text>
+    </g>
+  )
+}
+
+/** A little "pop" star for emphasis. */
+function Pop({ x, y, r = 10, fill = '#ffd166' }: { x: number; y: number; r?: number; fill?: string }) {
+  const points = Array.from({ length: 16 }, (_, i) => {
+    const radius = i % 2 === 0 ? r : r * 0.5
+    const angle = (Math.PI * i) / 8
+    return `${(x + radius * Math.cos(angle)).toFixed(1)},${(y + radius * Math.sin(angle)).toFixed(1)}`
+  }).join(' ')
+  return <polygon points={points} fill={fill} {...ink} strokeWidth={2} />
+}
+
+function Dot({ x, y }: { x: number; y: number }) {
+  return <circle cx={x} cy={y} r="3.5" fill={RED} stroke={INK} strokeWidth="1.5" />
+}
+
+// ---------- baits ----------
+
+/** A shrimp facing right; head (horn, eye, dark brain spot) near x+100. */
+function Shrimp({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${s})`}>
+      <path d="M2 30 L-18 16 L-13 30 L-18 44 Z" fill={SHRIMP_DARK} {...ink} />
+      {[46, 54, 62, 70, 78, 86].map((lx) => (
+        <path key={lx} d={`M${lx} 40 l-4 12`} {...ink} strokeWidth={2} fill="none" />
+      ))}
+      <path d="M2 30 C10 6 70 0 100 14 C114 22 114 34 100 38 C72 48 24 50 2 30 Z" fill={SHRIMP} {...ink} />
+      {[28, 46, 64].map((sx) => (
+        <path key={sx} d={`M${sx} 10 Q${sx + 5} 26 ${sx} 44`} fill="none" stroke={SHRIMP_DARK} strokeWidth="2" />
+      ))}
+      <path d="M100 14 L126 4 L106 22 Z" fill={SHRIMP_DARK} {...ink} strokeWidth={2.5} />
+      <path d="M108 20 C128 10 146 16 162 4" fill="none" {...ink} strokeWidth={2} />
+      <path d="M108 26 C132 26 146 34 166 28" fill="none" {...ink} strokeWidth={2} />
+      <circle cx="90" cy="24" r="6" fill="#5b3a29" stroke={INK} strokeWidth="1.5" />
+      <circle cx="104" cy="22" r="3.5" fill={INK} />
+    </g>
+  )
+}
+
+/** A baitfish facing left, mouth at (x, y+18). */
+function Baitfish({ x, y, s = 1, w = 120 }: { x: number; y: number; s?: number; w?: number }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${s})`}>
+      <path d={`M${w - 10} 18 L${w + 18} 0 L${w + 12} 18 L${w + 18} 36 Z`} fill={FISH_BACK} {...ink} />
+      <path d={`M${w * 0.42} 4 L${w * 0.55} -12 L${w * 0.66} 3 Z`} fill={FISH_BACK} {...ink} strokeWidth={2.5} />
+      <path d={`M0 18 C10 0 ${w * 0.6} -4 ${w} 18 C${w * 0.6} 40 10 36 0 18 Z`} fill={FISH} {...ink} />
+      <path d={`M8 12 C${w * 0.4} 2 ${w * 0.7} 6 ${w - 4} 16`} fill="none" stroke={FISH_BACK} strokeWidth="4" opacity="0.7" />
+      <path d={`M${w * 0.22} 8 Q${w * 0.28} 18 ${w * 0.22} 30`} fill="none" stroke={INK} strokeWidth="2" />
+      <circle cx="14" cy="15" r="4" fill="#fff" stroke={INK} strokeWidth="2" />
+      <circle cx="13" cy="15" r="2" fill={INK} />
+      <path d="M0 18 L7 20" stroke={INK} strokeWidth="2" />
+    </g>
+  )
+}
+
+/** A chunk of cut fish: skin on top, meat below. */
+function Chunk({ x, y, w = 70, h = 34, pale = false }: { x: number; y: number; w?: number; h?: number; pale?: boolean }) {
+  return (
+    <g transform={`translate(${x} ${y})`}>
+      <path d={`M0 6 Q${w / 2} -6 ${w} 6 L${w - 6} ${h} Q${w / 2} ${h + 6} 6 ${h} Z`} fill={pale ? '#f1e4df' : MEAT} {...ink} />
+      <path d={`M2 8 Q${w / 2} -2 ${w - 2} 8`} fill="none" stroke={pale ? '#b9c3cb' : FISH_BACK} strokeWidth="6" />
+      {!pale && <path d={`M${w * 0.3} 18 q6 6 12 0 M${w * 0.55} 22 q6 6 12 0`} fill="none" stroke="#c96f66" strokeWidth="2" />}
+    </g>
+  )
+}
+
+function SandFlea({ x, y, s = 1, eggs = false }: { x: number; y: number; s?: number; eggs?: boolean }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${s})`}>
+      <path d="M0 26 C0 4 70 -2 86 20 C90 30 80 40 70 42 L8 42 C2 40 0 34 0 26 Z" fill={SAND} {...ink} />
+      {[20, 36, 52, 66].map((sx) => (
+        <path key={sx} d={`M${sx} 6 Q${sx + 4} 24 ${sx} 42`} fill="none" stroke="#c9b27a" strokeWidth="2" />
+      ))}
+      <path d="M0 30 L-16 26 L-14 38 L2 38 Z" fill="#e6cf91" {...ink} strokeWidth={2.5} />
+      {eggs && <ellipse cx="44" cy="40" rx="20" ry="7" fill="#f4a261" {...ink} strokeWidth={2} />}
+      <path d="M84 16 l12 -8 M86 22 l14 -2" {...ink} strokeWidth={2} />
+    </g>
+  )
+}
+
+function Fiddler({ x, y, s = 1, clawless = false }: { x: number; y: number; s?: number; clawless?: boolean }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${s})`}>
+      {[0, 1, 2].map((i) => (
+        <path key={`l${i}`} d={`M${18 + i * 8} 34 l-12 ${10 + i * 2}`} {...ink} strokeWidth={3} fill="none" />
+      ))}
+      {[0, 1, 2].map((i) => (
+        <path key={`r${i}`} d={`M${52 - i * 8} 34 l12 ${10 + i * 2}`} {...ink} strokeWidth={3} fill="none" />
+      ))}
+      <path d="M6 22 C6 6 64 6 64 22 C64 36 6 36 6 22 Z" fill={FIDDLER} {...ink} />
+      <path d="M24 10 l-2 -10 M46 10 l2 -10" {...ink} strokeWidth={2.5} />
+      <circle cx="22" cy="0" r="3" fill={INK} />
+      <circle cx="48" cy="0" r="3" fill={INK} />
+      {clawless ? (
+        <circle cx="66" cy="22" r="4" fill="#8a5a3c" stroke={INK} strokeWidth="2" />
+      ) : (
+        <path d="M62 18 C80 6 104 10 102 24 C100 34 82 36 66 28 Z" fill="#f2e2c4" {...ink} />
+      )}
+      <path d="M4 22 C-6 16 -10 24 -4 28" fill="#f2e2c4" {...ink} strokeWidth={2.5} />
+    </g>
+  )
+}
+
+function Worm({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${s})`}>
+      <path d="M0 0 C20 -16 40 16 60 0 C80 -16 100 16 120 0" fill="none" stroke={INK} strokeWidth="14" strokeLinecap="round" />
+      <path d="M0 0 C20 -16 40 16 60 0 C80 -16 100 16 120 0" fill="none" stroke={WORM} strokeWidth="9" strokeLinecap="round" />
+      {[16, 36, 56, 76, 96].map((sx) => (
+        <path key={sx} d={`M${sx} -6 l0 10`} stroke="#a8433d" strokeWidth="1.5" />
+      ))}
+    </g>
+  )
+}
+
+function Panel({ children, label }: { children: React.ReactNode; label: string }) {
+  return (
+    <svg viewBox="0 0 200 140" role="img" aria-label={label} className="block h-auto w-full">
+      <defs>
+        <marker id="bait-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 Z" fill={RED} />
+        </marker>
+        <pattern id="bait-dots" width="8" height="8" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1" fill="#f0e2c4" />
+        </pattern>
+      </defs>
+      <rect x="2" y="2" width="196" height="136" rx="10" fill={PAPER} />
+      <rect x="2" y="2" width="196" height="136" rx="10" fill="url(#bait-dots)" />
+      {children}
+      <rect x="2" y="2" width="196" height="136" rx="10" fill="none" stroke={INK} strokeWidth="3" />
+    </svg>
+  )
+}
+
+type Art = (label: string) => React.ReactNode
+
+const ART: Record<string, Art[]> = {
+  shrimp: [
+    (label) => (
+      <Panel label={label}>
+        <Shrimp x={22} y={60} s={1} />
+        <Hook x={126} y={34} s={0.62} />
+        <Dot x={126} y={66} />
+        <Dot x={143} y={57} />
+        <Label x={72} y={128} text="MISS THE DARK SPOT!" tx={112} ty={88} color={RED} />
+        <Label x={130} y={22} text="UNDER THE HORN" />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        <Shrimp x={40} y={48} s={0.95} />
+        <Route d="M14 80 C40 84 62 94 96 94" />
+        <Dot x={30} y={78} />
+        <Dot x={98} y={88} />
+        <Label x={46} y={124} text="IN: TAIL" tx={30} ty={84} />
+        <Label x={148} y={124} text="OUT: BELLY" tx={100} ty={94} />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        <path d="M30 40 C46 24 70 26 78 40 C70 54 46 56 30 40 Z" fill={SHRIMP} {...ink} />
+        <path d="M44 30 Q48 40 44 52 M58 28 Q62 40 58 54" fill="none" stroke={SHRIMP_DARK} strokeWidth="2" />
+        <path d="M84 40 l16 0" {...ink} />
+        <path d="M94 34 l8 6 l-8 6" fill="none" {...ink} />
+        <Hook x={140} y={28} s={0.9} />
+        <path d="M128 62 C128 50 160 50 160 62 C160 76 128 76 128 62 Z" fill={SHRIMP} {...ink} />
+        <Label x={56} y={84} text="PEEL IT" />
+        <Label x={138} y={120} text="BURY THE POINT" tx={150} ty={74} />
+      </Panel>
+    ),
+  ],
+  baitfish: [
+    (label) => (
+      <Panel label={label}>
+        <Baitfish x={56} y={52} />
+        <Hook x={44} y={34} s={0.7} />
+        <Route d="M30 104 C30 88 40 76 52 72" />
+        <Label x={100} y={124} text="UP THROUGH BOTH LIPS" />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        <path d="M86 6 L86 30" {...ink} strokeWidth={2} />
+        <ellipse cx="86" cy="18" rx="9" ry="12" fill={RED} {...ink} />
+        <path d="M77 18 h18" stroke="#fff" strokeWidth="5" />
+        <Baitfish x={36} y={70} />
+        <Hook x={86} y={38} s={0.7} />
+        <Label x={138} y={52} text="ABOVE THE SPINE" tx={104} ty={72} />
+        <Label x={100} y={128} text="SWIMS AWAY FROM YOU" />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        <Baitfish x={56} y={56} />
+        <Hook x={60} y={30} s={0.7} />
+        <Dot x={62} y={66} />
+        <Label x={40} y={40} text="NOSE" tx={58} ty={64} />
+        <Label x={110} y={124} text="FOR SLOW-TROLLING" />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        <path d="M48 36 L152 36 L140 124 L60 124 Z" fill="#f8f9fa" {...ink} />
+        <path d="M54 56 L146 56 L138 118 L62 118 Z" fill={WATER} stroke="none" />
+        <path d="M48 36 Q100 10 152 36" fill="none" {...ink} strokeWidth={2.5} />
+        <Baitfish x={72} y={74} s={0.5} />
+        <Baitfish x={92} y={92} s={0.45} />
+        {[[120, 104], [126, 90], [118, 76], [128, 66]].map(([cx, cy]) => (
+          <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="4" fill="#fff" stroke={INK} strokeWidth="1.5" />
+        ))}
+        <path d="M132 112 L170 30" {...ink} strokeWidth={2.5} />
+        <rect x="160" y="16" width="26" height="18" rx="3" fill="#ffd166" {...ink} strokeWidth={2.5} />
+        <Label x={173} y={50} text="AIR" />
+        <Label x={60} y={26} text="KEEP 'EM KICKING" />
+      </Panel>
+    ),
+  ],
+  cut: [
+    (label) => (
+      <Panel label={label}>
+        <Baitfish x={34} y={46} s={1.05} />
+        {[70, 98, 126].map((cx) => (
+          <path key={cx} d={`M${cx} 34 L${cx - 6} 96`} stroke={RED} strokeWidth="3" strokeDasharray="6 4" />
+        ))}
+        <Label x={100} y={124} text="SKIN-ON CHUNKS" />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        <Chunk x={58} y={56} w={84} h={38} />
+        <Hook x={86} y={30} s={0.85} />
+        <Dot x={86} y={60} />
+        <Label x={62} y={24} text="THROUGH THE SKIN" tx={84} ty={56} />
+        <Label x={136} y={126} text="POINT CLEAR!" tx={112} ty={66} color={RED} />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        <circle cx="56" cy="66" r="34" fill="#fff" {...ink} />
+        <path d="M56 66 L56 42 M56 66 L72 74" {...ink} strokeWidth={3.5} />
+        <path d="M56 32 v6 M90 66 h-6 M56 100 v-6 M22 66 h6" {...ink} strokeWidth={2} />
+        <Chunk x={112} y={50} w={64} h={30} pale />
+        <path d="M120 100 l12 0 M160 100 l12 0" {...ink} strokeWidth={2} />
+        <Label x={144} y={44} text="WASHED OUT?" />
+        <Label x={100} y={126} text="FRESH ONE EVERY 15–20 MIN" />
+      </Panel>
+    ),
+  ],
+  squid: [
+    (label) => (
+      <Panel label={label}>
+        <path d="M24 70 C24 50 100 46 140 58 L168 50 L162 70 L168 90 L140 82 C100 94 24 90 24 70 Z" fill={SQUID} {...ink} />
+        {[60, 88, 116].map((cx) => (
+          <path key={cx} d={`M${cx - 4} 52 L${cx + 4} 88`} stroke={RED} strokeWidth="3" strokeDasharray="6 4" />
+        ))}
+        {[34, 54, 74, 94].map((cx) => (
+          <circle key={cx} cx={cx} cy={64 + (cx % 3)} r="2.5" fill="#c77d9b" />
+        ))}
+        <Label x={100} y={124} text="LONG, TAPERED STRIPS" />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        <path d="M70 70 L96 64 C120 74 150 96 176 120 C140 108 112 96 96 84 Z" fill={SQUID} {...ink} />
+        <Hook x={78} y={36} s={0.8} />
+        <Label x={56} y={110} text="WIDE END ON" tx={84} ty={80} />
+        <Label x={150} y={64} text="TAIL FLUTTERS" tx={150} ty={100} />
+      </Panel>
+    ),
+  ],
+  'sand-flea': [
+    (label) => (
+      <Panel label={label}>
+        <SandFlea x={46} y={48} s={1.25} />
+        <Hook x={66} y={20} s={0.75} />
+        <Route d="M40 116 C46 108 56 104 62 100" />
+        <Label x={70} y={128} text="IN UNDER THE TAIL" />
+        <Label x={150} y={30} text="OUT THE TOP" tx={98} ty={50} />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        <SandFlea x={46} y={42} s={1.25} eggs />
+        <Pop x={160} y={34} r={16} />
+        <Label x={100} y={124} text="SOFT + ORANGE EGGS = GOLD" />
+      </Panel>
+    ),
+  ],
+  fiddler: [
+    (label) => (
+      <Panel label={label}>
+        <Fiddler x={44} y={52} s={1.2} />
+        <Hook x={72} y={30} s={0.7} />
+        <Dot x={64} y={94} />
+        <Label x={56} y={128} text="BACK LEG JOINT" tx={64} ty={98} />
+        <Label x={150} y={128} text="OUT THE TOP" tx={94} ty={62} />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        <Fiddler x={44} y={56} s={1.2} clawless />
+        <path d="M150 40 C168 30 186 36 184 48 C182 58 166 58 154 52 Z" fill="#f2e2c4" {...ink} />
+        <Pop x={140} y={52} r={9} />
+        <Hook x={124} y={34} s={0.6} r={20} />
+        <Label x={150} y={24} text="SNAP!" color={RED} />
+        <Label x={90} y={128} text="HOOK THROUGH THE HOLE" />
+      </Panel>
+    ),
+  ],
+  crab: [
+    (label) => (
+      <Panel label={label}>
+        <path d="M30 60 C30 34 96 34 96 60 L96 92 C70 104 40 100 30 92 Z" fill={CRAB} {...ink} />
+        <path d="M110 60 C110 34 176 34 176 60 L176 92 C150 104 120 100 110 92 Z" fill={CRAB} {...ink} />
+        <path d="M100 36 L104 104" stroke={RED} strokeWidth="3" strokeDasharray="6 4" />
+        <path d="M96 64 C90 66 90 86 96 88 M110 64 C116 66 116 86 110 88" fill="#f6d5c3" {...ink} strokeWidth={2} />
+        <Hook x={150} y={30} s={0.6} />
+        <Label x={100} y={124} text="HALVES, CLAWS OFF" />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        {[0, 1, 2].map((i) => (
+          <path key={i} d={`M${60 + i * 12} 90 l-8 16 M${132 - i * 12} 90 l8 16`} {...ink} strokeWidth={3} />
+        ))}
+        <path d="M44 72 C44 44 156 44 156 72 C156 96 44 96 44 72 Z" fill={CRAB} {...ink} />
+        <path d="M44 68 L28 60 L44 78 Z M156 68 L172 60 L156 78 Z" fill={CRAB} {...ink} strokeWidth={2.5} />
+        <Hook x={150} y={30} s={0.7} />
+        <Dot x={152} y={64} />
+        <Label x={100} y={30} text="THROUGH THE CORNER" tx={146} ty={60} />
+        <Label x={100} y={128} text="STAYS ALIVE" />
+      </Panel>
+    ),
+  ],
+  worm: [
+    (label) => (
+      <Panel label={label}>
+        <Hook x={60} y={28} s={1} />
+        <path d="M60 34 L60 70 C60 86 86 86 88 72" fill="none" stroke={INK} strokeWidth="14" strokeLinecap="round" />
+        <path d="M60 34 L60 70 C60 86 86 86 88 72" fill="none" stroke={WORM} strokeWidth="9" strokeLinecap="round" />
+        <path d="M88 72 C96 60 112 80 124 68" fill="none" stroke={INK} strokeWidth="12" strokeLinecap="round" />
+        <path d="M88 72 C96 60 112 80 124 68" fill="none" stroke={WORM} strokeWidth="7" strokeLinecap="round" />
+        <Label x={146} y={44} text="HEAD FIRST" tx={66} ty={40} />
+        <Label x={146} y={100} text="TAIL WIGGLES" tx={122} ty={72} />
+        <Label x={72} y={128} text="WATCH THE BITE!" color={RED} />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        <Worm x={40} y={70} />
+        {[60, 72, 84].map((cx) => (
+          <path key={cx} d={`M${cx} 58 l-6 26`} stroke={THREAD} strokeWidth="2.5" />
+        ))}
+        <Label x={100} y={124} text="A FEW WRAPS OF THREAD" color={THREAD} />
+      </Panel>
+    ),
+  ],
+  clam: [
+    (label) => (
+      <Panel label={label}>
+        <path d="M24 76 C24 40 90 40 90 76 Z" fill={CLAM} {...ink} />
+        <path d="M24 76 C24 104 90 104 90 76 Z" fill={CLAM} {...ink} />
+        <ellipse cx="57" cy="76" rx="20" ry="10" fill="#f6b38a" {...ink} strokeWidth={2} />
+        <path d="M98 76 h14 M106 70 l8 6 l-8 6" fill="none" {...ink} />
+        <Hook x={150} y={28} s={0.9} />
+        <path d="M134 70 C134 58 166 58 168 70 C168 84 134 84 134 70 Z" fill="#f6b38a" {...ink} />
+        <Label x={100} y={124} text="THREAD ON THE TOUGH FOOT" />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        <Hook x={92} y={22} s={1.1} />
+        <path d="M76 64 C76 50 112 50 116 64 C116 82 76 82 76 64 Z" fill="#f6b38a" {...ink} />
+        {[0, 1, 2, 3].map((i) => (
+          <path key={i} d={`M${72 + i * 12} 52 l12 28`} stroke={THREAD} strokeWidth="3" />
+        ))}
+        <Label x={100} y={124} text="WRAP IT OR LOSE IT" color={THREAD} />
+      </Panel>
+    ),
+  ],
+  fishbites: [
+    (label) => (
+      <Panel label={label}>
+        <rect x="22" y="56" width="70" height="22" rx="3" fill="#ff8fab" {...ink} />
+        <path d="M36 56 v22 M50 56 v22 M64 56 v22 M78 56 v22" stroke="#e0607e" strokeWidth="2" />
+        <path d="M98 66 h14 M106 60 l8 6 l-8 6" fill="none" {...ink} />
+        <Hook x={150} y={28} s={0.9} />
+        <path d="M136 64 L164 64 L164 78 L136 78 Z" fill="#ff8fab" {...ink} />
+        <Label x={60} y={44} text="1-IN STRIP" />
+        <Label x={100} y={124} text="HOOK ONCE OR TWICE" />
+      </Panel>
+    ),
+  ],
+  sabiki: [
+    (label) => (
+      <Panel label={label}>
+        <path d="M100 8 L100 104" {...ink} strokeWidth={2} />
+        {[24, 44, 64, 84].map((cy) => (
+          <g key={cy}>
+            <path d={`M100 ${cy} l16 6`} {...ink} strokeWidth={1.5} />
+            <path d={`M116 ${cy + 6} q6 2 4 10`} fill="none" stroke={HOOK} strokeWidth="2.5" />
+            <path d={`M114 ${cy + 4} l6 -4 l2 6 z`} fill="#ff6b9a" stroke={INK} strokeWidth="1" />
+          </g>
+        ))}
+        <path d="M94 104 L106 104 L100 118 Z" fill="#6b7280" {...ink} strokeWidth={2} />
+        <path d="M60 40 L60 90" stroke={RED} strokeWidth="3" markerEnd="url(#bait-arrow)" markerStart="url(#bait-arrow)" />
+        <Baitfish x={140} y={54} s={0.4} />
+        <Baitfish x={146} y={80} s={0.4} />
+        <Label x={64} y={128} text="SLOW UP & DOWN" />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        <path d="M60 50 q20 6 16 30" fill="none" stroke={HOOK} strokeWidth="6" />
+        <path d="M60 50 q20 6 16 30" fill="none" stroke={INK} strokeWidth="1.5" />
+        <circle cx="76" cy="82" r="6" fill={SHRIMP} {...ink} strokeWidth={2} />
+        <Pop x={130} y={62} r={20} />
+        <Label x={130} y={66} text="TIP IT" />
+        <Label x={100} y={124} text="A SPECK OF SHRIMP" />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        <rect x="40" y="56" width="120" height="30" rx="15" fill="#ffd166" {...ink} />
+        {[60, 80, 100, 120, 140].map((cx) => (
+          <path key={cx} d={`M${cx} 50 L${cx + 6} 92`} stroke={INK} strokeWidth="1.5" />
+        ))}
+        <Label x={100} y={40} text="POOL NOODLE" />
+        <Label x={100} y={124} text="NO TANGLES, NO OUCH" />
+      </Panel>
+    ),
+  ],
+  dough: [
+    (label) => (
+      <Panel label={label}>
+        <Hook x={96} y={24} s={0.9} />
+        <circle cx="108" cy="78" r="18" fill="#f5e6c8" {...ink} />
+        <path d="M100 70 q4 -4 8 0" fill="none" stroke="#c9a96e" strokeWidth="2" />
+        <Label x={100} y={124} text="PEA-SIZE, SQUEEZED FIRM" />
+      </Panel>
+    ),
+  ],
+  limu: [
+    (label) => (
+      <Panel label={label}>
+        <Hook x={96} y={22} s={0.9} />
+        <path d="M90 52 C70 60 74 90 96 96 C120 100 126 70 112 56 C104 48 96 50 90 52 Z" fill={GREEN} {...ink} />
+        <path d="M84 60 c-10 -8 -20 -6 -24 4 M118 70 c10 -6 20 0 22 10" fill="none" stroke={GREEN} strokeWidth="5" strokeLinecap="round" />
+        {[0, 1, 2].map((i) => (
+          <path key={i} d={`M${86 + i * 10} 56 l8 34`} stroke={THREAD} strokeWidth="3" />
+        ))}
+        <Label x={100} y={124} text="WRAP & TIE ON" />
+      </Panel>
+    ),
+  ],
+  'ghost-shrimp': [
+    (label) => (
+      <Panel label={label}>
+        <path d="M30 70 C40 50 120 50 150 62 C166 70 160 86 144 86 C110 92 46 92 30 70 Z" fill="#f7e1e8" {...ink} />
+        <path d="M150 62 C170 52 182 60 176 70 C170 76 160 74 154 70" fill="#f7e1e8" {...ink} strokeWidth={2.5} />
+        <path d="M30 70 L14 60 L16 82 Z" fill="#f0c6d3" {...ink} strokeWidth={2.5} />
+        <Route d="M14 100 C40 96 80 96 120 90" />
+        <Label x={100} y={124} text="THREAD IN AT THE TAIL" />
+      </Panel>
+    ),
+    (label) => (
+      <Panel label={label}>
+        <path d="M40 70 C50 50 130 50 160 62 C170 70 164 86 150 86 C116 92 56 92 40 70 Z" fill="#f7e1e8" {...ink} />
+        {[70, 90, 110, 130].map((cx) => (
+          <path key={cx} d={`M${cx} 52 l-8 38`} stroke={THREAD} strokeWidth="3" />
+        ))}
+        <Label x={100} y={124} text="SOFT? WRAP IT." color={THREAD} />
+      </Panel>
+    ),
+  ],
+}
+
+/** The comic panel for one step of a bait how-to, or null. */
+export function BaitArt({ id, step, label }: { id: string; step: number; label: string }) {
+  const art = ART[id]?.[step]
+  return art ? <>{art(label)}</> : null
+}

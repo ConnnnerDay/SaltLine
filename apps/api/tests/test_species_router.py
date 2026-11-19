@@ -36,6 +36,7 @@ def test_lists_every_catalogue_fish(client: TestClient) -> None:
     assert red["access"] == "shore"
     assert "atlantic_mid" in red["regions"]
     assert red["peak_months"] and "bait" not in red  # summaries stay small
+    assert red["spawn"]["months"] and red["spawn"]["note"]
 
 
 def test_one_fish_in_full_with_state_limits(client: TestClient) -> None:

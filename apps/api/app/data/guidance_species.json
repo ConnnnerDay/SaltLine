@@ -46,7 +46,18 @@
         "bottom",
         "inshore_slam"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "temp_low": 70,
+        "temp_high": 82,
+        "note": "Red drum spawn near inlets, passes, and the surf zone; large 'bull reds' congregate in accessible numbers \u2014 releasing large breeders protects the fishery."
+      }
     },
     {
       "id": "black-drum",
@@ -88,7 +99,17 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5
+        ],
+        "temp_low": 60,
+        "temp_high": 74,
+        "note": "Black drum gather in large pods near inlets and inshore structure to spawn; their low drumming is audible underwater and signals active fish."
+      }
     },
     {
       "id": "bluefish",
@@ -130,7 +151,17 @@
       "targets": [
         "pelagic"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7
+        ],
+        "temp_low": 65,
+        "temp_high": 76,
+        "note": "Bluefish spawn in nearshore and offshore waters; large schools blitzing baitfish near the surface are common sights during spawning season."
+      }
     },
     {
       "id": "speckled-trout",
@@ -173,7 +204,19 @@
       "targets": [
         "inshore_slam"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 65,
+        "temp_high": 80,
+        "note": "Seatrout spawn repeatedly over seagrass beds and shallow bays; males produce a distinctive drumming call at dawn and dusk to attract females \u2014 active fish are vocal fish."
+      }
     },
     {
       "id": "whiting-sea-mullet",
@@ -215,7 +258,18 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 70,
+        "temp_high": 84,
+        "note": "King mackerel spawn in offshore waters; fish push large baitfish schools to the surface and are highly aggressive near any bait concentration."
+      }
     },
     {
       "id": "spot",
@@ -255,7 +309,17 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          9,
+          10,
+          11
+        ],
+        "temp_low": 62,
+        "temp_high": 74,
+        "note": "Spot migrate offshore to spawn in fall; the 'spot run' is one of the most anticipated autumn events for surf and pier anglers across the Southeast."
+      }
     },
     {
       "id": "atlantic-croaker",
@@ -295,7 +359,18 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "temp_low": 65,
+        "temp_high": 78,
+        "note": "Croaker move offshore in fall to spawn; the 'croaker run' concentrates fish along piers and inlets before they head to deeper water."
+      }
     },
     {
       "id": "sheepshead",
@@ -333,7 +408,17 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          2,
+          3,
+          4
+        ],
+        "temp_low": 55,
+        "temp_high": 68,
+        "note": "Sheepshead move to nearshore reefs, jetties, and passes to spawn; large females are especially active \u2014 fiddler crabs fished straight down on structure are deadly."
+      }
     },
     {
       "id": "flounder",
@@ -376,7 +461,17 @@
         "bottom",
         "inshore_slam"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          10,
+          11,
+          12
+        ],
+        "temp_low": 55,
+        "temp_high": 70,
+        "note": "Summer flounder migrate offshore to the continental shelf edge to spawn; the fall run through inlets consistently produces the season's largest fish."
+      }
     },
     {
       "id": "pompano",
@@ -415,7 +510,17 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5
+        ],
+        "temp_low": 65,
+        "temp_high": 76,
+        "note": "Pompano spawn in nearshore surf waters; fish are especially active along beach troughs and passes during this run \u2014 sand fleas and Fishbites are top baits."
+      }
     },
     {
       "id": "spanish-mackerel",
@@ -455,7 +560,17 @@
       "targets": [
         "pelagic"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          6,
+          7,
+          8
+        ],
+        "temp_low": 72,
+        "temp_high": 82,
+        "note": "Spanish mackerel spawn in nearshore and offshore waters; large surface-busting schools are common \u2014 a white or silver spoon on a long cast is hard to beat."
+      }
     },
     {
       "id": "snook",
@@ -492,7 +607,18 @@
         "gamefish",
         "inshore_slam"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 74,
+        "temp_high": 84,
+        "note": "Snook aggregate at passes and inlets to spawn on outgoing tides; topwater lures and large live baits work best during low-light spawning pushes."
+      }
     },
     {
       "id": "striped-bass",
@@ -532,7 +658,17 @@
       "targets": [
         "pelagic"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5
+        ],
+        "temp_low": 50,
+        "temp_high": 65,
+        "note": "Striped bass migrate up coastal rivers and estuaries to spawn; fish stage at river mouths and inlet channels \u2014 early morning tidal flows concentrate pre-spawn fish."
+      }
     },
     {
       "id": "tautog",
@@ -570,7 +706,17 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6
+        ],
+        "temp_low": 52,
+        "temp_high": 65,
+        "note": "Tautog spawn on rocky reefs and around jetty structure; spawning fish are less wary than usual and respond well to fresh green crab on a knocker rig."
+      }
     },
     {
       "id": "black-sea-bass",
@@ -606,7 +752,17 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7
+        ],
+        "temp_low": 58,
+        "temp_high": 72,
+        "note": "Black sea bass gather on nearshore reefs and wrecks to spawn; males darken dramatically and defend territories, making them more aggressive biters."
+      }
     },
     {
       "id": "barred-surfperch",
@@ -646,7 +802,18 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "temp_low": 50,
+        "temp_high": 62,
+        "note": "Surfperch are livebearers that release pups in late winter and early spring; newly delivered females feed aggressively in the heavy shorebreak \u2014 the best surf fishing of the year."
+      }
     },
     {
       "id": "redtail-surfperch",
@@ -725,7 +892,18 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "temp_low": 55,
+        "temp_high": 65,
+        "note": "California halibut spawn over nearshore sandy bottom; post-spawn fish flood into bays and estuaries in large numbers and bite aggressively on live anchovies."
+      }
     },
     {
       "id": "corbina",
@@ -762,7 +940,17 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          6,
+          7,
+          8
+        ],
+        "temp_low": 65,
+        "temp_high": 72,
+        "note": "Corbina spawn in the summer surf zone over sandy bottom; sight-fishing to fish tailing in the shallows with a sand crab on a light leader is a California tradition."
+      }
     },
     {
       "id": "yellowfin-croaker",
@@ -799,7 +987,17 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          6,
+          7,
+          8
+        ],
+        "temp_low": 65,
+        "temp_high": 74,
+        "note": "Yellowfin croaker spawn in the surf zone in summer alongside spotfin croaker; beach fishing with sand crabs and fresh clam siphon at night is highly productive."
+      }
     },
     {
       "id": "black-rockfish",
@@ -873,7 +1071,17 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          1,
+          2,
+          3
+        ],
+        "temp_low": 46,
+        "temp_high": 54,
+        "note": "Lingcod spawn on rocky reefs in winter; males guard large white egg masses and are highly aggressive \u2014 fishing near the nest is extremely effective but regulated."
+      }
     },
     {
       "id": "ulua-giant-trevally",
@@ -913,7 +1121,19 @@
         "pelagic",
         "gamefish"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 76,
+        "temp_high": 84,
+        "note": "Ulua spawn in open water near current rips and offshore pinnacles; spawning fish are highly aggressive and prowl reef edges at dawn and dusk."
+      }
     },
     {
       "id": "papio",
@@ -990,7 +1210,19 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 74,
+        "temp_high": 84,
+        "note": "Bonefish aggregate in large schools on shallow Hawaiian flats to spawn; spawning pods of 50+ fish are visible from shore and respond to small crab imitations."
+      }
     },
     {
       "id": "moi",
@@ -1027,7 +1259,18 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 76,
+        "temp_high": 82,
+        "note": "Moi spawn nearshore in summer; schooling fish in the surf along sandy beaches are at their most catchable \u2014 light tackle with small hooks and cut shrimp are traditional."
+      }
     },
     {
       "id": "weakfish-gray-trout",
@@ -1065,7 +1308,17 @@
       "targets": [
         "inshore_slam"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6
+        ],
+        "temp_low": 58,
+        "temp_high": 72,
+        "note": "Weakfish move into estuaries and bays to spawn; they are most active at night around piers and jetty edges \u2014 soft plastics and live shrimp under a light both work."
+      }
     },
     {
       "id": "scup-porgy",
@@ -1102,7 +1355,17 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7
+        ],
+        "temp_low": 60,
+        "temp_high": 72,
+        "note": "Scup spawn in nearshore and inshore waters; large aggregations make late spring one of the most productive times for porgies off piers and jetties."
+      }
     },
     {
       "id": "winter-flounder",
@@ -1206,7 +1469,18 @@
       "explanation_warm": "September through November is 'albie season' \u2014 they crash bait schools along the coast and are one of the fastest and most exciting fish on light tackle.",
       "conditions": [],
       "targets": [],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          7,
+          8,
+          9,
+          10
+        ],
+        "temp_low": 68,
+        "temp_high": 78,
+        "note": "False albacore push inshore during their summer-fall spawn, crashing baitfish at the surface within casting range of beaches and jetties \u2014 fast-retrieved epoxy jigs and small metal slabs draw explosive strikes."
+      }
     },
     {
       "id": "atlantic-bonito",
@@ -1242,7 +1516,18 @@
       "targets": [
         "pelagic"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 64,
+        "temp_high": 76,
+        "note": "Bonito spawn in open water offshore; active schools blitzing baitfish near the surface are a reliable sign of spawning season presence."
+      }
     },
     {
       "id": "northern-kingfish",
@@ -1280,7 +1565,18 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 60,
+        "temp_high": 74,
+        "note": "Northern kingfish are surf-zone spawners from spring through summer, best targeted in the trough just behind the breakers using sand fleas, bloodworms, or small pieces of shrimp on a simple bottom rig."
+      }
     },
     {
       "id": "cunner-bergall",
@@ -1344,7 +1640,18 @@
       "explanation_warm": "Pollock are a cold-water species not present in NC during warm months.",
       "conditions": [],
       "targets": [],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "temp_low": 32,
+        "temp_high": 48,
+        "note": "Pollock spawn in cold northern waters in late winter and are caught from shore on jigs and metal lures near rocky structure; winter concentrations near offshore banks bring them within reach of boat anglers."
+      }
     },
     {
       "id": "white-perch",
@@ -1412,7 +1719,17 @@
       "explanation_warm": "Hickory shad make massive spring runs up NC rivers; they are caught from bridges, piers and banks on small shad darts and jigs.",
       "conditions": [],
       "targets": [],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          2,
+          3,
+          4
+        ],
+        "temp_low": 52,
+        "temp_high": 68,
+        "note": "Hickory shad are among the earliest spring river runners and eagerly strike small darts and shad rigs near current seams; their arrival signals that American shad and stripers are not far behind."
+      }
     },
     {
       "id": "american-eel",
@@ -1666,7 +1983,18 @@
         "pelagic",
         "gamefish"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "temp_low": 68,
+        "temp_high": 82,
+        "note": "Cobia follow rays and large sharks inshore to spawn; sight-casting to individual fish near channel markers and nearshore structure is highly effective."
+      }
     },
     {
       "id": "king-mackerel",
@@ -1744,7 +2072,19 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 72,
+        "temp_high": 82,
+        "note": "Atlantic spadefish gather in large schools around nearshore buoys, wrecks, and bridge pilings to spawn; chumming with small moon jellies or clam bits and free-lining tiny circle hooks into the school is the classic approach."
+      }
     },
     {
       "id": "gray-triggerfish",
@@ -1782,7 +2122,20 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 70,
+        "temp_high": 82,
+        "note": "Gray triggerfish spawn near reefs and hard structure through the warm months and nest on the bottom where males guard egg beds, making them especially territorial and catchable on small pieces of blue crab or squid."
+      }
     },
     {
       "id": "southern-flounder",
@@ -1823,7 +2176,17 @@
         "bottom",
         "inshore_slam"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          10,
+          11,
+          12
+        ],
+        "temp_low": 55,
+        "temp_high": 68,
+        "note": "Southern flounder migrate from estuaries to nearshore water to spawn in fall; creek mouths and inlets funnel fish and concentrate large catches."
+      }
     },
     {
       "id": "gulf-flounder",
@@ -1865,7 +2228,18 @@
         "bottom",
         "inshore_slam"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          9,
+          10,
+          11,
+          12
+        ],
+        "temp_low": 55,
+        "temp_high": 68,
+        "note": "Gulf flounder migrate toward offshore spawning grounds in fall, staging in passes and inlets where gigging and slow-dragged live mud minnows intercept fish making the transition from estuaries to open water."
+      }
     },
     {
       "id": "southern-kingfish",
@@ -1907,7 +2281,18 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 65,
+        "temp_high": 76,
+        "note": "Southern kingfish spawn in the nearshore surf and are considered prime table fare; they hit shrimp and sand fleas fished on the bottom in the trough and are especially active on incoming tides."
+      }
     },
     {
       "id": "gulf-kingfish",
@@ -1946,7 +2331,18 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 65,
+        "temp_high": 76,
+        "note": "Gulf kingfish move into the surf zone to spawn in warm months and feed actively in the wash; small pieces of fresh shrimp or bloodworm on a bottom rig cast beyond the breakers produces consistent results."
+      }
     },
     {
       "id": "silver-perch",
@@ -2018,7 +2414,19 @@
       "targets": [
         "inshore_slam"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 68,
+        "temp_high": 80,
+        "note": "Sand seatrout spawn in estuaries and nearshore waters through spring and summer; they respond readily to small jigs and live shrimp fished over sandy bottom near grass edges."
+      }
     },
     {
       "id": "silver-seatrout",
@@ -2055,7 +2463,22 @@
       "targets": [
         "inshore_slam"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "temp_low": 64,
+        "temp_high": 78,
+        "note": "Silver seatrout have one of the longest spawn seasons of any coastal species, remaining active in nearshore and estuarine waters from spring through fall and responding to small soft plastics and shrimp."
+      }
     },
     {
       "id": "pinfish",
@@ -2130,7 +2553,19 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "temp_low": 72,
+        "temp_high": 84,
+        "note": "Gray snapper move to nearshore reefs and passes to spawn; this is the easiest time to target larger fish that normally hug structure tightly."
+      }
     },
     {
       "id": "jack-crevalle",
@@ -2170,7 +2605,18 @@
         "gamefish",
         "inshore_slam"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 74,
+        "temp_high": 84,
+        "note": "Jack crevalle spawn in nearshore and estuarine waters; aggressive schools herding baitfish along the beach and in passes are a summer spectacle."
+      }
     },
     {
       "id": "blue-runner",
@@ -2207,7 +2653,20 @@
       "targets": [
         "pelagic"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 72,
+        "temp_high": 82,
+        "note": "Blue runners spawn nearshore through the warm season and are excellent live baits for larger predators; schools chasing bait near the surface can be taken on small jigs and used immediately as live offerings for kingfish or cobia."
+      }
     },
     {
       "id": "ladyfish",
@@ -2243,7 +2702,19 @@
         "pelagic",
         "inshore_slam"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          9,
+          10,
+          11,
+          12,
+          1
+        ],
+        "temp_low": 65,
+        "temp_high": 78,
+        "note": "Ladyfish move to offshore spawning grounds in fall, but pre-spawn fish concentrate in inlets and passes where light-tackle anglers find them aggressive on small spoons and soft plastics."
+      }
     },
     {
       "id": "tarpon",
@@ -2282,7 +2753,18 @@
         "gamefish",
         "inshore_slam"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 74,
+        "temp_high": 86,
+        "note": "Tarpon spawn offshore in summer and stage in nearshore passes; large 'rolling' fish visible at dawn are staging for offshore spawning runs \u2014 permit-style presentations work."
+      }
     },
     {
       "id": "tripletail",
@@ -2320,7 +2802,19 @@
         "pelagic",
         "inshore_slam"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 72,
+        "temp_high": 84,
+        "note": "Tripletail hang near floating structure and channel buoys during spawn staging; sight-fishing to individual fish with a live shrimp is extremely effective."
+      }
     },
     {
       "id": "permit",
@@ -2356,7 +2850,18 @@
       "targets": [
         "gamefish"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 74,
+        "temp_high": 84,
+        "note": "Permit spawn offshore then return to flats and passes; large aggregations near inlet edges before the spawn are a rare opportunity."
+      }
     },
     {
       "id": "lookdown",
@@ -2390,7 +2895,18 @@
         "calm_water"
       ],
       "targets": [],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 72,
+        "temp_high": 82,
+        "note": "Lookdown spawn in nearshore waters near piers and structure in summer; they gather in loose schools and can be taken on tiny jigs or small pieces of shrimp, offering a fun light-tackle challenge."
+      }
     },
     {
       "id": "great-barracuda",
@@ -2931,7 +3447,18 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "temp_low": 52,
+        "temp_high": 62,
+        "note": "Calico surfperch are livebearers that release young in late winter and early spring; gravid females are the largest fish of the year and congregate in the inner surf trough, where sand crabs and small worms produce the best results."
+      }
     },
     {
       "id": "walleye-surfperch",
@@ -2967,7 +3494,18 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "temp_low": 56,
+        "temp_high": 66,
+        "note": "Walleye surfperch give birth to live young in spring and gravid fish stack up in the surf zone and around piers; they are caught on small hooks baited with pieces of bloodworm or tiny jigs and are often the most abundant species in the wash."
+      }
     },
     {
       "id": "silver-surfperch",
@@ -3216,7 +3754,18 @@
         "daytime"
       ],
       "targets": [],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "temp_low": 56,
+        "temp_high": 66,
+        "note": "Jacksmelt spawn in bays and nearshore in spring and are a targeted species for pier anglers using multi-hook Sabiki or live bait rigs suspended under a float; spawning fish school tightly and can be taken several at a time."
+      }
     },
     {
       "id": "white-croaker",
@@ -3253,7 +3802,20 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 58,
+        "temp_high": 70,
+        "note": "White croaker spawn in nearshore sandy areas through the warm months and are among the most common fish caught from piers and beaches; small pieces of shrimp or squid on a bottom rig produce consistent action."
+      }
     },
     {
       "id": "starry-flounder",
@@ -3288,7 +3850,18 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          12,
+          1,
+          2,
+          3
+        ],
+        "temp_low": 46,
+        "temp_high": 56,
+        "note": "Starry flounder enter bays and estuaries to spawn in winter, making them accessible from shore during cold months; slow-drifted live pile worms or ghost shrimp on a light bottom rig produce fish in shallow estuarine flats."
+      }
     },
     {
       "id": "pacific-sanddab",
@@ -3357,7 +3930,17 @@
       "explanation_warm": "Kelp greenling are colorful bottom fish found around kelp and rocky piers from Central CA to Washington; the males have bright blue spots.",
       "conditions": [],
       "targets": [],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          9,
+          10,
+          11
+        ],
+        "temp_low": 52,
+        "temp_high": 62,
+        "note": "Kelp greenling spawn in fall with males guarding colorful blue-speckled egg masses on rocky substrate; spawning fish are concentrated near rocky reefs and respond to small jigs and soft crabs fished tight to the bottom."
+      }
     },
     {
       "id": "cabezon",
@@ -3396,7 +3979,17 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          1,
+          2,
+          3
+        ],
+        "temp_low": 50,
+        "temp_high": 58,
+        "note": "Cabezon spawn on rocky reefs in winter; males guard adhesive egg masses fiercely and attack lures or baits that intrude on the nest site."
+      }
     },
     {
       "id": "grass-rockfish",
@@ -3470,7 +4063,19 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          12,
+          1,
+          2,
+          3,
+          4
+        ],
+        "temp_low": 50,
+        "temp_high": 60,
+        "note": "Blue rockfish release live larvae in late fall through early spring and school in dense mid-water columns near rocky reefs and kelp; they aggressively hit small jigs and soft plastics worked at mid-depth and are among the most accessible rockfish for shore anglers."
+      }
     },
     {
       "id": "copper-rockfish",
@@ -3687,7 +4292,18 @@
       "targets": [
         "gamefish"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 62,
+        "temp_high": 70,
+        "note": "Leopard sharks pup in warm, shallow bays in summer; large aggregations of pregnant females in very shallow water are an iconic California sight \u2014 strictly catch-and-release."
+      }
     },
     {
       "id": "bat-ray",
@@ -3724,7 +4340,18 @@
         "low_light"
       ],
       "targets": [],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 62,
+        "temp_high": 72,
+        "note": "Bat rays pup in very shallow bay flats in summer and are often visible as they cruise in only inches of water; large baits of squid or clam fished on the bottom in mudflat areas produce these hard-fighting rays."
+      }
     },
     {
       "id": "pacific-mackerel",
@@ -3762,7 +4389,20 @@
       "targets": [
         "pelagic"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 58,
+        "temp_high": 70,
+        "note": "Pacific mackerel are pelagic spring-summer spawners that show up in large schools near piers and kelp; they are caught on Sabiki rigs or small jigs and make excellent live bait for larger pelagics and halibut."
+      }
     },
     {
       "id": "spotfin-croaker",
@@ -3798,7 +4438,17 @@
       "targets": [
         "bottom"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          6,
+          7,
+          8
+        ],
+        "temp_low": 65,
+        "temp_high": 72,
+        "note": "Spotfin croaker spawn in the nearshore surf zone in summer; males produce a loud drumming sound at night \u2014 surf anglers targeting them after dark have an advantage."
+      }
     },
     {
       "id": "kelp-bass-calico-bass",
@@ -3835,7 +4485,19 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 60,
+        "temp_high": 72,
+        "note": "Kelp bass spawn repeatedly over kelp beds in warm months; males defend nest sites aggressively and bite surface plugs and swimbaits more readily than at any other time."
+      }
     },
     {
       "id": "barred-sand-bass",
@@ -3872,7 +4534,17 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          6,
+          7,
+          8
+        ],
+        "temp_low": 64,
+        "temp_high": 72,
+        "note": "Barred sand bass aggregate in massive spawning schools over sandy bottom in summer; this is when the largest bass of the year are caught on swimbaits and drop-shots."
+      }
     },
     {
       "id": "spotted-sand-bass",
@@ -3942,7 +4614,19 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 60,
+        "temp_high": 70,
+        "note": "California sheephead are hermaphroditic \u2014 all fish are born female and larger individuals transition to bold red-and-black males that dominate spawning areas in the kelp; targeting structure near kelp edges with live lobster or crab imitations is most productive."
+      }
     },
     {
       "id": "opaleye",
@@ -3979,7 +4663,17 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6
+        ],
+        "temp_low": 58,
+        "temp_high": 68,
+        "note": "Opaleye spawn over rocky reefs in spring and gather in schools near kelp and rocky structure; they are taken on small hooks baited with green sea lettuce or peas and require light line to fool their wary behavior."
+      }
     },
     {
       "id": "halfmoon",
@@ -4014,7 +4708,18 @@
         "calm_water"
       ],
       "targets": [],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "temp_low": 60,
+        "temp_high": 70,
+        "note": "Halfmoon spawn near kelp and rocky areas in spring and early summer; they are a popular pier and boat target taken on small hooks with pieces of mussel or shrimp, and their aggressive nature makes them easy to locate around structure."
+      }
     },
     {
       "id": "jack-mackerel",
@@ -4051,7 +4756,18 @@
       "targets": [
         "pelagic"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "temp_low": 56,
+        "temp_high": 68,
+        "note": "Jack mackerel spawn in open water off the coast; large nearshore schools in spring are a reliable sign of spawning aggregations \u2014 they hit small chrome jigs readily."
+      }
     },
     {
       "id": "pacific-barracuda",
@@ -4121,7 +4837,18 @@
       "targets": [
         "pelagic"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 62,
+        "temp_high": 72,
+        "note": "Pacific bonito spawn in open water off Southern California; surface-busting schools chasing anchovies are the hallmark of spawning season \u2014 fast-moving chrome jigs are go-to."
+      }
     },
     {
       "id": "yellowtail",
@@ -4157,7 +4884,18 @@
       "targets": [
         "pelagic"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 62,
+        "temp_high": 72,
+        "note": "Yellowtail spawn in offshore waters; warm-water eddies push fish close to the kelp line and island structure \u2014 live sardines on a slow-troll or flylined are the top producers."
+      }
     },
     {
       "id": "queenfish",
@@ -4262,7 +5000,18 @@
       "targets": [
         "gamefish"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 62,
+        "temp_high": 70,
+        "note": "Shovelnose guitarfish pup in nearshore sandy areas in summer and are a fun target for beach and pier anglers; whole squid or pieces of anchovy fished on the bottom near sandflats produce these unique-looking rays."
+      }
     },
     {
       "id": "round-stingray",
@@ -4333,7 +5082,19 @@
       "targets": [
         "pelagic"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 74,
+        "temp_high": 82,
+        "note": "Omilu spawn in nearshore reef areas; active schools herding baitfish near the surface are common during spawning season \u2014 small poppers and jigs are very effective."
+      }
     },
     {
       "id": "menpachi",
@@ -4375,7 +5136,20 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 74,
+        "temp_high": 82,
+        "note": "Menpachi are nocturnal spawners that hide in reef crevices by day and emerge at night; nighttime bottom fishing with small shrimp or cut squid near rocky ledges and caves produces these prized reef fish."
+      }
     },
     {
       "id": "aholehole",
@@ -4414,7 +5188,19 @@
         "calm_water"
       ],
       "targets": [],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 76,
+        "temp_high": 84,
+        "note": "Aholehole spawn nearshore in summer and are an important baitfish and light-tackle target; they school in shallow nearshore areas and under pier lights at night where small hooks baited with tiny pieces of shrimp produce quick catches."
+      }
     },
     {
       "id": "weke-goatfish",
@@ -4670,7 +5456,19 @@
       "targets": [
         "gamefish"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 76,
+        "temp_high": 84,
+        "note": "Kaku spawn nearshore around Hawaii in spring and summer; larger fish cruise reef edges and sandy flats and respond well to fast-retrieved silver lures or live fish baits cast along reef drop-offs."
+      }
     },
     {
       "id": "nenue",
@@ -4878,7 +5676,20 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 76,
+        "temp_high": 84,
+        "note": "Mu spawn on Hawaiian reefs through the warm season and are prized table fish targeted by bottom anglers using live shrimp or small crabs fished near coral structure at dusk and dawn."
+      }
     },
     {
       "id": "roi",
@@ -5065,7 +5876,19 @@
         "structure",
         "gamefish"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "temp_low": 68,
+        "temp_high": 80,
+        "note": "Amberjack spawn over offshore structure; their aggressive feeding during spawn staging makes them susceptible to live bait and heavy jigs."
+      }
     },
     {
       "id": "almaco-jack",
@@ -5173,7 +5996,19 @@
       "targets": [
         "structure"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 70,
+        "temp_high": 84,
+        "note": "Red snapper spawn repeatedly near reefs and hard structure; peak activity aligns with full and new moons \u2014 one of the most moon-phase-sensitive species."
+      }
     },
     {
       "id": "vermilion-snapper-beeliner",
@@ -5211,7 +6046,22 @@
       "targets": [
         "structure"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "temp_low": 68,
+        "temp_high": 78,
+        "note": "Vermilion snapper are active spawners through most of the warm season at offshore ledges and structure, responding well to small cut squid or shrimp on a double-drop rig fished just off the bottom."
+      }
     },
     {
       "id": "lane-snapper",
@@ -5246,7 +6096,19 @@
       "targets": [
         "structure"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 72,
+        "temp_high": 82,
+        "note": "Lane snapper spawn through the summer on nearshore reefs and are among the most willing biters; they respond to small pieces of shrimp or squid and make great table fare despite their modest size."
+      }
     },
     {
       "id": "gag-grouper",
@@ -5285,7 +6147,19 @@
       "targets": [
         "structure"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "temp_low": 62,
+        "temp_high": 74,
+        "note": "Gag grouper aggregate on deep offshore reefs and ledges to spawn; nearshore wrecks hold fish staging for the offshore run \u2014 live bait on heavy tackle is key."
+      }
     },
     {
       "id": "red-grouper",
@@ -5322,7 +6196,19 @@
       "targets": [
         "structure"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "temp_low": 64,
+        "temp_high": 76,
+        "note": "Red grouper form spawning aggregations on offshore rocky bottom and ledges; males hold territories aggressively and will attack almost any presented bait."
+      }
     },
     {
       "id": "scamp-grouper",
@@ -5359,7 +6245,18 @@
       "targets": [
         "structure"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "temp_low": 65,
+        "temp_high": 76,
+        "note": "Scamp gather at predictable aggregation sites on offshore reefs in spring; fishing live bait on the bottom around these ledges during the full moon phase can yield multiple fish from a single drop."
+      }
     },
     {
       "id": "black-grouper",
@@ -5395,7 +6292,19 @@
       "targets": [
         "structure"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "temp_low": 62,
+        "temp_high": 76,
+        "note": "Black grouper are winter-spring aggregation spawners that gather on deep offshore reefs; live pinfish or grunts fished on heavy bottom rigs near ledge structure are the most effective approach."
+      }
     },
     {
       "id": "mahi-mahi-dolphinfish",
@@ -5434,7 +6343,20 @@
         "pelagic",
         "gamefish"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 72,
+        "temp_high": 86,
+        "note": "Mahi spawn repeatedly in warm offshore water; weedlines and floating debris concentrate both bait and spawning fish \u2014 look for the sargassum."
+      }
     },
     {
       "id": "wahoo",
@@ -5472,7 +6394,19 @@
         "pelagic",
         "gamefish"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 72,
+        "temp_high": 84,
+        "note": "Wahoo spawn offshore in warm blue water and are caught by high-speed trolling along temperature breaks and current edges \u2014 the faster the lure, the better for triggering their aggressive strike."
+      }
     },
     {
       "id": "blackfin-tuna",
@@ -5511,7 +6445,21 @@
         "pelagic",
         "gamefish"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "temp_low": 72,
+        "temp_high": 82,
+        "note": "Blackfin tuna spawn offshore through the warm season and school near the surface around weedlines and current rips; chunking with small pieces of ballyhoo or fast-trolling cedar plugs are reliable methods."
+      }
     },
     {
       "id": "yellowfin-tuna",
@@ -5695,7 +6643,21 @@
       "targets": [
         "structure"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 70,
+        "temp_high": 82,
+        "note": "White grunt are prolific spawners on nearshore reefs through the warm months and are one of the most abundant reef fish anglers encounter; they take shrimp and cut squid readily and are excellent live bait for larger grouper and snapper."
+      }
     },
     {
       "id": "red-porgy",
@@ -5734,7 +6696,18 @@
       "targets": [
         "structure"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "temp_low": 60,
+        "temp_high": 72,
+        "note": "Red porgy spawn over hard bottom and offshore reefs in spring; they are caught on small hooks baited with shrimp or cut squid fished close to the bottom and are a reliable target when offshore conditions allow."
+      }
     },
     {
       "id": "hogfish",
@@ -5773,7 +6746,21 @@
       "targets": [
         "structure"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 68,
+        "temp_high": 78,
+        "note": "Hogfish form harems on nearshore reefs through the warm months with dominant males actively defending territory, making them visible and catchable on the bottom with small live shrimp or sand fleas."
+      }
     },
     {
       "id": "planehead-filefish",
@@ -5841,7 +6828,18 @@
       "explanation_warm": "American shad run up NC rivers in huge numbers during spring; the Cape Fear and Neuse Rivers are top destinations.",
       "conditions": [],
       "targets": [],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "temp_low": 50,
+        "temp_high": 70,
+        "note": "Shad make their famous upriver spawning migration; the run timing is closely tied to water temperature crossing 50\u00b0F \u2014 one of the year's most reliable seasonal triggers."
+      }
     },
     {
       "id": "striped-mullet",
@@ -5876,7 +6874,18 @@
       "explanation_warm": "Striped mullet are everywhere in the surf, inlets and ICW; they are the primary bait source and also caught for food during the fall run.",
       "conditions": [],
       "targets": [],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          10,
+          11,
+          12,
+          1
+        ],
+        "temp_low": 62,
+        "temp_high": 74,
+        "note": "The fall mullet run is one of the most reliable coastal events on the East Coast \u2014 huge schools stage near inlets before migrating offshore to spawn, drawing bluefish, stripers, and tarpon into feeding frenzies along the beach."
+      }
     },
     {
       "id": "ribbonfish-atlantic-cutlassfish",
@@ -5987,7 +6996,18 @@
       "targets": [
         "bottom"
       ],
-      "access": "incidental"
+      "access": "incidental",
+      "spawn": {
+        "months": [
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 72,
+        "temp_high": 84,
+        "note": "Gafftopsail catfish are summer mouthbrooders with males carrying egg clusters in their mouths; they school near piers and bridges and readily take cut shrimp or fish, offering easy action on light tackle."
+      }
     },
     {
       "id": "atlantic-needlefish",
@@ -6549,7 +7569,17 @@
       "explanation_warm": "Atlantic menhaden are THE most important bait fish in NC; massive schools move along the beach and through inlets. Cast net or sabiki rig them for bait.",
       "conditions": [],
       "targets": [],
-      "access": "incidental"
+      "access": "incidental",
+      "spawn": {
+        "months": [
+          10,
+          11,
+          12
+        ],
+        "temp_low": 60,
+        "temp_high": 74,
+        "note": "Atlantic menhaden move offshore in fall to spawn in massive pods \u2014 these bunker schools draw the most intense striper and bluefish blitzes of the year, and casting into or just beyond the pod with a large chunk of bunker or a bunker-colored plug triggers explosive strikes."
+      }
     },
     {
       "id": "round-scad-cigar-minnow",
@@ -6816,7 +7846,19 @@
       "explanation_warm": "Rainbow runners are colorful, fast-swimming jacks found around offshore structure and occasionally near piers; they are strong fighters on light tackle.",
       "conditions": [],
       "targets": [],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 74,
+        "temp_high": 84,
+        "note": "Rainbow runner spawn offshore in warm water and travel in fast-moving schools near the surface around floating structure and weedlines; small jigs and spoons retrieved quickly trigger their aggressive feeding response."
+      }
     },
     {
       "id": "skipjack-tuna",
@@ -6851,7 +7893,19 @@
       "targets": [
         "pelagic"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 72,
+        "temp_high": 82,
+        "note": "Skipjack tuna are prolific summer spawners offshore and travel in large, fast-moving schools that crash the surface; small metal jigs and feathers cast into the melee produce nonstop action."
+      }
     },
     {
       "id": "yellowtail-snapper",
@@ -6885,7 +7939,19 @@
       "targets": [
         "structure"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 74,
+        "temp_high": 84,
+        "note": "Yellowtail snapper spawn over offshore reefs; spawning fish feed aggressively near structure and respond to free-lined bait drifted back in the current."
+      }
     },
     {
       "id": "mutton-snapper",
@@ -6919,7 +7985,18 @@
       "targets": [
         "structure"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 72,
+        "temp_high": 82,
+        "note": "Mutton snapper congregate at predictable aggregation sites on offshore reefs during summer full moons; these spawning groupings offer a rare chance to catch multiple large fish from one spot on live pilchards or cut bait."
+      }
     },
     {
       "id": "black-snapper-black-sea-bass-juvenile",
@@ -8244,7 +9321,19 @@
       "explanation_warm": "Palometa are small, deep-bodied jacks related to permit; they occasionally appear in the NC surf zone during peak summer and hit sand fleas.",
       "conditions": [],
       "targets": [],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 74,
+        "temp_high": 84,
+        "note": "Palometa spawn in warm nearshore waters and are common in South Florida and Keys surf zones where they can be taken on small jigs and flies in the wash \u2014 their bold finnage and scrappy fight make them a top light-tackle target."
+      }
     },
     {
       "id": "cero-mackerel",
@@ -8278,7 +9367,19 @@
         "daytime"
       ],
       "targets": [],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "temp_low": 72,
+        "temp_high": 82,
+        "note": "Cero mackerel are a spring-summer species concentrated in South Florida and the Keys where spawning fish roam near reef edges; trolling small feathers or casting silver spoons near surface activity produces fast action."
+      }
     },
     {
       "id": "bigeye-tuna",
@@ -8353,7 +9454,18 @@
       "targets": [
         "pelagic"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          6,
+          7,
+          8,
+          9
+        ],
+        "temp_low": 60,
+        "temp_high": 72,
+        "note": "Albacore tuna spawn in warmer offshore water and appear along temperature breaks during summer and fall; trolling feathered jigs or cedar plugs along color changes or current edges is the standard approach."
+      }
     },
     {
       "id": "frigate-mackerel",
@@ -8491,7 +9603,19 @@
       "explanation_warm": "Red hind are beautifully red-spotted small groupers found on nearshore and offshore reefs; they are aggressive biters and good eating.",
       "conditions": [],
       "targets": [],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "temp_low": 66,
+        "temp_high": 76,
+        "note": "Red hind are spring-summer reef spawners that congregate at established aggregation sites; they eagerly take small live baitfish or cut squid dropped to the bottom and are a prized target in the Florida Keys and Caribbean waters."
+      }
     },
     {
       "id": "yellowedge-grouper",
@@ -9307,7 +10431,17 @@
       "explanation_warm": "Blueback herring run up NC rivers alongside shad in spring; they hit small, bright darts and jigs and are excellent cut bait.",
       "conditions": [],
       "targets": [],
-      "access": "incidental"
+      "access": "incidental",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5
+        ],
+        "temp_low": 50,
+        "temp_high": 68,
+        "note": "Blueback herring run slightly later than alewives and push further upriver; the overlapping runs create weeks of sustained bait-school activity at river mouths that draws stripers, bass, and shad."
+      }
     },
     {
       "id": "alewife",
@@ -9337,7 +10471,17 @@
       "explanation_warm": "Alewife are anadromous herring that run up NC rivers in spring for spawning; they hit small darts and make excellent cut and live bait.",
       "conditions": [],
       "targets": [],
-      "access": "incidental"
+      "access": "incidental",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5
+        ],
+        "temp_low": 48,
+        "temp_high": 64,
+        "note": "Alewife spawning runs up coastal rivers in spring create dense bait concentrations at river mouths; striped bass and bluefish stack up at these chokepoints to intercept the migrants."
+      }
     },
     {
       "id": "winter-skate",
@@ -9435,7 +10579,17 @@
       "targets": [
         "structure"
       ],
-      "access": "shore"
+      "access": "shore",
+      "spawn": {
+        "months": [
+          6,
+          7,
+          8
+        ],
+        "temp_low": 74,
+        "temp_high": 84,
+        "note": "Cubera snapper form deep-reef spawning aggregations in summer, most reliably during full-moon periods; large live blue crabs or whole grunt fished on heavy tackle near vertical structure produce these trophy fish."
+      }
     },
     {
       "id": "schoolmaster-snapper",
@@ -10058,7 +11212,18 @@
         "bottom",
         "structure"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "temp_low": 34,
+        "temp_high": 50,
+        "note": "Atlantic cod aggregate on offshore banks in winter to spawn, and these cold-weather concentrations are targeted by boat anglers with heavy jigs or bait rigs fished deep on rocky bottom."
+      }
     },
     {
       "id": "bigeye-priacanthus-arenatus",
@@ -11087,7 +12252,19 @@
       "targets": [
         "structure"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "temp_low": 52,
+        "temp_high": 62,
+        "note": "Vermilion rockfish are livebearers that release larvae in winter and early spring; they hold near rocky structure and respond to jigs and live anchovies fished at depth, with larger fish often found near the base of steep rocky walls."
+      }
     },
     {
       "id": "white-seabass",
@@ -11125,7 +12302,18 @@
       "targets": [
         "pelagic"
       ],
-      "access": "boat"
+      "access": "boat",
+      "spawn": {
+        "months": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "temp_low": 58,
+        "temp_high": 68,
+        "note": "White seabass move into kelp beds to spawn during squid spawning aggregations; following squid boats at night is one of the most productive WSB tactics of the year."
+      }
     },
     {
       "id": "thornback-ray",
@@ -11260,7 +12448,18 @@
       "explanation_warm": "Pacific herring are offshore during warm months.",
       "conditions": [],
       "targets": [],
-      "access": "incidental"
+      "access": "incidental",
+      "spawn": {
+        "months": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "temp_low": 46,
+        "temp_high": 56,
+        "note": "Pacific herring mass-spawn in bays and nearshore in winter, turning the water milky green with milt \u2014 these massive baitball events draw striped bass, halibut, and diving birds, and Sabiki rigs or small jigs fished in the melee produce instant limits."
+      }
     },
     {
       "id": "pacific-sardine",

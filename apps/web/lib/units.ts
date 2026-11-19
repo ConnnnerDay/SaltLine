@@ -213,7 +213,7 @@ const METRIC_RULES: Rule[] = [
   {
     // 18 in TL, 12–18 inches, 18" -- "in" only when it's clearly a length.
     pattern: new RegExp(
-      String.raw`${RANGE}\s*(?:inches|inch|in\b(?=\s*(?:TL|FL|total|fork|long|apart|slot|min|max|minimum|maximum|or\b|\)|,|;|\.|·|$))|")`,
+      String.raw`${RANGE}\s*(?:inches|inch|in\b(?=\s*(?:TL|FL|total|fork|long|apart|slot|min|max|minimum|maximum|of\b|or\b|\)|,|;|\.|·|$))|")`,
       'g',
     ),
     convert: ranged((v) => String(Math.round(v * IN_TO_CM)), 'cm'),

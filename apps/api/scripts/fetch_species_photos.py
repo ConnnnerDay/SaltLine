@@ -19,6 +19,9 @@ en.wikipedia.org and upload.wikimedia.org):
     python3 -m scripts.fetch_species_photos
 
 `--trim-existing` only re-trims letterbox borders on the committed photos.
+`--wiki-names` fills in species still missing one from English Wikipedia,
+by common name (only articles whose first sentence is about a fish),
+downloaded like the hand-mapped ones.
 `--inat` fills in species still missing a photo from iNaturalist instead
 (species with no Wikipedia article mapped -- the bulk of the catalogue --
 are matched by exact common name and *linked*, not copied: the site's CSP
@@ -467,6 +470,51 @@ def _photo_from_inat_name(name: str) -> dict[str, str] | None:
     return None
 
 
+# A Wikipedia lead sentence about a fish (or another catch): "... is a
+# species of ray-finned fish", "... is a requiem shark", "... genus of
+# skates". Anything else (a ship, a town) is not this fish's article.
+_FISH_ARTICLE = re.compile(
+    r"\b(fish|fishes|shark|ray|rays|skate|eel|seahorse|pipefish|goby|wrasse|grouper|"
+    r"snapper|porgy|grunt|jack|tuna|mackerel|marlin|flounder|sole|rockfish|perch|"
+    r"croaker|drum|catfish|gar|puffer|triggerfish|filefish|cowfish|squid|crab|lobster|"
+    r"shrimp|prawn|species|genus)\b",
+    re.IGNORECASE,
+)
+
+
+def _wiki_fish_article(name: str) -> str | None:
+    """The English Wikipedia article for a fish by its catalogue name: the
+    name without its parenthetical note, then the note itself ("Margate",
+    then nothing; "Opakapaka (pink snapper)" -> "Opakapaka", "pink snapper"),
+    accepted only when the article's first sentence is about a fish."""
+    candidates = [re.sub(r"\s*\([^)]*\)", "", name).strip()]
+    candidates += [
+        part.split(",")[0].strip() for part in re.findall(r"\(([^)]*)\)", name)
+    ]
+    for candidate in [c for c in candidates if c]:
+        data = _get_json(
+            "https://en.wikipedia.org/w/api.php?"
+            + urllib.parse.urlencode(
+                {
+                    "action": "query",
+                    "format": "json",
+                    "prop": "extracts",
+                    "exintro": 1,
+                    "explaintext": 1,
+                    "exsentences": 1,
+                    "redirects": 1,
+                    "titles": candidate,
+                }
+            )
+        )
+        page = next(iter(data["query"]["pages"].values()))
+        if "missing" not in page and _FISH_ARTICLE.search(str(page.get("extract", ""))):
+            return str(page["title"])
+        time.sleep(2)
+    print(f"  skip {name}: no Wikipedia fish article by that name")
+    return None
+
+
 def _photo_for(article: str) -> dict[str, str] | None:
     lead = _get_json(
         "https://en.wikipedia.org/w/api.php?"
@@ -544,6 +592,7 @@ def main() -> None:
     # Incremental: keep photos already fetched (pass --force to refetch all).
     force = "--force" in sys.argv
     inat = "--inat" in sys.argv
+    wiki = "--wiki-names" in sys.argv
     if "--trim-existing" in sys.argv:
         for path in sorted(_PHOTO_DIR.glob("*.jpg")):
             with Image.open(path) as source:
@@ -588,6 +637,9 @@ def main() -> None:
                 continue
             elif article:
                 photo = _photo_for(article)
+            elif wiki:
+                title = _wiki_fish_article(str(species["name"]))
+                photo = _photo_for(title) if title else None
             else:
                 print(f"  no article mapped for {species_id}")
                 continue
@@ -614,6 +666,7 @@ def main() -> None:
             "source_url": photo["source_url"],
         }
         print(f"  ok {species_id}: {photo['license']} — {photo['credit'][:60]}")
+        _MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     manifest = {key: manifest[key] for key in sorted(manifest)}
     _MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     print(f"{len(manifest)}/{len(catalogue)} photos")

@@ -22,6 +22,7 @@ manage here.
 from __future__ import annotations
 
 import asyncio
+import logging
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 
@@ -41,6 +42,7 @@ from app.providers.locations import (
     resolve_dynamic_location,
     resolved_from_curated,
 )
+from app.providers.nws import find_marine_zone
 from app.providers.stations import (
     CoopsStationCatalogEntry,
     NdbcStationCatalogEntry,
@@ -49,6 +51,8 @@ from app.providers.stations import (
     fetch_coops_watertemp_catalog,
     fetch_ndbc_catalog,
 )
+
+_logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -139,4 +143,33 @@ async def resolve_location_id(location_id: str, state: AppState) -> ResolvedLoca
     location, _anchor_miles = resolve_dynamic_location(
         lat, lng, curated, coops_tide, coops_watertemp, ndbc
     )
+    # The nearest curated spot's zone (inherited up to 75 mi away) is often
+    # the next zone along the coast; ask NWS which zone covers this point.
+    zone = await _marine_zone_for(state.http_client, lat, lng)
+    if zone:
+        location = location.model_copy(update={"nws_zone": zone})
     return location
+
+
+_MARINE_ZONE_CACHE: dict[tuple[float, float], str] = {}
+_MARINE_ZONE_CACHE_MAX = 2048
+
+
+async def _marine_zone_for(
+    client: BoundedHTTPClient, lat: float, lng: float
+) -> str | None:
+    """NWS's marine zone for a dynamic point, cached by ~1 km cell (zone
+    boundaries don't move; failures aren't cached, so a blip retries)."""
+    key = (round(lat, 2), round(lng, 2))
+    if key in _MARINE_ZONE_CACHE:
+        return _MARINE_ZONE_CACHE[key]
+    try:
+        zone = await find_marine_zone(client, lat, lng)
+    except Exception:  # the inherited zone is a fine fallback
+        _logger.warning("marine zone lookup failed", exc_info=True)
+        return None
+    if zone:
+        if len(_MARINE_ZONE_CACHE) >= _MARINE_ZONE_CACHE_MAX:
+            _MARINE_ZONE_CACHE.clear()
+        _MARINE_ZONE_CACHE[key] = zone
+    return zone

@@ -1,4 +1,5 @@
 import { Badge, type BadgeVariant, Button, Card } from './ui'
+import { sinkerAdvice } from '@/lib/sinker'
 import { KeepCheck } from './keep-check'
 import { pickWarning } from '@/lib/fish-id'
 import { cx } from './ui/cx'
@@ -6,7 +7,7 @@ import { HourlyChart } from './hourly-chart'
 import { RigDiagram } from './rig-diagram'
 import { RIGS, rigsFor, type RigId } from '@/lib/rigs'
 import { KNOTS, RIG_KNOTS } from '@/lib/knots'
-import { RIG_FIT, RIG_WATER_TIPS, WATER_NOUN, WATER_PHRASE, watersFor } from '@/lib/fishing-style'
+import { RIG_FIT, RIG_WATER_TIPS, WATER_LABEL, WATER_NOUN, WATER_PHRASE, watersFor } from '@/lib/fishing-style'
 import type { Preferences } from '@/app/api/preferences/route'
 import { WhereToFish, YourDay } from './your-day'
 import { SunAndMoon, WeatherAlerts, type SkyConditions } from './sky'
@@ -964,11 +965,14 @@ function formatAsOf(asOf: string): string {
 function RigsAndTips({
   guidance,
   profile = null,
+  conditions = null,
 }: {
   guidance: FishingGuidance
   profile?: Preferences | null
+  conditions?: { wind_range_kt: [number, number] | null; wave_range_ft: [number, number] | null } | null
 }) {
   const waters = watersFor(profile)
+  const sinkers = sinkerAdvice(waters.slice(0, 3), conditions?.wave_range_ft, conditions?.wind_range_kt)
   // Lure-only rigs are skipped for someone who never fishes lures.
   const skipJig = profile?.uses_lures === 'no'
   const groups = new Map<RigId, { main: SpeciesPick[]; also: SpeciesPick[] }>()
@@ -1009,6 +1013,23 @@ function RigsAndTips({
         <p className="text-xs text-text-muted">
           Jig rigs are hidden because your profile says you don&apos;t fish lures.
         </p>
+      )}
+      {sinkers.length > 0 && (
+        <section className="flex flex-col gap-2.5 rounded-md border border-border bg-surface-raised p-4 sm:p-5">
+          <h4 className="section-label">Sinker for today&apos;s water</h4>
+          <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {sinkers.map((advice) => (
+              <li key={advice.water} className="flex flex-col gap-1 text-sm">
+                <span className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">{WATER_LABEL[advice.water]}</span>
+                  <span className="text-lg font-bold tabular-nums text-text">{localizeText(advice.weight, requestUnits())}</span>
+                  <span className="font-semibold text-text">{advice.kind}</span>
+                </span>
+                <span className="text-text-muted">{localizeText(advice.why, requestUnits())}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
       <ol className="flex flex-col gap-4">
         {ordered.map(([id, group]) => {
@@ -1606,7 +1627,7 @@ export function ForecastCard({
                           {watersFor(profile).length > 0 && (
                             <h3 className="section-label mt-2">Rigs for today</h3>
                           )}
-                          <RigsAndTips guidance={forecast.recommendations} profile={profile} />
+                          <RigsAndTips guidance={forecast.recommendations} profile={profile} conditions={conditions} />
                         </>
                       )}
                     </CollapsibleSection>

@@ -89,6 +89,24 @@ const GROUP_HAZARDS: { match: RegExp; short: string; handle: string; table?: str
   },
 ]
 
+/** Releasing fish caught deep: their swim bladder swells on the way up
+ * (barotrauma) and they float off and die unless sent back down. Not a
+ * hazard to you, so no chip; it joins "Handle with care". */
+const DEEP_RELEASE: { match: RegExp; note: string }[] = [
+  {
+    match: /hapuupuu|opakapaka|onaga|ehu-|gindai|kalekale|lehi-/,
+    note: 'Caught from deep water, a fish you release may float with a swollen belly or bulging eyes (barotrauma). Return it to depth with a descending device rather than tossing it.',
+  },
+  {
+    match: /snapper|grouper|graysby|tilefish|amberjack|almaco|banded-rudderfish|wenchman|red-porgy|triggerfish/,
+    note: 'Caught from deep water, a fish you release may float with a swollen belly or eyes (barotrauma). Send it back down on a descending device rather than tossing it. Federal rules require a descending device (or, in the Gulf, a venting tool) rigged and ready when reef fishing in Gulf and South Atlantic federal waters.',
+  },
+  {
+    match: /rockfish|lingcod|cabezon|greenling/,
+    note: 'Caught from deep water, a fish you release may float with a swollen belly or bulging eyes (barotrauma). Return it to depth with a descending device: California requires one on board when boat fishing for groundfish.',
+  },
+]
+
 /** Toxins worth a warning on the forecast's picks, not just the fish page. */
 const TABLE_WARNINGS: Record<string, string> = {
   'great-barracuda': 'Ciguatera risk if you eat a big one',
@@ -598,7 +616,11 @@ export function fishNotes(id: string): FishNotes & { hazards: string[] } {
   return {
     ...own,
     table: own.table ?? group.find((hazard) => hazard.table)?.table,
-    handle: [...group.map((hazard) => hazard.handle), ...(own.handle ?? [])],
+    handle: [
+      ...group.map((hazard) => hazard.handle),
+      ...(own.handle ?? []),
+      ...DEEP_RELEASE.filter((entry) => entry.match.test(id)).slice(0, 1).map((entry) => entry.note),
+    ],
     hazards: group.map((hazard) => hazard.short),
   }
 }

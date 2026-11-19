@@ -1,4 +1,5 @@
 import { Badge, type BadgeVariant, Button, Card } from './ui'
+import { runsFor } from '@/lib/runs'
 import { sinkerAdvice } from '@/lib/sinker'
 import { KeepCheck } from './keep-check'
 import { pickWarning } from '@/lib/fish-id'
@@ -1178,6 +1179,63 @@ function RigsAndTips({
   )
 }
 
+/** "Runs & migrations": the seasonal runs on now in this region and the
+ * ones starting in the next two months (lib/runs.ts), each with what's
+ * happening and how to fish it. */
+function RunsAndMigrations({ guidance, linkFish }: { guidance: FishingGuidance; linkFish: boolean }) {
+  const runs = runsFor(guidance.basis.region, guidance.basis.month)
+  if (runs.length === 0) return null
+  const names = new Map<string, string>([
+    ...(guidance.calendar ?? []).map((row) => [row.id, row.name] as [string, string]),
+    ...guidance.species.map((pick) => [pick.id, pick.name] as [string, string]),
+  ])
+  const units = requestUnits()
+  return (
+    <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      {runs.map(({ run, status, startsIn }) => {
+        const fish = run.fish.filter((id) => names.has(id))
+        return (
+          <li key={run.id} className="flex flex-col gap-2 rounded-md border border-border bg-surface-raised p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="font-bold text-text">{run.title}</span>
+              <span
+                className={cx(
+                  'rounded-full px-2.5 py-0.5 text-xs font-bold',
+                  status === 'now' ? 'bg-accent-tint text-accent' : 'bg-border text-text-muted',
+                )}
+              >
+                {status === 'now'
+                  ? 'On now'
+                  : `Starts in ${_MONTH_NAMES[(guidance.basis.month - 1 + (startsIn ?? 1)) % 12]}`}
+              </span>
+            </div>
+            <p className="text-sm leading-relaxed text-text">{localizeText(run.what, units)}</p>
+            <p className="text-sm leading-relaxed text-text-muted">
+              <span className="font-semibold text-text">How: </span>
+              {localizeText(run.how, units)}
+            </p>
+            {fish.length > 0 && (
+              <p className="flex flex-wrap gap-1.5 text-xs">
+                {fish.map((id) =>
+                  linkFish ? (
+                    <a key={id} href={`/fish/${id}`} className="rounded-full bg-primary-tint px-2 py-0.5 font-semibold text-primary no-underline hover:underline">
+                      {names.get(id)}
+                    </a>
+                  ) : (
+                    <span key={id} className="rounded-full bg-primary-tint px-2 py-0.5 font-semibold text-primary">
+                      {names.get(id)}
+                    </span>
+                  ),
+                )}
+              </p>
+            )}
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
 /** "Size & bag limits": the state rules for today's picks, each with its
  * snapshot date and a link to the official source. */
 function SizeAndBagLimits({ guidance }: { guidance: FishingGuidance }) {
@@ -1696,6 +1754,25 @@ export function ForecastCard({
                         currentMonth={forecast.recommendations.basis.month}
                         linkFish={profile !== null}
                       />
+                    </CollapsibleSection>
+                  </Card>
+                )}
+              </>
+            ),
+          },
+          {
+            id: 'runs',
+            label: 'Runs & migrations',
+            tab: 'fish',
+            content: (
+              <>
+                {forecast.recommendations && runsFor(forecast.recommendations.basis.region, forecast.recommendations.basis.month).length > 0 && (
+                  <Card className="flex min-w-0 flex-col overflow-hidden p-0!">
+                    <CollapsibleSection
+                      title="Runs & migrations"
+                      aside={<span className="text-xs text-text-muted">Seasonal runs here, now and next</span>}
+                    >
+                      <RunsAndMigrations guidance={forecast.recommendations} linkFish={profile !== null} />
                     </CollapsibleSection>
                   </Card>
                 )}

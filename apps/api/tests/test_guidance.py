@@ -140,11 +140,13 @@ def test_picks_are_sorted_capped_and_above_threshold() -> None:
     assert all(score >= SCORE_THRESHOLD for score in scores)
 
 
-def test_red_drum_in_october_at_65f_is_a_prime_pick_with_reasons() -> None:
+def test_red_drum_in_october_at_65f_is_a_good_pick_with_reasons() -> None:
     guidance = _guidance()
     red_drum = next(pick for pick in guidance.species if pick.id == "red-drum")
     assert red_drum.score == 80  # 50 temperature + 30 peak month
-    assert red_drum.tier is GuidanceTier.PRIME
+    # In season at an ideal temperature is "good"; "prime" also needs
+    # today's conditions in its favor.
+    assert red_drum.tier is GuidanceTier.GOOD
     assert red_drum.reasons == [
         "Water 65°F is in its ideal 55–75°F range",
         "October is a peak month",
@@ -545,3 +547,17 @@ def test_spawning_fish_say_so() -> None:
     )
     red = next(pick for pick in spring.species if pick.id == "red-drum")
     assert not any("pawning" in reason for reason in red.reasons)
+
+
+def test_temperature_just_off_the_ideal_edge_shows_the_decimal() -> None:
+    from app.domain.guidance import _temperature_reason
+
+    species = {"temp_ideal_low": 58, "temp_ideal_high": 74}
+    assert (
+        _temperature_reason(species, 57.7, False)
+        == "Water 57.7°F is just below its ideal 58–74°F range"
+    )
+    assert (
+        _temperature_reason(species, 50.0, False)
+        == "Water 50°F is below its ideal 58–74°F, but within range"
+    )

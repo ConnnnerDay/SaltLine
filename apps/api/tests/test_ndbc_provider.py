@@ -60,7 +60,9 @@ def test_parse_realtime_text_partial_missing_markers_leave_only_those_fields_non
     result = parse_realtime_text(_feed(row))
 
     assert result == BuoyObservation(
-        wave_height_ft=round(1.3 * 3.28084, 1), pressure_mb=1015.2
+        wave_height_ft=round(1.3 * 3.28084, 1),
+        pressure_mb=1015.2,
+        water_temp_f=round(25.1 * 9 / 5 + 32, 1),
     )
 
 

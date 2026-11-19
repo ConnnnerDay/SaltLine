@@ -845,3 +845,33 @@ async def test_fallback_water_temp_uses_the_spots_local_month() -> None:
     assert normals[11] != normals[12]
     conditions = ForecastConditions.model_validate(envelope.conditions)
     assert conditions.water_temperature.value == normals[11]
+
+
+@pytest.mark.asyncio
+async def test_buoy_water_temp_used_when_the_tide_station_has_none() -> None:
+    """A live buoy water temperature beats the monthly average."""
+    buoy = (
+        "#YY  MM DD hh mm WDIR WSPD GST  WVHT   DPD   APD MWD   PRES  ATMP  WTMP\n"
+        "#yr  mo dy hr mn degT m/s  m/s     m   sec   sec degT   hPa  degC  degC\n"
+        f"{_NOW:%Y %m %d %H %M}  MM   MM   MM   1.0     9   6.7  88     MM    MM  20.0\n"
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
+        if "alerts/active" in url:
+            return httpx.Response(200, json={"features": []})
+        if "ndbc.noaa.gov" in url:
+            return httpx.Response(200, text=buoy)
+        return httpx.Response(503)
+
+    async with BoundedHTTPClient(
+        transport=httpx.MockTransport(handler), max_retries=0, backoff_base_seconds=0.0
+    ) as client:
+        envelope = await assemble_forecast(
+            _WRIGHTSVILLE_BEACH, client, _WATER_TEMP_PROFILES, now=_NOW
+        )
+
+    conditions = ForecastConditions.model_validate(envelope.conditions)
+    assert conditions.water_temperature.is_fallback is False
+    assert conditions.water_temperature.value == 68.0
+    assert conditions.water_temperature.provider == "ndbc"

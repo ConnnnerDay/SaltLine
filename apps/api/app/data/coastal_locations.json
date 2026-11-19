@@ -8,8 +8,8 @@
     "timezone": "America/New_York",
     "coops_station": "8510560",
     "ndbc_stations": [
-      "44025",
-      "44097"
+      "44097",
+      "44085"
     ],
     "nws_zone": "ANZ350",
     "temp_region": "northeast",
@@ -38,15 +38,16 @@
     "lat": 39.6373,
     "lng": -74.1895,
     "timezone": "America/New_York",
-    "coops_station": "8534720",
+    "coops_station": "8533935",
     "ndbc_stations": [
-      "44025",
-      "44009"
+      "44091",
+      "44025"
     ],
     "nws_zone": "ANZ451",
     "temp_region": "northeast",
     "conditions_region": "atlantic_north",
-    "temp_offset": 1
+    "temp_offset": 1,
+    "water_temp_station": "8534720"
   },
   {
     "id": "atlantic-city-nj",
@@ -57,8 +58,8 @@
     "timezone": "America/New_York",
     "coops_station": "8534720",
     "ndbc_stations": [
-      "44009",
-      "44025"
+      "44091",
+      "44009"
     ],
     "nws_zone": "ANZ452",
     "temp_region": "northeast",
@@ -74,6 +75,7 @@
     "timezone": "America/New_York",
     "coops_station": "8536110",
     "ndbc_stations": [
+      "44084",
       "44009"
     ],
     "nws_zone": "ANZ453",
@@ -89,8 +91,8 @@
     "timezone": "America/New_York",
     "coops_station": "8570283",
     "ndbc_stations": [
-      "44009",
-      "44014"
+      "44084",
+      "44009"
     ],
     "nws_zone": "ANZ650",
     "temp_region": "midatlantic",
@@ -103,15 +105,17 @@
     "lat": 36.8529,
     "lng": -75.978,
     "timezone": "America/New_York",
-    "coops_station": "8638610",
+    "coops_station": "8639168",
     "ndbc_stations": [
-      "44014",
-      "44099"
+      "44099",
+      "44087",
+      "44014"
     ],
     "nws_zone": "ANZ656",
     "temp_region": "midatlantic",
     "conditions_region": "atlantic_mid",
-    "temp_offset": 2
+    "temp_offset": 2,
+    "water_temp_station": "8638610"
   },
   {
     "id": "outer-banks-nc",
@@ -120,8 +124,10 @@
     "lat": 35.9582,
     "lng": -75.6249,
     "timezone": "America/New_York",
-    "coops_station": "8651370",
+    "coops_station": "8652226",
     "ndbc_stations": [
+      "44086",
+      "44056",
       "41025"
     ],
     "nws_zone": "AMZ150",
@@ -138,6 +144,8 @@
     "timezone": "America/New_York",
     "coops_station": "8654467",
     "ndbc_stations": [
+      "41120",
+      "44095",
       "41025"
     ],
     "nws_zone": "AMZ154",
@@ -154,7 +162,6 @@
     "timezone": "America/New_York",
     "coops_station": "8656483",
     "ndbc_stations": [
-      "41025",
       "41159"
     ],
     "nws_zone": "AMZ158",
@@ -185,14 +192,15 @@
     "lat": 34.0352,
     "lng": -77.8936,
     "timezone": "America/New_York",
-    "coops_station": "8658163",
+    "coops_station": "8658559",
     "ndbc_stations": [
       "41110",
       "41037"
     ],
     "nws_zone": "AMZ250",
     "temp_region": "nc_south",
-    "conditions_region": "atlantic_mid"
+    "conditions_region": "atlantic_mid",
+    "water_temp_station": "8658163"
   },
   {
     "id": "myrtle-beach-sc",
@@ -203,7 +211,7 @@
     "timezone": "America/New_York",
     "coops_station": "8661070",
     "ndbc_stations": [
-      "41004"
+      "41108"
     ],
     "nws_zone": "AMZ254",
     "temp_region": "sc_ga",
@@ -218,6 +226,8 @@
     "timezone": "America/New_York",
     "coops_station": "8665530",
     "ndbc_stations": [
+      "41065",
+      "41076",
       "41004"
     ],
     "nws_zone": "AMZ360",
@@ -233,7 +243,7 @@
     "timezone": "America/New_York",
     "coops_station": "8669133",
     "ndbc_stations": [
-      "41004",
+      "41067",
       "41008"
     ],
     "nws_zone": "AMZ362",
@@ -250,6 +260,7 @@
     "timezone": "America/New_York",
     "coops_station": "8670870",
     "ndbc_stations": [
+      "41067",
       "41008"
     ],
     "nws_zone": "AMZ364",
@@ -280,6 +291,8 @@
     "timezone": "America/New_York",
     "coops_station": "8720587",
     "ndbc_stations": [
+      "41117",
+      "41070",
       "41112"
     ],
     "nws_zone": "AMZ454",
@@ -295,8 +308,9 @@
     "timezone": "America/New_York",
     "coops_station": "8721120",
     "ndbc_stations": [
-      "41009",
-      "41112"
+      "41070",
+      "41117",
+      "41009"
     ],
     "nws_zone": "AMZ550",
     "temp_region": "fl_northeast",
@@ -312,6 +326,8 @@
     "timezone": "America/New_York",
     "coops_station": "8721604",
     "ndbc_stations": [
+      "41113",
+      "41114",
       "41009"
     ],
     "nws_zone": "AMZ552",
@@ -325,14 +341,15 @@
     "lat": 27.4467,
     "lng": -80.3256,
     "timezone": "America/New_York",
-    "coops_station": "8722670",
+    "coops_station": "8722219",
     "ndbc_stations": [
       "41114"
     ],
     "nws_zone": "AMZ555",
     "temp_region": "fl_central_east",
     "conditions_region": "atlantic_south",
-    "temp_offset": 2
+    "temp_offset": 2,
+    "water_temp_station": "8722670"
   },
   {
     "id": "palm-beach-fl",
@@ -360,7 +377,7 @@
     "timezone": "America/New_York",
     "coops_station": "8722956",
     "ndbc_stations": [
-      "41114"
+      "41122"
     ],
     "nws_zone": "AMZ651",
     "temp_region": "fl_south",
@@ -375,7 +392,7 @@
     "timezone": "America/New_York",
     "coops_station": "8723214",
     "ndbc_stations": [
-      "41047"
+      "41122"
     ],
     "nws_zone": "AMZ651",
     "temp_region": "fl_south",
@@ -390,6 +407,7 @@
     "timezone": "America/New_York",
     "coops_station": "8724580",
     "ndbc_stations": [
+      "42095",
       "SMKF1"
     ],
     "nws_zone": "GMZ044",
@@ -418,13 +436,14 @@
     "lat": 26.452,
     "lng": -81.9495,
     "timezone": "America/New_York",
-    "coops_station": "8725520",
+    "coops_station": "8725366",
     "ndbc_stations": [
       "42013"
     ],
     "nws_zone": "GMZ856",
     "temp_region": "fl_gulf_south",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "water_temp_station": "8725520"
   },
   {
     "id": "sarasota-fl",
@@ -433,13 +452,14 @@
     "lat": 27.3364,
     "lng": -82.5307,
     "timezone": "America/New_York",
-    "coops_station": "8726384",
+    "coops_station": "8726083",
     "ndbc_stations": [
-      "42036"
+      "42098"
     ],
     "nws_zone": "GMZ853",
     "temp_region": "fl_gulf_south",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "water_temp_station": "8726384"
   },
   {
     "id": "clearwater-fl",
@@ -450,7 +470,7 @@
     "timezone": "America/New_York",
     "coops_station": "8726724",
     "ndbc_stations": [
-      "42036"
+      "42098"
     ],
     "nws_zone": "GMZ853",
     "temp_region": "fl_gulf_south",
@@ -479,13 +499,14 @@
     "lat": 30.3935,
     "lng": -86.4958,
     "timezone": "America/Chicago",
-    "coops_station": "8729210",
+    "coops_station": "8729511",
     "ndbc_stations": [
       "42039"
     ],
     "nws_zone": "GMZ655",
     "temp_region": "fl_gulf_north",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "water_temp_station": "8729210"
   },
   {
     "id": "pensacola-fl",
@@ -510,14 +531,15 @@
     "lat": 30.246,
     "lng": -87.7008,
     "timezone": "America/Chicago",
-    "coops_station": "8735180",
+    "coops_station": "8731269",
     "ndbc_stations": [
-      "42012",
-      "42357"
+      "42357",
+      "42012"
     ],
     "nws_zone": "GMZ650",
     "temp_region": "gulf_central",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "water_temp_station": "8735180"
   },
   {
     "id": "biloxi-ms",
@@ -526,14 +548,15 @@
     "lat": 30.396,
     "lng": -88.8853,
     "timezone": "America/Chicago",
-    "coops_station": "8747437",
+    "coops_station": "8744117",
     "ndbc_stations": [
-      "42012",
-      "42416"
+      "42416",
+      "42417"
     ],
     "nws_zone": "GMZ532",
     "temp_region": "gulf_central",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "water_temp_station": "8747437"
   },
   {
     "id": "grand-isle-la",
@@ -575,8 +598,8 @@
     "timezone": "America/Chicago",
     "coops_station": "8775241",
     "ndbc_stations": [
-      "42035",
-      "42033"
+      "42033",
+      "42034"
     ],
     "nws_zone": "GMZ255",
     "temp_region": "gulf_west",
@@ -640,8 +663,9 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9410230",
     "ndbc_stations": [
-      "46258",
-      "46225"
+      "46224",
+      "46275",
+      "46258"
     ],
     "nws_zone": "PZZ740",
     "temp_region": "pacific_san_diego",
@@ -654,14 +678,16 @@
     "lat": 33.4594,
     "lng": -117.6981,
     "timezone": "America/Los_Angeles",
-    "coops_station": "9410580",
+    "coops_station": "TWC0419",
     "ndbc_stations": [
-      "46225",
-      "46285"
+      "46285",
+      "46277",
+      "46225"
     ],
     "nws_zone": "PZZ655",
     "temp_region": "pacific_socal",
-    "conditions_region": "pacific_south"
+    "conditions_region": "pacific_south",
+    "water_temp_station": "9410580"
   },
   {
     "id": "huntington-beach-ca",
@@ -737,8 +763,9 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9411270",
     "ndbc_stations": [
-      "46053",
-      "46221"
+      "46251",
+      "46268",
+      "46053"
     ],
     "nws_zone": "PZZ650",
     "temp_region": "pacific_socal",
@@ -754,6 +781,7 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9411340",
     "ndbc_stations": [
+      "46251",
       "46053",
       "46054"
     ],
@@ -771,8 +799,9 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9412110",
     "ndbc_stations": [
-      "46011",
-      "46054"
+      "46286",
+      "46215",
+      "46011"
     ],
     "nws_zone": "PZZ645",
     "temp_region": "pacific_central_cal",
@@ -787,8 +816,9 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9412110",
     "ndbc_stations": [
-      "46011",
-      "46028"
+      "46215",
+      "46286",
+      "46011"
     ],
     "nws_zone": "PZZ645",
     "temp_region": "pacific_central_cal",
@@ -803,8 +833,8 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9413450",
     "ndbc_stations": [
-      "46042",
-      "46236"
+      "46236",
+      "46042"
     ],
     "nws_zone": "PZZ535",
     "temp_region": "pacific_central_cal",
@@ -819,8 +849,9 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9413745",
     "ndbc_stations": [
-      "46042",
-      "46236"
+      "46236",
+      "46012",
+      "46042"
     ],
     "nws_zone": "PZZ535",
     "temp_region": "pacific_central_cal",
@@ -835,7 +866,7 @@
     "lat": 37.4636,
     "lng": -122.4286,
     "timezone": "America/Los_Angeles",
-    "coops_station": "9414290",
+    "coops_station": "9414131",
     "ndbc_stations": [
       "46012",
       "46026"
@@ -854,8 +885,9 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9414290",
     "ndbc_stations": [
-      "46026",
-      "46012"
+      "46237",
+      "46012",
+      "46026"
     ],
     "nws_zone": "PZZ545",
     "temp_region": "pacific_norcal",
@@ -869,14 +901,16 @@
     "lat": 38.3332,
     "lng": -123.0481,
     "timezone": "America/Los_Angeles",
-    "coops_station": "9415020",
+    "coops_station": "9415625",
     "ndbc_stations": [
-      "46013",
-      "46014"
+      "46214",
+      "46237",
+      "46013"
     ],
     "nws_zone": "PZZ540",
     "temp_region": "pacific_norcal",
-    "conditions_region": "pacific"
+    "conditions_region": "pacific",
+    "water_temp_station": "9415020"
   },
   {
     "id": "eureka-ca",
@@ -887,8 +921,8 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9418767",
     "ndbc_stations": [
-      "46022",
-      "46244"
+      "46244",
+      "46022"
     ],
     "nws_zone": "PZZ450",
     "temp_region": "pacific_norcal",
@@ -922,8 +956,8 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9432780",
     "ndbc_stations": [
-      "46015",
-      "46229"
+      "46229",
+      "46015"
     ],
     "nws_zone": "PZZ350",
     "temp_region": "pacific_nw",
@@ -937,13 +971,14 @@
     "lat": 43.9826,
     "lng": -124.1004,
     "timezone": "America/Los_Angeles",
-    "coops_station": "9432780",
+    "coops_station": "9434032",
     "ndbc_stations": [
       "46229"
     ],
     "nws_zone": "PZZ350",
     "temp_region": "pacific_nw",
-    "conditions_region": "pacific"
+    "conditions_region": "pacific",
+    "water_temp_station": "9432780"
   },
   {
     "id": "newport-or",
@@ -968,13 +1003,14 @@
     "lat": 44.9582,
     "lng": -124.0176,
     "timezone": "America/Los_Angeles",
-    "coops_station": "9435380",
+    "coops_station": "9436101",
     "ndbc_stations": [
       "46050"
     ],
     "nws_zone": "PZZ252",
     "temp_region": "pacific_nw",
-    "conditions_region": "pacific"
+    "conditions_region": "pacific",
+    "water_temp_station": "9435380"
   },
   {
     "id": "astoria-or",
@@ -985,6 +1021,8 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9439040",
     "ndbc_stations": [
+      "46243",
+      "46248",
       "46029"
     ],
     "nws_zone": "PZZ251",
@@ -999,13 +1037,16 @@
     "lat": 46.3523,
     "lng": -124.0543,
     "timezone": "America/Los_Angeles",
-    "coops_station": "9440910",
+    "coops_station": "TWC0933",
     "ndbc_stations": [
+      "46243",
+      "46248",
       "46029"
     ],
     "nws_zone": "PZZ251",
     "temp_region": "pacific_nw",
-    "conditions_region": "pacific"
+    "conditions_region": "pacific",
+    "water_temp_station": "9440910"
   },
   {
     "id": "westport-wa",
@@ -1016,8 +1057,9 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9441102",
     "ndbc_stations": [
-      "46029",
-      "46041"
+      "46211",
+      "46243",
+      "46029"
     ],
     "nws_zone": "PZZ156",
     "temp_region": "pacific_nw",
@@ -1032,6 +1074,7 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9442396",
     "ndbc_stations": [
+      "46267",
       "46041",
       "46087"
     ],
@@ -1066,8 +1109,9 @@
     "timezone": "Pacific/Honolulu",
     "coops_station": "1612340",
     "ndbc_stations": [
-      "51201",
-      "51202"
+      "51211",
+      "51202",
+      "51201"
     ],
     "nws_zone": "PHZ115",
     "temp_region": "hawaii",
@@ -1080,7 +1124,7 @@
     "lat": 21.579,
     "lng": -158.1041,
     "timezone": "Pacific/Honolulu",
-    "coops_station": "1612340",
+    "coops_station": "1612668",
     "ndbc_stations": [
       "51201",
       "51202"
@@ -1088,7 +1132,8 @@
     "nws_zone": "PHZ114",
     "temp_region": "hawaii",
     "conditions_region": "hawaii_conditions",
-    "temp_offset": -1
+    "temp_offset": -1,
+    "water_temp_station": "1612340"
   },
   {
     "id": "kailua-kona-hi",
@@ -1097,14 +1142,15 @@
     "lat": 19.64,
     "lng": -155.9969,
     "timezone": "Pacific/Honolulu",
-    "coops_station": "1617433",
+    "coops_station": "1617846",
     "ndbc_stations": [
       "51003"
     ],
     "nws_zone": "PHZ123",
     "temp_region": "hawaii",
     "conditions_region": "hawaii_conditions",
-    "temp_offset": 1
+    "temp_offset": 1,
+    "water_temp_station": "1617433"
   },
   {
     "id": "kahului-hi",
@@ -1147,6 +1193,7 @@
     "timezone": "America/New_York",
     "coops_station": "8418150",
     "ndbc_stations": [
+      "44098",
       "44007"
     ],
     "nws_zone": "ANZ153",
@@ -1161,14 +1208,16 @@
     "lat": 42.6159,
     "lng": -70.6603,
     "timezone": "America/New_York",
-    "coops_station": "8442645",
+    "coops_station": "8441841",
     "ndbc_stations": [
+      "44098",
       "44013",
       "44007"
     ],
     "nws_zone": "ANZ251",
     "temp_region": "northeast",
-    "conditions_region": "atlantic_north"
+    "conditions_region": "atlantic_north",
+    "water_temp_station": "8442645"
   },
   {
     "id": "cape-cod-ma",
@@ -1177,15 +1226,17 @@
     "lat": 41.6821,
     "lng": -69.9597,
     "timezone": "America/New_York",
-    "coops_station": "8447386",
+    "coops_station": "8447435",
     "ndbc_stations": [
+      "44085",
       "44013",
       "44020"
     ],
     "nws_zone": "ANZ254",
     "temp_region": "northeast",
     "conditions_region": "atlantic_north",
-    "temp_offset": 1
+    "temp_offset": 1,
+    "water_temp_station": "8447386"
   },
   {
     "id": "marthas-vineyard-ma",
@@ -1194,15 +1245,17 @@
     "lat": 41.3901,
     "lng": -70.5133,
     "timezone": "America/New_York",
-    "coops_station": "8449130",
+    "coops_station": "8448558",
     "ndbc_stations": [
-      "44020",
-      "44085"
+      "44085",
+      "44097",
+      "44020"
     ],
     "nws_zone": "ANZ232",
     "temp_region": "northeast",
     "conditions_region": "atlantic_north",
-    "temp_offset": 2
+    "temp_offset": 2,
+    "water_temp_station": "8449130"
   },
   {
     "id": "point-judith-ri",
@@ -1211,7 +1264,7 @@
     "lat": 41.3623,
     "lng": -71.4809,
     "timezone": "America/New_York",
-    "coops_station": "8452660",
+    "coops_station": "8455083",
     "ndbc_stations": [
       "44097",
       "44085"
@@ -1219,7 +1272,8 @@
     "nws_zone": "ANZ235",
     "temp_region": "northeast",
     "conditions_region": "atlantic_north",
-    "temp_offset": 1
+    "temp_offset": 1,
+    "water_temp_station": "8452660"
   },
   {
     "id": "rehoboth-beach-de",
@@ -1230,6 +1284,7 @@
     "timezone": "America/New_York",
     "coops_station": "8557380",
     "ndbc_stations": [
+      "44084",
       "44009"
     ],
     "nws_zone": "ANZ455",
@@ -1243,14 +1298,17 @@
     "lat": 37.033,
     "lng": -76.0836,
     "timezone": "America/New_York",
-    "coops_station": "8638610",
+    "coops_station": "8638901",
     "ndbc_stations": [
+      "44087",
+      "44072",
       "44014"
     ],
     "nws_zone": "ANZ632",
     "temp_region": "midatlantic",
     "conditions_region": "atlantic_mid",
-    "temp_offset": 1
+    "temp_offset": 1,
+    "water_temp_station": "8638610"
   },
   {
     "id": "topsail-island-nc",
@@ -1276,8 +1334,10 @@
     "lat": 33.9113,
     "lng": -78.1131,
     "timezone": "America/New_York",
-    "coops_station": "8659897",
+    "coops_station": "8659182",
     "ndbc_stations": [
+      "41108",
+      "41110",
       "41037"
     ],
     "nws_zone": "AMZ252",
@@ -1292,13 +1352,15 @@
     "lat": 33.4307,
     "lng": -79.1199,
     "timezone": "America/New_York",
-    "coops_station": "8661070",
+    "coops_station": "8662006",
     "ndbc_stations": [
+      "41065",
       "41004"
     ],
     "nws_zone": "AMZ256",
     "temp_region": "sc_ga",
-    "conditions_region": "atlantic_mid"
+    "conditions_region": "atlantic_mid",
+    "water_temp_station": "8661070"
   },
   {
     "id": "folly-beach-sc",
@@ -1309,6 +1371,8 @@
     "timezone": "America/New_York",
     "coops_station": "8665530",
     "ndbc_stations": [
+      "41076",
+      "41065",
       "41004"
     ],
     "nws_zone": "AMZ360",
@@ -1324,6 +1388,7 @@
     "timezone": "America/New_York",
     "coops_station": "8677344",
     "ndbc_stations": [
+      "41112",
       "41008"
     ],
     "nws_zone": "AMZ450",
@@ -1353,15 +1418,17 @@
     "lat": 27.8576,
     "lng": -80.4495,
     "timezone": "America/New_York",
-    "coops_station": "8721604",
+    "coops_station": "8722004",
     "ndbc_stations": [
-      "41009",
-      "41114"
+      "41114",
+      "41113",
+      "41009"
     ],
     "nws_zone": "AMZ552",
     "temp_region": "fl_central_east",
     "conditions_region": "atlantic_south",
-    "temp_offset": 1
+    "temp_offset": 1,
+    "water_temp_station": "8721604"
   },
   {
     "id": "islamorada-fl",
@@ -1370,13 +1437,14 @@
     "lat": 24.9243,
     "lng": -80.6278,
     "timezone": "America/New_York",
-    "coops_station": "8723970",
+    "coops_station": "8723808",
     "ndbc_stations": [
       "SMKF1"
     ],
     "nws_zone": "GMZ042",
     "temp_region": "fl_keys",
-    "conditions_region": "atlantic_south"
+    "conditions_region": "atlantic_south",
+    "water_temp_station": "8723970"
   },
   {
     "id": "marathon-fl",
@@ -1385,13 +1453,15 @@
     "lat": 24.7136,
     "lng": -81.0905,
     "timezone": "America/New_York",
-    "coops_station": "8724580",
+    "coops_station": "8723970",
     "ndbc_stations": [
+      "42095",
       "SMKF1"
     ],
     "nws_zone": "GMZ043",
     "temp_region": "fl_keys",
-    "conditions_region": "atlantic_south"
+    "conditions_region": "atlantic_south",
+    "water_temp_station": "8724580"
   },
   {
     "id": "tampa-skyway-fl",
@@ -1402,7 +1472,7 @@
     "timezone": "America/New_York",
     "coops_station": "8726520",
     "ndbc_stations": [
-      "42036"
+      "42098"
     ],
     "nws_zone": "GMZ830",
     "temp_region": "fl_gulf_south",
@@ -1447,6 +1517,8 @@
     "timezone": "America/Chicago",
     "coops_station": "8735180",
     "ndbc_stations": [
+      "42357",
+      "42416",
       "42012"
     ],
     "nws_zone": "GMZ650",
@@ -1491,14 +1563,15 @@
     "lat": 27.6364,
     "lng": -97.2253,
     "timezone": "America/Chicago",
-    "coops_station": "8775237",
+    "coops_station": "8775792",
     "ndbc_stations": [
       "42033",
       "42034"
     ],
     "nws_zone": "GMZ232",
     "temp_region": "gulf_west",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "water_temp_station": "8775237"
   },
   {
     "id": "newport-beach-ca",
@@ -1540,13 +1613,14 @@
     "lat": 45.2039,
     "lng": -123.9634,
     "timezone": "America/Los_Angeles",
-    "coops_station": "9435380",
+    "coops_station": "TWC0857",
     "ndbc_stations": [
       "46050"
     ],
     "nws_zone": "PZZ252",
     "temp_region": "pacific_nw",
-    "conditions_region": "pacific"
+    "conditions_region": "pacific",
+    "water_temp_station": "9435380"
   },
   {
     "id": "seaside-or",
@@ -1557,6 +1631,8 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9439040",
     "ndbc_stations": [
+      "46243",
+      "46248",
       "46029"
     ],
     "nws_zone": "PZZ251",
@@ -1572,6 +1648,7 @@
     "timezone": "America/Los_Angeles",
     "coops_station": "9443090",
     "ndbc_stations": [
+      "46267",
       "46087",
       "46041"
     ],
@@ -1589,7 +1666,7 @@
     "timezone": "Pacific/Honolulu",
     "coops_station": "1617760",
     "ndbc_stations": [
-      "51003"
+      "51206"
     ],
     "nws_zone": "PHZ122",
     "temp_region": "hawaii",

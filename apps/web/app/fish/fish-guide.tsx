@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { cx } from '@/app/components/ui/cx'
-import { ACCESS_LABEL, MONTH_NAMES, REGION_LABEL, REGIONS, seasonOf, type FishSummary } from '@/lib/fish'
+import { ACCESS_LABEL, MONTH_NAMES, REGION_LABEL, REGIONS, seasonOf, spawningIn, type FishSummary } from '@/lib/fish'
+import { BaitThisMonth } from './bait-this-month'
 import { temp, type Units } from '@/lib/units'
 
 type GuideFish = FishSummary & { photo: string | null }
@@ -13,6 +14,7 @@ const SEASONS = [
   { key: 'all', label: 'Any time' },
   { key: 'now', label: 'In season now' },
   { key: 'peak', label: 'Peak now' },
+  { key: 'spawn', label: 'Spawning now' },
 ] as const
 const ACCESS_ORDER: FishSummary['access'][] = ['shore', 'boat', 'tidal', 'incidental']
 const SEASON_RANK = { peak: 0, good: 1, off: 2 }
@@ -54,6 +56,7 @@ export function FishGuide({
       .filter((fish) => !q || fish.name.toLowerCase().includes(q))
       .filter((fish) => {
         const now = seasonOf(fish, month)
+        if (season === 'spawn') return spawningIn(fish, month)
         return season === 'all' || (season === 'peak' ? now === 'peak' : now !== 'off')
       })
       // In season first; within that, catalogue order (the commonly
@@ -146,9 +149,13 @@ export function FishGuide({
         </div>
       </div>
 
+      <BaitThisMonth region={mineOnly ? 'all' : region} month={month} units={units} />
+
       <p className="text-sm text-text-muted" aria-live="polite">
         {results.length} fish{mineOnly ? ' in My fish' : region !== 'all' && ` in the ${REGION_LABEL[region]}`}
-        {season !== 'all' && (season === 'peak' ? ', at their peak now' : ', in season now')}
+        {season === 'spawn'
+          ? ', spawning now'
+          : season !== 'all' && (season === 'peak' ? ', at their peak now' : ', in season now')}
       </p>
 
       {results.length === 0 ? (
@@ -197,6 +204,9 @@ export function FishGuide({
                       >
                         {now === 'peak' ? 'Peak now' : now === 'good' ? 'In season' : 'Off season'}
                       </span>
+                      {spawningIn(fish, month) && (
+                        <span className="rounded-full bg-marginal-bg px-2 py-0.5 font-bold text-marginal-text">Spawning</span>
+                      )}
                       {fish.access !== 'shore' && <span className="text-text-muted">{ACCESS_LABEL[fish.access]}</span>}
                     </span>
                     <span className="text-xs text-text-muted">

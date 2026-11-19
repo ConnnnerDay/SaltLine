@@ -2086,6 +2086,38 @@
         "title": "SourceStatus",
         "type": "object"
       },
+      "Spawn": {
+        "description": "When and at what water temperature the fish spawns (legacy\nSPAWNING_DATA), with what that means for anglers.",
+        "properties": {
+          "months": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Months",
+            "type": "array"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "temp_high": {
+            "title": "Temp High",
+            "type": "number"
+          },
+          "temp_low": {
+            "title": "Temp Low",
+            "type": "number"
+          }
+        },
+        "required": [
+          "months",
+          "temp_low",
+          "temp_high",
+          "note"
+        ],
+        "title": "Spawn",
+        "type": "object"
+      },
       "SpeciesDetail": {
         "properties": {
           "access": {
@@ -2164,6 +2196,16 @@
           "sinker": {
             "title": "Sinker",
             "type": "string"
+          },
+          "spawn": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Spawn"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "targets": {
             "default": [],
@@ -2246,6 +2288,16 @@
             },
             "title": "Regions",
             "type": "array"
+          },
+          "spawn": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Spawn"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "targets": {
             "default": [],

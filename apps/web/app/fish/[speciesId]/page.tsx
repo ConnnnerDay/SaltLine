@@ -7,7 +7,7 @@ import { SpeciesPhotoFigure } from '@/app/components/species-photo'
 import { auth } from '@/lib/auth'
 import { InternalApiError, internalApiFetch } from '@/lib/internal-api-client'
 import type { Preferences } from '@/app/api/preferences/route'
-import { ACCESS_LABEL, MONTH_NAMES, REGION_LABEL, TARGET_LABEL, seasonOf, type FishDetail } from '@/lib/fish'
+import { ACCESS_LABEL, MONTH_NAMES, REGION_LABEL, TARGET_LABEL, monthSpan, seasonOf, spawningIn, type FishDetail } from '@/lib/fish'
 import { localizeText, temp, type Units } from '@/lib/units'
 import { FavoriteButton } from '../favorite-button'
 import { BestSpots } from './best-spots'
@@ -147,6 +147,20 @@ export default async function FishDetailPage({ params }: Props) {
                   <Fact label="Best water" value={`${temp(fish.temp_ideal_low, units)}–${temp(fish.temp_ideal_high, units)}`} />
                   <Fact label="Found in" value={`${temp(fish.temp_min, units)}–${temp(fish.temp_max, units)}`} />
                 </dl>
+                {fish.spawn && (
+                  <div className="flex flex-col gap-1 border-t border-border pt-3">
+                    <h3 className="flex flex-wrap items-center gap-2 text-sm font-semibold text-text">
+                      Spawning
+                      <span className="font-normal text-text-muted">
+                        {monthSpan(fish.spawn.months)} · {temp(fish.spawn.temp_low, units)}–{temp(fish.spawn.temp_high, units)} water
+                      </span>
+                      {spawningIn(fish, month) && (
+                        <span className="rounded-full bg-marginal-bg px-2 py-0.5 text-xs font-bold text-marginal-text">Spawning now</span>
+                      )}
+                    </h3>
+                    <p className="text-xs leading-relaxed text-text-muted">{say(fish.spawn.note)}</p>
+                  </div>
+                )}
               </Card>
             </div>
 

@@ -44,6 +44,16 @@ router = APIRouter(
 )
 
 
+class Spawn(BaseModel):
+    """When and at what water temperature the fish spawns (legacy
+    SPAWNING_DATA), with what that means for anglers."""
+
+    months: list[int]
+    temp_low: float
+    temp_high: float
+    note: str
+
+
 class SpeciesSummary(BaseModel):
     id: str
     name: str
@@ -57,6 +67,7 @@ class SpeciesSummary(BaseModel):
     peak_months: list[int]
     good_months: list[int]
     targets: list[str] = []
+    spawn: Spawn | None = None
 
 
 class SpeciesDetail(SpeciesSummary):

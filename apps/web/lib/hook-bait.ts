@@ -1,12 +1,16 @@
 /**
- * How to put a bait on the hook so it stays on and looks right: live
- * shrimp under the horn, baitfish through the lips or the back, sand fleas
- * up through the shell, cut bait through the skin. Matched against bait
- * names and the catalogue's free-text bait lines ("Cut menhaden or mullet
- * strips; fresh shrimp; live finger mullet").
+ * How to rig each bait so it stays on the hook and looks natural.
+ * Matched against bait names and the catalogue's free-text bait lines
+ * ("Cut menhaden or mullet strips; fresh shrimp; live finger mullet").
  */
 
 export type BaitHow = { id: string; title: string; steps: string[] }
+
+const BAITFISH =
+  /mullet|menhaden|pogies|bunker|cigar|threadfin|runner|anchov|sardine|silverside|minnow|oama|halalu|opelu|akule|nehu|mackerel|pinfish|grunion|herring|ballyhoo|smelt|\bshad\b|croaker|bluegill|baitfish|pilchard|scad|\beels?\b|\blive (small )?fish\b/i
+
+/** A whole bait that isn't alive: "whole mackerel", "fresh menhaden". */
+const WHOLE = new RegExp(String.raw`\bwhole\b|\b(fresh|dead|frozen|salted)\b.*(${BAITFISH.source})`, 'i')
 
 const RULES: { match: RegExp; how: BaitHow }[] = [
   {
@@ -14,7 +18,7 @@ const RULES: { match: RegExp; how: BaitHow }[] = [
     how: {
       id: 'fishbites',
       title: 'Fishbites',
-      steps: ['Cut a strip about 1 in wide, peel it off the mesh, and hook through it once or twice. It stays on for hours.'],
+      steps: ['Cut off a piece about 1 in. long and hook it through the mesh once or twice. Leave the mesh on: it’s what holds the bait on the hook.'],
     },
   },
   {
@@ -23,9 +27,9 @@ const RULES: { match: RegExp; how: BaitHow }[] = [
       id: 'sabiki',
       title: 'Sabiki rig',
       steps: [
-        'Jig the string of tiny flies slowly up and down where the bait schools are, with a light sinker at the bottom.',
-        'If they won’t hit the bare flies, tip each hook with a speck of shrimp or fish.',
-        'Unhook carefully: the loose hooks tangle and stick fingers. Wind it onto a pool noodle between drops.',
+        'Clip a light sinker to the bottom, lower the rig to the bait school, and jig it slowly up and down.',
+        'If the fish ignore the bare flies, put a tiny piece of shrimp or squid on each hook.',
+        'The hooks tangle and catch fingers easily. When you’re done, wrap the rig around a pool noodle or its card.',
       ],
     },
   },
@@ -34,7 +38,7 @@ const RULES: { match: RegExp; how: BaitHow }[] = [
     how: {
       id: 'dough',
       title: 'Bread and dough',
-      steps: ['Pinch a pea-sized ball firmly around a tiny hook so it covers the point and won’t wash off. Chum a little in the water first.'],
+      steps: ['Squeeze a pea-sized ball firmly around a small hook, covering the point, so it doesn’t wash off.'],
     },
   },
   {
@@ -43,9 +47,17 @@ const RULES: { match: RegExp; how: BaitHow }[] = [
       id: 'ghost-shrimp',
       title: 'Ghost or mud shrimp',
       steps: [
-        'Thread a small hook in through the tail and up through the body.',
-        'They are soft: a turn or two of bait thread keeps them on through the cast.',
+        'Run a small hook in at the tail and thread it up through the body.',
+        'They’re soft, so a few wraps of bait thread keep them on when you cast.',
       ],
+    },
+  },
+  {
+    match: /live squid/i,
+    how: {
+      id: 'live-squid',
+      title: 'Live squid',
+      steps: ['Hook it once through the pointed tip of the body, the end away from the tentacles, so it can still swim.'],
     },
   },
   {
@@ -54,20 +66,8 @@ const RULES: { match: RegExp; how: BaitHow }[] = [
       id: 'squid',
       title: 'Squid',
       steps: [
-        'Cut long, narrow strips tapered at one end so they flutter in the current.',
-        'Hook through the wide end once or twice. It is tough, so it stays on well; tip a shrimp or worm bait with a small piece to keep it on.',
-      ],
-    },
-  },
-  {
-    match: /\bcut\b|strip|chunk|belly|steak|fillet/i,
-    how: {
-      id: 'cut',
-      title: 'Cut bait',
-      steps: [
-        'Cut fresh chunks or strips with the skin on, about the size of the hook gap or a little bigger.',
-        'Hook through the skin side, once or twice, so it holds on the cast. With a circle hook, leave the point and barb clear.',
-        'Change it every 15–20 minutes, once the blood and oil have washed out.',
+        'Slit the body tube open and slice it lengthwise into long, narrow strips, tapered at one end.',
+        'Hook a strip once through the wide end so the tail flutters. Squid is tough and stays on well.',
       ],
     },
   },
@@ -77,9 +77,9 @@ const RULES: { match: RegExp; how: BaitHow }[] = [
       id: 'shrimp',
       title: 'Shrimp',
       steps: [
-        'Live, under a float or free-lined: hook under the horn on top of the head, in front of the dark spot (its brain), so it stays alive and kicks.',
-        'Live, for casting or the bottom: thread the hook in at the tail and out the underside, so it doesn’t fly off.',
-        'Dead or pieces: peel, then thread on with the point just buried, in and out of the meat twice.',
+        'Live, under a float or free-lined: hook it through the clear part of the head, under the horn. Stay clear of the dark spot inside the head. Hitting it kills the shrimp.',
+        'Live, for casting or on the bottom: pinch off the tail fan, then thread the hook in through the end of the tail and out the underside.',
+        'Dead: peel it, cut it to fit the hook, and thread a piece on so it covers the shank.',
       ],
     },
   },
@@ -89,8 +89,8 @@ const RULES: { match: RegExp; how: BaitHow }[] = [
       id: 'sand-flea',
       title: 'Sand fleas and sand crabs',
       steps: [
-        'Hook from the underside, in near the tail flap and out through the top of the shell.',
-        'Soft-shelled ones (freshly molted, often orange-egged females) are the best bait you can find.',
+        'Hook it from the underside: in near the tail flap and out through the top of the shell.',
+        'Soft-shell (freshly molted) fleas are the best bait. Females carrying orange eggs under the tail are a close second, especially for pompano.',
       ],
     },
   },
@@ -101,7 +101,7 @@ const RULES: { match: RegExp; how: BaitHow }[] = [
       title: 'Fiddler crabs',
       steps: [
         'Push the hook in where a back leg joins the body and out through the top of the shell.',
-        'Or snap off the big claw and hook through the hole it leaves. Keep the crab whole otherwise.',
+        'Or twist off the big claw and put the hook in through the socket it leaves.',
       ],
     },
   },
@@ -111,8 +111,8 @@ const RULES: { match: RegExp; how: BaitHow }[] = [
       id: 'crab',
       title: 'Crab',
       steps: [
-        'Cut a blue crab in halves or quarters, remove the claws, and hook through a leg socket.',
-        'Whole small crab (for permit, tarpon or cobia): hook through the corner of the shell, front to back, so it stays alive.',
+        'Pull off the claws, cut the body in halves or quarters, and hook through a leg socket.',
+        'Small live crab (for permit, tarpon or cobia): hook it from underneath through one corner of the shell, away from the body, so it stays alive.',
       ],
     },
   },
@@ -122,8 +122,8 @@ const RULES: { match: RegExp; how: BaitHow }[] = [
       id: 'worm',
       title: 'Bloodworms and sandworms',
       steps: [
-        'Hold it behind the head (bloodworms can bite) and thread a 1–2 in piece onto the hook from the head end.',
-        'Leave a short tail free to wiggle. Bait thread helps them last.',
+        'Hold it just behind the head, since bloodworms can bite. Thread a 1–2 in. piece onto the hook and leave a short end hanging free.',
+        'They tear easily. A few wraps of bait thread make them last longer.',
       ],
     },
   },
@@ -133,8 +133,8 @@ const RULES: { match: RegExp; how: BaitHow }[] = [
       id: 'clam',
       title: 'Clams and mussels',
       steps: [
-        'Use the tough foot and the meat around it, and thread the hook through it a few times.',
-        'Wrap it with bait thread or bait elastic: soft shellfish otherwise flies off the cast.',
+        'Use the firm foot and the meat around it, and run the hook through it several times.',
+        'Wrap it with bait thread or bait elastic, or it will fly off when you cast.',
       ],
     },
   },
@@ -147,15 +147,38 @@ const RULES: { match: RegExp; how: BaitHow }[] = [
     },
   },
   {
-    match: /mullet|menhaden|pogies|bunker|cigar|threadfin|runner|anchov|sardine|silverside|minnow|oama|halalu|opelu|mackerel|pinfish|grunion|baitfish|pilchard|scad|eel/i,
+    match: /\bcut\b|\bstrips?\b|\bchunks?\b|\bbelly\b|\bsteaks?\b|\bfillets?\b/i,
+    how: {
+      id: 'cut',
+      title: 'Cut bait',
+      steps: [
+        'Cut fresh chunks or strips with the skin on, about as wide as the hook gap or a little wider.',
+        'Hook it once or twice through the skin, which holds when you cast. With a circle hook, leave the point exposed.',
+        'Put on a fresh piece every 15–20 minutes. Once the blood and oil wash out, it stops drawing fish.',
+      ],
+    },
+  },
+  {
+    match: WHOLE,
+    how: {
+      id: 'whole',
+      title: 'Whole dead baitfish',
+      steps: [
+        'Hook it up through both lips or through both eye sockets so it hangs straight and doesn’t spin on the retrieve.',
+        'Cut a few slashes into its sides to put more scent in the water.',
+      ],
+    },
+  },
+  {
+    match: BAITFISH,
     how: {
       id: 'baitfish',
       title: 'Live baitfish',
       steps: [
-        'Through both lips, from below and out the top: for a bait you cast, drift or slow-retrieve.',
-        'Through the back just in front of the dorsal fin, above the spine: it swims away from you under a float.',
-        'Through the nostrils (menhaden, mackerel, runners): for slow-trolling or live-lining off a pier.',
-        'Miss the spine and the brain, and keep it in a bucket with an aerator until it goes on.',
+        'Through both lips, from the bottom lip up through the top: best when you’re casting, drifting or reeling slowly.',
+        'Through the back, just in front of the dorsal fin and above the spine: best under a float, where it swims freely.',
+        'Through the nostrils (menhaden, mackerel, runners): best for slow-trolling or live-lining from a pier.',
+        'Don’t hit the spine or the brain. Keep them in an aerated bucket until you hook them.',
       ],
     },
   },
@@ -172,8 +195,9 @@ export function hooksFor(baitLine: string): BaitHow[] {
   const seen = new Set<string>()
   const out: BaitHow[] = []
   for (const part of baitLine.split(/[;,]|\bor\b|\band\b/i)) {
-    // Lures and plugs aren't bait you hook.
-    if (/jig|plug|spoon|lure|feather|dart|soft plastic/i.test(part)) continue
+    // Lures, flies, trolling rigs, roe and gear (traps, pots, nets) have no
+    // how-to here.
+    if (/jig|plug|spoon|lure|feather|dart|soft plastic|\bfl(y|ies)\b|troll|rigged|\btraps?\b|\bpots?\b|\brings?\b|\bnets?\b|\broe\b/i.test(part)) continue
     const how = hookFor(part)
     if (how && !seen.has(how.id)) {
       seen.add(how.id)

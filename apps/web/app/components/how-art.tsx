@@ -1,7 +1,7 @@
-import { Baitfish, CRAB, HOOK, INK, Label, PAPER, Panel, Pop, RED, SAND, THREAD, WATER, ink } from './bait-art'
+import { Baitfish, CRAB, HOOK, INK, Label, PAPER, Panel, RED, SAND, THREAD, WATER, ink } from './bait-art'
 
 /**
- * More comic panels in the bait-art style, for the other how-tos:
+ * More panels in the bait-art style, for the other how-tos:
  * how to measure a fish for a size limit (`MeasureArt`), the handling
  * tips on fish pages (`HandleArt`, picked from the tip's text by
  * `handleArtFor`), and little sinker icons for "Sinker for today's water"
@@ -45,7 +45,7 @@ export function MeasureArt({ measure }: { measure: Measure }) {
         <circle cx="164" cy="48" r="4" fill={RED} stroke={INK} strokeWidth="1.5" />
         <Label x={150} y={22} text="THE FORK" tx={162} ty={44} />
         <Bar x1={22} x2={164} y={88} />
-        <Label x={96} y={108} text={measure === 'FL' ? 'FORK LENGTH' : 'LOWER JAW → FORK'} />
+        <Label x={96} y={108} text={measure === 'FL' ? 'FORK LENGTH' : 'LOWER JAW TO FORK'} />
       </Panel>
     )
   }
@@ -67,7 +67,7 @@ export function MeasureArt({ measure }: { measure: Measure }) {
         <path d="M40 52 C40 26 160 26 160 52 C160 76 40 76 40 52 Z" fill={CRAB} {...ink} />
         <path d="M40 50 L22 44 L40 58 Z M160 50 L178 44 L160 58 Z" fill={CRAB} {...ink} strokeWidth={2.5} />
         <Bar x1={22} x2={178} y={20} />
-        <Label x={100} y={106} text="SPINE TIP → SPINE TIP" />
+        <Label x={100} y={106} text="SPINE TIP TO SPINE TIP" />
       </Panel>
     )
   }
@@ -139,8 +139,8 @@ const HANDLE: Record<HandleId, { label: string; art: React.ReactNode }> = {
         <path d="M150 74 l18 -10" stroke={RED} strokeWidth="3" markerEnd="url(#bait-arrow)" />
         <Foot x={34} y={100} />
         <path d="M12 96 h14 M8 90 h14 M14 84 h10" stroke={INK} strokeWidth="2" strokeLinecap="round" />
-        <Label x={100} y={24} text="SHUFFLE, DON'T STEP!" color={RED} />
-        <Label x={146} y={52} text="BYE!" />
+        <Label x={100} y={24} text="SHUFFLE YOUR FEET" color={RED} />
+        <Label x={138} y={52} text="RAY MOVES OFF" />
       </>
     ),
   },
@@ -149,11 +149,12 @@ const HANDLE: Record<HandleId, { label: string; art: React.ReactNode }> = {
     art: (
       <>
         <Water top={30} />
-        <path d="M100 4 L100 70" stroke={INK} strokeWidth="2" />
-        <Baitfish x={58} y={66} w={90} s={1} />
-        <path d="M100 70 q-6 2 -8 10" fill="none" stroke={HOOK} strokeWidth="4" />
-        <path d="M94 84 L106 84 L104 100 L96 100 Z" fill="#6b7280" {...ink} strokeWidth={2.5} />
-        <path d="M30 54 L30 118" stroke={RED} strokeWidth="4" markerEnd="url(#bait-arrow)" />
+        <Baitfish x={58} y={58} w={90} s={1} />
+        <path d="M52 4 L52 92" stroke={INK} strokeWidth="2" />
+        <path d="M52 72 C60 72 62 78 58 80 L54 78" fill="none" stroke={HOOK} strokeWidth="4" strokeLinecap="round" />
+        <path d="M46 92 L58 92 L56 110 L48 110 Z" fill="#6b7280" {...ink} strokeWidth={2.5} />
+        <Label x={130} y={50} text="CLIPPED TO THE LIP" tx={62} ty={76} />
+        <path d="M24 54 L24 118" stroke={RED} strokeWidth="4" markerEnd="url(#bait-arrow)" />
         <Label x={100} y={128} text="SEND IT BACK DOWN" />
       </>
     ),
@@ -168,7 +169,7 @@ const HANDLE: Record<HandleId, { label: string; art: React.ReactNode }> = {
         <path d="M70 34 L170 46 L176 96 L76 92 Z" fill="#8ecae6" {...ink} opacity="0.92" />
         <path d="M90 50 l70 8 M88 66 l72 8 M86 82 l72 6" stroke="#5aa9cf" strokeWidth="3" />
         <Label x={100} y={124} text="PIN IT, THEN UNHOOK" />
-        <Label x={46} y={20} text="SPINES!" color={RED} tx={92} ty={24} />
+        <Label x={50} y={20} text="SHARP SPINES" color={RED} tx={92} ty={24} />
       </>
     ),
   },
@@ -196,8 +197,6 @@ const HANDLE: Record<HandleId, { label: string; art: React.ReactNode }> = {
           <circle cx="8" cy="-8" r="7" fill="none" stroke={RED} strokeWidth="4" />
           <circle cx="8" cy="8" r="7" fill="none" stroke={RED} strokeWidth="4" />
         </g>
-        <Pop x={30} y={70} r={13} />
-        <Label x={30} y={74} text="SNIP" />
         <Label x={100} y={128} text="CUT THE LEADER CLOSE" />
       </>
     ),
@@ -207,14 +206,11 @@ const HANDLE: Record<HandleId, { label: string; art: React.ReactNode }> = {
     art: (
       <>
         <Baitfish x={58} y={44} w={108} s={1} />
-        {[0, 1, 2, 3].map((i) => (
-          <path key={i} d={`M${60 + i * 5} 58 l2 6 l2 -6`} fill="#fff" stroke={INK} strokeWidth="1.2" />
-        ))}
         <path d="M60 62 L16 104 M64 66 L24 112" stroke={HOOK} strokeWidth="6" strokeLinecap="round" />
         <path d="M60 62 L16 104 M64 66 L24 112" stroke={INK} strokeWidth="1.5" strokeLinecap="round" />
         <circle cx="40" cy="86" r="4" fill={INK} />
-        <Label x={124} y={24} text="TEETH!" color={RED} tx={70} ty={58} />
-        <Label x={120} y={124} text="PLIERS, NOT FINGERS" />
+        <Label x={124} y={24} text="SHARP TEETH" color={RED} tx={60} ty={60} />
+        <Label x={120} y={124} text="USE LONG PLIERS" />
       </>
     ),
   },

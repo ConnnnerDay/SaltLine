@@ -4,6 +4,7 @@ import { HookIt } from './hook-it'
 import { hooksFor } from '@/lib/hook-bait'
 import { runsFor } from '@/lib/runs'
 import { sinkerAdvice } from '@/lib/sinker'
+import { sizeText } from '@/lib/size-rule'
 import { KeepCheck } from './keep-check'
 import { pickWarning } from '@/lib/fish-id'
 import { cx } from './ui/cx'
@@ -806,7 +807,7 @@ function WhatsBiting({ guidance, linkFish = false }: { guidance: FishingGuidance
                 {pick.regulation && (
                   <p className="text-sm text-text">
                     <span className="text-text-muted">{pick.regulation.state} limits: </span>
-                    {[pick.regulation.min_size, pick.regulation.bag_limit]
+                    {[sizeText(pick.regulation), pick.regulation.bag_limit]
                       .filter(Boolean)
                       .join(' · ') || 'see state rules'}
                   </p>
@@ -1284,7 +1285,7 @@ function SizeAndBagLimits({ guidance }: { guidance: FishingGuidance }) {
             </span>
             <span className="text-text">
               {[
-                regulation.min_size && `Min ${regulation.min_size}`,
+                regulation.min_size && (/slot/i.test(sizeText(regulation) ?? '') ? sizeText(regulation) : `Min ${regulation.min_size}`),
                 regulation.bag_limit,
                 regulation.season,
               ]

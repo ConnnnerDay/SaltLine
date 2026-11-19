@@ -75,3 +75,14 @@ export const MEASURE_HOW: Record<Measure, string> = {
   mantle: 'Mantle length: the body tube, from its tip to its edge by the eyes.',
   other: 'Measure the way your state’s rules describe.',
 }
+
+/** The size limit to show in a list or table. When the slot's upper end
+ * is only in the notes ("18 in TL" + "Slot limit: 18–27 in TL"), show the
+ * whole slot, so the table agrees with "Can I keep it?". */
+export function sizeText(rule: RuleText): string | null {
+  const parsed = parseSizeRule(rule)
+  const text = rule.min_size
+  if (parsed.kind !== 'size' || parsed.max === null || !text || /[–-]/.test(text)) return text
+  const measure = text.match(/\bin\b\s*(.*)$/i)?.[1]?.trim() ?? ''
+  return `${parsed.min}–${parsed.max} in ${measure} slot`.replace(/\s+/g, ' ')
+}

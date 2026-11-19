@@ -30,10 +30,10 @@
   "states": {
     "AL": {
       "red-drum": {
-        "min_size": "18 in TL",
+        "min_size": "16\u201326 in TL (slot limit)",
         "bag_limit": "3 per day",
         "season": "Open year-round",
-        "notes": "Slot limit: 18\u201327 in TL. Verify current rules before fishing."
+        "notes": "16\u201326 in slot, 3 per day. Check Alabama Marine Resources for any allowance over 26 in before fishing."
       },
       "black-drum": {
         "min_size": "14 in TL",
@@ -1554,10 +1554,10 @@
         "notes": "Spanish mackerel arrive in summer; no closed season. Verify current state rules."
       },
       "striped-bass": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Regulations may include slot limits or season closures. Verify with DEEP. Verify current ASMFC-aligned slot limits and season with CT DEEP for 2026."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "tautog": {
         "min_size": "16 in TL",
@@ -1649,10 +1649,10 @@
         "source": "NOAA Fisheries HMS; CT state agency"
       },
       "striped-bass-west-coast": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Regulations may include slot limits or season closures. Verify with DEEP. Verify current ASMFC-aligned slot limits and season with CT DEEP for 2026."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "mahi-mahi-dolphinfish": {
         "min_size": "No minimum",
@@ -1942,10 +1942,10 @@
         "source": "https://dnrec.delaware.gov/fish-wildlife/fishing/saltwater-fishing/"
       },
       "striped-bass": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal \u2014 check DNREC for dates",
-        "notes": "Regulations may include a slot limit. Verify current rules with DE DNREC. Verify 2026 slot limits and season with DE DNREC \u2014 ASMFC measures may have been updated."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "tautog": {
         "min_size": "16 in TL",
@@ -2037,10 +2037,10 @@
         "source": "NOAA Fisheries HMS; DE state agency"
       },
       "striped-bass-west-coast": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal \u2014 check DNREC for dates",
-        "notes": "Regulations may include a slot limit. Verify current rules with DE DNREC. Verify 2026 slot limits and season with DE DNREC \u2014 ASMFC measures may have been updated."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "mahi-mahi-dolphinfish": {
         "min_size": "No minimum",
@@ -3048,10 +3048,10 @@
     },
     "GA": {
       "red-drum": {
-        "min_size": "15 in TL",
+        "min_size": "14\u201323 in TL (slot limit)",
         "bag_limit": "5 per day",
         "season": "Open year-round",
-        "notes": "Verify current limits with GA DNR."
+        "notes": "Georgia has proposed changing this to a 15\u201324 in slot and 3 per day to meet the 2026 interstate plan. Check GA DNR for whether it's in effect."
       },
       "black-drum": {
         "min_size": "14 in TL",
@@ -3119,10 +3119,10 @@
         "notes": "Verify current limits with GA DNR."
       },
       "striped-bass": {
-        "min_size": "28\u201335 in slot limit (follows ASMFC)",
+        "min_size": "See current GA DNR rules",
         "bag_limit": "1 per day",
         "season": "Open year-round in most areas",
-        "notes": "Slot limit aligns with ASMFC coastwide rules. Verify current state-specific rules before fishing."
+        "notes": "Georgia's coastal rivers set their own striped bass limits. Check GA DNR before fishing."
       },
       "black-sea-bass": {
         "min_size": "15 in TL",
@@ -3317,10 +3317,10 @@
         "source": "NOAA Fisheries HMS; GA state agency"
       },
       "striped-bass-west-coast": {
-        "min_size": "28\u201335 in slot limit (follows ASMFC)",
+        "min_size": "See current GA DNR rules",
         "bag_limit": "1 per day",
         "season": "Open year-round in most areas",
-        "notes": "Slot limit aligns with ASMFC coastwide rules. Verify current state-specific rules before fishing."
+        "notes": "Georgia's coastal rivers set their own striped bass limits. Check GA DNR before fishing."
       },
       "kaku-barracuda": {
         "min_size": "None (FL: no minimum)",
@@ -3902,10 +3902,10 @@
     },
     "LA": {
       "red-drum": {
-        "min_size": "18 in TL",
-        "bag_limit": "5 per day",
+        "min_size": "18\u201327 in TL (slot limit)",
+        "bag_limit": "4 per day",
         "season": "Open year-round",
-        "notes": "Slot limit: 18\u201327 in TL. Verify current rules with LDWF."
+        "notes": "Since June 20, 2024: 18\u201327 in slot, 4 per angler, no fish over 27 in. Captain and crew of for-hire trips may not keep red drum."
       },
       "black-drum": {
         "min_size": "14 in TL (slot: 14\u201327 in preferred)",
@@ -4610,10 +4610,10 @@
         "source": "https://www.mass.gov/saltwater-fishing-regulations"
       },
       "striped-bass": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal \u2014 check MA DMF for open dates",
-        "notes": "Regulations may include a slot limit or reduced season. Verify current rules with MA DMF. ASMFC may have implemented new measures for 2025-2026. Verify current slot limits and seasonal closures with MA DMF."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "tautog": {
         "min_size": "16 in TL",
@@ -4700,10 +4700,10 @@
         "source": "NOAA Fisheries HMS; MA state agency"
       },
       "striped-bass-west-coast": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal \u2014 check MA DMF for open dates",
-        "notes": "Regulations may include a slot limit or reduced season. Verify current rules with MA DMF. ASMFC may have implemented new measures for 2025-2026. Verify current slot limits and seasonal closures with MA DMF."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "greater-amberjack": {
         "min_size": "28 in FL",
@@ -5040,10 +5040,10 @@
     },
     "MD": {
       "red-drum": {
-        "min_size": "18 in TL",
+        "min_size": "18\u201326 in TL (slot limit)",
         "bag_limit": "3 per day",
         "season": "Open year-round (coastal)",
-        "notes": "Verify current limits with MD DNR."
+        "notes": "Changed in 2026 under the ASMFC red drum plan (Addendum II), matching Virginia and the Potomac. Check MD DNR before fishing."
       },
       "black-drum": {
         "min_size": "14 in TL",
@@ -5104,10 +5104,10 @@
         "notes": "Verify current MD DNR limits."
       },
       "striped-bass": {
-        "min_size": "19 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
-        "season": "Seasonal \u2014 Chesapeake Bay has a spring and fall season; coastal waters open most of year",
-        "notes": "Regulations vary greatly by area (Chesapeake Bay vs. coastal). Slot limits may apply. Verify with MD DNR. Chesapeake Bay and coastal rules differ and are updated seasonally. Verify 2026 slot limits with MD DNR."
+        "season": "Ocean open year-round; Chesapeake Bay has closed periods",
+        "notes": "Atlantic coast waters: 28\u201331 in slot, 1 per day. Chesapeake Bay is a 19\u201324 in slot, 1 per day, with closed and catch-and-release periods. Check MD DNR before fishing."
       },
       "tautog": {
         "min_size": "16 in TL",
@@ -5286,10 +5286,10 @@
         "source": "NOAA Fisheries HMS; MD state agency"
       },
       "striped-bass-west-coast": {
-        "min_size": "19 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
-        "season": "Seasonal \u2014 Chesapeake Bay has a spring and fall season; coastal waters open most of year",
-        "notes": "Regulations vary greatly by area (Chesapeake Bay vs. coastal). Slot limits may apply. Verify with MD DNR. Chesapeake Bay and coastal rules differ and are updated seasonally. Verify 2026 slot limits with MD DNR."
+        "season": "Ocean open year-round; Chesapeake Bay has closed periods",
+        "notes": "Atlantic coast waters: 28\u201331 in slot, 1 per day. Chesapeake Bay is a 19\u201324 in slot, 1 per day, with closed and catch-and-release periods. Check MD DNR before fishing."
       },
       "amaama-mullet": {
         "min_size": "No minimum",
@@ -5604,10 +5604,10 @@
         "notes": "Spanish mackerel arrive in summer; no closed season. Verify current state rules."
       },
       "striped-bass": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal \u2014 check ME DMR for open dates",
-        "notes": "Regulations may include slot or season restrictions. Verify with ME DMR. Verify 2026 slot limits and season dates with ME DMR."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "tautog": {
         "min_size": "16 in TL",
@@ -5676,10 +5676,10 @@
         "source": "ME DMRE; NOAA Fisheries"
       },
       "striped-bass-west-coast": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal \u2014 check ME DMR for open dates",
-        "notes": "Regulations may include slot or season restrictions. Verify with ME DMR. Verify 2026 slot limits and season dates with ME DMR."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "shortfin-mako-shark": {
         "min_size": "",
@@ -6549,10 +6549,10 @@
         "notes": "Fork length minimum. Verify current limits with NC DMF."
       },
       "striped-bass": {
-        "min_size": "18 in TL",
-        "bag_limit": "5 per day (coastal)",
+        "min_size": "28\u201331 in TL (slot limit)",
+        "bag_limit": "1 per day",
         "season": "Open year-round (some areas have closed seasons)",
-        "notes": "Rules differ for Albemarle Sound, Roanoke River, and coastal waters. Verify area-specific rules with NC DMF."
+        "notes": "Ocean and coastal waters follow the coastwide 28\u201331 in slot. The Albemarle Sound, Roanoke River and other inland areas have their own seasons and limits: check NC DMF proclamations."
       },
       "tautog": {
         "min_size": "15 in TL",
@@ -6781,10 +6781,10 @@
         "source": "NOAA Fisheries HMS; NC state agency"
       },
       "striped-bass-west-coast": {
-        "min_size": "18 in TL",
-        "bag_limit": "5 per day (coastal)",
+        "min_size": "28\u201331 in TL (slot limit)",
+        "bag_limit": "1 per day",
         "season": "Open year-round (some areas have closed seasons)",
-        "notes": "Rules differ for Albemarle Sound, Roanoke River, and coastal waters. Verify area-specific rules with NC DMF."
+        "notes": "Ocean and coastal waters follow the coastwide 28\u201331 in slot. The Albemarle Sound, Roanoke River and other inland areas have their own seasons and limits: check NC DMF proclamations."
       },
       "kaku-barracuda": {
         "min_size": "None (FL: no minimum)",
@@ -7439,10 +7439,10 @@
     },
     "NJ": {
       "red-drum": {
-        "min_size": "18 in TL",
-        "bag_limit": "5 per day",
+        "min_size": "18\u201327 in TL (slot limit)",
+        "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Verify current limits with NJ DEP."
+        "notes": "18\u201327 in slot, 1 per day. Check NJ DEP before fishing."
       },
       "black-drum": {
         "min_size": "14 in TL",
@@ -7496,10 +7496,10 @@
         "notes": "Summer visitor to NJ; verify current NJ DEP rules."
       },
       "striped-bass": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal \u2014 check NJ DEP for open dates",
-        "notes": "Regulations have changed in recent years and may include slot limits. Verify with NJ DEP. ASMFC measures for 2025-2026 may differ. Verify current slot limits and open seasons with NJ DEP."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "tautog": {
         "min_size": "16 in TL",
@@ -7659,10 +7659,10 @@
         "source": "NOAA Fisheries HMS; NJ state agency"
       },
       "striped-bass-west-coast": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal \u2014 check NJ DEP for open dates",
-        "notes": "Regulations have changed in recent years and may include slot limits. Verify with NJ DEP. ASMFC measures for 2025-2026 may differ. Verify current slot limits and open seasons with NJ DEP."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "amaama-mullet": {
         "min_size": "No minimum",
@@ -8108,10 +8108,10 @@
         "notes": "Spanish mackerel arrive in summer; no closed season. Verify current state rules."
       },
       "striped-bass": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Open year-round (some tributary closures)",
-        "notes": "Regulations may include a slot limit. Verify current rules with NY DEC. ASMFC measures for 2025-2026 may differ from prior years. Verify current slot limits with NY DEC."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "tautog": {
         "min_size": "16 in TL",
@@ -8245,10 +8245,10 @@
         "source": "NOAA Fisheries HMS; NY state agency"
       },
       "striped-bass-west-coast": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Open year-round (some tributary closures)",
-        "notes": "Regulations may include a slot limit. Verify current rules with NY DEC. ASMFC measures for 2025-2026 may differ from prior years. Verify current slot limits with NY DEC."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "lemon-shark": {
         "min_size": "54 in (fork length)",
@@ -9389,10 +9389,10 @@
         "notes": "Spanish mackerel arrive in summer; no closed season. Verify current state rules."
       },
       "striped-bass": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "May include slot restrictions. Verify current rules with RI DEM. Verify 2026 slot limits and season dates with RI DEM \u2014 ASMFC measures may have been updated."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "tautog": {
         "min_size": "16 in TL",
@@ -9485,10 +9485,10 @@
         "source": "NOAA Fisheries HMS; RI state agency"
       },
       "striped-bass-west-coast": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "May include slot restrictions. Verify current rules with RI DEM. Verify 2026 slot limits and season dates with RI DEM \u2014 ASMFC measures may have been updated."
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules."
       },
       "mahi-mahi-dolphinfish": {
         "min_size": "No minimum",
@@ -9740,10 +9740,10 @@
     },
     "SC": {
       "red-drum": {
-        "min_size": "15 in TL",
-        "bag_limit": "5 per day",
+        "min_size": "18\u201325 in TL (slot limit)",
+        "bag_limit": "1 per day (2 per boat)",
         "season": "Open year-round",
-        "notes": "Verify current limits with SC DNR."
+        "notes": "New limits from July 1, 2026 (state law S.961): 18\u201325 in slot, 1 per person, 2 per boat. Check SCDNR for hook rules."
       },
       "black-drum": {
         "min_size": "14 in TL",
@@ -11281,10 +11281,10 @@
     },
     "VA": {
       "red-drum": {
-        "min_size": "18 in TL",
+        "min_size": "18\u201326 in TL (slot limit)",
         "bag_limit": "3 per day",
         "season": "Open year-round",
-        "notes": "Verify current rules with VA MRC."
+        "notes": "18\u201326 in slot and 3 per day under the 2026 ASMFC red drum plan (Addendum II), shared with Maryland and the Potomac. Check VMRC before fishing."
       },
       "black-drum": {
         "min_size": "14 in TL",
@@ -11351,10 +11351,10 @@
         "notes": "Fork length minimum. Verify current limits with VA MRC."
       },
       "striped-bass": {
-        "min_size": "18 in TL",
-        "bag_limit": "2 per day",
+        "min_size": "28\u201331 in TL (slot limit)",
+        "bag_limit": "1 per day",
         "season": "Seasonal (Chesapeake Bay has spring/fall seasons; coastal waters differ)",
-        "notes": "Regulations vary by area. Slot limits may apply. Verify current rules with VA MRC or VDWR. Rules vary by area. Verify 2026 slot limits and seasons with VA MRC or VDWR."
+        "notes": "Atlantic coast waters: 28\u201331 in slot, 1 per day. Chesapeake Bay and its tributaries have their own slot and seasons. Check VMRC before fishing."
       },
       "tautog": {
         "min_size": "16 in TL",
@@ -11574,10 +11574,10 @@
         "source": "NOAA Fisheries HMS; VA state agency"
       },
       "striped-bass-west-coast": {
-        "min_size": "18 in TL",
-        "bag_limit": "2 per day",
+        "min_size": "28\u201331 in TL (slot limit)",
+        "bag_limit": "1 per day",
         "season": "Seasonal (Chesapeake Bay has spring/fall seasons; coastal waters differ)",
-        "notes": "Regulations vary by area. Slot limits may apply. Verify current rules with VA MRC or VDWR. Rules vary by area. Verify 2026 slot limits and seasons with VA MRC or VDWR."
+        "notes": "Atlantic coast waters: 28\u201331 in slot, 1 per day. Chesapeake Bay and its tributaries have their own slot and seasons. Check VMRC before fishing."
       },
       "amaama-mullet": {
         "min_size": "No minimum",
@@ -13073,10 +13073,10 @@
         "source": "NH Fish & Game"
       },
       "striped-bass": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal (check NH Fish & Game for dates)",
-        "notes": "New Hampshire follows ASMFC coastwide striped bass rules: 28-inch minimum, 1/day. A slot limit (28\u201335 in) may apply \u2014 verify 2026 rules with NH Fish & Game before fishing.",
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules.",
         "source": "https://www.wildlife.nh.gov/fishing"
       },
       "tautog": {
@@ -13157,10 +13157,10 @@
         "source": "NH Fish & Game; ASMFC"
       },
       "striped-bass-west-coast": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal (check NH Fish & Game for dates)",
-        "notes": "New Hampshire follows ASMFC coastwide striped bass rules: 28-inch minimum, 1/day. A slot limit (28\u201335 in) may apply \u2014 verify 2026 rules with NH Fish & Game before fishing.",
+        "notes": "Ocean slot under the coastwide ASMFC rules; no recreational harvest in federal waters (beyond 3 miles). ASMFC cut harvest another 12% for 2026, so seasons and bay/river rules may have changed: check the state's current rules.",
         "source": "https://www.wildlife.nh.gov/fishing"
       },
       "greater-amberjack": {
@@ -13448,10 +13448,10 @@
         "source": "PA Fish & Boat Commission"
       },
       "striped-bass": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal (typically spring/fall); check PA Fish & Boat Commission",
-        "notes": "Striped bass in Delaware River/Bay. PA follows Delaware River Basin Commission (DRBC) and PRFC rules.",
+        "notes": "Delaware estuary: 28\u201331 in slot most of the year, with a different spring slot. Check the PA Fish & Boat Commission before fishing.",
         "source": "PA Fish & Boat Commission; DRBC"
       },
       "tautog": {
@@ -13511,10 +13511,10 @@
         "source": "PA Fish & Boat Commission"
       },
       "striped-bass-west-coast": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201331 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Seasonal (typically spring/fall); check PA Fish & Boat Commission",
-        "notes": "Striped bass in Delaware River/Bay. PA follows Delaware River Basin Commission (DRBC) and PRFC rules.",
+        "notes": "Delaware estuary: 28\u201331 in slot most of the year, with a different spring slot. Check the PA Fish & Boat Commission before fishing.",
         "source": "PA Fish & Boat Commission; DRBC"
       },
       "greater-amberjack": {

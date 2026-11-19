@@ -107,10 +107,10 @@
         "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
       },
       "cobia": {
-        "min_size": "33 in FL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day (2 per boat)",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules before fishing."
+        "notes": "1 per person or 2 per boat, whichever is less; 36 in fork length. Federal Gulf and Atlantic rules match. Check the state's current rules."
       },
       "king-mackerel": {
         "min_size": "24 in FL",
@@ -640,10 +640,10 @@
         "notes": "Bag limit is 2 in tidal waters. Verify for Delta rules which differ."
       },
       "black-sea-bass": {
-        "min_size": "28 in TL",
-        "bag_limit": "1 per year",
-        "season": "Apr 16 \u2013 Dec 31",
-        "notes": "Giant (Pacific) black sea bass are a severely depleted species in CA. Extremely strict 1/year limit. Verify CDFW rules.",
+        "min_size": null,
+        "bag_limit": "0",
+        "season": "Not present",
+        "notes": "Black sea bass are an Atlantic fish. California's giant sea bass is a different, protected species: it may not be kept.",
         "source": "CDFW"
       },
       "barred-surfperch": {
@@ -947,10 +947,10 @@
         "source": "CDFW"
       },
       "black-snapper-black-sea-bass-juvenile": {
-        "min_size": "28 in TL",
-        "bag_limit": "1 per year",
-        "season": "Apr 16 \u2013 Dec 31",
-        "notes": "Giant (Pacific) black sea bass are a severely depleted species in CA. Extremely strict 1/year limit. Verify CDFW rules.",
+        "min_size": null,
+        "bag_limit": "0",
+        "season": "Not present",
+        "notes": "Black sea bass are an Atlantic fish. California's giant sea bass is a different, protected species: it may not be kept.",
         "source": "CDFW"
       },
       "albacore-tuna": {
@@ -1629,10 +1629,10 @@
         "source": "CT DEEP"
       },
       "cobia": {
-        "min_size": "37 in FL",
-        "bag_limit": "1 per person per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Open year-round (rare summer visitor)",
-        "notes": "Cobia occasionally appear in these northern waters in summer. Verify current ASMFC coastwide rules."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "sandbar-shark": {
         "min_size": "No minimum",
@@ -2016,10 +2016,10 @@
         "source": "DE DNREC; NOAA Fisheries"
       },
       "cobia": {
-        "min_size": "33 in TL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Seasonal (May\u2013October)",
-        "notes": "Cobia migrate up the Delmarva Peninsula in spring and into Delaware Bay in summer. 33-inch minimum TL, 2/day bag limit. Verify current rules with DE DNREC.",
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season.",
         "source": "https://dnrec.delaware.gov/fish-wildlife/fishing/saltwater-fishing/"
       },
       "king-mackerel": {
@@ -2268,10 +2268,10 @@
         "notes": "Fork length minimum. Verify current limits with FWC."
       },
       "snook": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201332 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Open season varies by zone \u2014 check FWC",
-        "notes": "Slot limit: 28\u201333 in TL. Season closed portions of year depending on Atlantic vs. Gulf side. Verify with FWC."
+        "notes": "Atlantic coast slot 28\u201332 in; Gulf coast slot 28\u201333 in. Closed seasons and some catch-and-release zones vary by region, and a snook permit is required to keep one. Check FWC before fishing."
       },
       "striped-bass": {
         "min_size": "18 in TL",
@@ -2327,10 +2327,10 @@
         "source": "FL FWC"
       },
       "cobia": {
-        "min_size": "33 in FL",
-        "bag_limit": "1 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day (2 per boat)",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules with FWC."
+        "notes": "1 per person or 2 per boat, whichever is less; 36 in fork length. Federal Gulf and Atlantic rules match. Check the state's current rules."
       },
       "king-mackerel": {
         "min_size": "24 in FL",
@@ -2994,16 +2994,16 @@
         "notes": "Black grouper regulations are complex and change frequently. They count toward the grouper complex limit. Always verify current FL FWC and NOAA rules before targeting."
       },
       "fat-snook": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201332 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Open season varies by zone \u2014 check FWC",
-        "notes": "Slot limit: 28\u201333 in TL. Season closed portions of year depending on Atlantic vs. Gulf side. Verify with FWC."
+        "notes": "Atlantic coast slot 28\u201332 in; Gulf coast slot 28\u201333 in. Closed seasons and some catch-and-release zones vary by region, and a snook permit is required to keep one. Check FWC before fishing."
       },
       "swordspine-snook": {
-        "min_size": "28 in TL",
+        "min_size": "28\u201332 in TL (slot limit)",
         "bag_limit": "1 per day",
         "season": "Open season varies by zone \u2014 check FWC",
-        "notes": "Slot limit: 28\u201333 in TL. Season closed portions of year depending on Atlantic vs. Gulf side. Verify with FWC."
+        "notes": "Atlantic coast slot 28\u201332 in; Gulf coast slot 28\u201333 in. Closed seasons and some catch-and-release zones vary by region, and a snook permit is required to keep one. Check FWC before fishing."
       },
       "blue-crab-atlantic": {
         "min_size": "5 in point-to-point",
@@ -3125,10 +3125,10 @@
         "notes": "Georgia's coastal rivers set their own striped bass limits. Check GA DNR before fishing."
       },
       "black-sea-bass": {
-        "min_size": "15 in TL",
-        "bag_limit": "15 per day",
+        "min_size": "13 in TL",
+        "bag_limit": "7 per day",
         "season": "Varies annually",
-        "notes": "Season and bag limit change each year. Verify with state agency."
+        "notes": "South Atlantic rule: 13 in total length, 7 per person. Check the state's current rules."
       },
       "oio-bonefish": {
         "min_size": "No minimum",
@@ -3171,10 +3171,10 @@
         "source": "GA DNR"
       },
       "cobia": {
-        "min_size": "33 in FL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current GA rules."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "king-mackerel": {
         "min_size": "24 in FL",
@@ -3511,10 +3511,10 @@
         "notes": "Season dates and bag limits are set each year; verify with NOAA before fishing federal waters."
       },
       "black-snapper-black-sea-bass-juvenile": {
-        "min_size": "15 in TL",
-        "bag_limit": "15 per day",
+        "min_size": "13 in TL",
+        "bag_limit": "7 per day",
         "season": "Varies annually",
-        "notes": "Season and bag limit change each year. Verify with state agency."
+        "notes": "South Atlantic rule: 13 in total length, 7 per person. Check the state's current rules."
       },
       "atlantic-bumper": {
         "min_size": "No minimum",
@@ -3987,10 +3987,10 @@
         "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
       },
       "cobia": {
-        "min_size": "33 in FL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day (2 per boat)",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules with LDWF."
+        "notes": "1 per person or 2 per boat, whichever is less; 36 in fork length. Federal Gulf and Atlantic rules match. Check the state's current rules."
       },
       "king-mackerel": {
         "min_size": "24 in FL",
@@ -4686,10 +4686,10 @@
         "source": "MA DMF; NOAA Fisheries"
       },
       "cobia": {
-        "min_size": "33 in TL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Seasonal (July\u2013October)",
-        "notes": "Cobia occasionally move into Massachusetts waters during warm years. 33-inch minimum, 2/day. Verify current rules with MA DMF.",
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season.",
         "source": "https://www.mass.gov/saltwater-fishing-regulations"
       },
       "sandbar-shark": {
@@ -5192,10 +5192,10 @@
         "source": "MD DNR; NOAA Fisheries"
       },
       "cobia": {
-        "min_size": "37 in FL",
-        "bag_limit": "2 per day",
-        "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules with MD DNR."
+        "min_size": "43 in TL",
+        "bag_limit": "1 per day",
+        "season": "Jun 15 \u2013 Sep 20 (2026)",
+        "notes": "Maryland's 2026 season and size. Check MD DNR before fishing."
       },
       "king-mackerel": {
         "min_size": "24 in FL",
@@ -5958,10 +5958,10 @@
         "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
       },
       "cobia": {
-        "min_size": "33 in FL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day (2 per boat)",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current MDWFP rules."
+        "notes": "1 per person or 2 per boat, whichever is less; 36 in fork length. Federal Gulf and Atlantic rules match. Check the state's current rules."
       },
       "king-mackerel": {
         "min_size": "24 in FL",
@@ -6564,7 +6564,7 @@
         "min_size": "11 in TL",
         "bag_limit": "10 per day",
         "season": "Seasonal",
-        "notes": "Season dates and bag limits vary. Verify current rules with NC DMF. Verify 2026 regulations with NC DMF."
+        "notes": "North of Cape Hatteras follows the mid-Atlantic rules; south of Hatteras is 13 in total length and 7 per person. Check NC DMF before fishing."
       },
       "oio-bonefish": {
         "min_size": "No minimum",
@@ -6636,10 +6636,10 @@
         "source": "NC DMF; NOAA Fisheries"
       },
       "cobia": {
-        "min_size": "33 in FL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules with NC DMF."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "king-mackerel": {
         "min_size": "24 in FL",
@@ -7015,7 +7015,7 @@
         "min_size": "11 in TL",
         "bag_limit": "10 per day",
         "season": "Seasonal",
-        "notes": "Season dates and bag limits vary. Verify current rules with NC DMF. Verify 2026 regulations with NC DMF."
+        "notes": "North of Cape Hatteras follows the mid-Atlantic rules; south of Hatteras is 13 in total length and 7 per person. Check NC DMF before fishing."
       },
       "atlantic-bumper": {
         "min_size": "No minimum",
@@ -7583,10 +7583,10 @@
         "source": "NJ DEP Marine Fisheries"
       },
       "cobia": {
-        "min_size": "33 in FL",
+        "min_size": "36 in FL",
         "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Summer visitor to NJ. Verify current NJ DEP limits."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "king-mackerel": {
         "min_size": "24 in FL",
@@ -8188,10 +8188,10 @@
         "source": "NY DEC; NOAA Fisheries"
       },
       "cobia": {
-        "min_size": "33 in FL",
+        "min_size": "36 in FL",
         "bag_limit": "1 per day",
         "season": "Open year-round (rare summer visitor)",
-        "notes": "Cobia are uncommon in NY waters but do occur in summer. Verify NY DEC rules."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "king-mackerel": {
         "min_size": "24 in FL",
@@ -9465,10 +9465,10 @@
         "source": "RI DEM; NOAA Fisheries"
       },
       "cobia": {
-        "min_size": "37 in FL",
-        "bag_limit": "1 per person per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Open year-round (rare summer visitor)",
-        "notes": "Cobia occasionally appear in these northern waters in summer. Verify current ASMFC coastwide rules."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "sandbar-shark": {
         "min_size": "No minimum",
@@ -9818,10 +9818,10 @@
         "notes": "Rules vary by area. Verify with SC DNR."
       },
       "black-sea-bass": {
-        "min_size": "11 in TL",
-        "bag_limit": "10 per day",
+        "min_size": "13 in TL",
+        "bag_limit": "7 per day",
         "season": "Seasonal",
-        "notes": "Verify current season dates and limits with SC DNR."
+        "notes": "South Atlantic rule: 13 in total length, 7 per person. Check the state's current rules."
       },
       "oio-bonefish": {
         "min_size": "No minimum",
@@ -9871,10 +9871,10 @@
         "source": "SC DNR"
       },
       "cobia": {
-        "min_size": "33 in FL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules with SC DNR."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "king-mackerel": {
         "min_size": "24 in FL",
@@ -10214,10 +10214,10 @@
         "notes": "Season dates and bag limits are set each year; verify with NOAA before fishing federal waters."
       },
       "black-snapper-black-sea-bass-juvenile": {
-        "min_size": "11 in TL",
-        "bag_limit": "10 per day",
+        "min_size": "13 in TL",
+        "bag_limit": "7 per day",
         "season": "Seasonal",
-        "notes": "Verify current season dates and limits with SC DNR."
+        "notes": "South Atlantic rule: 13 in total length, 7 per person. Check the state's current rules."
       },
       "atlantic-bumper": {
         "min_size": "No minimum",
@@ -10688,10 +10688,10 @@
         "notes": "No specific bag or size limit for sea mullet/kingfish in most Atlantic and Gulf states. Verify current state rules."
       },
       "cobia": {
-        "min_size": "37 in FL",
+        "min_size": "See current TPWD rules",
         "bag_limit": "2 per day",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules with TPWD."
+        "notes": "Texas sets its own cobia size and bag. Check TPWD before fishing."
       },
       "king-mackerel": {
         "min_size": "24 in FL",
@@ -11438,10 +11438,10 @@
         "source": "VA DGIF; NOAA Fisheries"
       },
       "cobia": {
-        "min_size": "37 in FL",
-        "bag_limit": "2 per day",
+        "min_size": "36 in FL",
+        "bag_limit": "1 per day",
         "season": "Open year-round",
-        "notes": "Fork length minimum. Verify current rules with VA MRC."
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season."
       },
       "king-mackerel": {
         "min_size": "24 in FL",
@@ -13150,10 +13150,10 @@
         "source": "NH Fish & Game; NOAA Fisheries"
       },
       "cobia": {
-        "min_size": "36 in TL",
+        "min_size": "36 in FL",
         "bag_limit": "1 per day",
         "season": "Rare stray \u2014 Jun\u2013Sep",
-        "notes": "Cobia are occasional warm-water strays in NH. Follow ASMFC regulations.",
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season.",
         "source": "NH Fish & Game; ASMFC"
       },
       "striped-bass-west-coast": {
@@ -13497,10 +13497,10 @@
         "source": "PA Fish & Boat Commission; NOAA Fisheries"
       },
       "cobia": {
-        "min_size": "36 in TL",
+        "min_size": "36 in FL",
         "bag_limit": "1 per day",
         "season": "Apr 1 \u2013 Dec 31 (rare stray)",
-        "notes": "Cobia are occasional strays in Delaware Bay. Very uncommon in PA waters.",
+        "notes": "Atlantic rule (ASMFC): 36 in fork length (40 in total length), 1 per person, and a per-boat limit of up to 6 that varies by state. Check the state's current rules and season.",
         "source": "PA Fish & Boat Commission"
       },
       "king-mackerel": {

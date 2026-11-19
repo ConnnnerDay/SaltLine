@@ -1,4 +1,5 @@
 import { Badge, type BadgeVariant, Button, Card } from './ui'
+import { pickWarning } from '@/lib/fish-id'
 import { cx } from './ui/cx'
 import { HourlyChart } from './hourly-chart'
 import { RigDiagram } from './rig-diagram'
@@ -780,6 +781,11 @@ function WhatsBiting({ guidance, linkFish = false }: { guidance: FishingGuidance
                   {pick.matches_profile && (
                     <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-primary-contrast">
                       Your target
+                    </span>
+                  )}
+                  {pickWarning(pick.id) && (
+                    <span className="rounded-full border border-marginal-border bg-marginal-bg px-2 py-0.5 text-xs font-bold text-marginal-text">
+                      ⚠ {pickWarning(pick.id)}
                     </span>
                   )}
                 </div>

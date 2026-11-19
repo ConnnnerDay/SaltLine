@@ -15,6 +15,7 @@ import { RIGS, rigsFor } from '@/lib/rigs'
 import { KNOTS, RIG_KNOTS } from '@/lib/knots'
 import { setRequestUnits } from '@/lib/request-units'
 import { BestSpots } from './best-spots'
+import { Identify } from './identify'
 import { Suspense } from 'react'
 import type { SavedLocation } from '@/app/api/saved-locations/route'
 
@@ -54,11 +55,13 @@ export default async function FishDetailPage({ params }: Props) {
     if (err instanceof InternalApiError && err.status === 404) notFound()
     throw err
   }
-  const [prefs, locations, saved] = await Promise.all([
+  const [prefs, locations, saved, catalogue] = await Promise.all([
     internalApiFetch<Preferences>('/v1/me/preferences', { userId }).catch(() => null),
     internalApiFetch<{ id: string; state: string }[]>('/v1/locations').catch(() => []),
     internalApiFetch<SavedLocation[]>('/v1/me/locations', { userId }).catch(() => [] as SavedLocation[]),
+    internalApiFetch<{ id: string; name: string }[]>('/v1/species').catch(() => []),
   ])
+  const names = new Map(catalogue.map((entry) => [entry.id, entry.name]))
   const spotIds = [
     ...new Set([prefs?.default_location_id, ...saved.map((spot) => spot.location_id)].filter(Boolean)),
   ] as string[]
@@ -234,6 +237,8 @@ export default async function FishDetailPage({ params }: Props) {
               </Card>
             </div>
           </div>
+
+          <Identify id={fish.id} names={names} say={say} />
 
           {fish.access !== 'incidental' && (
             <Suspense

@@ -334,7 +334,7 @@
     "rig": "Float rig with wire leader, free-lined or under float",
     "hook_size": "#1-2/0 long-shank hook",
     "sinker": "None or 1/2 oz split shot",
-    "explanation_cold": "Spanish mackerel have migrated south; they are not present in nearshore NC waters during cold months.",
+    "explanation_cold": "Spanish mackerel move south in cold water; north of Florida they leave the beaches until spring.",
     "explanation_warm": "Spanish mackerel are blitzing baitfish just behind the breakers and around piers; they hit flashy spoons and small baits.",
     "coast": "east",
     "regions": [
@@ -428,7 +428,7 @@
     "rig": "Fish finder rig, heavy tackle, or free-lined live bait",
     "hook_size": "5/0-8/0 circle hook",
     "sinker": "2-4 oz egg sinker or none for free-lining",
-    "explanation_cold": "Cobia have migrated south and are not present in NC waters during cold months.",
+    "explanation_cold": "Cobia move south and offshore in cold water and leave the beaches until spring.",
     "explanation_warm": "Cobia are cruising near the surface around piers, buoys and structure; sight-cast live eels or large baits to visible fish.",
     "coast": "east",
     "regions": [
@@ -525,7 +525,7 @@
     "rig": "King mackerel stinger rig with wire leader and trailing treble",
     "hook_size": "4/0-7/0 treble or J-hook with stinger",
     "sinker": "None or 1 oz egg for slow-trolling",
-    "explanation_cold": "King mackerel have migrated south and are not available in NC nearshore waters during cold months.",
+    "explanation_cold": "King mackerel move south and offshore in cold water and leave the piers and beaches until spring.",
     "explanation_warm": "Kings are cruising near piers and along the beach chasing baitfish schools; slow-troll or float live baits on wire leader.",
     "coast": "east",
     "regions": [
@@ -646,7 +646,7 @@
     "rig": "Fish finder rig, heavy tackle, or free-lined live bait",
     "hook_size": "6/0-9/0 circle hook",
     "sinker": "2-4 oz egg sinker or none",
-    "explanation_cold": "Tarpon are a tropical species not present in NC waters during cold months.",
+    "explanation_cold": "Tarpon are tropical; in cold water they leave the beaches and hold in deep, warmer rivers and canals in South Florida.",
     "explanation_warm": "Tarpon are cruising near inlets and along the beach; they hit large live baits and put up spectacular aerial fights.",
     "coast": "east",
     "regions": [
@@ -728,7 +728,7 @@
     "rig": "Fish finder rig with wire leader",
     "hook_size": "7/0-10/0 circle hook",
     "sinker": "4-8 oz pyramid sinker",
-    "explanation_cold": "Blacktip sharks have migrated south and are not present in NC nearshore waters during cold months.",
+    "explanation_cold": "Blacktip sharks move south in cold water; big schools winter off South Florida.",
     "explanation_warm": "Blacktip sharks are cruising the surf zone and around piers chasing baitfish schools; they are one of the most common sharks caught from shore.",
     "coast": "east",
     "lures": "Large fast-retrieved swimbaits; primarily caught on bait"
@@ -752,7 +752,7 @@
     "rig": "Fish finder rig with wire leader",
     "hook_size": "7/0-10/0 circle hook",
     "sinker": "4-8 oz pyramid sinker",
-    "explanation_cold": "Spinner sharks migrate south for winter and are absent from NC waters.",
+    "explanation_cold": "Spinner sharks move south for the winter.",
     "explanation_warm": "Spinner sharks are feeding in the surf zone, often leaping and spinning out of the water while chasing baitfish.",
     "coast": "east",
     "lures": "Large fast-retrieved surface lures; primarily caught on bait"
@@ -829,7 +829,7 @@
     "hook_size": "8/0-12/0 circle hook",
     "sinker": "5-8 oz pyramid sinker",
     "explanation_cold": "Sandbar sharks migrate to deeper offshore waters or south during cold months.",
-    "explanation_warm": "Sandbar sharks are one of the most abundant large sharks nearshore in NC; target them from piers or the surf with heavy cut bait.",
+    "explanation_warm": "Sandbar sharks are one of the most common large sharks nearshore in summer. They're protected: release them in the water.",
     "coast": "east",
     "lures": "Primarily caught on bait"
   },
@@ -853,7 +853,7 @@
     "rig": "Fish finder rig with light wire or heavy fluorocarbon leader",
     "hook_size": "2/0-4/0 circle hook",
     "sinker": "1-3 oz egg sinker",
-    "explanation_cold": "Bonnethead sharks migrate south and are not present in NC during cold months.",
+    "explanation_cold": "Bonnetheads move south and into deeper water when it gets cold.",
     "explanation_warm": "Bonnetheads are the smallest hammerhead species; they cruise grass flats, inlets and the surf feeding on shrimp and crabs.",
     "coast": "east",
     "regions": [
@@ -882,7 +882,7 @@
     "rig": "Fish finder rig with wire leader",
     "hook_size": "8/0-12/0 circle hook",
     "sinker": "4-8 oz pyramid sinker",
-    "explanation_cold": "Lemon sharks are in warmer southern waters during winter and not found in NC.",
+    "explanation_cold": "Lemon sharks winter in warm southern water, with big gatherings off Southeast Florida.",
     "explanation_warm": "Lemon sharks are found near inlets, docks and shallow flats; they are strong fighters that prefer live or large cut baits.",
     "coast": "east",
     "regions": [
@@ -913,8 +913,8 @@
     "rig": "Shark rig with heavy wire leader",
     "hook_size": "12/0-16/0 circle hook",
     "sinker": "6-10 oz pyramid sinker",
-    "explanation_cold": "Dusky sharks are migratory and pass through NC waters mainly during seasonal transitions.",
-    "explanation_warm": "Dusky sharks migrate through NC nearshore waters in spring and fall following baitfish; they are large, powerful fish requiring the heaviest tackle.",
+    "explanation_cold": "Dusky sharks are migratory and pass through mainly in spring and fall. They're protected: release them in the water.",
+    "explanation_warm": "Dusky sharks migrate along the coast in spring and fall following bait. They're protected: release them in the water.",
     "coast": "east",
     "lures": "Primarily caught on bait"
   },
@@ -965,7 +965,7 @@
     "rig": "Fish finder rig with heavy fluorocarbon leader",
     "hook_size": "4/0-6/0 circle hook",
     "sinker": "3-5 oz pyramid sinker",
-    "explanation_cold": "Cownose rays migrate south in large schools during fall and are absent from NC in winter.",
+    "explanation_cold": "Cownose rays migrate south in large schools in the fall and are gone from northern waters in winter.",
     "explanation_warm": "Cownose rays travel in large schools through the surf and inlets; they are strong fighters often hooked while bottom fishing for other species.",
     "coast": "east",
     "lures": "Not typically targeted with lures"
@@ -1084,7 +1084,7 @@
     "hook_size": "6/0-9/0 circle hook",
     "sinker": "4-8 oz bank sinker or jig head",
     "explanation_cold": "Amberjack move to deeper offshore structure during winter but some remain on nearshore wrecks.",
-    "explanation_warm": "Greater amberjack are found on nearshore wrecks and reefs; they are one of the hardest-fighting fish in NC waters and require heavy tackle.",
+    "explanation_warm": "Greater amberjack crowd nearshore and offshore wrecks and reefs; they're one of the hardest-fighting reef fish and need heavy tackle.",
     "coast": "east",
     "regions": [
       "southeast",
@@ -1174,8 +1174,8 @@
     "rig": "Fish finder rig with fluorocarbon leader",
     "hook_size": "1/0-3/0 circle hook",
     "sinker": "1-2 oz egg sinker",
-    "explanation_cold": "Permit are a tropical species not typically found in NC during cold months.",
-    "explanation_warm": "Permit occasionally visit NC waters during peak summer; they feed on crabs and crustaceans and are a prized catch when encountered.",
+    "explanation_cold": "Permit are tropical; in cool water they move to deeper wrecks and reefs.",
+    "explanation_warm": "Permit feed on crabs and shrimp over sand flats, along beaches and around wrecks; north of Florida they're occasional summer visitors.",
     "coast": "east",
     "regions": [
       "florida"
@@ -1205,7 +1205,7 @@
     "hook_size": "4/0-7/0 circle hook",
     "sinker": "4-8 oz bank sinker",
     "explanation_cold": "Red snapper remain on deeper offshore structure during cold months and are less accessible.",
-    "explanation_warm": "Red snapper are on nearshore and offshore wrecks and reefs; NC has a growing population and they hit cut bait and live baits aggressively.",
+    "explanation_warm": "Red snapper live on wrecks and reefs from nearshore out to deep water and hit cut and live bait hard. Seasons are short: check them first.",
     "coast": "east",
     "regions": [
       "southeast",
@@ -1421,7 +1421,7 @@
     "hook_size": "6/0-9/0 circle hook",
     "sinker": "6-10 oz bank sinker",
     "explanation_cold": "Black grouper are on deeper offshore structure and rarely encountered inshore during winter.",
-    "explanation_warm": "Black grouper are the largest grouper in NC waters; they inhabit wrecks and reefs and require the heaviest tackle to land.",
+    "explanation_warm": "Black grouper are among the largest groupers on wrecks and reefs; they dive for the rocks, so it takes heavy tackle to land one.",
     "coast": "east",
     "regions": [
       "florida",
@@ -1450,8 +1450,8 @@
     "rig": "Float rig with heavy fluorocarbon leader or trolling rig",
     "hook_size": "4/0-7/0 J-hook or circle hook",
     "sinker": "None or trolling weight",
-    "explanation_cold": "Mahi-mahi follow warm Gulf Stream water and are not present in NC nearshore during winter.",
-    "explanation_warm": "Mahi-mahi follow the Gulf Stream close to NC in summer; they school around floating debris, weedlines and temperature breaks.",
+    "explanation_cold": "Mahi-mahi follow warm water south and offshore in winter.",
+    "explanation_warm": "Mahi-mahi follow warm blue water in summer; they school around floating debris, weedlines and temperature breaks.",
     "coast": "east",
     "regions": [
       "southeast",
@@ -1483,7 +1483,7 @@
     "hook_size": "6/0-9/0 J-hook or trolling hook",
     "sinker": "Trolling weight or none",
     "explanation_cold": "Wahoo follow warm water and are occasionally found near the Gulf Stream edge in late fall and winter.",
-    "explanation_warm": "Wahoo are one of the fastest fish in the ocean; they are found along the Gulf Stream edge and temperature breaks near NC.",
+    "explanation_warm": "Wahoo are one of the fastest fish in the ocean; look for them along temperature breaks, ledges and offshore structure.",
     "coast": "east",
     "regions": [
       "southeast",
@@ -1550,7 +1550,7 @@
     "hook_size": "5/0-8/0 circle hook",
     "sinker": "None or trolling weight",
     "explanation_cold": "Yellowfin tuna are available along the Gulf Stream edge year-round; winter trips target them at the shelf break.",
-    "explanation_warm": "Yellowfin tuna are one of NC's premier offshore targets; they feed along temperature breaks, over structure and in blue water.",
+    "explanation_warm": "Yellowfin tuna are a top offshore target; they feed along temperature breaks, over structure and in blue water.",
     "coast": "east",
     "regions": [
       "southeast",
@@ -1580,7 +1580,7 @@
     "rig": "Float rig with fluorocarbon leader or casting jig",
     "hook_size": "1/0-3/0 J-hook or jig hook",
     "sinker": "None or jig weight",
-    "explanation_cold": "Atlantic bonito pass through NC waters during fall and spring migrations and may be present in cooler months.",
+    "explanation_cold": "Atlantic bonito pass along the coast on their spring and fall migrations and can turn up in cooler months.",
     "explanation_warm": "Atlantic bonito school nearshore and around piers during migration; they are fast, aggressive fish that hit small jigs and live baits.",
     "coast": "east",
     "regions": [
@@ -1610,8 +1610,8 @@
     "rig": "Float rig with heavy fluorocarbon leader or trolling rig",
     "hook_size": "6/0-8/0 circle hook",
     "sinker": "None or trolling weight",
-    "explanation_cold": "Sailfish are in warmer waters to the south and rarely encountered off NC in winter.",
-    "explanation_warm": "Sailfish are caught off NC when the Gulf Stream pushes close to shore; they are the premier billfish target with spectacular aerial displays.",
+    "explanation_cold": "Sailfish winter in warm water off Southeast Florida, where the winter run is the best of the year.",
+    "explanation_warm": "Sailfish come within reach when warm blue water pushes close to shore; they're the classic billfish, known for their jumps.",
     "coast": "east",
     "regions": [
       "florida",
@@ -1638,8 +1638,8 @@
     "rig": "Heavy trolling rig with wind-on leader",
     "hook_size": "9/0-12/0 J-hook or circle hook",
     "sinker": "None or trolling weight",
-    "explanation_cold": "Blue marlin are in tropical waters during winter and are not present off NC.",
-    "explanation_warm": "Blue marlin are the ultimate offshore trophy off NC; the Gulf Stream provides world-class fishing from May through September.",
+    "explanation_cold": "Blue marlin follow warm tropical water and are scarce in winter except in the far south.",
+    "explanation_warm": "Blue marlin are the top offshore trophy; summer brings them to the warm blue water along the shelf edge.",
     "coast": "east",
     "regions": [
       "southeast",
@@ -1668,7 +1668,7 @@
     "rig": "Float rig or light trolling rig with fluorocarbon leader",
     "hook_size": "5/0-7/0 circle hook",
     "sinker": "None or trolling weight",
-    "explanation_cold": "White marlin migrate south during winter and are not available off NC.",
+    "explanation_cold": "White marlin migrate south in winter.",
     "explanation_warm": "White marlin are found along the Gulf Stream edge and over offshore canyon structure; they are acrobatic fighters on lighter tackle.",
     "coast": "east",
     "regions": [
@@ -1728,7 +1728,7 @@
     "rig": "Float rig or free-lined with light tackle",
     "hook_size": "#1-2/0 J-hook",
     "sinker": "None or small split shot",
-    "explanation_cold": "Ladyfish move to warmer waters during cold months and are absent from NC.",
+    "explanation_cold": "Ladyfish move to warmer water in winter; north of Florida they leave until spring.",
     "explanation_warm": "Ladyfish (skipjack) are fast, acrobatic fish that school in inlets and along the surf; they hit small lures and live shrimp aggressively.",
     "coast": "east",
     "regions": [
@@ -1758,8 +1758,8 @@
     "rig": "Float rig with heavy wire leader",
     "hook_size": "4/0-7/0 J-hook or treble",
     "sinker": "None",
-    "explanation_cold": "Barracuda are in warmer tropical waters during winter and rarely found off NC.",
-    "explanation_warm": "Great barracuda occasionally show up around piers and nearshore structure in NC during warm months; they are explosive strikers.",
+    "explanation_cold": "Barracuda move to warmer, deeper water in winter and are scarce in the shallows.",
+    "explanation_warm": "Great barracuda hang around reefs, wrecks, piers and channel edges in warm water and hit fast-moving baits hard.",
     "coast": "east",
     "regions": [
       "southeast",
@@ -1790,7 +1790,7 @@
     "hook_size": "2/0-4/0 circle or wide-gap hook",
     "sinker": "1-3 oz egg sinker",
     "explanation_cold": "Southern flounder move offshore to spawn in late fall and are scarce inshore during winter.",
-    "explanation_warm": "Southern flounder are the primary flounder species in NC inshore waters; they ambush prey around inlets, docks and creek mouths.",
+    "explanation_warm": "Southern flounder are the main inshore flounder from the Carolinas through the Gulf; they ambush prey around inlets, docks and creek mouths.",
     "coast": "east",
     "lures": "Bucktail jigs with paddle tail, Gulp shrimp/Nemesis; same technique as summer flounder"
   },
@@ -2021,7 +2021,7 @@
     "hook_size": "#4-#1 shad dart or jig",
     "sinker": "1/4-1/2 oz jig head",
     "explanation_cold": "Hickory shad are staging offshore before their spring spawning run up coastal rivers.",
-    "explanation_warm": "Hickory shad make massive spring runs up NC rivers; they are caught from bridges, piers and banks on small shad darts and jigs.",
+    "explanation_warm": "Hickory shad make big spring runs up coastal rivers; they're caught from bridges, piers and banks on small shad darts and spoons.",
     "coast": "east",
     "regions": [
       "midatlantic",
@@ -2048,8 +2048,8 @@
     "rig": "Tandem shad dart rig",
     "hook_size": "#6-#2 shad dart",
     "sinker": "1/4-1/2 oz jig head",
-    "explanation_cold": "American shad are beginning to enter NC rivers for their spring spawning run during late winter.",
-    "explanation_warm": "American shad run up NC rivers in huge numbers during spring; the Cape Fear and Neuse Rivers are top destinations.",
+    "explanation_cold": "American shad start into coastal rivers for their spring spawning run in late winter.",
+    "explanation_warm": "American shad run up coastal rivers in huge numbers each spring to spawn; small darts and spoons catch them.",
     "coast": "east",
     "regions": [
       "northeast",
@@ -2273,7 +2273,7 @@
     "hook_size": "2/0-4/0 circle hook",
     "sinker": "3-5 oz pyramid sinker",
     "explanation_cold": "Spiny dogfish are abundant inshore during winter, schooling along the bottom and readily hitting cut bait; handle carefully due to venomous dorsal spines.",
-    "explanation_warm": "Spiny dogfish migrate to cooler northern or deeper waters during warm months and are absent from NC inshore waters.",
+    "explanation_warm": "Spiny dogfish move to cooler, deeper water in summer and leave the beaches.",
     "coast": "east",
     "regions": [
       "northeast",
@@ -2331,8 +2331,8 @@
     "rig": "Shark rig with heavy wire leader and stand-up tackle",
     "hook_size": "14/0-20/0 circle hook",
     "sinker": "8-16 oz pyramid sinker",
-    "explanation_cold": "Tiger sharks are in warmer waters to the south and not present in NC nearshore during winter.",
-    "explanation_warm": "Tiger sharks are the apex predator in NC waters; they patrol the surf zone and near piers eating anything. Landing one from shore is a major event.",
+    "explanation_cold": "Tiger sharks move to warmer water to the south in winter.",
+    "explanation_warm": "Tiger sharks are top predators that cruise the surf zone and around piers, eating almost anything. Landing one from shore is a big event.",
     "coast": "east",
     "lures": "Primarily caught on bait"
   },
@@ -2356,7 +2356,7 @@
     "rig": "Shark rig with heavy wire leader",
     "hook_size": "10/0-16/0 circle hook",
     "sinker": "6-10 oz pyramid sinker",
-    "explanation_cold": "Hammerhead sharks have migrated south and are not present in NC during cold months.",
+    "explanation_cold": "Hammerheads move south in cold water.",
     "explanation_warm": "Scalloped hammerheads cruise the surf zone and near piers hunting stingrays and other prey; they are powerful fighters requiring the heaviest tackle.",
     "coast": "east",
     "lures": "Primarily caught on bait offshore"
@@ -2408,8 +2408,8 @@
     "rig": "Fish finder rig with wire leader",
     "hook_size": "8/0-12/0 circle hook",
     "sinker": "6-10 oz pyramid sinker",
-    "explanation_cold": "Thresher sharks pass through NC waters during seasonal migrations and are less common in the coldest months.",
-    "explanation_warm": "Thresher sharks use their incredibly long tails to stun baitfish; they pass through NC in spring and fall migrations and are prized catches.",
+    "explanation_cold": "Thresher sharks pass through on seasonal migrations and are less common in the coldest months.",
+    "explanation_warm": "Thresher sharks stun baitfish with their very long tails; they pass along the coast in spring and fall and are prized catches.",
     "coast": "east",
     "lures": "Offshore trolling lures; primarily caught on bait"
   },
@@ -2804,7 +2804,7 @@
     "hook_size": "#10-#6 sabiki or gold hook",
     "sinker": "1-2 oz weight below sabiki",
     "explanation_cold": "Menhaden are offshore in large schools during the coldest months; some remain in deeper inshore channels.",
-    "explanation_warm": "Atlantic menhaden are THE most important bait fish in NC; massive schools move along the beach and through inlets. Cast net or sabiki rig them for bait.",
+    "explanation_warm": "Atlantic menhaden (bunker) are the most important bait fish on the coast; big schools move along the beach and through inlets. Cast-net or snag them for bait.",
     "coast": "east",
     "lures": "Not typically targeted with lures; used as bait"
   },
@@ -2979,8 +2979,8 @@
     "rig": "Float rig or free-lined with light tackle",
     "hook_size": "1/0-3/0 circle or J-hook",
     "sinker": "None or small split shot",
-    "explanation_cold": "Bar jacks are in warmer tropical waters and not present in NC during cold months.",
-    "explanation_warm": "Bar jacks occasionally appear around NC piers and nearshore structure during peak summer when water is warmest.",
+    "explanation_cold": "Bar jacks are tropical and move to warmer water in winter.",
+    "explanation_warm": "Bar jacks school around reefs, piers and nearshore structure in warm water.",
     "coast": "east",
     "lures": "Small spoons, jigs near structure"
   },
@@ -3004,7 +3004,7 @@
     "rig": "Float rig with fluorocarbon leader or trolling rig",
     "hook_size": "2/0-5/0 circle or J-hook",
     "sinker": "None or trolling weight",
-    "explanation_cold": "Rainbow runners are in warmer offshore waters and not available near NC in cold months.",
+    "explanation_cold": "Rainbow runners move to warmer offshore water in winter.",
     "explanation_warm": "Rainbow runners are colorful, fast-swimming jacks found around offshore structure and occasionally near piers; they are strong fighters on light tackle.",
     "coast": "east",
     "lures": "Fast-retrieved spoons, small jigs"
@@ -3053,8 +3053,8 @@
     "rig": "Float rig with fluorocarbon leader or free-lined",
     "hook_size": "#1-2/0 circle hook",
     "sinker": "None or small split shot",
-    "explanation_cold": "Yellowtail snapper are a tropical species not present in NC during cold months.",
-    "explanation_warm": "Yellowtail snapper occasionally appear around NC nearshore reefs and structure during peak warm months; they are wary and require light tackle.",
+    "explanation_cold": "Yellowtail snapper are tropical; in cool water they hold deeper on the reef.",
+    "explanation_warm": "Yellowtail snapper school over reefs and structure in warm water; they're wary, so use light leader and small baits.",
     "coast": "east",
     "regions": [
       "florida"
@@ -3081,7 +3081,7 @@
     "hook_size": "2/0-5/0 circle hook",
     "sinker": "2-4 oz egg sinker",
     "explanation_cold": "Mutton snapper are in warmer southern waters during cold months.",
-    "explanation_warm": "Mutton snapper occasionally visit NC reefs and wrecks during peak summer; they are hard-fighting, excellent-eating snapper.",
+    "explanation_warm": "Mutton snapper feed on reefs, wrecks and sand patches; they fight hard and eat well.",
     "coast": "east",
     "regions": [
       "florida"
@@ -3428,7 +3428,7 @@
     "rig": "Deep-drop bottom rig with very heavy weight and electric reel",
     "hook_size": "9/0-14/0 circle hook",
     "sinker": "3-8 lb bank sinker",
-    "explanation_cold": "Wreckfish are deep-water grouper-like fish found on deep structure in 1000+ ft; winter is peak season off NC.",
+    "explanation_cold": "Wreckfish live on deep structure in 1,000 ft or more; winter is their peak season.",
     "explanation_warm": "Wreckfish are in very deep, cold water year-round; they are less commonly targeted in summer but remain accessible via deep-drop rigs.",
     "coast": "east",
     "lures": "Heavy jigs near deep structure"
@@ -3618,7 +3618,7 @@
     "hook_size": "#2-2/0 circle hook",
     "sinker": "3-6 oz bank sinker",
     "explanation_cold": "Whitebone porgy remain on offshore reefs during cold months.",
-    "explanation_warm": "Whitebone porgy are common on nearshore reefs and hard bottom off NC; they school over structure and are reliable bottom biters.",
+    "explanation_warm": "Whitebone porgy are common on nearshore reefs and hard bottom; they school over structure and bite reliably on bottom rigs.",
     "coast": "east",
     "lures": "Small jigs near structure"
   },
@@ -3644,7 +3644,7 @@
     "hook_size": "#1-3/0 circle hook",
     "sinker": "3-6 oz bank sinker",
     "explanation_cold": "Jolthead porgy are on deeper reefs and less accessible during cold months.",
-    "explanation_warm": "Jolthead porgy are the largest porgy species in NC waters; they inhabit reefs and hard bottom and put up a good fight on bottom rigs.",
+    "explanation_warm": "Jolthead porgy are one of the largest porgies; they live on reefs and hard bottom and fight well on bottom rigs.",
     "coast": "east",
     "lures": "Small jigs near structure"
   },
@@ -3795,7 +3795,7 @@
     "hook_size": "#4-#1 circle hook",
     "sinker": "1-3 oz bank sinker",
     "explanation_cold": "Porkfish are in warmer waters to the south during cold months.",
-    "explanation_warm": "Porkfish are striking yellow-and-black striped grunts that occasionally appear around NC piers and reefs during peak summer.",
+    "explanation_warm": "Porkfish are yellow-and-black striped grunts found around reefs, piers and jetties in warm water.",
     "coast": "east",
     "lures": "Small jigs near structure"
   },
@@ -3949,7 +3949,7 @@
     "hook_size": "#4-#1 strong short-shank hook",
     "sinker": "1-2 oz egg sinker",
     "explanation_cold": "Queen triggerfish are in warmer tropical waters during cold months.",
-    "explanation_warm": "Queen triggerfish are the most colorful triggerfish, occasionally appearing on NC reefs and around structure during peak summer.",
+    "explanation_warm": "Queen triggerfish are the most colorful triggerfish, found on reefs and around structure in warm water.",
     "coast": "east",
     "lures": "Small jigs near structure"
   },
@@ -4024,7 +4024,7 @@
     "hook_size": "5/0-8/0 circle hook",
     "sinker": "3-6 oz pyramid sinker",
     "explanation_cold": "Nurse sharks are in warmer southern waters during cold months.",
-    "explanation_warm": "Nurse sharks occasionally appear in NC during peak summer; they are docile bottom dwellers that rest under ledges and feed on crustaceans and small fish.",
+    "explanation_warm": "Nurse sharks are docile bottom sharks that rest under ledges and feed on crustaceans and small fish. They still bite hard when handled.",
     "coast": "east",
     "regions": [
       "florida",
@@ -4102,8 +4102,8 @@
     "rig": "Float rig or free-lined with medium tackle",
     "hook_size": "1/0-4/0 circle or J-hook",
     "sinker": "None or small split shot",
-    "explanation_cold": "Yellow jacks are in tropical waters and not present in NC during cold months.",
-    "explanation_warm": "Yellow jacks occasionally visit NC waters during peak summer; they are beautiful golden fish that fight hard and school around structure.",
+    "explanation_cold": "Yellow jacks are tropical and move to warmer water in winter.",
+    "explanation_warm": "Yellow jacks are golden, hard-fighting jacks that school around structure in warm water.",
     "coast": "east",
     "lures": "Spoons, jigs; aggressive jack species"
   },
@@ -4127,7 +4127,7 @@
     "hook_size": "2/0-5/0 circle or J-hook",
     "sinker": "None or 1-2 oz egg sinker",
     "explanation_cold": "Horse-eye jacks are in warmer waters to the south during cold months.",
-    "explanation_warm": "Horse-eye jacks are large-eyed jacks that occasionally school around NC piers and nearshore structure during warm months; they are strong fighters.",
+    "explanation_warm": "Horse-eye jacks are big-eyed jacks that school around piers and nearshore structure in warm water; they fight hard.",
     "coast": "east",
     "lures": "Spoons, jigs, topwater; similar to jack crevalle"
   },
@@ -4150,8 +4150,8 @@
     "rig": "Hi-lo rig with small hooks or float rig",
     "hook_size": "#2-1/0 circle hook",
     "sinker": "1-2 oz pyramid sinker",
-    "explanation_cold": "Palometa are a tropical species not found in NC during cold months.",
-    "explanation_warm": "Palometa are small, deep-bodied jacks related to permit; they occasionally appear in the NC surf zone during peak summer and hit sand fleas.",
+    "explanation_cold": "Palometa are tropical and leave the beaches in cold water.",
+    "explanation_warm": "Palometa are small, deep-bodied relatives of permit that feed in the surf zone in warm water and hit sand fleas.",
     "coast": "east",
     "lures": "Small jigs, spoons near surface"
   },
@@ -4175,7 +4175,7 @@
     "hook_size": "#1-2/0 long-shank hook",
     "sinker": "None or small split shot",
     "explanation_cold": "Cero mackerel are in warmer tropical waters during cold months.",
-    "explanation_warm": "Cero mackerel resemble Spanish mackerel but with spots arranged in rows; they occasionally show up around NC piers during peak summer.",
+    "explanation_warm": "Cero mackerel look like Spanish mackerel with a bronze stripe down the side; they feed around reefs, wrecks and piers in warm water.",
     "coast": "east",
     "lures": "Metal spoons, small jigs; same tactics as Spanish mackerel"
   },
@@ -4229,8 +4229,8 @@
     "rig": "Trolling rig with fluorocarbon leader",
     "hook_size": "3/0-6/0 circle or J-hook",
     "sinker": "Trolling weight or none",
-    "explanation_cold": "Albacore tuna pass through NC offshore waters during fall and winter, preferring cooler water than other tunas.",
-    "explanation_warm": "Albacore prefer cooler water and are most accessible off NC during fall and early winter along temperature breaks.",
+    "explanation_cold": "Albacore like cooler water than other tunas and pass through offshore waters in fall and winter.",
+    "explanation_warm": "Albacore like cooler water than other tunas and feed along temperature breaks.",
     "coast": "east",
     "lures": "Heavy metal jigs, feather lures, trolling lures"
   },
@@ -4383,8 +4383,8 @@
     "rig": "Hi-lo rig or Carolina rig",
     "hook_size": "#1-3/0 circle hook",
     "sinker": "2-4 oz bank sinker",
-    "explanation_cold": "Coney are a tropical species not commonly found on NC reefs during cold months.",
-    "explanation_warm": "Coney are small, colorful groupers that occasionally appear on NC nearshore reefs during peak summer; they come in multiple color phases.",
+    "explanation_cold": "Coney are tropical; in cool water they hold deeper on the reef.",
+    "explanation_warm": "Coney are small, colorful groupers on reefs in warm water; they come in several color phases.",
     "coast": "east",
     "lures": "Small jigs near structure"
   },
@@ -4511,7 +4511,7 @@
     "hook_size": "3/0-6/0 hook",
     "sinker": "2-4 oz",
     "explanation_cold": "Green morays are deep in structure crevices and inactive during cold months.",
-    "explanation_warm": "Green moray eels are the largest morays in NC waters; they inhabit pier pilings, jetties and wrecks. Do not attempt to handle \u2014 they deliver severe bites.",
+    "explanation_warm": "Green morays are the largest morays around; they live in pier pilings, jetties and wrecks. Don't handle one: they bite hard.",
     "coast": "east",
     "lures": "Primarily caught on bait near reef structure"
   },
@@ -4534,8 +4534,8 @@
     "rig": "Fish finder rig with heavy fluorocarbon leader or free-lined",
     "hook_size": "2/0-5/0 circle hook",
     "sinker": "1-2 oz egg sinker or none",
-    "explanation_cold": "Snook are a tropical species not found in NC during cold months.",
-    "explanation_warm": "Snook are rare visitors to NC during unusually warm summers; they are prized gamefish that ambush bait around inlets, docks and structure.",
+    "explanation_cold": "Snook are tropical and cold-sensitive; in cool water they hold in deep canals, rivers and residential basins.",
+    "explanation_warm": "Snook ambush bait around inlets, docks, mangroves and structure; north of Florida they're rare strays in the warmest summers.",
     "coast": "east",
     "regions": [
       "florida"
@@ -4670,7 +4670,7 @@
     "hook_size": "8/0-12/0 circle hook",
     "sinker": "3-8 lb bank sinker",
     "explanation_cold": "Warsaw grouper inhabit deep ledges year-round and are accessible via deep-drop rigs.",
-    "explanation_warm": "Warsaw grouper are the largest grouper caught off NC, living on deep ledges in 300-800+ ft; they can exceed 300 lbs and require the heaviest tackle.",
+    "explanation_warm": "Warsaw grouper live on deep ledges in 300\u2013800+ ft and can top 300 lb. Many areas restrict or ban keeping them: check before you do.",
     "coast": "east",
     "lures": "Heavy jigs near deep structure"
   },
@@ -4823,8 +4823,8 @@
     "rig": "N/A \u2014 not a typical hook-and-line target",
     "hook_size": "N/A",
     "sinker": "N/A",
-    "explanation_cold": "Blue tang are a tropical reef species not found in NC during cold months.",
-    "explanation_warm": "Blue tang occasionally appear around NC pier pilings and jetties during late summer as tropical strays; they are herbivores with a sharp tail spine.",
+    "explanation_cold": "Blue tang are tropical reef fish and scarce in cold water.",
+    "explanation_warm": "Blue tang are reef herbivores with a scalpel-sharp spine at the tail; outside the tropics they turn up as late-summer strays around pilings and jetties.",
     "coast": "east",
     "lures": "Not typically targeted with lures"
   },
@@ -4848,7 +4848,7 @@
     "hook_size": "#6-#2 small hook",
     "sinker": "Small split shot",
     "explanation_cold": "Gray angelfish are in tropical waters during cold months.",
-    "explanation_warm": "Gray angelfish are large, disc-shaped reef fish that occasionally visit NC pier pilings and jetties as tropical strays during warm months.",
+    "explanation_warm": "Gray angelfish are large, disc-shaped reef fish that also show up around pilings and jetties in warm water.",
     "coast": "east",
     "lures": "Not typically targeted with lures"
   },
@@ -4870,8 +4870,8 @@
     "rig": "N/A \u2014 not a hook-and-line target",
     "hook_size": "N/A",
     "sinker": "N/A",
-    "explanation_cold": "Spotfin butterflyfish are tropical and not present in NC during cold months.",
-    "explanation_warm": "Spotfin butterflyfish are beautiful tropical strays that appear around NC pier pilings in late summer; they feed on small invertebrates on structure.",
+    "explanation_cold": "Spotfin butterflyfish are tropical and scarce in cold water.",
+    "explanation_warm": "Spotfin butterflyfish pick small invertebrates off structure; north of Florida they show up around pilings in late summer.",
     "coast": "east",
     "lures": "Not a primary lure target; check local tackle shop for lure recommendations"
   },
@@ -4893,8 +4893,8 @@
     "rig": "N/A \u2014 not a typical hook-and-line target",
     "hook_size": "N/A",
     "sinker": "N/A",
-    "explanation_cold": "Doctorfish are tropical and not present in NC during cold months.",
-    "explanation_warm": "Doctorfish are tropical tangs that occasionally appear around NC structure as summer strays; they are herbivores with a scalpel-like tail spine.",
+    "explanation_cold": "Doctorfish are tropical and scarce in cold water.",
+    "explanation_warm": "Doctorfish are tangs with a scalpel-sharp tail spine; outside the tropics they turn up around structure as summer strays.",
     "coast": "east",
     "lures": "Not a primary lure target; check local tackle shop for lure recommendations"
   },
@@ -4944,8 +4944,8 @@
     "rig": "Hi-lo rig (usually caught while reef fishing)",
     "hook_size": "#1-3/0 hook",
     "sinker": "2-4 oz bank sinker",
-    "explanation_cold": "Lionfish remain on deeper reefs during cold months but survive NC winters on offshore structure.",
-    "explanation_warm": "Red lionfish are an invasive Indo-Pacific species now established on NC reefs; they have venomous spines but are excellent eating once spines are removed.",
+    "explanation_cold": "Lionfish stay on deeper reefs through the winter.",
+    "explanation_warm": "Red lionfish are an invasive Indo-Pacific fish now on reefs from the Carolinas through the Gulf. The spines are venomous; the meat is excellent.",
     "coast": "east",
     "lures": "Not typically targeted with lures; usually speared"
   },
@@ -4970,7 +4970,7 @@
     "hook_size": "#4-#1 circle hook",
     "sinker": "1-2 oz egg sinker",
     "explanation_cold": "Puddingwife wrasse are on deeper reefs or in warmer waters during cold months.",
-    "explanation_warm": "Puddingwife are colorful, medium-sized wrasses found around NC pier pilings and reefs; they feed on small crustaceans and are strong for their size.",
+    "explanation_warm": "Puddingwife are colorful, medium-sized wrasses around pilings and reefs; they eat small crustaceans and pull hard for their size.",
     "coast": "east",
     "lures": "Not typically targeted with lures"
   },
@@ -4993,8 +4993,8 @@
     "rig": "Knocker rig with very small hooks",
     "hook_size": "#8-#4 small hook",
     "sinker": "Small split shot",
-    "explanation_cold": "Bluehead wrasse are tropical and not present in NC during cold months.",
-    "explanation_warm": "Bluehead wrasse are small, colorful tropical wrasses that occasionally appear around NC pier pilings and reefs as summer strays.",
+    "explanation_cold": "Bluehead wrasse are tropical and scarce in cold water.",
+    "explanation_warm": "Bluehead wrasse are small, colorful reef wrasses; north of Florida they show up around pilings as summer strays.",
     "coast": "east",
     "lures": "Not typically targeted with lures"
   },
@@ -5202,7 +5202,7 @@
     "hook_size": "#6-#2 shad dart or jig",
     "sinker": "1/4-1/2 oz jig head",
     "explanation_cold": "Blueback herring are offshore staging before their spring river runs.",
-    "explanation_warm": "Blueback herring run up NC rivers alongside shad in spring; they hit small, bright darts and jigs and are excellent cut bait.",
+    "explanation_warm": "Blueback herring run up coastal rivers with the shad in spring; they hit small, bright darts and make excellent bait.",
     "coast": "east",
     "lures": "Small jigs, sabiki rigs"
   },
@@ -5225,7 +5225,7 @@
     "hook_size": "#6-#2 shad dart or jig",
     "sinker": "1/4-1/2 oz jig head",
     "explanation_cold": "Alewife are offshore before their spring spawning run into rivers.",
-    "explanation_warm": "Alewife are anadromous herring that run up NC rivers in spring for spawning; they hit small darts and make excellent cut and live bait.",
+    "explanation_warm": "Alewives run up coastal rivers to spawn in spring; they hit small darts and make excellent cut and live bait. Many states restrict keeping river herring: check first.",
     "coast": "east",
     "lures": "Not typically targeted with lures; incidentally caught"
   },
@@ -5274,7 +5274,7 @@
     "rig": "Hi-lo rig",
     "hook_size": "#2-2/0 circle hook",
     "sinker": "2-4 oz pyramid sinker",
-    "explanation_cold": "Little skates are small, common bottom catches during winter months; they are the smallest skate species in NC waters.",
+    "explanation_cold": "Little skates are small, common bottom catches in cold months.",
     "explanation_warm": "Little skates move to deeper, cooler water during warm months.",
     "coast": "east",
     "lures": "Not typically targeted with lures"
@@ -5298,8 +5298,8 @@
     "rig": "Fish finder rig with very heavy leader",
     "hook_size": "6/0-10/0 circle hook",
     "sinker": "4-8 oz bank sinker",
-    "explanation_cold": "Cubera snapper are in tropical waters and not present in NC during cold months.",
-    "explanation_warm": "Cubera snapper are the largest snapper species, rarely encountered on NC reefs during peak summer; they are immensely powerful around structure.",
+    "explanation_cold": "Cubera snapper are tropical; in cool water they hold on deeper structure.",
+    "explanation_warm": "Cubera snapper are the largest snapper, holding on deep ledges and wrecks; they're immensely strong around structure.",
     "coast": "east",
     "lures": "Large jigs, swimbaits near deep structure"
   },
@@ -5322,8 +5322,8 @@
     "rig": "Knocker rig with fluorocarbon leader",
     "hook_size": "1/0-3/0 circle hook",
     "sinker": "1-2 oz egg sinker",
-    "explanation_cold": "Schoolmaster snapper are tropical and not found in NC during cold months.",
-    "explanation_warm": "Schoolmaster snapper are occasional tropical visitors to NC structure during warm summers; they have distinctive yellow fins and are wary biters.",
+    "explanation_cold": "Schoolmaster snapper are tropical and scarce in cold water.",
+    "explanation_warm": "Schoolmaster snapper have bright yellow fins and live around reefs and mangroves; they're wary biters.",
     "coast": "east",
     "lures": "Small jigs, soft plastics near structure"
   },
@@ -5350,7 +5350,7 @@
     "hook_size": "2/0-5/0 circle hook",
     "sinker": "8-16 oz bank sinker",
     "explanation_cold": "Silk snapper are on deep reefs year-round and accessible via deep-drop rigs.",
-    "explanation_warm": "Silk snapper are deep-water snappers found on reefs in 300-600+ ft off NC; they are beautiful pink fish caught on deep-drop rigs.",
+    "explanation_warm": "Silk snapper are pink deep-water snappers on reefs in 300\u2013600+ ft, caught on deep-drop rigs.",
     "coast": "east",
     "lures": "Vertical jigs near deep structure"
   },
@@ -5378,8 +5378,8 @@
     "rig": "Deep-drop bottom rig with electric reel",
     "hook_size": "3/0-6/0 circle hook",
     "sinker": "2-5 lb bank sinker",
-    "explanation_cold": "Queen snapper inhabit very deep water (600-1500+ ft) year-round off NC.",
-    "explanation_warm": "Queen snapper are brilliant red deep-water fish caught in 600-1500+ ft; they are among the most prized deep-drop catches off NC.",
+    "explanation_cold": "Queen snapper live in very deep water (600\u20131,500+ ft) all year.",
+    "explanation_warm": "Queen snapper are bright red deep-water fish caught in 600\u20131,500+ ft; they're a prized deep-drop catch.",
     "coast": "east",
     "lures": "Vertical jigs near deep bottom"
   },
@@ -5426,8 +5426,8 @@
     "rig": "Knocker rig with very small hooks",
     "hook_size": "#10-#6 micro hook",
     "sinker": "Tiny split shot",
-    "explanation_cold": "Yellowtail damselfish are tropical and not present in NC during cold months.",
-    "explanation_warm": "Yellowtail damselfish are small, bright tropical strays that appear around NC pier pilings in late summer; they aggressively defend small territories.",
+    "explanation_cold": "Yellowtail damselfish are tropical and scarce in cold water.",
+    "explanation_warm": "Yellowtail damselfish are small reef fish that guard their patch hard; outside the tropics they turn up around pilings in late summer.",
     "coast": "east",
     "lures": "Not typically targeted with lures"
   },
@@ -5452,7 +5452,7 @@
     "hook_size": "#4-#1 circle hook",
     "sinker": "2-4 oz bank sinker",
     "explanation_cold": "Creole wrasse are on deeper offshore reefs during cold months.",
-    "explanation_warm": "Creole wrasse are purple reef fish that school above hard bottom and reefs; they are common on NC offshore structure.",
+    "explanation_warm": "Creole wrasse are purple reef fish that school above hard bottom and reefs offshore.",
     "coast": "east",
     "lures": "Not typically targeted with lures"
   },
@@ -5692,7 +5692,7 @@
     "rig": "Deep-drop bottom rig with electric reel",
     "hook_size": "5/0-8/0 circle hook",
     "sinker": "3-8 lb bank sinker",
-    "explanation_cold": "Barrelfish inhabit deep structure in 600-1200+ ft off NC; they are most commonly targeted during winter deep-drop trips.",
+    "explanation_cold": "Barrelfish live on deep structure in 600\u20131,200+ ft and are most often caught on winter deep-drop trips.",
     "explanation_warm": "Barrelfish are deep-water species found well below the thermocline; they are caught on deep-drop rigs and have firm, white flesh.",
     "coast": "east",
     "lures": "Heavy jigs near deep structure"
@@ -5719,7 +5719,7 @@
     "rig": "Deep-drop bottom rig",
     "hook_size": "2/0-5/0 circle hook",
     "sinker": "2-5 lb bank sinker",
-    "explanation_cold": "Blackbelly rosefish are deep-water scorpionfish found in 500-1500 ft off NC; they are bright red with large eyes.",
+    "explanation_cold": "Blackbelly rosefish are bright red deep-water scorpionfish with big eyes, found in 500\u20131,500 ft.",
     "explanation_warm": "Blackbelly rosefish remain in deep, cold water year-round; they are occasional catches on deep-drop trips targeting tilefish and snowy grouper.",
     "coast": "east",
     "lures": "Small jigs near deep structure"
@@ -5875,8 +5875,8 @@
     "rig": "Hi-lo rig or jig",
     "hook_size": "2/0-5/0 circle or jig hook",
     "sinker": "3-6 oz bank sinker",
-    "explanation_cold": "Pollock are rare visitors to NC waters during exceptionally cold winters; they are more common further north but occasionally appear.",
-    "explanation_warm": "Pollock are a cold-water species not present in NC during warm months.",
+    "explanation_cold": "Pollock feed on rocky ledges and wrecks in cold water and come closer to shore in late fall and winter.",
+    "explanation_warm": "Pollock are a cold-water fish; in summer they're on deeper, cooler ledges and wrecks.",
     "coast": "east",
     "lures": "Metal jigs, swimbaits, diamond jigs; excellent jig target in cold water"
   },
@@ -5898,8 +5898,8 @@
     "rig": "Hi-lo rig or jig",
     "hook_size": "3/0-6/0 circle or jig hook",
     "sinker": "4-8 oz bank sinker",
-    "explanation_cold": "Atlantic cod are extremely rare visitors to NC waters during the coldest winters; they are at the far southern edge of their range.",
-    "explanation_warm": "Atlantic cod are a cold-water species not found in NC waters during warm months.",
+    "explanation_cold": "Atlantic cod feed on rocky bottom, ledges and wrecks in cold water and come closer to shore in late fall and winter.",
+    "explanation_warm": "Atlantic cod are a cold-water fish; in summer they're on deeper, cooler ledges and wrecks.",
     "coast": "east",
     "lures": "Heavy jigs (4-8 oz), large swimbaits and pirks near bottom; good jigging target"
   },
@@ -5971,8 +5971,8 @@
     "rig": "Hi-lo rig",
     "hook_size": "#1-3/0 circle hook",
     "sinker": "2-4 oz pyramid sinker",
-    "explanation_cold": "Ocean pout are eel-like bottom fish at the far southern edge of their range in NC; extremely rare but occasionally caught in the coldest winters.",
-    "explanation_warm": "Ocean pout are a cold-water species not found in NC during warm months.",
+    "explanation_cold": "Ocean pout are eel-like bottom fish that feed in cold water on hard and mixed bottom.",
+    "explanation_warm": "Ocean pout are a cold-water fish and move deeper in summer.",
     "coast": "east",
     "lures": "Heavy jigs near bottom; primarily caught on bait"
   },
@@ -6101,7 +6101,7 @@
     "rig": "Deep-drop bottom rig with electric reel",
     "hook_size": "7/0-10/0 circle hook",
     "sinker": "3-8 lb bank sinker",
-    "explanation_cold": "Misty grouper inhabit very deep structure (600-1500+ ft) year-round off NC.",
+    "explanation_cold": "Misty grouper live on very deep structure (600\u20131,500+ ft) all year.",
     "explanation_warm": "Misty grouper are rare, deep-water groupers found on deep ledges; they are occasionally caught on deep-drop trips targeting wreckfish.",
     "coast": "east",
     "lures": "Heavy jigs near deep structure"
@@ -6152,7 +6152,7 @@
     "hook_size": "N/A",
     "sinker": "N/A",
     "explanation_cold": "Nassau grouper are in warmer tropical waters during cold months.",
-    "explanation_warm": "Nassau grouper are critically endangered and rarely encountered on NC reefs. PROTECTED \u2014 must be immediately released if hooked.",
+    "explanation_warm": "Nassau grouper are critically endangered and protected: if you hook one, release it right away.",
     "coast": "east",
     "lures": "Jigs, swimbaits near structure"
   },
@@ -6174,8 +6174,8 @@
     "rig": "Fish finder rig with heavy fluorocarbon leader",
     "hook_size": "5/0-8/0 circle hook",
     "sinker": "4-8 oz bank sinker",
-    "explanation_cold": "Atlantic wolffish are extremely rare visitors to NC \u2014 if one shows up, it's at the very southern extreme of their range during the coldest winters.",
-    "explanation_warm": "Atlantic wolffish are a cold-water species never found in NC during warm months.",
+    "explanation_cold": "Atlantic wolffish live on deep, rocky bottom in cold water. They're protected in U.S. waters: release any you catch.",
+    "explanation_warm": "Atlantic wolffish are a cold-water fish of deep, rocky bottom. They're protected in U.S. waters: release any you catch.",
     "coast": "east",
     "lures": "Heavy jigs near bottom in cold water"
   },
@@ -6203,7 +6203,7 @@
     "hook_size": "#4-#1 circle hook",
     "sinker": "1-3 oz pyramid sinker",
     "explanation_cold": "Northern kingfish (the true 'whiting') are in deeper water during the coldest months but accessible in mild winters.",
-    "explanation_warm": "Northern kingfish are the classic NC whiting, common in the surf during spring and fall; they prefer cooler water than their southern and gulf cousins.",
+    "explanation_warm": "Northern kingfish are a classic surf whiting, common in spring and fall; they like cooler water than southern and Gulf kingfish.",
     "coast": "east",
     "lures": "Small jigs; not a primary lure target"
   },
@@ -6328,8 +6328,8 @@
     "rig": "Knocker rig with very small hooks",
     "hook_size": "#8-#4 small hook",
     "sinker": "Small split shot",
-    "explanation_cold": "Yellowhead wrasse are tropical and not present in NC during cold months.",
-    "explanation_warm": "Yellowhead wrasse are colorful tropical wrasses that occasionally appear around NC structure as late-summer strays from the Gulf Stream.",
+    "explanation_cold": "Yellowhead wrasse are tropical and scarce in cold water.",
+    "explanation_warm": "Yellowhead wrasse are colorful reef wrasses; outside the tropics they turn up around structure as late-summer strays.",
     "coast": "east",
     "lures": "Not typically targeted with lures"
   },
@@ -6483,8 +6483,8 @@
     "rig": "Knocker rig with small hooks",
     "hook_size": "#6-#2 small hook",
     "sinker": "Small split shot",
-    "explanation_cold": "Smooth trunkfish are tropical and not found in NC during cold months.",
-    "explanation_warm": "Smooth trunkfish are cube-shaped tropical strays that occasionally appear around NC pier pilings during peak summer; they secrete a mild toxin.",
+    "explanation_cold": "Smooth trunkfish are tropical and scarce in cold water.",
+    "explanation_warm": "Smooth trunkfish are boxy reef fish that can release a toxin when stressed; outside the tropics they turn up around pilings as summer strays.",
     "coast": "east",
     "lures": "Not typically targeted with lures"
   },
@@ -6506,8 +6506,8 @@
     "rig": "Knocker rig with small hooks",
     "hook_size": "#6-#2 small hook",
     "sinker": "Small split shot",
-    "explanation_cold": "Honeycomb cowfish are tropical and not found in NC during cold months.",
-    "explanation_warm": "Honeycomb cowfish are quirky, horned boxfish with honeycomb patterning; they are rare tropical strays around NC pier pilings in late summer.",
+    "explanation_cold": "Honeycomb cowfish are tropical and scarce in cold water.",
+    "explanation_warm": "Honeycomb cowfish are horned boxfish with a honeycomb pattern, found over grass beds and reefs; north of Florida they're rare late-summer strays.",
     "coast": "east",
     "lures": "Not typically targeted with lures"
   },
@@ -6663,7 +6663,7 @@
     "hook_size": "5/0-8/0 circle hook",
     "sinker": "3-6 oz egg sinker",
     "explanation_cold": "Flathead catfish are in deep river holes during cold months.",
-    "explanation_warm": "Flathead catfish are apex freshwater predators found in the Cape Fear River system; they prefer live bait and can exceed 50 lbs in NC.",
+    "explanation_warm": "Flathead catfish are big river predators that eat live fish and can top 50 lb; in coastal rivers they reach down into brackish water.",
     "coast": "east",
     "lures": "Large soft plastic swimbaits; primarily caught on bait"
   },
@@ -8277,7 +8277,7 @@
     "hook_size": "6/0-9/0 circle hook",
     "sinker": "None for float rig; 4-8 oz for bottom rig",
     "explanation_cold": "Blue sharks are pelagic and move offshore or south in cold water \u2014 nearshore catches are uncommon below 55\u00b0F.",
-    "explanation_warm": "Blue sharks are among the most abundant pelagic sharks from Cape Hatteras to New England in summer; they cruise near the surface offshore and occasionally come within a few miles of shore following baitfish and menhaden schools.",
+    "explanation_warm": "Blue sharks are among the most common open-ocean sharks off the Northeast in summer; they cruise near the surface offshore and sometimes follow bait within a few miles of shore.",
     "coast": "east",
     "categories": [
       "shark",
@@ -25943,7 +25943,7 @@
     "hook_size": "Not applicable",
     "sinker": "Not applicable (trap-based fishery)",
     "lures": "Not applicable",
-    "explanation_cold": "Jonah crabs (Cancer borealis) are a cold-water species abundant throughout the Northeast from Maine to North Carolina. They prefer cold water (40-62\u00b0F) and rocky substrate.",
+    "explanation_cold": "Jonah crabs are a cold-water crab of rocky bottom, common from Maine to the mid-Atlantic in 40\u201362\u00b0F water.",
     "explanation_warm": "Jonah crabs are a prized Northeast seafood increasingly popular as a crab cake and claw alternative to blue crab and Dungeness. They're caught with hoop nets and crab traps from docks, piers, and boats. Large recreational bag limits (100/day in most NE states) make them a productive catch. Excellent eating \u2014 claws and legs are the main target. Found from rocks and jetties to offshore lobster grounds.",
     "tip": "Jonah crabs aggregate under large rocks and in crevices. Hoop nets baited with fish scraps and left for 20-30 minutes in rocky areas produce the best results."
   },

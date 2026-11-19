@@ -31,11 +31,11 @@ export const RUNS: Run[] = [
   {
     id: 'fall-drum',
     title: 'Fall red drum run',
-    regions: ['atlantic_mid', 'atlantic_south', 'gulf'],
+    regions: ['atlantic_mid', 'atlantic_south'],
     months: [9, 10, 11],
     fish: ['red-drum'],
-    what: 'Big spawning "bull" reds gather around inlets, passes and the surf, the best shot all year at a trophy from the beach.',
-    how: 'Fish fresh cut mullet or menhaden on a fish-finder rig with a circle hook near inlet mouths and sloughs, especially on the falling tide. Release the big breeders quickly.',
+    what: 'Big spawning "bull" reds gather around inlets and in the surf. It’s the best chance all year at a trophy red from the beach.',
+    how: 'Fish fresh cut mullet or menhaden on a fish-finder rig with a circle hook near inlet mouths and sloughs, especially on the falling tide. Release the big breeders quickly; they’re over the slot anyway.',
   },
   {
     id: 'flounder-run',
@@ -61,8 +61,8 @@ export const RUNS: Run[] = [
     regions: ['atlantic_mid', 'atlantic_south'],
     months: [10, 11],
     fish: ['king-mackerel'],
-    what: 'King mackerel move along the coast ahead of cooling water, coming within reach of fishing piers with an end.',
-    how: 'From a pier end, anchor a heavy rig and slide a live bait (bluefish, menhaden, mullet) down to the surface on a trolley rig with a wire stinger.',
+    what: 'King mackerel move along the coast ahead of the cooling water and come within reach of the longer fishing piers.',
+    how: 'From the end of the pier, cast a heavy anchor rig to hold bottom, then send a live bluefish, menhaden or mullet down the anchor line on a trolley rig with a wire stinger hook.',
   },
   {
     id: 'spring-cobia',
@@ -70,7 +70,7 @@ export const RUNS: Run[] = [
     regions: ['atlantic_mid', 'atlantic_south', 'gulf'],
     months: [3, 4, 5, 6],
     fish: ['cobia'],
-    what: 'Cobia migrate north along the coast as the water warms past about 68°F: early spring in Florida and the Gulf, late spring into Virginia and the Chesapeake.',
+    what: 'Cobia move north along the coast once the water passes about 68°F. They show in Florida and the Gulf in early spring and reach Virginia and the Chesapeake by late spring.',
     how: 'Sight-fish from a high vantage point for fish cruising near the surface, often under rays or around buoys, and pitch a bucktail jig or a live eel or menhaden.',
   },
   {
@@ -106,7 +106,7 @@ export const RUNS: Run[] = [
     regions: ['atlantic_south', 'gulf'],
     months: [5, 6, 7],
     fish: ['tarpon'],
-    what: 'Big tarpon roll along the beaches and gather in passes and inlets, a short window for the fish of a lifetime.',
+    what: 'Big tarpon roll along the beaches and stack up in passes and inlets. The window is short.',
     how: 'Fish live crabs or mullet in passes on the outgoing tide, or freeline baits to rolling fish off the beach. Use heavy tackle and keep the fight short.',
   },
   {
@@ -116,7 +116,7 @@ export const RUNS: Run[] = [
     months: [4, 5, 6],
     fish: ['striped-bass', 'bluefish'],
     what: 'Striped bass come up the coast from their spawning rivers, chasing herring and bunker into the bays and along the beaches.',
-    how: 'Fish chunked or live bunker, or cast swimming plugs at dawn and dusk. Use inline circle hooks with bait, as required in many states.',
+    how: 'Fish chunked or live bunker, or cast swimming plugs at dawn and dusk. Atlantic coast rules require inline circle hooks whenever you fish bait for stripers.',
   },
   {
     id: 'fall-stripers',
@@ -124,7 +124,7 @@ export const RUNS: Run[] = [
     regions: ['atlantic_north', 'atlantic_mid'],
     months: [9, 10, 11, 12],
     fish: ['striped-bass', 'bluefish', 'false-albacore'],
-    what: 'Stripers and bluefish feed hard on bunker, mullet and sand eels on their way south: the busiest surf fishing of the year.',
+    what: 'Stripers and bluefish feed hard on bunker, mullet and sand eels on their way south. It’s the busiest surf fishing of the year.',
     how: 'Follow the birds. Throw metal, bucktails or plugs into the blitz; after dark, swim a needlefish plug or soft plastic slowly.',
   },
   {
@@ -143,7 +143,7 @@ export const RUNS: Run[] = [
     months: [4, 5, 6],
     fish: [],
     what: 'Longfin squid move inshore to spawn and crowd lit docks and piers at night.',
-    how: 'Jig small squid jigs under the dock lights after dark. Fresh squid is also the best bait you can have for everything else.',
+    how: 'Fish small squid jigs under dock lights after dark. Any you don’t eat make great bait.',
   },
   {
     id: 'bull-reds-gulf',
@@ -161,7 +161,7 @@ export const RUNS: Run[] = [
     months: [12, 1, 2],
     fish: ['speckled-trout', 'red-drum', 'black-drum'],
     what: 'Cold fronts push speckled trout and redfish into deep creeks, canals and holes where the water stays warmer.',
-    how: 'Fish slowly: soft plastics or suspending twitchbaits worked low and slow in the deep bends, best on sunny afternoons after a front.',
+    how: 'Work soft plastics or suspending twitchbaits slowly along the bottom of the deep bends. Sunny afternoons after a front are best.',
   },
   {
     id: 'sheepshead-spring',
@@ -169,8 +169,8 @@ export const RUNS: Run[] = [
     regions: ['atlantic_south', 'gulf'],
     months: [2, 3, 4],
     fish: ['sheepshead'],
-    what: 'Sheepshead gather on nearshore reefs, jetties and pilings to spawn: the year’s best numbers and size.',
-    how: 'Drop a fiddler crab or sand flea on a short knocker rig straight down the pilings and set the hook at the first tap.',
+    what: 'Sheepshead gather on nearshore reefs, jetties and pilings to spawn, and you’ll see the year’s best numbers and sizes.',
+    how: 'Drop a fiddler crab or sand flea on a short knocker rig straight down the pilings. Set the hook when you feel weight, not at the first tap.',
   },
   {
     id: 'grunion',
@@ -179,7 +179,7 @@ export const RUNS: Run[] = [
     months: [3, 4, 5, 6, 7, 8],
     fish: [],
     what: 'Grunion swim up onto Southern California beaches to spawn on the highest tides of the month, for a few nights after each new and full moon.',
-    how: 'Catch them with bare hands only, and a fishing license is required from age 16. Part of the season is watch-only to protect the spawn: check California’s run schedule and rules first.',
+    how: 'Bare hands only, and anyone 16 or older needs a fishing license. Some months are look-but-don’t-touch to protect the spawn, so check California’s run schedule first.',
   },
   {
     id: 'white-seabass',
@@ -215,7 +215,7 @@ export const RUNS: Run[] = [
     months: [7, 8, 9, 10],
     fish: ['chinook-salmon', 'coho-salmon'],
     what: 'Chinook and coho gather off river mouths and move into the bays and rivers to spawn.',
-    how: 'Troll herring or spinners near river mouths and bay entrances; check emergency closures and quotas before you go.',
+    how: 'Troll herring or spinners near river mouths and bay entrances. Seasons and closures change on short notice, so check before you go.',
   },
   {
     id: 'oama-run',
@@ -233,7 +233,7 @@ export const RUNS: Run[] = [
     months: [6, 7, 8, 9],
     fish: ['akule'],
     what: 'Halalu (young akule) school in harbors and bays through summer.',
-    how: 'Fish small bait rigs (sabiki) or tiny hooks with bread chum at dawn and dusk; check the seasonal bag limits.',
+    how: 'Fish sabiki rigs, or tiny hooks with a little bread for chum, at dawn and dusk. Check local rules before you go.',
   },
 ]
 

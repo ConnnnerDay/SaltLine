@@ -22,19 +22,19 @@ export type FishNotes = {
   table?: string
 }
 
-const HOT_WATER = 'If you are stuck, soak the wound in water as hot as you can stand (not scalding) for 30–90 minutes and get it looked at.'
+const HOT_WATER = 'If a spine goes in, soak the wound in water as hot as you can stand without scalding for 30–90 minutes, then get it looked at.'
 
 /** Hazards shared by a whole group of fish, keyed by a pattern on the id. */
 const GROUP_HAZARDS: { match: RegExp; short: string; handle: string; table?: string }[] = [
   {
-    match: /stingray|^bat-ray$|cownose-ray|eagle-ray|thornback-ray/,
+    match: /stingray|^bat-ray$|cownose-ray|eagle-ray/,
     short: 'Venomous tail barb',
     handle: `A barbed, venomous spine on the tail. Shuffle your feet when wading, and keep the tail pinned away from you while you unhook it. ${HOT_WATER}`,
   },
   {
     match: /torpedo-ray|electric-ray/,
     short: 'Electric shock',
-    handle: 'Gives a strong electric shock: cut the line rather than handle it.',
+    handle: 'Can give a strong electric shock. Cut the line rather than handle it.',
   },
   {
     match: /lionfish|scorpionfish/,
@@ -49,12 +49,17 @@ const GROUP_HAZARDS: { match: RegExp; short: string; handle: string; table?: str
   {
     match: /channel-catfish|blue-catfish|flathead-catfish/,
     short: 'Sharp spines',
-    handle: 'Sharp spines on the dorsal and pectoral fins lock upright: grip behind them.',
+    handle: 'Sharp spines on the dorsal and pectoral fins lock upright. Grip the fish behind them.',
   },
   {
     match: /stargazer/,
     short: 'Shock and spines',
     handle: `Can give an electric shock from behind the eyes, and has venomous spines above the pectoral fins. Unhook it with pliers. ${HOT_WATER}`,
+  },
+  {
+    match: /rockfish/,
+    short: 'Sharp spines',
+    handle: `Sharp, mildly venomous spines on the dorsal, anal and pelvic fins and the gill covers. Grip it with a towel or glove. ${HOT_WATER}`,
   },
   {
     match: /moray|wolf-eel|conger-eel/,
@@ -65,12 +70,12 @@ const GROUP_HAZARDS: { match: RegExp; short: string; handle: string; table?: str
     match: /puffer/,
     short: 'Toxic to eat',
     handle: 'Sharp beak-like teeth clip fingers as easily as line.',
-    table: 'Do not eat: puffers can carry tetrodotoxin, a deadly poison that cooking does not destroy.',
+    table: 'Don’t eat it. Puffers can carry tetrodotoxin, a deadly poison that cooking doesn’t destroy.',
   },
   {
     match: /surgeonfish|-tang$|doctorfish|ocean-surgeon/,
     short: 'Blade at the tail',
-    handle: 'A scalpel-sharp spine on each side of the tail base: hold it by the head and keep the tail away from your hand.',
+    handle: 'A scalpel-sharp spine on each side of the tail base. Hold it by the head and keep the tail away from your hand.',
   },
   {
     match: /toadfish/,
@@ -85,7 +90,7 @@ const GROUP_HAZARDS: { match: RegExp; short: string; handle: string; table?: str
   {
     match: /barracuda|bluefish|king-mackerel|spanish-mackerel|cero-mackerel|wahoo|ribbonfish|cutlassfish|needlefish|lizardfish|lingcod/,
     short: 'Sharp teeth',
-    handle: 'Razor teeth: unhook with long pliers, never a finger in the mouth or a lip grip.',
+    handle: 'Very sharp teeth. Unhook it with long pliers, and don’t put a finger in its mouth or lip it.',
   },
 ]
 
@@ -103,18 +108,18 @@ const DEEP_RELEASE: { match: RegExp; note: string }[] = [
   },
   {
     match: /rockfish|lingcod|cabezon|greenling/,
-    note: 'Caught from deep water, a fish you release may float with a swollen belly or bulging eyes (barotrauma). Return it to depth with a descending device: California requires one on board when boat fishing for groundfish.',
+    note: 'Caught from deep water, a fish you release may float with a swollen belly or bulging eyes (barotrauma). Return it to depth with a descending device. California, Oregon and Washington require one on board when you’re boat fishing for groundfish.',
   },
 ]
 
 /** Toxins worth a warning on the forecast's picks, not just the fish page. */
 const TABLE_WARNINGS: Record<string, string> = {
   'great-barracuda': 'Ciguatera risk if you eat a big one',
-  'roi': 'Ciguatera risk: usually not eaten',
-  'northern-puffer-blowfish': 'Toxic organs: clean carefully',
+  'roi': 'Ciguatera risk, usually not eaten',
+  'northern-puffer-blowfish': 'Toxic organs, clean carefully',
   'cabezon': 'Never eat the roe',
-  'nassau-grouper': 'Protected: release',
-  'sand-tiger-shark': 'Protected: release',
+  'nassau-grouper': 'Protected, must be released',
+  'sand-tiger-shark': 'Protected, must be released',
   'sandbar-shark': 'Prohibited in federal waters',
   'dusky-shark': 'Prohibited in federal waters',
 }
@@ -124,7 +129,7 @@ const NOTES: Record<string, FishNotes> = {
     lookalikes: [
       { id: 'black-drum', tell: 'Red drum are copper-bronze with one or more black spots near the tail and no chin whiskers. Black drum are gray to black, taller-backed, and have whisker-like barbels under the chin.' },
     ],
-    table: 'Slot-size reds are mild and firm. Big bull reds are coarser and are the spawners: let them go.',
+    table: 'Slot-size reds are mild and firm. Big bull reds are coarser, and they’re the breeding stock, so let them go.',
   },
   'black-drum': {
     lookalikes: [
@@ -138,8 +143,8 @@ const NOTES: Record<string, FishNotes> = {
       { id: 'black-drum', tell: 'Sheepshead have human-looking front teeth and no chin barbels; young black drum have barbels.' },
       { id: 'atlantic-spadefish', tell: 'Spadefish are disc-shaped with long trailing fins and a tiny mouth; sheepshead are longer, with stout spines and big front teeth.' },
     ],
-    handle: ['Sharp dorsal and gill-cover spines, and teeth that crush barnacles: keep fingers out of the mouth.'],
-    table: 'Excellent: sweet, white fillets. The scales and rib cage make it a chore to clean.',
+    handle: ['Sharp dorsal and gill-cover spines, and teeth strong enough to crush barnacles. Keep your fingers out of its mouth.'],
+    table: 'Sweet white fillets, among the best inshore eating. The heavy scales and rib cage make it a chore to clean.',
   },
   'atlantic-spadefish': {
     lookalikes: [
@@ -159,7 +164,7 @@ const NOTES: Record<string, FishNotes> = {
     lookalikes: [
       { id: 'speckled-trout', tell: 'Weakfish have faint, small spots in diagonal lines and a plain tail; speckled trout have bold round spots, including on the tail.' },
     ],
-    handle: ['The mouth tears easily (hence the name): net it instead of swinging it up.'],
+    handle: ['The mouth tears easily, which is where the name comes from. Net it instead of swinging it up.'],
     table: 'Good fresh, soft flesh.',
   },
   'sand-seatrout-white-trout': {
@@ -174,14 +179,14 @@ const NOTES: Record<string, FishNotes> = {
       { id: 'king-mackerel', tell: 'Spanish mackerel have yellow-gold spots and a black patch at the front of the first dorsal fin. Adult king mackerel have no spots, a plain gray first dorsal, and a lateral line that dips sharply under the second dorsal fin.' },
       { id: 'cero-mackerel', tell: 'Cero have a yellow-bronze stripe running down the middle of the side as well as spots; Spanish have spots only.' },
     ],
-    table: 'Good fresh: oily and mild if bled and iced right away. Doesn’t keep long in the freezer.',
+    table: 'Good fresh, and mild if you bleed it and ice it right away. It doesn’t keep well frozen.',
   },
   'king-mackerel': {
     lookalikes: [
       { id: 'spanish-mackerel', tell: 'Kings have a lateral line that drops sharply under the second dorsal fin and no spots as adults; Spanish have gold spots and a black patch on the first dorsal.' },
       { id: 'wahoo', tell: 'Wahoo have tiger-like vertical bars and a long first dorsal fin running half the body; kings have a short first dorsal and no bars.' },
     ],
-    table: 'Good smoked or as steaks. Large kings are high in mercury: the FDA advises pregnant women and children not to eat king mackerel.',
+    table: 'Good smoked or as steaks. King mackerel is high in mercury, and the FDA advises pregnant women and children not to eat it.',
   },
   'cero-mackerel': {
     lookalikes: [
@@ -193,7 +198,7 @@ const NOTES: Record<string, FishNotes> = {
     lookalikes: [
       { id: 'king-mackerel', tell: 'Wahoo have vertical tiger-like bars and a long, low first dorsal fin; king mackerel have neither.' },
     ],
-    table: 'Excellent: white, firm and mild.',
+    table: 'Excellent. White, firm and mild.',
   },
   bluefish: {
     table: 'Oily and strong. Bleed and ice it right away and eat small ones fresh. Some states post consumption advisories for large bluefish.',
@@ -209,7 +214,7 @@ const NOTES: Record<string, FishNotes> = {
     lookalikes: [
       { id: 'pompano', tell: 'Permit are taller and deeper-bodied with a dark patch by the pectoral fin; pompano are slimmer with a yellow throat. Small ones: permit have 17–21 soft dorsal rays, pompano 22–27.' },
     ],
-    table: 'Mostly released: in many places they are a catch-and-release fish.',
+    table: 'Most anglers release them. Florida has its own permit rules for the waters around the Keys and South Florida, so check before you keep one.',
   },
   'african-pompano': {
     lookalikes: [
@@ -242,27 +247,27 @@ const NOTES: Record<string, FishNotes> = {
   },
   snook: {
     handle: ['The edge of the gill cover is razor sharp (it cuts line and fingers). Hold it by the lower lip and support the belly; big ones are best kept horizontal.'],
-    table: 'Very good, where you may keep one: skin it, as the skin tastes soapy.',
+    table: 'Very good where you’re allowed to keep one. Skin the fillets, since the skin tastes soapy.',
   },
   tarpon: {
     lookalikes: [
       { id: 'ladyfish', tell: 'Tarpon have huge scales, an upturned mouth and a long thread trailing from the last dorsal ray; ladyfish are slender with tiny scales and no thread.' },
     ],
-    handle: ['Keep big fish in the water: in Florida, tarpon over 40 inches must not be taken out of the water.'],
-    table: 'Not eaten: bony, and a catch-and-release fish.',
+    handle: ['Keep big fish in the water. In Florida, a tarpon over 40 inches can’t be taken out of the water at all.'],
+    table: 'Not eaten. They’re bony and almost always released.',
   },
   ladyfish: {
     lookalikes: [
       { id: 'tarpon', tell: 'Ladyfish are slim with small scales; tarpon have big scales and a trailing dorsal thread.' },
     ],
-    table: 'Bony and soft: used as cut bait rather than eaten.',
+    table: 'Bony and soft, so they’re used for cut bait rather than eaten.',
   },
   cobia: {
     lookalikes: [
       { id: 'remora-sharksucker', tell: 'Remoras have a ridged sucking disc on top of the head. Cobia have a flat head with no disc. In the water, young cobia and remoras look very alike.' },
     ],
-    handle: ['A green cobia thrashes violently on deck: tire it out before you gaff or boat it.'],
-    table: 'Excellent: firm, white and rich.',
+    handle: ['A cobia brought aboard green will thrash hard enough to break things. Tire it out before you gaff it.'],
+    table: 'Excellent. Firm, white and rich.',
   },
   'remora-sharksucker': {
     lookalikes: [
@@ -273,20 +278,20 @@ const NOTES: Record<string, FishNotes> = {
     lookalikes: [
       { id: 'blue-runner', tell: 'Jack crevalle have a blunt head, a black spot on the gill cover and a dark blotch at the base of the pectoral fin; blue runners are slimmer with no pectoral blotch.' },
     ],
-    table: 'Dark, strong-tasting meat: most are released.',
+    table: 'Dark, strong-tasting meat, so most get released.',
   },
   'blue-runner': {
     lookalikes: [
       { id: 'jack-crevalle', tell: 'Blue runners are slimmer, with no dark blotch at the base of the pectoral fin.' },
     ],
-    table: 'Strong, dark meat: best as live or cut bait.',
+    table: 'Strong, dark meat. Better as live or cut bait.',
   },
   'greater-amberjack': {
     lookalikes: [
       { id: 'almaco-jack', tell: 'Almaco jacks are deeper-bodied with tall, sickle-shaped second dorsal and anal fins; greater amberjack are longer and slimmer with short, low fin lobes.' },
       { id: 'lesser-amberjack', tell: 'Lesser amberjack stay small and are deeper-bodied for their size; size limits differ, so check which one you have.' },
     ],
-    table: 'Good, firm white meat. Large fish often carry tail worms near the tail: cut them out.',
+    table: 'Good, firm white meat. Big fish often have worms in the meat near the tail. Cut them out; they’re harmless.',
   },
   'almaco-jack': {
     lookalikes: [
@@ -304,19 +309,19 @@ const NOTES: Record<string, FishNotes> = {
   },
   'gray-triggerfish': {
     handle: ['Strong jaws with sharp teeth, and a first dorsal spine that locks upright.'],
-    table: 'Excellent, sweet white meat. Skin it: the hide is like sandpaper.',
+    table: 'Excellent, sweet white meat. Skin it, because the hide is tough as sandpaper.',
   },
   'hardhead-catfish-sea-catfish': {
     lookalikes: [
       { id: 'gafftopsail-catfish', tell: 'Hardheads have four barbels under the chin and short fin spines. Gafftopsail have two chin barbels and long thread-like streamers off the dorsal and pectoral spines.' },
     ],
-    table: 'Usually thrown back: strong-tasting.',
+    table: 'Usually thrown back for its strong taste.',
   },
   'gafftopsail-catfish': {
     lookalikes: [
       { id: 'hardhead-catfish-sea-catfish', tell: 'Gafftopsail have long streamers off the dorsal and pectoral spines and two chin barbels; hardheads have four chin barbels.' },
     ],
-    table: 'Good, mild white meat: better than its reputation. Watch for slime on the line.',
+    table: 'Better eating than its reputation: mild white meat. Expect a lot of slime on you and the line.',
   },
   'spot': {
     lookalikes: [
@@ -335,19 +340,19 @@ const NOTES: Record<string, FishNotes> = {
       { id: 'northern-kingfish', tell: 'Northern kingfish have bold dark diagonal bars (a V on the shoulder); southern kingfish are grayer with faint bars.' },
       { id: 'gulf-kingfish', tell: 'Gulf kingfish are plain silver with no bars.' },
     ],
-    table: 'Excellent: mild, sweet and flaky.',
+    table: 'Excellent. Mild, sweet and flaky.',
   },
   'northern-kingfish': {
     lookalikes: [
       { id: 'whiting-sea-mullet', tell: 'Northern kingfish have bold dark bars; southern kingfish are grayer with faint bars.' },
     ],
-    table: 'Excellent: mild and flaky.',
+    table: 'Excellent. Mild and flaky.',
   },
   'gulf-kingfish': {
     lookalikes: [
       { id: 'whiting-sea-mullet', tell: 'Gulf kingfish are plain silver with no bars; southern kingfish are grayer with faint bars.' },
     ],
-    table: 'Excellent: mild and flaky.',
+    table: 'Excellent. Mild and flaky.',
   },
   'mangrove-snapper': {
     lookalikes: [
@@ -377,7 +382,7 @@ const NOTES: Record<string, FishNotes> = {
       { id: 'vermilion-snapper-beeliner', tell: 'Red snapper are deeper-bodied with a red eye and a pointed anal fin; vermilion snapper are slimmer, more orange-red, with thin yellow lines along the side.' },
       { id: 'mangrove-snapper', tell: 'Red snapper are pink-red all over; mangroves are gray to copper.' },
     ],
-    table: 'Excellent. Federal and state seasons are short and change yearly: check before you keep one.',
+    table: 'Excellent. Federal and state seasons are short and change every year, so check before you keep one.',
   },
   'vermilion-snapper-beeliner': {
     lookalikes: [
@@ -418,7 +423,7 @@ const NOTES: Record<string, FishNotes> = {
     table: 'Among the best-eating groupers.',
   },
   'nassau-grouper': {
-    handle: ['Protected: Nassau grouper may not be kept in U.S. waters. Release it quickly at depth.'],
+    handle: ['Nassau grouper are protected and can’t be kept in U.S. waters. Release it quickly, with a descending device if it came from deep.'],
   },
   'blackfin-tuna': {
     lookalikes: [
@@ -438,14 +443,14 @@ const NOTES: Record<string, FishNotes> = {
     lookalikes: [
       { id: 'false-albacore', tell: 'Skipjack have dark stripes on the belly; false albacore have wavy lines on the back and spots under the pectoral fin.' },
     ],
-    table: 'Strong, dark meat: good bled and eaten fresh, or as bait.',
+    table: 'Strong, dark meat. Good if bled and eaten fresh, or use it for bait.',
   },
   'false-albacore': {
     lookalikes: [
       { id: 'atlantic-bonito', tell: 'False albacore have wavy, worm-like lines on the back and a few dark spots under the pectoral fin. Atlantic bonito have straight, slanted dark stripes along the back and visible teeth.' },
       { id: 'skipjack-tuna', tell: 'Skipjack have stripes on the belly instead of wavy lines on the back.' },
     ],
-    table: 'Dark and strong: most are released.',
+    table: 'Dark and strong-tasting, so most get released.',
   },
   'atlantic-bonito': {
     lookalikes: [
@@ -487,13 +492,13 @@ const NOTES: Record<string, FishNotes> = {
       { id: 'dusky-shark', tell: 'Sandbar sharks have a very tall first dorsal fin set over the pectoral fins; dusky sharks have a lower dorsal set farther back.' },
       { id: 'bull-shark', tell: 'Bull sharks have a short, blunt snout, small eyes and no ridge between the dorsal fins; sandbars have a ridge.' },
     ],
-    handle: ['Sandbar and dusky sharks may not be kept in federal waters: release them in the water.'],
+    handle: ['Sandbar and dusky sharks can’t be kept in federal waters. Release them without taking them out of the water.'],
   },
   'dusky-shark': {
     lookalikes: [
       { id: 'sandbar-shark', tell: 'Dusky sharks have a lower first dorsal fin set behind the pectoral fins; sandbars have a tall dorsal right over the pectorals.' },
     ],
-    handle: ['Dusky sharks may not be kept in federal waters: release them in the water.'],
+    handle: ['Dusky sharks can’t be kept in federal waters. Release them without taking them out of the water.'],
   },
   'bull-shark': {
     lookalikes: [
@@ -509,16 +514,16 @@ const NOTES: Record<string, FishNotes> = {
     lookalikes: [
       { id: 'bonnethead-shark', tell: 'Scalloped hammerheads have a wide, notched hammer; bonnetheads have a rounded shovel head.' },
     ],
-    handle: ['Hammerheads tire and die easily: keep the fight short and release in the water. Florida prohibits keeping them from state waters.'],
+    handle: ['Hammerheads die easily from a long fight. Keep it short and release them in the water. Florida doesn’t allow keeping great, scalloped or smooth hammerheads.'],
   },
   'sand-tiger-shark': {
-    handle: ['Protected: sand tigers may not be kept. Release in the water, with the ragged teeth well clear of your hands.'],
+    handle: ['Sand tigers are protected and can’t be kept. Release them in the water and keep your hands clear of the teeth.'],
   },
   'spiny-dogfish': {
     lookalikes: [
       { id: 'smooth-dogfish', tell: 'Spiny dogfish have a sharp spine in front of each dorsal fin and white spots on the back; smooth dogfish have no spines.' },
     ],
-    handle: ['A mildly venomous spine in front of each dorsal fin: hold it behind the head.'],
+    handle: ['A mildly venomous spine in front of each dorsal fin. Hold it just behind the head.'],
   },
   'smooth-dogfish': {
     lookalikes: [
@@ -542,7 +547,7 @@ const NOTES: Record<string, FishNotes> = {
     lookalikes: [
       { id: 'cunner-bergall', tell: 'Tautog have a blunt, rounded head, thick lips and a white chin. Cunner rarely top a pound and have a more pointed snout.' },
     ],
-    table: 'Excellent: firm, white and sweet.',
+    table: 'Excellent. Firm, white and sweet.',
   },
   'cunner-bergall': {
     lookalikes: [
@@ -554,23 +559,23 @@ const NOTES: Record<string, FishNotes> = {
     table: 'Excellent, mild white fillets.',
   },
   'striped-bass': {
-    table: 'Very good. Some states post consumption advisories for large stripers from certain waters: check yours.',
+    table: 'Very good. Some states post eating advisories for big stripers from certain waters, so check yours.',
   },
   'sea-robin': {
     handle: ['A bony, spiny head and sharp gill-cover spines.'],
-    table: 'Underrated: firm and mild tail meat.',
+    table: 'Underrated. The tail meat is firm and mild.',
   },
   'northern-puffer-blowfish': {
     table: 'Northern puffer meat is eaten ("sea squab"), but other puffers and some puffer organs carry deadly tetrodotoxin. Only eat it if you are sure of the species and only the cleaned tail meat.',
   },
   'red-lionfish-invasive': {
-    table: 'Excellent, and invasive: keep every one you can. The meat is safe once the spines are removed.',
+    table: 'Excellent, and they’re invasive, so keep every one you can. The venom is only in the spines; the meat is safe.',
   },
   lingcod: {
-    table: 'Excellent. Some have blue-green flesh: that is normal and turns white when cooked.',
+    table: 'Excellent. Some have blue-green flesh. That’s normal, and it turns white when cooked.',
   },
   cabezon: {
-    handle: ['Cabezon roe is poisonous: never eat the eggs.'],
+    handle: ['Cabezon roe is poisonous. Never eat the eggs.'],
     table: 'Good meat, which may be blue-green raw and turns white when cooked.',
   },
   'kelp-bass-calico-bass': {
@@ -594,7 +599,7 @@ const NOTES: Record<string, FishNotes> = {
     lookalikes: [
       { id: 'omilu-bluefin-trevally', tell: 'Omilu have electric-blue fins and blue spots; ulua are dull silver-gray to black with a steep forehead.' },
     ],
-    table: 'Large ulua can carry ciguatera in some areas: ask locally before keeping a big one.',
+    table: 'Big ulua can carry ciguatera in some areas. Ask locally before keeping a large one.',
   },
   'omilu-bluefin-trevally': {
     lookalikes: [
@@ -602,7 +607,10 @@ const NOTES: Record<string, FishNotes> = {
     ],
   },
   roi: {
-    table: 'Often carries ciguatera: most Hawaii anglers do not eat roi. Removing it helps the reef.',
+    table: 'Often carries ciguatera, so most Hawaii anglers don’t eat roi. It’s an invasive species, so keeping it off the reef still helps.',
+  },
+  'thornback-ray': {
+    handle: ['No stinger, but rows of hooked thorns run down the back and tail. Handle it with a towel or gloves.'],
   },
   'atlantic-sharpnose-shark': {
     table: 'Good if bled and iced right away.',

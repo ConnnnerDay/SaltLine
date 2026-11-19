@@ -35,17 +35,17 @@ export const RIGS: Record<RigId, Rig> = {
     summary:
       'A sliding sinker on the main line above a swivel and a long leader. A fish can pick up the bait and swim off without feeling the weight. With an egg sinker it is the Carolina rig.',
     tie: [
-      'Slide a sinker slide (pyramid sinker) or an egg sinker onto the main line.',
+      'Put a sinker slide on the main line and clip a pyramid sinker to it, or slide on an egg sinker.',
       'Add a plastic bead so the sinker cannot chip the knot.',
       'Tie the main line to a barrel swivel with an improved clinch or Palomar knot.',
-      'Tie 18–36 in of leader to the swivel: fluorocarbon for most fish, wire for bluefish.',
+      'Tie 18–36 in of leader to the swivel. Use fluorocarbon for most fish and wire for bluefish.',
       'Finish with a circle hook, snelled or tied with a clinch knot.',
     ],
     tips: [
       'Cast past the breakers, let the sinker settle, then keep the line just snug.',
       'With a circle hook, do not jerk: when the rod loads up, reel steadily and the hook sets itself.',
       'Use a longer leader in calm, clear water and a shorter one in rough surf.',
-      'Use the lightest sinker that holds bottom. Pyramids grip sand; go heavier as the current builds.',
+      'Use the lightest sinker that holds bottom, and go heavier as the current picks up.',
     ],
   },
   hi_lo: {
@@ -55,16 +55,16 @@ export const RIGS: Record<RigId, Rig> = {
     summary:
       'Two short droppers, one above the other, with the sinker at the bottom. It puts two baits at two heights just off the bottom, the go-to for panfish.',
     tie: [
-      'In about 3 ft of 20–30 lb leader, tie two dropper loops 12–18 in apart (or buy one made with three-way swivels).',
+      'In about 3 ft of 30–40 lb mono, tie two dropper loops 12–18 in apart, or buy one made with three-way swivels.',
       'Tie a snap swivel at the top to clip onto the main line.',
       'Loop or snell a small hook (#4 to 1/0) onto each dropper.',
       'Tie a snap at the bottom for a pyramid or bank sinker.',
     ],
     tips: [
-      'Use small pieces of bait: spot, croaker and whiting have small mouths.',
+      'Use small pieces of bait. Spot, croaker and whiting have small mouths.',
       'Expect quick taps. Lift the rod smoothly rather than swinging hard.',
       'Fish the first trough and the edges of sandbars, where small fish feed.',
-      'Two hooks mean doubles: let a fish hang for a moment and a second may join it.',
+      'With two hooks, leave a hooked fish down for a few seconds and a second one may bite.',
     ],
   },
   pompano: {
@@ -88,7 +88,7 @@ export const RIGS: Record<RigId, Rig> = {
   },
   knocker: {
     id: 'knocker',
-    line: { main: '30–50 lb braid', leader: '12–24 in of 30–50 lb fluorocarbon' },
+    line: { main: '30–50 lb braid', leader: '8–18 in of 30–50 lb fluorocarbon' },
     name: 'Knocker rig',
     summary:
       'An egg sinker that slides down the leader and rests on the hook eye. The bait stays pinned to structure, you feel every nibble, and it snags less than a separate sinker.',
@@ -100,7 +100,7 @@ export const RIGS: Record<RigId, Rig> = {
     tips: [
       'Drop it straight down beside pilings, jetty rocks and bridge supports.',
       'Use the lightest sinker that reaches bottom in the current.',
-      'Sheepshead and tautog nibble: set the hook at the first steady weight, not the first tap.',
+      'Sheepshead and tautog nibble. Set the hook when you feel steady weight, not at the first tap.',
       'Fiddler crabs, clams and barnacle-crusted mussels are the classic baits.',
     ],
   },
@@ -118,21 +118,21 @@ export const RIGS: Record<RigId, Rig> = {
     ],
     tips: [
       'Cast along grass edges, oyster bars and drop-offs.',
-      'Give a sharp twitch of the rod tip every few seconds: pop, pause, pop.',
+      'Snap the rod tip every few seconds to make the cork pop, then let it sit.',
       'When the cork ducks under, reel tight and sweep the rod. Do not wait.',
       'Moving tide and low light (dawn and dusk) are best.',
     ],
   },
   float: {
     id: 'float',
-    line: { main: '15–30 lb mono or braid', leader: '2–4 ft of wire or 30–50 lb fluorocarbon' },
+    line: { main: '15–30 lb mono or braid', leader: '12–24 in of wire or 30–50 lb fluorocarbon' },
     name: 'Float rig',
     summary:
       'A float suspends a live bait at the depth fish are feeding, then drifts it along the pier or current line. Leave off the float to free-line the bait.',
     tie: [
       'Put a bobber stop and a bead on the main line, then a slip float.',
       'Add a split shot or small egg sinker below the float to stand it upright.',
-      'Tie on a swivel, then 12–24 in of leader: single-strand wire for Spanish mackerel and other toothy fish.',
+      'Tie on a swivel, then 12–24 in of leader. Use single-strand wire for Spanish mackerel and other toothy fish.',
       'Hook a live baitfish or shrimp lightly through the lips or back.',
     ],
     tips: [

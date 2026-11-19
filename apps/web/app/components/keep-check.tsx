@@ -75,17 +75,17 @@ export function KeepCheck({
     const slot = rule.max !== null ? span(rule.min, rule.max) : null
     const close = Math.abs(inches - rule.min) < 0.5 || (rule.max !== null && Math.abs(inches - rule.max) < 0.5)
     if (inches < rule.min) {
-      verdict = { tone: 'short', title: `Too short: release it`, detail: `${option.state} needs ${size(rule.min)}${slot ? ` (slot ${slot})` : ''}. Yours is ${size(inches)}.` }
+      verdict = { tone: 'short', title: 'Too short, release it', detail: `${option.state} needs ${size(rule.min)}${slot ? ` (slot ${slot})` : ''}. Yours is ${size(inches)}.` }
     } else if (rule.max !== null && inches > rule.max) {
-      verdict = { tone: 'long', title: 'Over the slot: release it', detail: `${option.state}’s slot is ${slot}. Yours is ${size(inches)}.` }
+      verdict = { tone: 'long', title: 'Over the slot, release it', detail: `${option.state}’s slot is ${slot}. Yours is ${size(inches)}.` }
     } else {
       verdict = {
         tone: 'keep',
-        title: slot ? 'In the slot: legal to keep' : 'Legal size to keep',
+        title: slot ? 'In the slot' : 'Legal size',
         detail: `${size(inches)} ${slot ? `is inside ${option.state}’s ${slot} slot` : `meets ${option.state}’s ${size(rule.min)} minimum`}.${option.bag_limit ? ` Bag limit: ${say(option.bag_limit)}.` : ''}`,
       }
     }
-    if (close) verdict.detail = `${verdict.detail} That’s within half ${units === 'metric' ? 'a centimetre or so' : 'an inch'} of the line: measure again.`
+    if (close) verdict.detail = `${verdict.detail} That’s within half ${units === 'metric' ? 'a centimetre or so' : 'an inch'} of the limit, so measure again.`
   }
 
   return (
@@ -151,7 +151,7 @@ export function KeepCheck({
       )}
 
       {rule.kind === 'size' && rule.varies && (
-        <p className="text-xs text-marginal-text">Limits differ by area or may have changed in {option.state}: confirm with the official rules.</p>
+        <p className="text-xs text-marginal-text">Limits differ by area or may have changed in {option.state}. Confirm with the official rules.</p>
       )}
       {option.season && !/year.round|^open$/i.test(option.season) && (
         <p className="text-xs text-text-muted">

@@ -34,6 +34,9 @@ function measureOf(text: string): Measure {
 export function parseSizeRule(rule: RuleText): SizeRule {
   const text = (rule.min_size ?? '').trim()
   const bag = (rule.bag_limit ?? '').trim()
+  // A tag lets you keep one ("0 (tag required to harvest)"), so that's not
+  // a "can't keep it"; send the angler to the rules instead.
+  if (/tag required/i.test(bag)) return { kind: 'unknown' }
   if (/prohibit|protected|no retention|catch.and.release only/i.test(`${text} ${bag}`) || /^0\b/.test(bag)) {
     // "N/A — prohibited in some states" is about other states, not this one.
     if (!/in some states/i.test(text)) return { kind: 'prohibited' }

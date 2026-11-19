@@ -1325,10 +1325,10 @@
         "notes": "Yelloweye rockfish are a rebuilding species. Retention is prohibited in many areas. Verify current rules \u2014 this is a high-compliance-risk species."
       },
       "pacific-bluefin-tuna": {
-        "min_size": "27 in curved fork length",
-        "bag_limit": "3 per day (ICCAT/NOAA western Atlantic and Pacific bluefin quota may apply)",
-        "season": "Open year-round offshore; quota may close season early",
-        "notes": "Pacific bluefin tuna are under international quota management (IATTC). Verify current NOAA HMS rules before fishing \u2014 seasons may be shortened based on quota."
+        "min_size": "No minimum",
+        "bag_limit": "2 per day",
+        "season": "Open year-round",
+        "notes": "Federal 2-fish daily bag limit off California, with a higher possession limit on multi-day trips. No size limit. Verify current NOAA and CDFW rules."
       },
       "darkblotched-rockfish": {
         "min_size": "None",

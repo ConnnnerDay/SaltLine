@@ -1,4 +1,5 @@
 import { Badge, type BadgeVariant, Button, Card } from './ui'
+import { KeepCheck } from './keep-check'
 import { pickWarning } from '@/lib/fish-id'
 import { cx } from './ui/cx'
 import { HourlyChart } from './hourly-chart'
@@ -1161,6 +1162,12 @@ function RigsAndTips({
 function SizeAndBagLimits({ guidance }: { guidance: FishingGuidance }) {
   const picks = guidance.species.filter((pick) => pick.regulation)
   return (
+    <div className="flex flex-col gap-4">
+    <KeepCheck
+      units={requestUnits()}
+      asOf={formatAsOf(picks[0].regulation!.as_of)}
+      options={picks.map((pick) => ({ key: pick.id, label: pick.name, ...pick.regulation! }))}
+    />
     <ul className="flex flex-col divide-y divide-border">
       {picks.map((pick) => {
         const regulation = pick.regulation!
@@ -1201,6 +1208,7 @@ function SizeAndBagLimits({ guidance }: { guidance: FishingGuidance }) {
         )
       })}
     </ul>
+    </div>
   )
 }
 

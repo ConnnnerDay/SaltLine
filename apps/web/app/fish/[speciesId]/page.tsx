@@ -16,6 +16,7 @@ import { KNOTS, RIG_KNOTS } from '@/lib/knots'
 import { setRequestUnits } from '@/lib/request-units'
 import { BestSpots } from './best-spots'
 import { Identify } from './identify'
+import { KeepCheck } from '@/app/components/keep-check'
 import { Suspense } from 'react'
 import type { SavedLocation } from '@/app/api/saved-locations/route'
 
@@ -262,6 +263,13 @@ export default async function FishDetailPage({ params }: Props) {
                 </span>
               )}
             </div>
+            {regulations.length > 0 && (
+              <KeepCheck
+                units={units}
+                asOf={regulations[0].as_of}
+                options={regulations.map((rule) => ({ ...rule, key: rule.state, label: rule.state }))}
+              />
+            )}
             {regulations.length === 0 ? (
               <p className="text-sm text-text-muted">
                 No state limits on file for this fish. Check your state&apos;s fishing regulations.

@@ -498,11 +498,15 @@ export type BestWindow = { hours: HourlyActivity[]; tag: ActivityTag }
  * already on hand, no extra fetch, per `app.domain.timing`'s own
  * docstring flagging this as the natural follow-up. The longest
  * contiguous run of hours at the day's best activity tag (ties broken
- * by whichever run comes first); `null` when the day never reaches
- * `high` (a `low`/`med`-only day has no window worth calling out).
+ * by whichever run comes first), among the hours that haven't ended
+ * yet; `null` when the rest of the day never reaches `high` (a
+ * `low`/`med`-only stretch has no window worth calling out).
  */
-export function deriveBestWindow(outlook: HourlyOutlook): BestWindow | null {
-  const bestRank = Math.max(...outlook.hours.map((hour) => TAG_RANK[hour.tag]))
+export function deriveBestWindow(outlook: HourlyOutlook, now: number = Date.now()): BestWindow | null {
+  // Only hours that haven't ended yet: at 3 PM, a 1 AM window is no use.
+  const hours = outlook.hours.filter((hour) => new Date(hour.time).getTime() + 3_600_000 > now)
+  if (hours.length === 0) return null
+  const bestRank = Math.max(...hours.map((hour) => TAG_RANK[hour.tag]))
   if (bestRank < TAG_RANK.high) return null
   const bestTag = (Object.keys(TAG_RANK) as ActivityTag[]).find(
     (tag) => TAG_RANK[tag] === bestRank,
@@ -510,7 +514,7 @@ export function deriveBestWindow(outlook: HourlyOutlook): BestWindow | null {
 
   let bestRun: HourlyActivity[] = []
   let currentRun: HourlyActivity[] = []
-  for (const hour of outlook.hours) {
+  for (const hour of hours) {
     if (hour.tag === bestTag) {
       currentRun = [...currentRun, hour]
       if (currentRun.length > bestRun.length) bestRun = currentRun

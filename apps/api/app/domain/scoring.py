@@ -145,10 +145,22 @@ def onshore_offshore_dirs(orientation: str) -> tuple[set[str], set[str]]:
     return _DIRS_BY_ORIENTATION.get(orientation, _DIRS_BY_ORIENTATION["east"])
 
 
+def _sentence(parts: list[str]) -> str:
+    """The top factors as one sentence: "Moderate surf (2–5 ft), onshore
+    wind (NE) bringing murkier water, a dusk bite window and a good
+    solunar period." Factor descriptions are written as capitalized
+    labels; only the first keeps its capital here."""
+    if not parts:
+        return ""
+    words = [parts[0], *(p[:1].lower() + p[1:] for p in parts[1:])]
+    body = words[0] if len(words) == 1 else f"{', '.join(words[:-1])} and {words[-1]}"
+    return f"{body}."
+
+
 def _range_label(
     values: tuple[float, float] | list[float], unit: str, step: float
 ) -> str:
-    """ "10-13 kt", or "4 ft" when both ends round the same -- rounded to
+    """ "10–13 kt", or "4 ft" when both ends round the same -- rounded to
     *step* rather than truncated (4.5 ft stays 4.5, never "4-4 ft")."""
 
     def fmt(value: float) -> str:
@@ -156,7 +168,7 @@ def _range_label(
         return f"{rounded:g}"
 
     low, high = fmt(values[0]), fmt(values[1])
-    return f"{low} {unit}" if low == high else f"{low}-{high} {unit}"
+    return f"{low} {unit}" if low == high else f"{low}–{high} {unit}"
 
 
 def score_conditions(
@@ -244,7 +256,7 @@ def score_conditions(
             factors.append(
                 ScoreFactor(
                     impact=-4,
-                    description=f"Onshore wind ({wind_direction}) — murkier water",
+                    description=f"Onshore wind ({wind_direction}) bringing murkier water",
                 )
             )
 
@@ -308,7 +320,7 @@ def score_conditions(
         verdict = ScoreVerdict.POOR
 
     factors.sort(key=lambda f: -abs(f.impact))
-    summary = ", ".join(f.description for f in factors[:4])
+    summary = _sentence([f.description for f in factors[:4]])
 
     return ForecastScore(
         score=round(score), verdict=verdict, factors=factors, summary=summary

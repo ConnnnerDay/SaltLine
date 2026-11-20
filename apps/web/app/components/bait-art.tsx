@@ -278,7 +278,7 @@ function SandFlea({ x, y, s = 1, eggs = false }: { x: number; y: number; s?: num
 
 /** A blue crab from above, centered on (x, y): carapace with its long
  * side spines at x=±56, blue claws forward, swimming paddles at the back. */
-function BlueCrab({ x, y, s = 1, clawless = false }: { x: number; y: number; s?: number; clawless?: boolean }) {
+export function BlueCrab({ x, y, s = 1, clawless = false }: { x: number; y: number; s?: number; clawless?: boolean }) {
   const side = (m: 1 | -1) => (
     <g key={m} transform={`scale(${m} 1)`}>
       {[0, 1, 2].map((i) => (

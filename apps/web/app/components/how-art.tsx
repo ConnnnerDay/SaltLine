@@ -1,4 +1,4 @@
-import { Baitfish, CRAB, HOOK, INK, Label, PAPER, Panel, RED, SAND, THREAD, WATER, ink } from './bait-art'
+import { Baitfish, BlueCrab, FISH, FISH_BACK, HOOK, INK, Label, PAPER, Panel, RED, SAND, THREAD, WATER, ink } from './bait-art'
 
 /**
  * More panels in the bait-art style, for the other how-tos:
@@ -21,6 +21,28 @@ function Bar({ x1, x2, y, color = RED }: { x1: number; x2: number; y: number; co
   )
 }
 
+/** A marlin side view, facing left: bill tip x 6, lower jaw tip (44, 59),
+ * tall dorsal, crescent tail with its fork at (170, 53). */
+function Billfish() {
+  return (
+    <g>
+      <path d="M48 50 L6 50 L48 54 Z" fill={FISH_BACK} {...ink} strokeWidth={2} />
+      <path d="M64 44 L76 26 C82 32 96 38 128 44 Z" fill={FISH_BACK} {...ink} strokeWidth={2.4} />
+      <path d="M162 52 L184 26 C178 38 172 46 170 53 C172 60 178 68 184 80 L162 56 Z" fill={FISH_BACK} {...ink} strokeWidth={2.4} />
+      <path d="M46 50 C70 36 124 38 162 50 L162 56 C124 66 76 68 48 60 L44 59 L50 56 Z" fill={FISH} {...ink} strokeWidth={2.6} />
+      <path d="M50 48 C74 40 122 42 160 51 L161 53 C126 48 84 46 52 52 Z" fill={FISH_BACK} />
+      {[84, 98, 112, 126].map((bx) => (
+        <path key={bx} d={`M${bx} 46 l-2 12`} stroke={FISH_BACK} strokeWidth="2" strokeLinecap="round" opacity="0.6" />
+      ))}
+      <path d="M46 50 C70 36 124 38 162 50 L162 56 C124 66 76 68 48 60 L44 59 L50 56 Z" fill="none" {...ink} strokeWidth={2.6} />
+      <path d="M66 57 L90 72 L82 58 Z" fill={FISH_BACK} {...ink} strokeWidth={2} />
+      <path d="M62 46 C66 50 66 56 62 60" fill="none" stroke={INK} strokeWidth="1.6" />
+      <circle cx="54" cy="51" r="3" fill={PAPER} stroke={INK} strokeWidth="1.5" />
+      <circle cx="54.6" cy="51" r="1.4" fill={INK} />
+    </g>
+  )
+}
+
 /** Where to put the tape for this kind of size rule, or null. */
 export function MeasureArt({ measure }: { measure: Measure }) {
   // Baitfish at (22, 30), w 130: snout x 22, tail fork x 164, tail tips x 170.
@@ -37,15 +59,29 @@ export function MeasureArt({ measure }: { measure: Measure }) {
       </Panel>
     )
   }
-  if (measure === 'FL' || measure === 'LJFL') {
+  if (measure === 'LJFL') {
     return (
-      <Panel label={measure === 'FL' ? 'Fork length: from the tip of the snout to the fork in the tail' : 'Lower jaw fork length: from the tip of the lower jaw to the fork in the tail'} h={116}>
+      <Panel label="Lower jaw fork length: from the tip of the lower jaw to the fork in the tail, not counting the bill" h={116}>
+        <Billfish />
+        <path d="M8 46 l8 8 M16 46 l-8 8" stroke={RED} strokeWidth="2.5" strokeLinecap="round" />
+        <Label x={36} y={24} text="NOT THE BILL" tx={14} ty={44} color={RED} />
+        <path d="M44 60 L44 88 M170 54 L170 88" stroke={INK} strokeWidth="1.5" strokeDasharray="3 3" />
+        <circle cx="44" cy="59" r="3.5" fill={RED} stroke={INK} strokeWidth="1.5" />
+        <circle cx="170" cy="53" r="3.5" fill={RED} stroke={INK} strokeWidth="1.5" />
+        <Bar x1={44} x2={170} y={88} />
+        <Label x={107} y={108} text="LOWER JAW TO FORK" />
+      </Panel>
+    )
+  }
+  if (measure === 'FL') {
+    return (
+      <Panel label="Fork length: from the tip of the snout to the fork in the tail" h={116}>
         {fish}
         <path d="M22 50 L22 88 M164 48 L164 88" stroke={INK} strokeWidth="1.5" strokeDasharray="3 3" />
         <circle cx="164" cy="48" r="4" fill={RED} stroke={INK} strokeWidth="1.5" />
         <Label x={150} y={22} text="THE FORK" tx={162} ty={44} />
         <Bar x1={22} x2={164} y={88} />
-        <Label x={96} y={108} text={measure === 'FL' ? 'FORK LENGTH' : 'LOWER JAW TO FORK'} />
+        <Label x={96} y={108} text="FORK LENGTH" />
       </Panel>
     )
   }
@@ -61,12 +97,8 @@ export function MeasureArt({ measure }: { measure: Measure }) {
   if (measure === 'CW') {
     return (
       <Panel label="Carapace width: straight across the shell at its widest, spine tip to spine tip" h={116}>
-        {[0, 1, 2].map((i) => (
-          <path key={i} d={`M${72 + i * 14} 74 l-10 16 M${128 - i * 14} 74 l10 16`} {...ink} strokeWidth={3} />
-        ))}
-        <path d="M40 52 C40 26 160 26 160 52 C160 76 40 76 40 52 Z" fill={CRAB} {...ink} />
-        <path d="M40 50 L22 44 L40 58 Z M160 50 L178 44 L160 58 Z" fill={CRAB} {...ink} strokeWidth={2.5} />
-        <Bar x1={22} x2={178} y={20} />
+        <BlueCrab x={100} y={60} />
+        <Bar x1={44} x2={156} y={58} />
         <Label x={100} y={106} text="SPINE TIP TO SPINE TIP" />
       </Panel>
     )

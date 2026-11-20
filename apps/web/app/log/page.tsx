@@ -38,7 +38,7 @@ export default async function LogPage({ searchParams }: Props) {
 
   const [saved, curated, species, home, units] = await Promise.all([
     internalApiFetch<SavedLocation[]>('/v1/me/locations', { userId }).catch(() => []),
-    internalApiFetch<{ id: string; name: string; state: string }[]>('/v1/locations').catch(
+    internalApiFetch<{ id: string; name: string; state: string; timezone: string }[]>('/v1/locations').catch(
       () => [],
     ),
     internalApiFetch<string[]>('/v1/me/catches/species', { userId }).catch(() => []),
@@ -49,18 +49,19 @@ export default async function LogPage({ searchParams }: Props) {
   ])
 
   const names = new Map<string, string>()
+  const zones = new Map(curated.map((spot) => [spot.id, spot.timezone]))
   for (const spot of curated) names.set(spot.id, `${spot.name}, ${spot.state}`)
   for (const spot of saved) names.set(spot.location_id, `${spot.name}, ${spot.state}`)
 
   const mine: LocationOption[] = []
   for (const id of [location, home, ...saved.map((spot) => spot.location_id)]) {
     if (id && !mine.some((option) => option.id === id)) {
-      mine.push({ id, label: names.get(id) ?? 'Custom spot' })
+      mine.push({ id, label: names.get(id) ?? 'Custom spot', timezone: zones.get(id) ?? null })
     }
   }
   const others: LocationOption[] = curated
     .filter((spot) => !mine.some((option) => option.id === spot.id))
-    .map((spot) => ({ id: spot.id, label: `${spot.name}, ${spot.state}` }))
+    .map((spot) => ({ id: spot.id, label: `${spot.name}, ${spot.state}`, timezone: spot.timezone }))
     // The catalogue's own order runs New York south and then jumps around;
     // alphabetical is what people scan a long list by.
     .sort((a, b) => a.label.localeCompare(b.label))

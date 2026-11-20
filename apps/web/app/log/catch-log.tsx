@@ -1,5 +1,6 @@
 'use client'
 
+import { wallClock, wallClockToIso } from '@/lib/zoned-time'
 import { fromDisplay, heightRange, length, speedRange, temp, unitLabel, weight, type Units } from '@/lib/units'
 
 import { useId, useState, type FormEvent } from 'react'
@@ -8,7 +9,9 @@ import type { CatchEntry } from '@/app/api/catches/route'
 import { compassLabel } from '@/app/components/forecast-card'
 import { CatchInsights } from './catch-insights'
 
-export type LocationOption = { id: string; label: string }
+/** `timezone` is the spot's IANA zone (null for a custom point), so the
+ * "When" field is read as local time there. */
+export type LocationOption = { id: string; label: string; timezone?: string | null }
 
 const INPUT =
   'w-full rounded-md border border-border bg-surface px-3 py-2.5 text-text ' +
@@ -16,12 +19,6 @@ const INPUT =
 const LABEL = 'text-sm font-medium text-text'
 
 /** "YYYY-MM-DDTHH:mm" in the browser's local time, for datetime-local. */
-function localNow(): string {
-  const now = new Date()
-  now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
-  return now.toISOString().slice(0, 16)
-}
-
 function numberOrNull(value: FormDataEntryValue | null): number | null {
   const text = String(value ?? '').trim()
   return text === '' ? null : Number(text)
@@ -70,6 +67,10 @@ export function CatchLog({
   const [saving, setSaving] = useState(false)
   const [formKey, setFormKey] = useState(0)
   const datalistId = useId()
+  const spots = [...mySpots, ...otherSpots]
+  const zoneOf = (id: string) => spots.find((spot) => spot.id === id)?.timezone ?? null
+  const [caughtAt, setCaughtAt] = useState(() => wallClock(new Date(), zoneOf(defaultLocationId)))
+  const [timeEdited, setTimeEdited] = useState(false)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -83,7 +84,7 @@ export function CatchLog({
         body: JSON.stringify({
           location_id: form.get('location_id'),
           species: String(form.get('species') ?? '').trim(),
-          caught_at: new Date(String(form.get('caught_at'))).toISOString(),
+          caught_at: wallClockToIso(String(form.get('caught_at')), zoneOf(String(form.get('location_id')))),
           length_in: inUs(numberOrNull(form.get('length_in')), fromDisplay.length),
           weight_lb: inUs(numberOrNull(form.get('weight_lb')), fromDisplay.weight),
           kept: form.get('kept') === 'on',
@@ -100,6 +101,8 @@ export function CatchLog({
         [body as CatchEntry, ...current].sort((a, b) => b.caught_at.localeCompare(a.caught_at)),
       )
       setFormKey((key) => key + 1)
+      setCaughtAt(wallClock(new Date(), zoneOf(defaultLocationId)))
+      setTimeEdited(false)
     } catch {
       setError('Could not save that catch.')
     } finally {
@@ -137,7 +140,16 @@ export function CatchLog({
 
           <label className="flex flex-col gap-1.5 sm:col-span-2">
             <span className={LABEL}>Spot</span>
-            <select name="location_id" required defaultValue={defaultLocationId} className={INPUT}>
+            <select
+              name="location_id"
+              required
+              defaultValue={defaultLocationId}
+              onChange={(event) => {
+                // Until the time is edited, keep it at "now" at the picked spot.
+                if (!timeEdited) setCaughtAt(wallClock(new Date(), zoneOf(event.target.value)))
+              }}
+              className={INPUT}
+            >
               {mySpots.length > 0 && (
                 <optgroup label="Your spots">
                   {mySpots.map((spot) => (
@@ -181,7 +193,11 @@ export function CatchLog({
               name="caught_at"
               type="datetime-local"
               required
-              defaultValue={localNow()}
+              value={caughtAt}
+              onChange={(event) => {
+                setCaughtAt(event.target.value)
+                setTimeEdited(true)
+              }}
               className={INPUT}
             />
           </label>

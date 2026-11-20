@@ -29,14 +29,34 @@ export function SavedLocationsList({
   initialLocations,
   initialError,
   units = 'imperial',
+  initialHomeId = null,
 }: {
   initialLocations: SavedLocationWithForecast[] | null
   initialError: string | null
   units?: Units
+  /** The home spot (the forecast Saltline opens to), set from here too. */
+  initialHomeId?: string | null
 }) {
   const [locations, setLocations] = useState(initialLocations)
   const [error, setError] = useState(initialError)
   const [removingId, setRemovingId] = useState<number | null>(null)
+  const [homeId, setHomeId] = useState(initialHomeId)
+  const [homeError, setHomeError] = useState<string | null>(null)
+
+  async function handleMakeHome(locationId: string) {
+    const previous = homeId
+    setHomeId(locationId)
+    setHomeError(null)
+    const response = await fetch('/api/preferences', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ default_location_id: locationId }),
+    }).catch(() => null)
+    if (!response?.ok) {
+      setHomeId(previous)
+      setHomeError('Could not change your home spot. Try again.')
+    }
+  }
 
   async function handleRemove(id: number) {
     setRemovingId(id)
@@ -73,6 +93,12 @@ export function SavedLocationsList({
   }
 
   return (
+    <>
+      {homeError && (
+        <p role="alert" className="text-sm text-danger-text">
+          {homeError}
+        </p>
+      )}
     <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {locations.map((location) => (
         <li key={location.id} className="relative">
@@ -81,7 +107,12 @@ export function SavedLocationsList({
             className="flex h-full flex-col gap-3 rounded-lg border border-border bg-surface p-5 pr-12 text-text no-underline shadow-card transition-[border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/60"
           >
             <span>
-              <span className="block text-lg font-bold leading-tight">{localizeText(location.name, units)}</span>
+              <span className="block text-lg font-bold leading-tight">
+                {localizeText(location.name, units)}
+                {location.location_id === homeId && (
+                  <span className="ml-2 rounded-full bg-primary-tint px-2 py-0.5 align-middle text-xs font-bold text-primary">Home</span>
+                )}
+              </span>
               <span className="block text-sm text-text-muted">{location.state}</span>
             </span>
             <LocationForecastSummary forecast={location.forecast} units={units} />
@@ -109,9 +140,19 @@ export function SavedLocationsList({
               <path d="M6 7 L7 20 a1 1 0 0 0 1 1 h8 a1 1 0 0 0 1 -1 L19 7" />
             </svg>
           </button>
+          {location.location_id !== homeId && (
+            <button
+              type="button"
+              onClick={() => handleMakeHome(location.location_id)}
+              className="absolute bottom-3 right-3 rounded-md px-2 py-1 text-xs font-semibold text-primary hover:bg-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+            >
+              Make home
+            </button>
+          )}
         </li>
       ))}
     </ul>
+    </>
   )
 }
 

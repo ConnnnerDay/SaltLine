@@ -162,9 +162,17 @@ function decimalsOf(value: string): number {
   return value.includes('.') ? 1 : 0
 }
 
+type Context = { tempDecimals: number }
+
 type Rule = {
   pattern: RegExp
-  convert: (low: string, high: string | undefined, sep: string | undefined) => string
+  convert: (
+    low: string,
+    high: string | undefined,
+    sep: string | undefined,
+    extra: string | undefined,
+    ctx: Context,
+  ) => string
 }
 
 /** "a" and an optional "b" (a range), converted by `fn` and joined by the
@@ -181,18 +189,22 @@ const METRIC_RULES: Rule[] = [
   {
     // 63°F, 55–75°F, 63 °F
     pattern: new RegExp(String.raw`(-?${NUM})(?:(\s*(?:–|-|to)\s*)(-?${NUM}))?\s*°\s*F\b`, 'g'),
-    convert: (low, high, sep) => {
-      const c = (v: string) => F_TO_C(parse(v)).toFixed(decimalsOf(v))
+    convert: (low, high, sep, _extra, ctx) => {
+      // With a decimal reading in the sentence ("57.7°F is just below
+      // 58–74°F"), whole-degree ranges would round to a contradiction
+      // ("14.3°C is just below 14–23°C"): keep tenths throughout.
+      const c = (v: string) => F_TO_C(parse(v)).toFixed(Math.max(decimalsOf(v), ctx.tempDecimals))
       return high !== undefined ? `${c(low)}${sep}${c(high)}°C` : `${c(low)}°C`
     },
   },
   {
-    pattern: new RegExp(String.raw`${RANGE}\s*(?:ft|feet|foot)\b`, 'g'),
-    convert: (low, high, sep) => {
+    // "300-800+ ft" keeps its "+".
+    pattern: new RegExp(String.raw`${RANGE}(\+?)\s*(?:ft|feet|foot)\b`, 'g'),
+    convert: (low, high, sep, plus = '') => {
       const top = parse(high ?? low) * FT_TO_M
       const d = metresDecimals(top)
       const m = (v: string) => tidy(parse(v) * FT_TO_M, d)
-      return high !== undefined ? `${m(low)}${sep}${m(high)} m` : `${m(low)} m`
+      return high !== undefined ? `${m(low)}${sep}${m(high)}${plus} m` : `${m(low)}${plus} m`
     },
   },
   {
@@ -213,7 +225,9 @@ const METRIC_RULES: Rule[] = [
   {
     // 18 in TL, 12–18 inches, 18" -- "in" only when it's clearly a length.
     pattern: new RegExp(
-      String.raw`${RANGE}\s*(?:inches|inch|in\b(?=\s*(?:TL|FL|total|fork|long|apart|slot|min|max|minimum|maximum|of\b|or\b|\)|,|;|\.|·|$))|")`,
+      // "8-inch" too; "in." mid-sentence ("a 1–2 in. piece") is an
+      // abbreviation, so its dot goes with it.
+      String.raw`${RANGE}(?:\s*|-)(?:inches|inch|in\.(?=\s+[a-z])|in\b(?=\s*(?:TL|FL|total|fork|long|apart|slot|min|max|minimum|maximum|of\b|or\b|leaders?\b|fluoro|mono\b|wire\b|line\b|pieces?\b|strips?\b|range\b|\(\s*(?:fork|total|curved|lower|carapace|mantle|varies|part\b)|preferred\b|carapace|body\s+length|mantle|point-to-point|CL\b|CFL\b|LJFL\b|curved|lower\s+jaw|before\b|are\b|\)|,|;|\.|·|$))|")`,
       'g',
     ),
     convert: ranged((v) => String(Math.round(v * IN_TO_CM)), 'cm'),
@@ -241,10 +255,13 @@ const METRIC_RULES: Rule[] = [
  * no-op for imperial). */
 export function localizeText(text: string, units: Units): string {
   if (units !== 'metric' || !text) return text
+  const ctx: Context = { tempDecimals: /\d\.\d+\s*°\s*F/.test(text) ? 1 : 0 }
   let out = text
   for (const rule of METRIC_RULES) {
-    out = out.replace(rule.pattern, (_match, low: string, sep: string | undefined, high: string | undefined) =>
-      rule.convert(low, high, sep),
+    out = out.replace(
+      rule.pattern,
+      (_match, low: string, sep: string | undefined, high: string | undefined, extra: unknown) =>
+        rule.convert(low, high, sep, typeof extra === 'string' ? extra : undefined, ctx),
     )
   }
   return out

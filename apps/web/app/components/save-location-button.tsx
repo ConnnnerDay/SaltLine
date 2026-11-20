@@ -13,9 +13,12 @@ import { Button } from './ui'
 export function SaveLocationButton({
   locationId,
   initiallySaved = false,
+  compact = false,
 }: {
   locationId: string
   initiallySaved?: boolean
+  /** A small bookmark button for the navy location bar. */
+  compact?: boolean
 }) {
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>(initiallySaved ? 'saved' : 'idle')
 
@@ -33,6 +36,24 @@ export function SaveLocationButton({
       return
     }
     setStatus('error')
+  }
+
+  if (compact) {
+    const saved = status === 'saved'
+    return (
+      <button
+        type="button"
+        onClick={saved ? undefined : handleClick}
+        disabled={saved || status === 'saving'}
+        aria-label={saved ? 'Saved to your spots' : 'Save this spot'}
+        className="flex h-8 items-center gap-1.5 rounded-md border border-white/20 px-2.5 text-xs font-semibold text-white/85 hover:border-white/40 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 disabled:cursor-default disabled:hover:border-white/20"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinejoin="round" aria-hidden="true">
+          <path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V4.5a1 1 0 0 1 1-1z" />
+        </svg>
+        {status === 'error' ? 'Try again' : saved ? 'Saved' : status === 'saving' ? 'Saving…' : 'Save'}
+      </button>
+    )
   }
 
   if (status === 'saved') {

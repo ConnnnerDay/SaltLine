@@ -12,12 +12,15 @@ export function LocationBar({
   backLabel,
   label,
   switcher,
+  actions,
 }: {
   backHref: string
   backLabel: string
   label: string | null
   /** Signed in: the name opens a switcher of these spots. */
   switcher?: { currentId: string; spots: SwitcherSpot[] }
+  /** Spot actions on the right (signed in: save this spot). */
+  actions?: React.ReactNode
 }) {
   return (
     <div className="border-b border-header-border bg-header text-white">
@@ -42,6 +45,7 @@ export function LocationBar({
         ) : (
           <h1 className="truncate text-base font-bold tracking-tight text-white">{label}</h1>
         )}
+        {actions && <div className="ml-auto flex shrink-0 items-center gap-2">{actions}</div>}
       </div>
     </div>
   )

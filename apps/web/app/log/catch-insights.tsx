@@ -19,6 +19,8 @@ import { Card } from '@/app/components/ui'
  */
 
 const MIN_FOR_PATTERN = 3
+/** Catches needed before the breakdowns show at all. */
+const MIN_FOR_INSIGHTS = 5
 
 type Bucket = { label: string; count: number }
 
@@ -125,13 +127,15 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 export function CatchInsights({ catches, units = 'imperial' }: { catches: CatchEntry[]; units?: Units }) {
-  if (catches.length < 2) {
+  // Below this, every breakdown is "1 or 2 with data": noise, not a pattern.
+  if (catches.length < MIN_FOR_INSIGHTS) {
+    const more = MIN_FOR_INSIGHTS - catches.length
     return (
       <Card className="flex flex-col gap-2">
         <h2 className="section-label">Your patterns</h2>
         <p className="text-sm text-text-muted">
-          Log a few catches and this turns into a picture of when you catch fish: time of day,
-          tide, moon, water temperature and species.
+          Log {more} more {more === 1 ? 'catch' : 'catches'} and this turns into a picture of when you
+          catch fish: time of day, tide, moon, water temperature and species.
         </p>
       </Card>
     )

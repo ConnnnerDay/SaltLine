@@ -40,9 +40,8 @@ export function AuthStatus() {
 }
 
 /**
- * Sprint 37 replaced the flat "name link + sign out button" pair with a
- * real menu once there were multiple destinations (Preferences, Saved
- * spots, and -- sprint 45 -- Account) plus sign-out to fit -- a
+ * The Account section: account settings, preferences (which also
+ * links to the setup wizard) and sign-out (spots and the catch log live in the main nav). A
  * `role="menu"` button/popup pattern (like LocationSearch's combobox)
  * rather than several siblings racing for space at phone width, which
  * is exactly the text-wrap crowding this header fixed once already.
@@ -125,44 +124,20 @@ function AccountMenu({ name }: { name: string }) {
         >
           <Link
             ref={firstItemRef}
-            href="/preferences"
-            role="menuitem"
-            onClick={() => setOpen(false)}
-            className="block px-4 py-2 text-sm text-text no-underline hover:bg-bg focus-visible:outline-none focus-visible:bg-bg"
-          >
-            Preferences
-          </Link>
-          <Link
-            href="/onboarding?next=/"
-            role="menuitem"
-            onClick={() => setOpen(false)}
-            className="block px-4 py-2 text-sm text-text no-underline hover:bg-bg focus-visible:outline-none focus-visible:bg-bg"
-          >
-            Fishing profile
-          </Link>
-          <Link
-            href="/saved"
-            role="menuitem"
-            onClick={() => setOpen(false)}
-            className="block px-4 py-2 text-sm text-text no-underline hover:bg-bg focus-visible:outline-none focus-visible:bg-bg"
-          >
-            Saved spots
-          </Link>
-          <Link
-            href="/log"
-            role="menuitem"
-            onClick={() => setOpen(false)}
-            className="block px-4 py-2 text-sm text-text no-underline hover:bg-bg focus-visible:outline-none focus-visible:bg-bg"
-          >
-            Catch log
-          </Link>
-          <Link
             href="/account"
             role="menuitem"
             onClick={() => setOpen(false)}
             className="block px-4 py-2 text-sm text-text no-underline hover:bg-bg focus-visible:outline-none focus-visible:bg-bg"
           >
             Account
+          </Link>
+          <Link
+            href="/preferences"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 text-sm text-text no-underline hover:bg-bg focus-visible:outline-none focus-visible:bg-bg"
+          >
+            Preferences
           </Link>
           <button
             type="button"

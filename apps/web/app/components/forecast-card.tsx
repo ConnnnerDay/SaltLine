@@ -1349,7 +1349,7 @@ export function ForecastCard({
   forecast: ForecastEnvelope
   /** "Nearby spots today" (streams in; shown on the Week tab). */
   nearby?: React.ReactNode
-  /** "Fish seen nearby lately" (streams in; shown on the Fish tab). */
+  /** "Fish seen nearby lately" (streams in; shown on the Biting tab). */
   seen?: React.ReactNode
   /** Nearby public live-cam links (lib/get-cams.ts). */
   cams?: NearbyCam[]
@@ -1546,9 +1546,9 @@ export function ForecastCard({
       <ForecastTabs
         tabs={[
           { key: 'today', label: 'Today', hint: 'When to go' },
-          { key: 'conditions', label: 'Conditions', hint: 'Water, wind, tides' },
-          { key: 'fish', label: 'Fish', hint: 'Species, rigs, limits' },
-          { key: 'week', label: 'Week', hint: 'Days ahead, nearby' },
+          { key: 'conditions', label: 'Conditions', hint: 'Water, wind, tides, cams' },
+          { key: 'fish', label: 'Biting', hint: 'Species, rigs, limits' },
+          { key: 'week', label: 'Week', hint: 'Days ahead, nearby spots' },
         ]}
         sections={[
           {
@@ -1848,7 +1848,7 @@ export function ForecastCard({
           {
             id: 'cams',
             label: 'Live cams',
-            tab: 'week',
+            tab: 'conditions',
             content: (
               <>
                 {cams.length > 0 && (

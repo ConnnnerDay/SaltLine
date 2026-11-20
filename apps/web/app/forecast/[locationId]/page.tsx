@@ -119,21 +119,26 @@ export default async function ForecastPage({ params }: Props) {
       retryHref={`/forecast/${encodeURIComponent(locationId)}`}
       backHref="/locations"
       backLabel="Back to search"
+      barActions={
+        forecast && (
+          <SaveLocationButton
+            compact
+            locationId={forecast.location.id}
+            initiallySaved={saved.some((spot) => spot.location_id === forecast.location.id)}
+          />
+        )
+      }
     >
       {forecast && (
         <div className="flex flex-col gap-3">
           <AlertControl locationId={forecast.location.id} />
           <div className="flex flex-col gap-3 sm:flex-row">
-          <SaveLocationButton
-            locationId={forecast.location.id}
-            initiallySaved={saved.some((spot) => spot.location_id === forecast.location.id)}
-          />
-          <Button
-            variant="secondary"
-            href={`/log?location=${encodeURIComponent(forecast.location.id)}`}
-          >
-            Log a catch here
-          </Button>
+            <Button
+              variant="secondary"
+              href={`/log?location=${encodeURIComponent(forecast.location.id)}`}
+            >
+              Log a catch here
+            </Button>
           </div>
         </div>
       )}

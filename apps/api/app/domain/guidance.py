@@ -447,7 +447,13 @@ def _tackle_note(wave_range: tuple[float, float] | None) -> str | None:
     )
 
 
-_NOT_A_LURE = ("not a primary", "rarely", "not typically", "occasionally")
+# Lure-line entries that say the fish isn't really a lure fish ("Not a
+# strong lure target", "Primarily caught on bait", "small jigs
+# occasionally"): not something to pack.
+_NOT_A_LURE = re.compile(
+    r"^(not|no)\b|\bnot (a|typically|usually|commonly|targeted)\b|primarily|rarely|occasional",
+    re.IGNORECASE,
+)
 # Lures and gear that turn up in some species' bait lines.
 _NOT_A_BAIT = re.compile(
     r"\b(plugs?|lures?|jigs?|spoons?|swimbaits?|soft plastics?|flies|fly)\b",
@@ -525,7 +531,7 @@ def build_pack_for_today(
     lures = [
         lure
         for lure in _tokens([pick.lures for pick in working])
-        if not any(phrase in lure.lower() for phrase in _NOT_A_LURE)
+        if not _NOT_A_LURE.search(lure)
     ][:4]
     if lures:
         if low_light and warm and not any("topwater" in lure.lower() for lure in lures):

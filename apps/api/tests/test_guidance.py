@@ -448,8 +448,28 @@ def test_pack_skips_non_lure_phrases() -> None:
     from app.domain.guidance import _NOT_A_LURE
 
     pack = _pack()
-    lures = next(row.value for row in pack.rows if row.kind == "lure").lower()
-    assert not any(phrase in lures for phrase in _NOT_A_LURE)
+    lures = next(row.value for row in pack.rows if row.kind == "lure")
+    assert not any(_NOT_A_LURE.search(entry) for entry in lures.split(" · "))
+
+
+def test_not_a_lure_phrases_cover_the_catalogue_wording() -> None:
+    from app.domain.guidance import _NOT_A_LURE
+
+    for phrase in (
+        "Not a strong lure target",
+        "not usually targeted on lures",
+        "Primarily caught on bait",
+        "small jigs occasionally work",
+        "Not applicable",
+    ):
+        assert _NOT_A_LURE.search(phrase), phrase
+    for lure in (
+        "Tiny metal jigs (1/4-1/2 oz)",
+        "Small spoons",
+        "Sabiki rigs",
+        "Bucktail jigs",
+    ):
+        assert not _NOT_A_LURE.search(lure), lure
 
 
 def test_no_pack_without_picks() -> None:

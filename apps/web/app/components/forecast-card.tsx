@@ -383,6 +383,10 @@ function TideTable({
   )
 }
 
+/** A lure line that says the fish isn't a lure fish ("Not a strong lure
+ * target", "Primarily caught on bait"); same rule as apps/api's pack. */
+const NOT_A_LURE = /^(not|no)\b|\bnot (a|typically|usually|commonly|targeted)\b|^primarily|^rarely/i
+
 const ACTIVITY_BAR: Record<ActivityTag, string> = {
   prime: 'bg-tier-prime',
   high: 'bg-tier-high',
@@ -1201,7 +1205,7 @@ function RigsAndTips({
                         </span>
                         <span className="text-xs text-text-muted">
                           Setup: {pick.rig}
-                          {pick.lures && !/not (a |typically )?(primary )?lure|rarely taken on lures/i.test(pick.lures) && ` · Lures: ${pick.lures}`}
+                          {pick.lures && !NOT_A_LURE.test(pick.lures) && ` · Lures: ${pick.lures}`}
                         </span>
                       </li>
                     ))}

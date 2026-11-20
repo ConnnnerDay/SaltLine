@@ -227,7 +227,7 @@ const METRIC_RULES: Rule[] = [
     pattern: new RegExp(
       // "8-inch" too; "in." mid-sentence ("a 1–2 in. piece") is an
       // abbreviation, so its dot goes with it.
-      String.raw`${RANGE}(?:\s*|-)(?:inches|inch|in\.(?=\s+[a-z])|in\b(?=\s*(?:TL|FL|total|fork|long|apart|slot|min|max|minimum|maximum|of\b|or\b|leaders?\b|fluoro|mono\b|wire\b|line\b|pieces?\b|strips?\b|range\b|\(\s*(?:fork|total|curved|lower|carapace|mantle|varies|part\b)|preferred\b|carapace|body\s+length|mantle|point-to-point|CL\b|CFL\b|LJFL\b|curved|lower\s+jaw|before\b|are\b|\)|,|;|\.|·|$))|")`,
+      String.raw`${RANGE}(?:\s*|-)(?:inches|inch|in\.(?=\s+[a-z])|in\b(?=\s*(?:TL|FL|total|fork|long|apart|slot|min|max|minimum|maximum|of\b|or\b|leaders?\b|fluoro|mono\b|wire\b|line\b|pieces?\b|strips?\b|range\b|\(\s*(?:fork|total|curved|lower|carapace|mantle|varies|part\b)|preferred\b|carapace|body\s+length|mantle|point-to-point|CL\b|CW\b|CFL\b|LJFL\b|curved|lower\s+jaw|before\b|are\b|\)|,|;|\.|·|$))|")`,
       'g',
     ),
     convert: ranged((v) => String(Math.round(v * IN_TO_CM)), 'cm'),

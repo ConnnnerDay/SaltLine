@@ -45,6 +45,54 @@ function Fact({ label, value }: { label: string; value: string }) {
   )
 }
 
+/** Size, bag and season rows, one per state, the home state marked. */
+function LimitsTable({
+  rows,
+  homeState,
+  say,
+}: {
+  rows: FishDetail['regulations']
+  homeState: string | null
+  say: (text: string) => string
+}) {
+  if (rows.length === 0) return null
+  return (
+    <div className="max-w-full overflow-x-auto">
+      <table className="w-full min-w-[560px] text-left text-sm">
+        <thead className="text-xs text-text-muted">
+          <tr>
+            <th scope="col" className="py-1.5 pr-3 font-semibold">State</th>
+            <th scope="col" className="py-1.5 pr-3 font-semibold">Size</th>
+            <th scope="col" className="py-1.5 pr-3 font-semibold">Bag</th>
+            <th scope="col" className="py-1.5 pr-3 font-semibold">Season</th>
+            <th scope="col" className="py-1.5 font-semibold"><span className="sr-only">Source</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((rule) => (
+            <tr key={rule.state} className={cx('border-t border-border', rule.state === homeState && 'bg-primary-tint')}>
+              <th scope="row" className="py-2 pr-3 font-bold text-text">
+                {rule.state}
+                {rule.state === homeState && <span className="ml-1.5 text-xs font-semibold text-primary">your state</span>}
+              </th>
+              <td className="py-2 pr-3 text-text">{rule.min_size ? say(sizeText(rule) ?? rule.min_size) : '—'}</td>
+              <td className="py-2 pr-3 text-text">{rule.bag_limit ? say(rule.bag_limit) : '—'}</td>
+              <td className="py-2 pr-3 text-text-muted">{rule.season ? say(rule.season) : 'Open'}</td>
+              <td className="py-2 text-right">
+                {rule.source_url && (
+                  <a href={rule.source_url} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold">
+                    Official rules ↗
+                  </a>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 /** One fish from the Fish guide: photo, seasons, how to catch it, and its
  * size and bag limits in every state the snapshot covers. */
 export default async function FishDetailPage({ params }: Props) {
@@ -86,6 +134,11 @@ export default async function FishDetailPage({ params }: Props) {
   const regulations = [...fish.regulations].sort(
     (a, b) => Number(b.state === homeState) - Number(a.state === homeState) || a.state.localeCompare(b.state),
   )
+  // The home state's limits up front; every other state folded away.
+  // With no home state (or no rule for it), every state is shown.
+  const homeRules = regulations.filter((rule) => rule.state === homeState)
+  const shownRules = homeRules.length > 0 ? homeRules : regulations
+  const otherRules = homeRules.length > 0 ? regulations.filter((rule) => rule.state !== homeState) : []
 
   return (
     <main>
@@ -198,6 +251,17 @@ export default async function FishDetailPage({ params }: Props) {
                   </div>
                 )}
               </Card>
+              <Card className="flex flex-col gap-3">
+                <h2 className="section-label">What they&apos;re doing</h2>
+                <p className="text-sm leading-relaxed text-text">
+                  <span className="font-semibold">Warm water: </span>
+                  {say(fish.explanation_warm)}
+                </p>
+                <p className="text-sm leading-relaxed text-text">
+                  <span className="font-semibold">Cool water: </span>
+                  {say(fish.explanation_cold)}
+                </p>
+              </Card>
             </div>
 
             <div className="flex flex-col gap-4">
@@ -257,21 +321,8 @@ export default async function FishDetailPage({ params }: Props) {
                   })}
                 </Card>
               )}
-              <Card className="flex flex-col gap-3">
-                <h2 className="section-label">What they&apos;re doing</h2>
-                <p className="text-sm leading-relaxed text-text">
-                  <span className="font-semibold">Warm water: </span>
-                  {say(fish.explanation_warm)}
-                </p>
-                <p className="text-sm leading-relaxed text-text">
-                  <span className="font-semibold">Cool water: </span>
-                  {say(fish.explanation_cold)}
-                </p>
-              </Card>
             </div>
           </div>
-
-          <Identify id={fish.id} names={names} say={say} beginner={prefs?.experience === 'beginner'} />
 
           {fish.access !== 'incidental' && (
             <Suspense
@@ -307,41 +358,23 @@ export default async function FishDetailPage({ params }: Props) {
                 No state limits on file for this fish. Check your state&apos;s fishing regulations.
               </p>
             ) : (
-              <div className="max-w-full overflow-x-auto">
-                <table className="w-full min-w-[560px] text-left text-sm">
-                  <thead className="text-xs text-text-muted">
-                    <tr>
-                      <th scope="col" className="py-1.5 pr-3 font-semibold">State</th>
-                      <th scope="col" className="py-1.5 pr-3 font-semibold">Size</th>
-                      <th scope="col" className="py-1.5 pr-3 font-semibold">Bag</th>
-                      <th scope="col" className="py-1.5 pr-3 font-semibold">Season</th>
-                      <th scope="col" className="py-1.5 font-semibold"><span className="sr-only">Source</span></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {regulations.map((rule) => (
-                      <tr key={rule.state} className={cx('border-t border-border', rule.state === homeState && 'bg-primary-tint')}>
-                        <th scope="row" className="py-2 pr-3 font-bold text-text">
-                          {rule.state}
-                          {rule.state === homeState && <span className="ml-1.5 text-xs font-semibold text-primary">your state</span>}
-                        </th>
-                        <td className="py-2 pr-3 text-text">{rule.min_size ? say(sizeText(rule) ?? rule.min_size) : '—'}</td>
-                        <td className="py-2 pr-3 text-text">{rule.bag_limit ? say(rule.bag_limit) : '—'}</td>
-                        <td className="py-2 pr-3 text-text-muted">{rule.season ? say(rule.season) : 'Open'}</td>
-                        <td className="py-2 text-right">
-                          {rule.source_url && (
-                            <a href={rule.source_url} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold">
-                              Official rules ↗
-                            </a>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <>
+                <LimitsTable rows={shownRules} homeState={homeState} say={say} />
+                {otherRules.length > 0 && (
+                  <details className="group">
+                    <summary className="w-fit cursor-pointer text-sm font-semibold text-primary">
+                      Other states ({otherRules.length})
+                    </summary>
+                    <div className="mt-2">
+                      <LimitsTable rows={otherRules} homeState={homeState} say={say} />
+                    </div>
+                  </details>
+                )}
+              </>
             )}
           </Card>
+
+          <Identify id={fish.id} names={names} say={say} beginner={prefs?.experience === 'beginner'} />
         </div>
       </Container>
     </main>

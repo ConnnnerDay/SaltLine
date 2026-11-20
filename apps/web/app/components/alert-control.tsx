@@ -8,8 +8,9 @@ type Choice = 'off' | 'Good' | 'Excellent'
 /**
  * "Email me when this spot is Good or better" -- the restored forecast
  * alerts. One alert per spot; at most one email a day, 5 AM-8 PM at the
- * spot, to the account's own address. Warns when the server has no mail
- * settings, since alerts can't be sent until install.sh is given them.
+ * spot, to the account's own address. Hidden when the site has no mail
+ * settings, since nothing could be sent (unless an alert already exists,
+ * so it can still be turned off).
  */
 export function AlertControl({ locationId }: { locationId: string }) {
   const selectId = useId()
@@ -64,6 +65,7 @@ export function AlertControl({ locationId }: { locationId: string }) {
   }
 
   const current: Choice = rule ? rule.min_verdict : 'off'
+  if (!loaded || (!emailConfigured && !rule)) return null
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-5 shadow-card sm:p-6">
@@ -73,7 +75,7 @@ export function AlertControl({ locationId }: { locationId: string }) {
       <select
         id={selectId}
         value={current}
-        disabled={!loaded || busy}
+        disabled={busy}
         onChange={(event) => change(event.target.value as Choice)}
         className="w-full rounded-md border border-border bg-surface px-3 py-2.5 text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring sm:w-auto sm:min-w-80 sm:self-start"
       >
@@ -86,11 +88,8 @@ export function AlertControl({ locationId }: { locationId: string }) {
           Sends to {rule.email}, at most once a day, between 5 AM and 8 PM at this spot.
         </p>
       )}
-      {loaded && !emailConfigured && (
-        <p className="text-xs text-marginal-text">
-          Email alerts aren&apos;t turned on for this site yet, so nothing will be sent.
-          (If you run this server: add mail settings with ./install.sh.)
-        </p>
+      {!emailConfigured && (
+        <p className="text-xs text-marginal-text">Email isn&apos;t working on this site right now, so this alert won&apos;t send.</p>
       )}
       {error && (
         <p role="alert" className="text-xs text-danger-text">

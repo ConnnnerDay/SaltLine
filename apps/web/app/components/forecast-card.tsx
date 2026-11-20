@@ -349,7 +349,7 @@ function TideTable({
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm sm:w-auto">
           <caption className="sr-only">
-            Upcoming high and low tides for {tides.station_id}
+            Upcoming high and low tides
           </caption>
           <thead>
             <tr className="text-text-muted">
@@ -392,9 +392,9 @@ const ACTIVITY_BAR: Record<ActivityTag, string> = {
 
 const ACTIVITY_LABEL: Record<ActivityTag, string> = {
   prime: 'Prime',
-  high: 'High',
-  med: 'Good',
-  low: 'Low',
+  high: 'Active',
+  med: 'Moderate',
+  low: 'Slow',
 }
 
 /**
@@ -1010,6 +1010,18 @@ function RigsAndTips({
     )
     .map(({ entry }) => entry)
 
+  // Each knot is taught once, under the first rig that uses it; later
+  // rigs just name it.
+  const knotsTaught = new Set<string>()
+  const knotPlan = new Map(
+    ordered.map(([id]) => {
+      const fresh = RIG_KNOTS[id].filter((knotId) => !knotsTaught.has(knotId))
+      const repeat = RIG_KNOTS[id].filter((knotId) => knotsTaught.has(knotId))
+      fresh.forEach((knotId) => knotsTaught.add(knotId))
+      return [id, { fresh, repeat }]
+    }),
+  )
+
   const fittingWater = (id: RigId) => waters.find((water) => RIG_FIT[water].includes(id))
   const waterTips = (id: RigId) =>
     waters
@@ -1046,7 +1058,10 @@ function RigsAndTips({
       <ol className="flex flex-col gap-4">
         {ordered.map(([id, group]) => {
           const rig = RIGS[id]
-          const fish = [...group.main, ...group.also]
+          // A fish's hook and sinker go under its main rig only; under an
+          // alternative rig it's just named in "For today".
+          const fish = group.main.length > 0 ? group.main : group.also
+          const knots = knotPlan.get(id) ?? { fresh: [], repeat: [] }
           return (
             <li
               key={id}
@@ -1129,8 +1144,14 @@ function RigsAndTips({
 
                 <section className="flex flex-col gap-2 border-t border-border pt-3">
                   <h4 className="section-label">Knots for this rig</h4>
+                  {knots.repeat.length > 0 && (
+                    <p className="text-xs text-text-muted">
+                      {knots.fresh.length > 0 ? 'Also ' : ''}
+                      {knots.repeat.map((knotId) => KNOTS[knotId].name).join(' and ')}, shown with the rig above.
+                    </p>
+                  )}
                   <ul className="flex flex-col gap-1.5">
-                    {RIG_KNOTS[id].map((knotId) => {
+                    {knots.fresh.map((knotId) => {
                       const knot = KNOTS[knotId]
                       return (
                         <li key={knotId}>

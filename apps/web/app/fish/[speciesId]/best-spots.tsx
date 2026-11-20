@@ -84,11 +84,16 @@ export async function BestSpots({
               <span className="min-w-0 flex-1">
                 <span className="font-semibold text-text">{localizeText(spot.label, units)}</span>
                 <span className="block text-xs text-text-muted">
-                  {spot.biting
-                    ? localizeText(spot.reasons.slice(0, 2).join(' · '), units)
-                    : 'Not biting here today'}
-                  {!spot.biting && spot.water_temp_f !== null && ` · water ${temp(spot.water_temp_f, units)}`}
-                  {spot.day_verdict && ` · day: ${spot.day_verdict.toLowerCase()}`}
+                  {[
+                    spot.biting
+                      ? localizeText(spot.reasons.slice(0, 2).join(' · '), units)
+                      : // The heading above already says none are biting.
+                        biting.length > 0 && 'Not biting here today',
+                    !spot.biting && spot.water_temp_f !== null && `water ${temp(spot.water_temp_f, units)}`,
+                    spot.day_verdict && `day rated ${spot.day_verdict}`,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
                 </span>
               </span>
               {spot.biting && spot.tier && (

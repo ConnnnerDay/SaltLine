@@ -11,7 +11,8 @@ import { cx } from './ui/cx'
  * - Forecast: today's call (/, /forecast/*)
  * - Spots: finding a spot and the ones you saved (/locations, /saved)
  * - Fish: the fish guide and your own catch log (/fish, /log)
- * - Account: the account menu in the header (/account, /preferences)
+ * - Account: the account menu in the header (/account, /preferences;
+ *   the setup wizard is linked from Preferences)
  *
  * The first three are header links on wider screens (`MainNavLinks`) and
  * an app-style bottom tab bar on phones (`MobileTabBar`); Account is the

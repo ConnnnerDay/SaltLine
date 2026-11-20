@@ -40,8 +40,8 @@ export function AuthStatus() {
 }
 
 /**
- * The Account section: account settings, preferences, the fishing
- * profile and sign-out (spots and the catch log live in the main nav). A
+ * The Account section: account settings, preferences (which also
+ * links to the setup wizard) and sign-out (spots and the catch log live in the main nav). A
  * `role="menu"` button/popup pattern (like LocationSearch's combobox)
  * rather than several siblings racing for space at phone width, which
  * is exactly the text-wrap crowding this header fixed once already.
@@ -138,14 +138,6 @@ function AccountMenu({ name }: { name: string }) {
             className="block px-4 py-2 text-sm text-text no-underline hover:bg-bg focus-visible:outline-none focus-visible:bg-bg"
           >
             Preferences
-          </Link>
-          <Link
-            href="/onboarding?next=/"
-            role="menuitem"
-            onClick={() => setOpen(false)}
-            className="block px-4 py-2 text-sm text-text no-underline hover:bg-bg focus-visible:outline-none focus-visible:bg-bg"
-          >
-            Fishing profile
           </Link>
           <button
             type="button"

@@ -160,13 +160,18 @@ async def test_delete_removes_the_users_analytics_events(
 ) -> None:
     from sqlalchemy import select
 
-    from app.domain.analytics import AnalyticsEvent, AnalyticsEventIn, try_record_event
+    from app.domain.analytics import (
+        AnalyticsEvent,
+        AnalyticsEventIn,
+        AnalyticsEventType,
+        try_record_event,
+    )
 
     now = datetime.now(UTC)
     for user in ("user-1", "user-2"):
         await try_record_event(
             db_state.db_sessionmaker,
-            AnalyticsEventIn(event_type="registration", user_id=user),
+            AnalyticsEventIn(event_type=AnalyticsEventType.REGISTRATION, user_id=user),
             now=now,
         )
     assert client.delete("/v1/me").status_code == 204

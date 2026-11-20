@@ -50,11 +50,12 @@ export function MeasureArt({ measure }: { measure: Measure }) {
   if (measure === 'TL') {
     return (
       <Panel label="Total length: from the tip of the closed mouth to the tip of the tail, lobes pinched together" h={116}>
-        {fish}
-        <path d="M176 26 l-8 8 M176 70 l-8 -8" stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
-        <Label x={160} y={20} text="PINCH" />
-        <path d="M22 50 L22 88 M170 48 L170 88" stroke={INK} strokeWidth="1.5" strokeDasharray="3 3" />
-        <Bar x1={22} x2={170} y={88} />
+        <Baitfish x={22} y={30} w={130} pinched />
+        <path d="M168 28 V40 M168 68 V56" stroke={RED} strokeWidth="3" strokeLinecap="round" />
+        <path d="M163 38 L168 45 L173 38 Z M163 58 L168 51 L173 58 Z" fill={RED} />
+        <Label x={160} y={20} text="PINCH THE TAIL" />
+        <path d="M22 50 L22 88 M178 50 L178 88" stroke={INK} strokeWidth="1.5" strokeDasharray="3 3" />
+        <Bar x1={22} x2={178} y={88} />
         <Label x={96} y={108} text="TOTAL LENGTH" />
       </Panel>
     )
@@ -181,11 +182,12 @@ const HANDLE: Record<HandleId, { label: string; art: React.ReactNode }> = {
     art: (
       <>
         <Water top={30} />
-        <Baitfish x={58} y={58} w={90} s={1} />
-        <path d="M52 4 L52 92" stroke={INK} strokeWidth="2" />
-        <path d="M52 72 C60 72 62 78 58 80 L54 78" fill="none" stroke={HOOK} strokeWidth="4" strokeLinecap="round" />
-        <path d="M46 92 L58 92 L56 110 L48 110 Z" fill="#6b7280" {...ink} strokeWidth={2.5} />
-        <Label x={130} y={50} text="CLIPPED TO THE LIP" tx={62} ty={76} />
+        <Baitfish x={58} y={60} w={90} s={1} />
+        <path d="M54 4 L54 44" stroke={INK} strokeWidth="2" />
+        <path d="M47 44 L61 44 L59 60 L49 60 Z" fill="#6b7280" {...ink} strokeWidth={2.5} />
+        <path d="M54 60 L54 72 C54 80 62 82 63 76" fill="none" stroke={INK} strokeWidth="4.4" strokeLinecap="round" />
+        <path d="M54 60 L54 72 C54 80 62 82 63 76" fill="none" stroke={HOOK} strokeWidth="2.4" strokeLinecap="round" />
+        <Label x={136} y={50} text="CLIPPED TO THE LIP" tx={66} ty={74} />
         <path d="M24 54 L24 118" stroke={RED} strokeWidth="4" markerEnd="url(#bait-arrow)" />
         <Label x={100} y={128} text="SEND IT BACK DOWN" />
       </>
@@ -195,13 +197,16 @@ const HANDLE: Record<HandleId, { label: string; art: React.ReactNode }> = {
     label: 'Pin a spiny fish under a towel and unhook it with pliers',
     art: (
       <>
-        <Baitfish x={28} y={58} w={130} />
-        <path d="M30 76 l-10 14 M34 78 l-6 16" stroke={INK} strokeWidth="2" />
-        <path d="M80 40 L100 18 M48 72 L34 96" stroke={RED} strokeWidth="3" />
-        <path d="M70 34 L170 46 L176 96 L76 92 Z" fill="#8ecae6" {...ink} opacity="0.92" />
-        <path d="M90 50 l70 8 M88 66 l72 8 M86 82 l72 6" stroke="#5aa9cf" strokeWidth="3" />
-        <Label x={100} y={124} text="PIN IT, THEN UNHOOK" />
-        <Label x={50} y={20} text="SHARP SPINES" color={RED} tx={92} ty={24} />
+        <Baitfish x={28} y={56} w={130} />
+        <path d="M66 38 L174 46 L180 98 L62 94 Z" fill="#8ecae6" {...ink} />
+        <path d="M84 52 l76 7 M82 68 l80 7 M80 84 l80 5" stroke="#5aa9cf" strokeWidth="3" />
+        <path d="M31 72 C24 72 22 80 28 82" fill="none" stroke={INK} strokeWidth="3.6" strokeLinecap="round" />
+        <path d="M31 72 C24 72 22 80 28 82" fill="none" stroke={HOOK} strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M27 80 L10 112 M31 82 L18 116" stroke={HOOK} strokeWidth="6" strokeLinecap="round" />
+        <path d="M27 80 L10 112 M31 82 L18 116" stroke={INK} strokeWidth="1.5" strokeLinecap="round" />
+        <circle cx="21" cy="96" r="3.5" fill={INK} />
+        <Label x={124} y={26} text="TOWEL OVER THE SPINES" tx={120} ty={42} />
+        <Label x={110} y={124} text="PIN IT, THEN UNHOOK" />
       </>
     ),
   },
@@ -224,10 +229,13 @@ const HANDLE: Record<HandleId, { label: string; art: React.ReactNode }> = {
       <>
         <Baitfish x={70} y={50} w={100} />
         <path d="M70 68 C50 68 30 44 12 20" fill="none" stroke={INK} strokeWidth="2" />
-        <g transform="translate(50 56) rotate(-40)">
-          <path d="M0 0 L-28 -8 M0 0 L-28 8" stroke={HOOK} strokeWidth="5" strokeLinecap="round" />
-          <circle cx="8" cy="-8" r="7" fill="none" stroke={RED} strokeWidth="4" />
-          <circle cx="8" cy="8" r="7" fill="none" stroke={RED} strokeWidth="4" />
+        <g transform="translate(38 84) rotate(-38)">
+          <path d="M0 0 L30 -8 M0 0 L30 8" stroke={INK} strokeWidth="6.4" strokeLinecap="round" />
+          <path d="M0 0 L30 -8 M0 0 L30 8" stroke={HOOK} strokeWidth="4" strokeLinecap="round" />
+          <path d="M0 0 L-12 -8 M0 0 L-12 8" stroke={RED} strokeWidth="4" strokeLinecap="round" />
+          <circle cx="-18" cy="-10" r="6.5" fill="none" stroke={RED} strokeWidth="4" />
+          <circle cx="-18" cy="10" r="6.5" fill="none" stroke={RED} strokeWidth="4" />
+          <circle cx="0" cy="0" r="2" fill={INK} />
         </g>
         <Label x={100} y={128} text="CUT THE LEADER CLOSE" />
       </>
@@ -250,12 +258,15 @@ const HANDLE: Record<HandleId, { label: string; art: React.ReactNode }> = {
     label: 'If you are stung, soak it in water as hot as you can stand',
     art: (
       <>
-        <path d="M50 52 L150 52 L140 124 L60 124 Z" fill="#f8f9fa" {...ink} />
-        <path d="M56 68 L144 68 L138 118 L62 118 Z" fill="#ffb4a2" stroke="none" />
-        {[70, 100, 130].map((x) => (
-          <path key={x} d={`M${x} 46 q-8 -10 0 -18 q8 -8 0 -18`} fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" />
+        <path d="M28 56 L172 56 L162 122 L38 122 Z" fill="#f8f9fa" {...ink} />
+        <path d="M34 70 L166 70 L158 116 L42 116 Z" fill="#ffb4a2" stroke="none" />
+        {[118, 140, 162].map((x) => (
+          <path key={x} d={`M${x} 50 q-8 -10 0 -18 q8 -8 0 -18`} fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" />
         ))}
-        <path d="M120 66 L120 20 C120 12 140 12 140 20 L140 70" fill="#f1c9a5" {...ink} />
+        <path d="M66 10 L82 10 L82 104 L66 104 Z" fill="#f1c9a5" {...ink} strokeWidth={2.5} />
+        <path d="M64 100 L104 100 C114 100 114 114 104 114 L64 114 Z" fill="#f1c9a5" {...ink} />
+        <path d="M34 70 L166 70 L158 116 L42 116 Z" fill="#ffb4a2" opacity="0.45" stroke="none" />
+        <path d="M34 70 L166 70" stroke="#e5826b" strokeWidth="2" />
         <Label x={100} y={134} text="AS HOT AS YOU CAN STAND" color={RED} />
       </>
     ),

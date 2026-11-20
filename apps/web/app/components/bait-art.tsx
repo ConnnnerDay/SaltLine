@@ -209,11 +209,20 @@ function Shrimp({
 
 /** A baitfish, side view, head to the left: mouth at (x, y+18) (scaled),
  * body `w` long, forked tail to x+w+18. Nostril just in front of the eye
- * at (7,13.5); dorsal fin from 0.4w to 0.6w; the spine runs along y≈18. */
-export function Baitfish({ x, y, s = 1, w = 120 }: { x: number; y: number; s?: number; w?: number }) {
+ * at (7,13.5); dorsal fin from 0.4w to 0.6w; the spine runs along y≈18.
+ * `pinched` squeezes the tail lobes together into one point at x+w+26. */
+export function Baitfish({ x, y, s = 1, w = 120, pinched = false }: { x: number; y: number; s?: number; w?: number; pinched?: boolean }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${s})`}>
-      <path d={`M${w - 4} 15 L${w + 18} 1 L${w + 12} 18 L${w + 18} 35 L${w - 4} 21 Z`} fill={FISH_BACK} {...ink} strokeWidth={2.4} />
+      {pinched ? (
+        <>
+          <path d={`M${w - 4} 14.5 C${w + 6} 10 ${w + 16} 11 ${w + 26} 17 L${w + 26} 19 C${w + 16} 25 ${w + 6} 26 ${w - 4} 21.5 Z`} fill={FISH_BACK} {...ink} strokeWidth={2.4} />
+          <path d={`M${w + 2} 15 L${w + 22} 17 M${w + 2} 21 L${w + 22} 19`} fill="none" stroke="#4d7391" strokeWidth={1.1} />
+          <path d={`M${w + 4} 18 L${w + 25} 18`} stroke={INK} strokeWidth={1.3} />
+        </>
+      ) : (
+        <path d={`M${w - 4} 15 L${w + 18} 1 L${w + 12} 18 L${w + 18} 35 L${w - 4} 21 Z`} fill={FISH_BACK} {...ink} strokeWidth={2.4} />
+      )}
       <path d={`M${w * 0.4} 3 L${w * 0.47} -9 L${w * 0.6} 2 Z`} fill={FISH_BACK} {...ink} strokeWidth={2} />
       <path d={`M${w * 0.68} 30 L${w * 0.74} 38 L${w * 0.82} 28 Z`} fill={FISH_BACK} {...ink} strokeWidth={1.8} />
       <path d={`M${w * 0.42} 33 L${w * 0.46} 40 L${w * 0.52} 33 Z`} fill={FISH_BACK} {...ink} strokeWidth={1.8} />

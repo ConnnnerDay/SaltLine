@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import math
 import re
 from datetime import date, datetime, timedelta
 from typing import Any
@@ -666,3 +667,91 @@ async def fetch_state_alerts(
         logger.warning("NWS state alerts unavailable", exc_info=True)
         return []
     return _parse_alerts(data, limit)  # type: ignore[arg-type]
+
+
+# --- marine zone lookup for a point -------------------------------------
+
+_OFFSHORE_ZONE = re.compile(
+    r"(from|out) (10|20) to|10 to 60|20 to 60|beyond|offshore|60 nm", re.IGNORECASE
+)
+_INNER_ZONE = re.compile(
+    r"\b(bay|harbor|sound|channel|bar|lake|river|lagoon|laguna|intra ?coastal)\b",
+    re.IGNORECASE,
+)
+_ZONE_PROBE_MILES = (2.0, 5.0, 9.0)
+
+
+def pick_marine_zone(candidates: dict[str, tuple[str, float]]) -> str | None:
+    """The zone to forecast a coastal point from, among `{id: (name,
+    miles from the point)}`. A zone that contains the point itself (0 mi)
+    wins unless it's an offshore (10–60 nm) zone; otherwise prefer the
+    nearshore open-coast zone over bays and harbors and offshore zones,
+    then the nearest."""
+
+    def offshore(name: str) -> bool:
+        return bool(_OFFSHORE_ZONE.search(name))
+
+    def inner(name: str) -> bool:
+        return bool(_INNER_ZONE.search(name)) and "coastal" not in name.lower()
+
+    containing = [
+        zone
+        for zone, (name, miles) in candidates.items()
+        if miles == 0 and not offshore(name)
+    ]
+    if containing:
+        return containing[0]
+    ranked = sorted(
+        candidates.items(),
+        key=lambda item: (offshore(item[1][0]), inner(item[1][0]), item[1][1]),
+    )
+    return ranked[0][0] if ranked else None
+
+
+async def _zones_at_point(
+    client: BoundedHTTPClient, lat: float, lng: float
+) -> list[tuple[str, str]]:
+    try:
+        data: Any = await client.get_json(
+            f"https://api.weather.gov/zones?type=marine&point={lat:.4f},{lng:.4f}",
+            headers={**_NWS_HEADERS, "Accept": "application/geo+json"},
+        )
+    except ProviderError:
+        return []
+    return [
+        (str(f["properties"]["id"]), str(f["properties"].get("name", "")))
+        for f in data.get("features", [])
+        if isinstance(f, dict) and isinstance(f.get("properties"), dict)
+    ]
+
+
+async def find_marine_zone(
+    client: BoundedHTTPClient, lat: float, lng: float
+) -> str | None:
+    """The NWS marine zone for a coastal point: zones at the point and on
+    rings around it (a beach point is often just on land), picked by
+    `pick_marine_zone`. None if NWS has none nearby or can't be reached."""
+    found: dict[str, tuple[str, float]] = {}
+    for zone, name in await _zones_at_point(client, lat, lng):
+        found[zone] = (name, 0.0)
+    for miles in _ZONE_PROBE_MILES:
+        points = [
+            (
+                lat + miles / 69.0 * math.cos(math.radians(bearing)),
+                lng
+                + miles
+                / (69.0 * math.cos(math.radians(lat)))
+                * math.sin(math.radians(bearing)),
+            )
+            for bearing in range(0, 360, 45)
+        ]
+        rings = await asyncio.gather(
+            *(_zones_at_point(client, a, b) for a, b in points)
+        )
+        for ring in rings:
+            for zone, name in ring:
+                if zone not in found or miles < found[zone][1]:
+                    found[zone] = (name, miles)
+        if found:
+            break
+    return pick_marine_zone(found)

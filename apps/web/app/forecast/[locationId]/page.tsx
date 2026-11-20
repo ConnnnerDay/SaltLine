@@ -119,7 +119,10 @@ export default async function ForecastPage({ params }: Props) {
         <div className="flex flex-col gap-3">
           <AlertControl locationId={forecast.location.id} />
           <div className="flex flex-col gap-3 sm:flex-row">
-          <SaveLocationButton locationId={forecast.location.id} />
+          <SaveLocationButton
+            locationId={forecast.location.id}
+            initiallySaved={saved.some((spot) => spot.location_id === forecast.location.id)}
+          />
           <Button
             variant="secondary"
             href={`/log?location=${encodeURIComponent(forecast.location.id)}`}

@@ -117,13 +117,17 @@ export function CatchLog({
     setCatches((current) => current.filter((entry) => entry.id !== id))
   }
 
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  })
+  // In the spot's own time zone, so a 1:30 PM catch reads 1:30 PM wherever
+  // (and on whichever server) the log is rendered.
+  const when = (entry: CatchEntry) =>
+    new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      ...(entry.timezone ? { timeZone: entry.timezone } : {}),
+    }).format(new Date(entry.caught_at))
 
   return (
     <div className="flex flex-col gap-6">
@@ -249,7 +253,7 @@ export function CatchLog({
                           {size && <span className="font-normal text-text-muted"> · {size}</span>}
                         </p>
                         <p className="text-sm text-text-muted">
-                          {entry.location_name} · {formatter.format(new Date(entry.caught_at))}
+                          {entry.location_name} · {when(entry)}
                         </p>
                       </div>
                       <span
@@ -284,7 +288,7 @@ export function CatchLog({
                         type="button"
                         onClick={() => handleDelete(entry.id)}
                         className="text-xs font-semibold text-danger-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
-                        aria-label={`Delete ${entry.species} catch from ${formatter.format(new Date(entry.caught_at))}`}
+                        aria-label={`Delete ${entry.species} catch from ${when(entry)}`}
                       >
                         Delete
                       </button>

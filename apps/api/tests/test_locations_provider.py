@@ -41,8 +41,8 @@ def test_load_curated_locations_golden_montauk() -> None:
         lng=-71.9544,
         timezone="America/New_York",
         coops_station="8510560",
-        ndbc_stations=["44025", "44097"],
-        nws_zone="ANZ338",
+        ndbc_stations=["44097", "44085"],
+        nws_zone="ANZ350",
         temp_region="northeast",
         conditions_region="atlantic_north",
         temp_offset=0,
@@ -61,7 +61,7 @@ def test_load_curated_locations_golden_wrightsville_beach() -> None:
         timezone="America/New_York",
         coops_station="8658163",
         ndbc_stations=["41110", "41037"],
-        nws_zone="AMZ158",
+        nws_zone="AMZ250",
         temp_region="nc_south",
         conditions_region="atlantic_mid",
         temp_offset=0,
@@ -202,7 +202,7 @@ def test_resolve_dynamic_location_near_wrightsville_beach_inherits_regional_fiel
     assert resolved.conditions_region == "atlantic_mid"
     assert resolved.timezone == "America/New_York"
     assert (
-        resolved.nws_zone == "AMZ158"
+        resolved.nws_zone == "AMZ250"
     )  # inherited, within the 75mi zone-inherit radius
     assert resolved.name == "Near Wrightsville Beach"
     assert anchor_miles < 5.0
@@ -261,3 +261,20 @@ def test_dynamic_name_places_the_point_relative_to_the_nearest_spot() -> None:
     )
     assert _dynamic_name(30.0, -60.0, wb, 400.0) == "Coastal spot (30.00, -60.00)"
     assert _dynamic_name(30.0, -60.0, None, float("inf")).startswith("Coastal spot")
+
+
+def test_curated_marine_zones_are_on_the_right_coast() -> None:
+    """The legacy data had most spots one NWS marine zone off (Ocean City,
+    MD on a North Carolina zone, Honolulu on Kauai's). A zone's prefix
+    names its coast: AN = Northeast/mid-Atlantic, AM = Southeast, GM =
+    Gulf and Keys, PZ = West Coast, PH = Hawaii."""
+    prefixes = {
+        "ME": ("ANZ",), "NH": ("ANZ",), "MA": ("ANZ",), "RI": ("ANZ",),
+        "NY": ("ANZ",), "NJ": ("ANZ",), "DE": ("ANZ",), "MD": ("ANZ",),
+        "VA": ("ANZ",), "NC": ("AMZ",), "SC": ("AMZ",), "GA": ("AMZ",),
+        "FL": ("AMZ", "GMZ"), "AL": ("GMZ",), "MS": ("GMZ",), "LA": ("GMZ",),
+        "TX": ("GMZ",), "CA": ("PZZ",), "OR": ("PZZ",), "WA": ("PZZ",),
+        "HI": ("PHZ",),
+    }  # fmt: skip
+    for loc in load_curated_locations():
+        assert loc.nws_zone.startswith(prefixes[loc.state]), (loc.id, loc.nws_zone)

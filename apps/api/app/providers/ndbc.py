@@ -82,6 +82,9 @@ class BuoyObservation(BaseModel):
     wind_direction: str | None = None
     wave_height_ft: float | None = None
     pressure_mb: float | None = None
+    water_temp_f: float | None = None
+    station_id: str | None = None
+    """Which buoy this came from (set by the caller that picked it)."""
 
 
 def _deg_to_compass(deg: float) -> str:
@@ -131,6 +134,7 @@ def parse_realtime_text(text: str, now: datetime | None = None) -> BuoyObservati
     wind_direction: str | None = None
     wave_height_ft: float | None = None
     pressure_mb: float | None = None
+    water_temp_f: float | None = None
 
     for line in lines[2:12]:
         fields = line.split()
@@ -146,6 +150,7 @@ def parse_realtime_text(text: str, now: datetime | None = None) -> BuoyObservati
         wdir_raw = fields[col["WDIR"]] if "WDIR" in col else "MM"
         wvht_raw = fields[col["WVHT"]] if "WVHT" in col else "MM"
         pres_raw = fields[col["PRES"]] if "PRES" in col else "MM"
+        wtmp_raw = fields[col["WTMP"]] if "WTMP" in col else "MM"
 
         if wind_speed_kt is None and wspd_raw not in _MISSING:
             wind_speed_kt = round(float(wspd_raw) * _MS_TO_KNOTS, 1)
@@ -164,11 +169,15 @@ def parse_realtime_text(text: str, now: datetime | None = None) -> BuoyObservati
         if pressure_mb is None and pres_raw not in _MISSING:
             pressure_mb = round(float(pres_raw), 1)
 
+        if water_temp_f is None and wtmp_raw not in _MISSING:
+            water_temp_f = round(float(wtmp_raw) * 9 / 5 + 32, 1)
+
         if (
             wind_speed_kt is not None
             and wind_direction is not None
             and wave_height_ft is not None
             and pressure_mb is not None
+            and water_temp_f is not None
         ):
             break
 
@@ -178,6 +187,8 @@ def parse_realtime_text(text: str, now: datetime | None = None) -> BuoyObservati
         and wave_height_ft is None
         and pressure_mb is None
     ):
+        # Water temperature alone doesn't count: the caller should move on
+        # to a buoy that reports wind or waves.
         raise NdbcDataUnavailableError(
             "no row in the checked window had a usable reading for any field"
         )
@@ -188,6 +199,7 @@ def parse_realtime_text(text: str, now: datetime | None = None) -> BuoyObservati
         wind_direction=wind_direction,
         wave_height_ft=wave_height_ft,
         pressure_mb=pressure_mb,
+        water_temp_f=water_temp_f,
     )
 
 

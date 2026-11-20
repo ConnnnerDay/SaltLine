@@ -136,8 +136,29 @@ async def _zones_at(client: BoundedHTTPClient, lat: float, lng: float) -> list[s
     return [feature["properties"]["id"] for feature in data.get("features", [])]
 
 
+async def _zones_near(client: BoundedHTTPClient, loc: dict[str, Any]) -> set[str]:
+    """Every marine zone within the probe radius of the spot."""
+    found: set[str] = set(await _zones_at(client, loc["lat"], loc["lng"]))
+    for miles in _ZONE_PROBE_MILES:
+        for bearing in range(0, 360, 45):
+            dlat = miles / 69.0 * math.cos(math.radians(bearing))
+            dlng = (
+                miles
+                / (69.0 * math.cos(math.radians(loc["lat"])))
+                * math.sin(math.radians(bearing))
+            )
+            found.update(await _zones_at(client, loc["lat"] + dlat, loc["lng"] + dlng))
+    return found
+
+
 async def _repair_zone(client: BoundedHTTPClient, loc: dict[str, Any]) -> str | None:
-    if await _zone_ok(client, loc["nws_zone"]):
+    # A zone that still answers isn't necessarily this spot's: the legacy
+    # data had most spots one zone off along the coast (Ocean City, MD on
+    # a North Carolina zone; Honolulu on Kauai's). Keep it only if it is
+    # one of the zones actually near the spot.
+    if await _zone_ok(client, loc["nws_zone"]) and loc["nws_zone"] in await _zones_near(
+        client, loc
+    ):
         return None
     for miles in _ZONE_PROBE_MILES:
         for bearing in range(0, 360, 45):

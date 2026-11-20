@@ -494,6 +494,17 @@
             "title": "Species",
             "type": "string"
           },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone"
+          },
           "weight_lb": {
             "anyOf": [
               {

@@ -814,3 +814,64 @@ async def test_outlook_today_matches_the_headline() -> None:
     assert today["score"] == conditions["score"]["score"]
     assert today["verdict"] == conditions["score"]["verdict"]
     assert today["wind_range_kt"] == conditions["wind_range_kt"]
+
+
+@pytest.mark.asyncio
+async def test_fallback_water_temp_uses_the_spots_local_month() -> None:
+    """Without a live reading, the monthly normal is for the spot's local
+    month: 9 PM Eastern on Nov 30 is already December in UTC."""
+    from datetime import UTC, datetime
+
+    from app.domain.assembly import monthly_water_temps_for_region
+
+    location = _WRIGHTSVILLE_BEACH.model_copy(update={"water_temp_station": ""})
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if "alerts/active" in str(request.url):
+            return httpx.Response(200, json={"features": []})
+        return httpx.Response(503)
+
+    now = datetime(2026, 12, 1, 2, 0, tzinfo=UTC)  # Nov 30, 9 PM in NC
+    async with BoundedHTTPClient(
+        transport=httpx.MockTransport(handler), max_retries=0, backoff_base_seconds=0.0
+    ) as client:
+        envelope = await assemble_forecast(
+            location, client, _WATER_TEMP_PROFILES, now=now
+        )
+
+    normals = monthly_water_temps_for_region(
+        location.temp_region, location.temp_offset, _WATER_TEMP_PROFILES
+    )
+    assert normals[11] != normals[12]
+    conditions = ForecastConditions.model_validate(envelope.conditions)
+    assert conditions.water_temperature.value == normals[11]
+
+
+@pytest.mark.asyncio
+async def test_buoy_water_temp_used_when_the_tide_station_has_none() -> None:
+    """A live buoy water temperature beats the monthly average."""
+    buoy = (
+        "#YY  MM DD hh mm WDIR WSPD GST  WVHT   DPD   APD MWD   PRES  ATMP  WTMP\n"
+        "#yr  mo dy hr mn degT m/s  m/s     m   sec   sec degT   hPa  degC  degC\n"
+        f"{_NOW:%Y %m %d %H %M}  MM   MM   MM   1.0     9   6.7  88     MM    MM  20.0\n"
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
+        if "alerts/active" in url:
+            return httpx.Response(200, json={"features": []})
+        if "ndbc.noaa.gov" in url:
+            return httpx.Response(200, text=buoy)
+        return httpx.Response(503)
+
+    async with BoundedHTTPClient(
+        transport=httpx.MockTransport(handler), max_retries=0, backoff_base_seconds=0.0
+    ) as client:
+        envelope = await assemble_forecast(
+            _WRIGHTSVILLE_BEACH, client, _WATER_TEMP_PROFILES, now=_NOW
+        )
+
+    conditions = ForecastConditions.model_validate(envelope.conditions)
+    assert conditions.water_temperature.is_fallback is False
+    assert conditions.water_temperature.value == 68.0
+    assert conditions.water_temperature.provider == "ndbc"

@@ -496,3 +496,55 @@ def test_parse_marine_zone_days_when_forecast_starts_at_night() -> None:
         {"name": "Wed", "detailedForecast": "S winds 15 kt. Seas 3 ft."},
     ]
     assert [day.label for day in parse_marine_zone_days(periods)] == ["Tonight", "Wed"]
+
+
+def test_pick_marine_zone_prefers_the_open_coast_nearshore_zone() -> None:
+    from app.providers.nws import pick_marine_zone
+
+    # A zone containing the point wins (unless it's an offshore zone).
+    assert (
+        pick_marine_zone({"ANZ452": ("Coastal waters from Little Egg Inlet ...", 0.0)})
+        == "ANZ452"
+    )
+    # A beach point off the water: nearshore coast beats a bay, and both
+    # beat the 20-60 nm zone, even if those are closer.
+    assert (
+        pick_marine_zone(
+            {
+                "GMZ830": ("Tampa Bay waters", 2.0),
+                "GMZ870": (
+                    "Waters from Tarpon Springs to Suwannee River 20 to 60 NM",
+                    2.0,
+                ),
+                "GMZ853": (
+                    "Coastal waters from Englewood to Tarpon Springs FL out 20 NM",
+                    5.0,
+                ),
+            }
+        )
+        == "GMZ853"
+    )
+    assert pick_marine_zone({}) is None
+
+
+@pytest.mark.asyncio
+async def test_find_marine_zone_probes_around_a_point_on_land() -> None:
+    from app.providers.nws import find_marine_zone
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        lat = float(str(request.url.params["point"]).split(",")[0])
+        if lat > 39.0:  # only points north of the spot are over water
+            return httpx.Response(
+                200,
+                json={
+                    "features": [
+                        {"properties": {"id": "ANZ452", "name": "Coastal waters"}}
+                    ]
+                },
+            )
+        return httpx.Response(200, json={"features": []})
+
+    async with BoundedHTTPClient(
+        transport=httpx.MockTransport(handler), max_retries=0, backoff_base_seconds=0.0
+    ) as client:
+        assert await find_marine_zone(client, 38.99, -74.8) == "ANZ452"

@@ -383,7 +383,9 @@ async def _fetch_buoy(
             _logger.exception("unexpected provider failure")
             first_error = first_error or f"unexpected {type(exc).__name__}"
             continue
-        return _FetchResult(value=value, error=None)
+        return _FetchResult(
+            value=value.model_copy(update={"station_id": station_id}), error=None
+        )
     return _FetchResult(value=None, error=first_error)
 
 
@@ -495,16 +497,32 @@ async def assemble_forecast(
             )
         )
 
+    buoy_water_f = (
+        buoy_result.value.water_temp_f if buoy_result.value is not None else None
+    )
     if water_temp_result.value is not None:
         water_temperature = normalize_water_temperature(
             water_temp_result.value, station_id=location.water_temp_station
+        )
+    elif buoy_water_f is not None and buoy_result.value is not None:
+        # The tide station's sensor is down (or it has none), but the
+        # buoy measures water temperature too: a live reading beats the
+        # monthly average.
+        water_temperature = Observation(
+            value=buoy_water_f,
+            unit="degF",
+            provider="ndbc",
+            station_id=buoy_result.value.station_id,
+            observed_at=now,
         )
     else:
         fallback_temps = monthly_water_temps_for_region(
             location.temp_region, location.temp_offset, water_temp_profiles
         )
         water_temperature = Observation(
-            value=fallback_temps[now.month],
+            # The spot's local month: on the evening of the last day of a
+            # month, UTC is already in the next one.
+            value=fallback_temps[now.astimezone(safe_zone(location.timezone)).month],
             unit="degF",
             provider="noaa_coops",
             station_id=None,

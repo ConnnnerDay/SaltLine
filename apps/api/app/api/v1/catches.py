@@ -43,11 +43,12 @@ router = APIRouter(
 )
 
 
-def _out(row: CatchEntry, location_name: str) -> CatchOut:
+def _out(row: CatchEntry, location_name: str, timezone: str | None) -> CatchOut:
     return CatchOut(
         id=row.id,
         location_id=row.location_id,
         location_name=location_name,
+        timezone=timezone,
         species=row.species,
         caught_at=row.caught_at,
         length_in=row.length_in,
@@ -85,17 +86,16 @@ async def list_catches(
         .scalars()
         .all()
     )
-    names: dict[str, str] = {}
+    spots: dict[str, tuple[str, str | None]] = {}
     out: list[CatchOut] = []
     for row in rows:
-        if row.location_id not in names:
+        if row.location_id not in spots:
             try:
-                names[row.location_id] = (
-                    await resolve_location_id(row.location_id, state)
-                ).name
+                resolved = await resolve_location_id(row.location_id, state)
+                spots[row.location_id] = (resolved.name, resolved.timezone)
             except HTTPException:
-                names[row.location_id] = row.location_id
-        out.append(_out(row, names[row.location_id]))
+                spots[row.location_id] = (row.location_id, None)
+        out.append(_out(row, *spots[row.location_id]))
     return out
 
 
@@ -139,7 +139,7 @@ async def log_catch(
     session.add(row)
     await session.commit()
     await session.refresh(row)
-    return _out(row, location.name)
+    return _out(row, location.name, location.timezone)
 
 
 @router.delete("/{catch_id}", status_code=204)

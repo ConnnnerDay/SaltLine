@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Button, Card, Container, Field } from '@/app/components/ui'
 import { authClient } from '@/lib/auth-client'
+import { authErrorMessage } from '@/lib/auth-errors'
 
 /**
  * Reached from the email link app/forgot-password/page.tsx sends:
@@ -33,7 +34,7 @@ function ResetPasswordForm() {
     const { error: resetError } = await authClient.resetPassword({ newPassword, token })
     setIsSubmitting(false)
     if (resetError) {
-      setError(resetError.message ?? 'This reset link is invalid or has expired.')
+      setError(authErrorMessage(resetError, 'This reset link is invalid or has expired.'))
       return
     }
     setDone(true)

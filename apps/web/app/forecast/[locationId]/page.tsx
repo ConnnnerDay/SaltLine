@@ -15,6 +15,7 @@ import { setRequestUnits } from '@/lib/request-units'
 import { fetchNearbyCams } from '@/lib/get-cams'
 import { logForecastFailure, userFacingReason } from '@/lib/diagnose-api'
 import { InternalApiError, internalApiFetch } from '@/lib/internal-api-client'
+import { NOT_COASTAL } from '@/app/components/forecast-card'
 
 // Forecasts are live, per-request data -- never build-time content. See
 // app/forecast/[locationId]/page.tsx's git history / the roadmap
@@ -77,9 +78,13 @@ export default async function ForecastPage({ params }: Props) {
     if (err instanceof InternalApiError && err.status === 404) {
       notFound()
     }
-    logForecastFailure(locationId, err)
-    errorReason = userFacingReason(err)
-    error = err instanceof Error ? err.message : 'Unknown error'
+    if (err instanceof InternalApiError && err.status === 422) {
+      error = NOT_COASTAL
+    } else {
+      logForecastFailure(locationId, err)
+      errorReason = userFacingReason(err)
+      error = err instanceof Error ? err.message : 'Unknown error'
+    }
   }
 
   // The location bar's quick switcher: home spot first, then saved spots.

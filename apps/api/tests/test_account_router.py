@@ -6,6 +6,7 @@ test_preferences_router.py/test_saved_locations_router.py.
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Iterator
+from datetime import UTC, datetime
 
 import httpx
 import pytest
@@ -142,3 +143,39 @@ def test_delete_without_a_session_is_401(db_state: AppState) -> None:
     finally:
         app.dependency_overrides.pop(get_app_state, None)
         app.dependency_overrides.pop(require_internal_signature, None)
+
+
+def test_export_includes_the_whole_profile(client: TestClient) -> None:
+    client.patch(
+        "/v1/me/preferences",
+        json={"fishing_types": ["surf", "pier"], "experience": "beginner"},
+    )
+    prefs = client.get("/v1/me/export").json()["preferences"]
+    assert prefs["fishing_types"] == ["surf", "pier"]
+    assert prefs["experience"] == "beginner"
+
+
+async def test_delete_removes_the_users_analytics_events(
+    client: TestClient, db_state: AppState
+) -> None:
+    from sqlalchemy import select
+
+    from app.domain.analytics import (
+        AnalyticsEvent,
+        AnalyticsEventIn,
+        AnalyticsEventType,
+        try_record_event,
+    )
+
+    now = datetime.now(UTC)
+    for user in ("user-1", "user-2"):
+        await try_record_event(
+            db_state.db_sessionmaker,
+            AnalyticsEventIn(event_type=AnalyticsEventType.REGISTRATION, user_id=user),
+            now=now,
+        )
+    assert client.delete("/v1/me").status_code == 204
+    assert db_state.db_sessionmaker is not None
+    async with db_state.db_sessionmaker() as session:
+        left = (await session.execute(select(AnalyticsEvent.user_id))).scalars().all()
+    assert left == ["user-2"]

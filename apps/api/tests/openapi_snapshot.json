@@ -22,7 +22,7 @@
           "preferences": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ExportedPreferences"
+                "$ref": "#/components/schemas/PreferencesOut"
               },
               {
                 "type": "null"
@@ -788,67 +788,6 @@
           "conditions"
         ],
         "title": "ExportedCatch",
-        "type": "object"
-      },
-      "ExportedPreferences": {
-        "properties": {
-          "default_location_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Default Location Id"
-          },
-          "fishing_style": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fishing Style"
-          },
-          "surf_threshold_ft": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Surf Threshold Ft"
-          },
-          "units": {
-            "title": "Units",
-            "type": "string"
-          },
-          "wind_threshold_kt": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Wind Threshold Kt"
-          }
-        },
-        "required": [
-          "units",
-          "fishing_style",
-          "wind_threshold_kt",
-          "surf_threshold_ft",
-          "default_location_id"
-        ],
-        "title": "ExportedPreferences",
         "type": "object"
       },
       "ExportedSavedLocation": {

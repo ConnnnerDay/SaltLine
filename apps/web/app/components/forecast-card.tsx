@@ -1937,6 +1937,10 @@ export function ForecastCard({
  * troubleshooting text are gated on `NODE_ENV` -- a Server Component
  * reading its own process's env, not something a visitor can spoof.
  */
+/** The error for a point apps/api won't forecast because it isn't on the
+ * coast (its 422): not a temporary outage, so no "try again". */
+export const NOT_COASTAL = 'not-coastal'
+
 export function ForecastErrorCard({
   message,
   reason,
@@ -1949,6 +1953,23 @@ export function ForecastErrorCard({
   retryHref?: string
 }) {
   const isDev = process.env.NODE_ENV !== 'production'
+
+  if (message === NOT_COASTAL) {
+    return (
+      <Card>
+        <h2 className="font-semibold text-text">That point isn&apos;t on the coast</h2>
+        <p className="mt-1 text-sm text-text-muted">
+          Saltline forecasts beaches, piers and inlets, and this point is too far from the shore
+          and from any tide station or buoy. Pick a spot on the shoreline instead.
+        </p>
+        <div className="mt-4">
+          <Button variant="primary" href="/locations">
+            Find a spot
+          </Button>
+        </div>
+      </Card>
+    )
+  }
 
   return (
     <Card>

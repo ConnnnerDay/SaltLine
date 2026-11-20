@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Button, Card, Container, Field } from '@/app/components/ui'
 import { signIn } from '@/lib/auth-client'
 import { safeRedirectTarget } from '@/lib/safe-redirect'
+import { authErrorMessage } from '@/lib/auth-errors'
 
 /**
  * `?next=` (sprint 29): a visitor bounced off a session-gated page
@@ -30,7 +31,7 @@ function LoginForm() {
     const { error: signInError } = await signIn.email({ email, password })
     setIsSubmitting(false)
     if (signInError) {
-      setError(signInError.message ?? 'Could not log you in.')
+      setError(authErrorMessage(signInError, 'Could not log you in.'))
       return
     }
     router.push(next)

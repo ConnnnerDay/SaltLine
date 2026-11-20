@@ -30,8 +30,11 @@ export function ForecastPageBody({
   backHref,
   backLabel,
   switcherSpots,
+  barActions,
   children,
 }: {
+  /** Signed in: actions for this spot in the location bar. */
+  barActions?: React.ReactNode
   /** Signed in: spots for the location bar's quick switcher. */
   switcherSpots?: SwitcherSpot[]
   forecast: ForecastEnvelope | null
@@ -73,6 +76,7 @@ export function ForecastPageBody({
         switcher={
           forecast && switcherSpots ? { currentId: forecast.location.id, spots: switcherSpots } : undefined
         }
+        actions={forecast ? barActions : undefined}
       />
 
       <Container>

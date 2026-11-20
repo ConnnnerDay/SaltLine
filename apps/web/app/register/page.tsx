@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Button, Card, Container, Field } from '@/app/components/ui'
 import { signUp } from '@/lib/auth-client'
 import { safeRedirectTarget } from '@/lib/safe-redirect'
+import { authErrorMessage } from '@/lib/auth-errors'
 
 /**
  * Sprint 28 ("Authentication"), per docs/architecture.md's ADR-005:
@@ -52,7 +53,7 @@ function RegisterForm() {
     })
     setIsSubmitting(false)
     if (signUpError) {
-      setError(signUpError.message ?? 'Could not create your account.')
+      setError(authErrorMessage(signUpError, 'Could not create your account.'))
       return
     }
     if (!data?.token) {

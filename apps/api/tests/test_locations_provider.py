@@ -46,6 +46,7 @@ def test_load_curated_locations_golden_montauk() -> None:
         temp_region="northeast",
         conditions_region="atlantic_north",
         temp_offset=0,
+        shore_facing_deg=160,
     )
 
 
@@ -65,6 +66,7 @@ def test_load_curated_locations_golden_wrightsville_beach() -> None:
         temp_region="nc_south",
         conditions_region="atlantic_mid",
         temp_offset=0,
+        shore_facing_deg=115,
     )
 
 

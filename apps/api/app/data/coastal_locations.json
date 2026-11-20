@@ -13,7 +13,8 @@
     ],
     "nws_zone": "ANZ350",
     "temp_region": "northeast",
-    "conditions_region": "atlantic_north"
+    "conditions_region": "atlantic_north",
+    "shore_facing_deg": 160
   },
   {
     "id": "sandy-hook-nj",
@@ -29,7 +30,8 @@
     ],
     "nws_zone": "ANZ355",
     "temp_region": "northeast",
-    "conditions_region": "atlantic_north"
+    "conditions_region": "atlantic_north",
+    "shore_facing_deg": 90
   },
   {
     "id": "long-beach-island-nj",
@@ -47,7 +49,8 @@
     "temp_region": "northeast",
     "conditions_region": "atlantic_north",
     "temp_offset": 1,
-    "water_temp_station": "8534720"
+    "water_temp_station": "8534720",
+    "shore_facing_deg": 110
   },
   {
     "id": "atlantic-city-nj",
@@ -64,7 +67,8 @@
     "nws_zone": "ANZ452",
     "temp_region": "northeast",
     "conditions_region": "atlantic_north",
-    "temp_offset": 2
+    "temp_offset": 2,
+    "shore_facing_deg": 135
   },
   {
     "id": "cape-may-nj",
@@ -80,7 +84,8 @@
     ],
     "nws_zone": "ANZ453",
     "temp_region": "midatlantic",
-    "conditions_region": "atlantic_north"
+    "conditions_region": "atlantic_north",
+    "shore_facing_deg": 160
   },
   {
     "id": "ocean-city-md",
@@ -96,7 +101,8 @@
     ],
     "nws_zone": "ANZ650",
     "temp_region": "midatlantic",
-    "conditions_region": "atlantic_mid"
+    "conditions_region": "atlantic_mid",
+    "shore_facing_deg": 95
   },
   {
     "id": "virginia-beach-va",
@@ -115,7 +121,8 @@
     "temp_region": "midatlantic",
     "conditions_region": "atlantic_mid",
     "temp_offset": 2,
-    "water_temp_station": "8638610"
+    "water_temp_station": "8638610",
+    "shore_facing_deg": 90
   },
   {
     "id": "outer-banks-nc",
@@ -133,7 +140,8 @@
     "nws_zone": "AMZ150",
     "temp_region": "nc_outer_banks",
     "conditions_region": "atlantic_mid",
-    "water_temp_station": "8652587"
+    "water_temp_station": "8652587",
+    "shore_facing_deg": 75
   },
   {
     "id": "cape-hatteras-nc",
@@ -151,7 +159,8 @@
     "nws_zone": "AMZ154",
     "temp_region": "nc_outer_banks",
     "conditions_region": "atlantic_mid",
-    "temp_offset": 1
+    "temp_offset": 1,
+    "shore_facing_deg": 120
   },
   {
     "id": "atlantic-beach-nc",
@@ -167,7 +176,8 @@
     "nws_zone": "AMZ158",
     "temp_region": "nc_south",
     "conditions_region": "atlantic_mid",
-    "temp_offset": -1
+    "temp_offset": -1,
+    "shore_facing_deg": 170
   },
   {
     "id": "wrightsville-beach-nc",
@@ -183,7 +193,8 @@
     ],
     "nws_zone": "AMZ250",
     "temp_region": "nc_south",
-    "conditions_region": "atlantic_mid"
+    "conditions_region": "atlantic_mid",
+    "shore_facing_deg": 115
   },
   {
     "id": "carolina-beach-nc",
@@ -200,7 +211,8 @@
     "nws_zone": "AMZ250",
     "temp_region": "nc_south",
     "conditions_region": "atlantic_mid",
-    "water_temp_station": "8658163"
+    "water_temp_station": "8658163",
+    "shore_facing_deg": 100
   },
   {
     "id": "myrtle-beach-sc",
@@ -215,7 +227,8 @@
     ],
     "nws_zone": "AMZ254",
     "temp_region": "sc_ga",
-    "conditions_region": "atlantic_mid"
+    "conditions_region": "atlantic_mid",
+    "shore_facing_deg": 140
   },
   {
     "id": "charleston-sc",
@@ -232,7 +245,8 @@
     ],
     "nws_zone": "AMZ360",
     "temp_region": "sc_ga",
-    "conditions_region": "atlantic_south"
+    "conditions_region": "atlantic_south",
+    "shore_facing_deg": 135
   },
   {
     "id": "hilton-head-sc",
@@ -249,7 +263,8 @@
     "nws_zone": "AMZ362",
     "temp_region": "sc_ga",
     "conditions_region": "atlantic_south",
-    "water_temp_station": "8670870"
+    "water_temp_station": "8670870",
+    "shore_facing_deg": 130
   },
   {
     "id": "tybee-island-ga",
@@ -265,7 +280,8 @@
     ],
     "nws_zone": "AMZ364",
     "temp_region": "sc_ga",
-    "conditions_region": "atlantic_south"
+    "conditions_region": "atlantic_south",
+    "shore_facing_deg": 100
   },
   {
     "id": "jacksonville-beach-fl",
@@ -280,7 +296,8 @@
     ],
     "nws_zone": "AMZ452",
     "temp_region": "fl_northeast",
-    "conditions_region": "atlantic_south"
+    "conditions_region": "atlantic_south",
+    "shore_facing_deg": 85
   },
   {
     "id": "st-augustine-fl",
@@ -297,7 +314,8 @@
     ],
     "nws_zone": "AMZ454",
     "temp_region": "fl_northeast",
-    "conditions_region": "atlantic_south"
+    "conditions_region": "atlantic_south",
+    "shore_facing_deg": 85
   },
   {
     "id": "daytona-beach-fl",
@@ -315,7 +333,8 @@
     "nws_zone": "AMZ550",
     "temp_region": "fl_northeast",
     "conditions_region": "atlantic_south",
-    "temp_offset": 2
+    "temp_offset": 2,
+    "shore_facing_deg": 80
   },
   {
     "id": "cocoa-beach-fl",
@@ -332,7 +351,8 @@
     ],
     "nws_zone": "AMZ552",
     "temp_region": "fl_central_east",
-    "conditions_region": "atlantic_south"
+    "conditions_region": "atlantic_south",
+    "shore_facing_deg": 80
   },
   {
     "id": "fort-pierce-fl",
@@ -349,7 +369,8 @@
     "temp_region": "fl_central_east",
     "conditions_region": "atlantic_south",
     "temp_offset": 2,
-    "water_temp_station": "8722670"
+    "water_temp_station": "8722670",
+    "shore_facing_deg": 75
   },
   {
     "id": "palm-beach-fl",
@@ -366,7 +387,8 @@
     "temp_region": "fl_south",
     "conditions_region": "atlantic_south",
     "temp_offset": -2,
-    "water_temp_station": "8722670"
+    "water_temp_station": "8722670",
+    "shore_facing_deg": 85
   },
   {
     "id": "fort-lauderdale-fl",
@@ -381,7 +403,8 @@
     ],
     "nws_zone": "AMZ651",
     "temp_region": "fl_south",
-    "conditions_region": "atlantic_south"
+    "conditions_region": "atlantic_south",
+    "shore_facing_deg": 90
   },
   {
     "id": "miami-beach-fl",
@@ -396,7 +419,8 @@
     ],
     "nws_zone": "AMZ651",
     "temp_region": "fl_south",
-    "conditions_region": "atlantic_south"
+    "conditions_region": "atlantic_south",
+    "shore_facing_deg": 90
   },
   {
     "id": "key-west-fl",
@@ -412,7 +436,8 @@
     ],
     "nws_zone": "GMZ044",
     "temp_region": "fl_keys",
-    "conditions_region": "atlantic_south"
+    "conditions_region": "atlantic_south",
+    "shore_facing_deg": 180
   },
   {
     "id": "naples-fl",
@@ -427,7 +452,8 @@
     ],
     "nws_zone": "GMZ656",
     "temp_region": "fl_gulf_south",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "shore_facing_deg": 265
   },
   {
     "id": "fort-myers-beach-fl",
@@ -443,7 +469,8 @@
     "nws_zone": "GMZ856",
     "temp_region": "fl_gulf_south",
     "conditions_region": "gulf",
-    "water_temp_station": "8725520"
+    "water_temp_station": "8725520",
+    "shore_facing_deg": 235
   },
   {
     "id": "sarasota-fl",
@@ -459,7 +486,8 @@
     "nws_zone": "GMZ853",
     "temp_region": "fl_gulf_south",
     "conditions_region": "gulf",
-    "water_temp_station": "8726384"
+    "water_temp_station": "8726384",
+    "shore_facing_deg": 255
   },
   {
     "id": "clearwater-fl",
@@ -475,7 +503,8 @@
     "nws_zone": "GMZ853",
     "temp_region": "fl_gulf_south",
     "conditions_region": "gulf",
-    "temp_offset": -1
+    "temp_offset": -1,
+    "shore_facing_deg": 270
   },
   {
     "id": "panama-city-beach-fl",
@@ -490,7 +519,8 @@
     ],
     "nws_zone": "GMZ751",
     "temp_region": "fl_gulf_north",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "shore_facing_deg": 170
   },
   {
     "id": "destin-fl",
@@ -506,7 +536,8 @@
     "nws_zone": "GMZ655",
     "temp_region": "fl_gulf_north",
     "conditions_region": "gulf",
-    "water_temp_station": "8729210"
+    "water_temp_station": "8729210",
+    "shore_facing_deg": 180
   },
   {
     "id": "pensacola-fl",
@@ -522,7 +553,8 @@
     ],
     "nws_zone": "GMZ655",
     "temp_region": "fl_gulf_north",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "shore_facing_deg": 180
   },
   {
     "id": "gulf-shores-al",
@@ -539,7 +571,8 @@
     "nws_zone": "GMZ650",
     "temp_region": "gulf_central",
     "conditions_region": "gulf",
-    "water_temp_station": "8735180"
+    "water_temp_station": "8735180",
+    "shore_facing_deg": 180
   },
   {
     "id": "biloxi-ms",
@@ -556,7 +589,8 @@
     "nws_zone": "GMZ532",
     "temp_region": "gulf_central",
     "conditions_region": "gulf",
-    "water_temp_station": "8747437"
+    "water_temp_station": "8747437",
+    "shore_facing_deg": 180
   },
   {
     "id": "grand-isle-la",
@@ -572,7 +606,8 @@
     ],
     "nws_zone": "GMZ553",
     "temp_region": "gulf_central",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "shore_facing_deg": 150
   },
   {
     "id": "galveston-tx",
@@ -587,7 +622,8 @@
     ],
     "nws_zone": "GMZ355",
     "temp_region": "gulf_west",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "shore_facing_deg": 145
   },
   {
     "id": "port-aransas-tx",
@@ -604,7 +640,8 @@
     "nws_zone": "GMZ255",
     "temp_region": "gulf_west",
     "conditions_region": "gulf",
-    "water_temp_station": "8775237"
+    "water_temp_station": "8775237",
+    "shore_facing_deg": 115
   },
   {
     "id": "south-padre-island-tx",
@@ -619,7 +656,8 @@
     ],
     "nws_zone": "GMZ150",
     "temp_region": "gulf_west",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "shore_facing_deg": 90
   },
   {
     "id": "san-diego-ca",
@@ -635,7 +673,8 @@
     ],
     "nws_zone": "PZZ740",
     "temp_region": "pacific_san_diego",
-    "conditions_region": "pacific_south"
+    "conditions_region": "pacific_south",
+    "shore_facing_deg": 270
   },
   {
     "id": "imperial-beach-ca",
@@ -652,7 +691,8 @@
     "nws_zone": "PZZ740",
     "temp_region": "pacific_san_diego",
     "conditions_region": "pacific_south",
-    "temp_offset": -1
+    "temp_offset": -1,
+    "shore_facing_deg": 260
   },
   {
     "id": "oceanside-ca",
@@ -669,7 +709,8 @@
     ],
     "nws_zone": "PZZ740",
     "temp_region": "pacific_san_diego",
-    "conditions_region": "pacific_south"
+    "conditions_region": "pacific_south",
+    "shore_facing_deg": 250
   },
   {
     "id": "dana-point-ca",
@@ -687,7 +728,8 @@
     "nws_zone": "PZZ655",
     "temp_region": "pacific_socal",
     "conditions_region": "pacific_south",
-    "water_temp_station": "9410580"
+    "water_temp_station": "9410580",
+    "shore_facing_deg": 200
   },
   {
     "id": "huntington-beach-ca",
@@ -703,7 +745,8 @@
     ],
     "nws_zone": "PZZ655",
     "temp_region": "pacific_socal",
-    "conditions_region": "pacific_south"
+    "conditions_region": "pacific_south",
+    "shore_facing_deg": 220
   },
   {
     "id": "long-beach-ca",
@@ -720,7 +763,8 @@
     "temp_region": "pacific_socal",
     "conditions_region": "pacific_south",
     "temp_offset": 1,
-    "water_temp_station": "9410840"
+    "water_temp_station": "9410840",
+    "shore_facing_deg": 180
   },
   {
     "id": "santa-monica-ca",
@@ -736,7 +780,8 @@
     ],
     "nws_zone": "PZZ655",
     "temp_region": "pacific_socal",
-    "conditions_region": "pacific_south"
+    "conditions_region": "pacific_south",
+    "shore_facing_deg": 230
   },
   {
     "id": "malibu-ca",
@@ -752,7 +797,8 @@
     "nws_zone": "PZZ655",
     "temp_region": "pacific_socal",
     "conditions_region": "pacific_south",
-    "temp_offset": -1
+    "temp_offset": -1,
+    "shore_facing_deg": 180
   },
   {
     "id": "ventura-ca",
@@ -770,7 +816,8 @@
     "nws_zone": "PZZ650",
     "temp_region": "pacific_socal",
     "conditions_region": "pacific_south",
-    "temp_offset": -2
+    "temp_offset": -2,
+    "shore_facing_deg": 220
   },
   {
     "id": "santa-barbara-ca",
@@ -788,7 +835,8 @@
     "nws_zone": "PZZ650",
     "temp_region": "pacific_central_cal",
     "conditions_region": "pacific_south",
-    "temp_offset": 2
+    "temp_offset": 2,
+    "shore_facing_deg": 180
   },
   {
     "id": "pismo-beach-ca",
@@ -805,7 +853,8 @@
     ],
     "nws_zone": "PZZ645",
     "temp_region": "pacific_central_cal",
-    "conditions_region": "pacific_south"
+    "conditions_region": "pacific_south",
+    "shore_facing_deg": 255
   },
   {
     "id": "morro-bay-ca",
@@ -822,7 +871,8 @@
     ],
     "nws_zone": "PZZ645",
     "temp_region": "pacific_central_cal",
-    "conditions_region": "pacific_south"
+    "conditions_region": "pacific_south",
+    "shore_facing_deg": 270
   },
   {
     "id": "monterey-ca",
@@ -838,7 +888,8 @@
     ],
     "nws_zone": "PZZ535",
     "temp_region": "pacific_central_cal",
-    "conditions_region": "pacific"
+    "conditions_region": "pacific",
+    "shore_facing_deg": 330
   },
   {
     "id": "santa-cruz-ca",
@@ -857,7 +908,8 @@
     "temp_region": "pacific_central_cal",
     "conditions_region": "pacific",
     "temp_offset": 1,
-    "water_temp_station": "9413450"
+    "water_temp_station": "9413450",
+    "shore_facing_deg": 180
   },
   {
     "id": "half-moon-bay-ca",
@@ -874,7 +926,8 @@
     "nws_zone": "PZZ545",
     "temp_region": "pacific_norcal",
     "conditions_region": "pacific",
-    "water_temp_station": "9414750"
+    "water_temp_station": "9414750",
+    "shore_facing_deg": 250
   },
   {
     "id": "san-francisco-ca",
@@ -892,7 +945,8 @@
     "nws_zone": "PZZ545",
     "temp_region": "pacific_norcal",
     "conditions_region": "pacific",
-    "water_temp_station": "9414750"
+    "water_temp_station": "9414750",
+    "shore_facing_deg": 270
   },
   {
     "id": "bodega-bay-ca",
@@ -910,7 +964,8 @@
     "nws_zone": "PZZ540",
     "temp_region": "pacific_norcal",
     "conditions_region": "pacific",
-    "water_temp_station": "9415020"
+    "water_temp_station": "9415020",
+    "shore_facing_deg": 240
   },
   {
     "id": "eureka-ca",
@@ -927,7 +982,8 @@
     "nws_zone": "PZZ450",
     "temp_region": "pacific_norcal",
     "conditions_region": "pacific",
-    "temp_offset": -1
+    "temp_offset": -1,
+    "shore_facing_deg": 280
   },
   {
     "id": "brookings-or",
@@ -945,7 +1001,8 @@
     "temp_region": "pacific_nw",
     "conditions_region": "pacific",
     "temp_offset": 2,
-    "water_temp_station": "9419750"
+    "water_temp_station": "9419750",
+    "shore_facing_deg": 260
   },
   {
     "id": "charleston-or",
@@ -962,7 +1019,8 @@
     "nws_zone": "PZZ350",
     "temp_region": "pacific_nw",
     "conditions_region": "pacific",
-    "temp_offset": 1
+    "temp_offset": 1,
+    "shore_facing_deg": 270
   },
   {
     "id": "florence-or",
@@ -978,7 +1036,8 @@
     "nws_zone": "PZZ350",
     "temp_region": "pacific_nw",
     "conditions_region": "pacific",
-    "water_temp_station": "9432780"
+    "water_temp_station": "9432780",
+    "shore_facing_deg": 270
   },
   {
     "id": "newport-or",
@@ -994,7 +1053,8 @@
     ],
     "nws_zone": "PZZ253",
     "temp_region": "pacific_nw",
-    "conditions_region": "pacific"
+    "conditions_region": "pacific",
+    "shore_facing_deg": 270
   },
   {
     "id": "lincoln-city-or",
@@ -1010,7 +1070,8 @@
     "nws_zone": "PZZ252",
     "temp_region": "pacific_nw",
     "conditions_region": "pacific",
-    "water_temp_station": "9435380"
+    "water_temp_station": "9435380",
+    "shore_facing_deg": 275
   },
   {
     "id": "astoria-or",
@@ -1028,7 +1089,8 @@
     "nws_zone": "PZZ251",
     "temp_region": "pacific_nw",
     "conditions_region": "pacific",
-    "temp_offset": -1
+    "temp_offset": -1,
+    "shore_facing_deg": 280
   },
   {
     "id": "long-beach-wa",
@@ -1046,7 +1108,8 @@
     "nws_zone": "PZZ251",
     "temp_region": "pacific_nw",
     "conditions_region": "pacific",
-    "water_temp_station": "9440910"
+    "water_temp_station": "9440910",
+    "shore_facing_deg": 270
   },
   {
     "id": "westport-wa",
@@ -1063,7 +1126,8 @@
     ],
     "nws_zone": "PZZ156",
     "temp_region": "pacific_nw",
-    "conditions_region": "pacific"
+    "conditions_region": "pacific",
+    "shore_facing_deg": 260
   },
   {
     "id": "la-push-wa",
@@ -1081,7 +1145,8 @@
     "nws_zone": "PZZ150",
     "temp_region": "pacific_nw",
     "conditions_region": "pacific",
-    "temp_offset": -1
+    "temp_offset": -1,
+    "shore_facing_deg": 260
   },
   {
     "id": "seattle-wa",
@@ -1115,7 +1180,8 @@
     ],
     "nws_zone": "PHZ115",
     "temp_region": "hawaii",
-    "conditions_region": "hawaii_conditions"
+    "conditions_region": "hawaii_conditions",
+    "shore_facing_deg": 190
   },
   {
     "id": "north-shore-hi",
@@ -1133,7 +1199,8 @@
     "temp_region": "hawaii",
     "conditions_region": "hawaii_conditions",
     "temp_offset": -1,
-    "water_temp_station": "1612340"
+    "water_temp_station": "1612340",
+    "shore_facing_deg": 330
   },
   {
     "id": "kailua-kona-hi",
@@ -1150,7 +1217,8 @@
     "temp_region": "hawaii",
     "conditions_region": "hawaii_conditions",
     "temp_offset": 1,
-    "water_temp_station": "1617433"
+    "water_temp_station": "1617433",
+    "shore_facing_deg": 260
   },
   {
     "id": "kahului-hi",
@@ -1165,7 +1233,8 @@
     ],
     "nws_zone": "PHZ117",
     "temp_region": "hawaii",
-    "conditions_region": "hawaii_conditions"
+    "conditions_region": "hawaii_conditions",
+    "shore_facing_deg": 0
   },
   {
     "id": "bar-harbor-me",
@@ -1182,7 +1251,8 @@
     "nws_zone": "ANZ052",
     "temp_region": "northeast",
     "conditions_region": "atlantic_north",
-    "temp_offset": -2
+    "temp_offset": -2,
+    "shore_facing_deg": 160
   },
   {
     "id": "portland-me",
@@ -1199,7 +1269,8 @@
     "nws_zone": "ANZ153",
     "temp_region": "northeast",
     "conditions_region": "atlantic_north",
-    "temp_offset": -1
+    "temp_offset": -1,
+    "shore_facing_deg": 125
   },
   {
     "id": "gloucester-ma",
@@ -1217,7 +1288,8 @@
     "nws_zone": "ANZ251",
     "temp_region": "northeast",
     "conditions_region": "atlantic_north",
-    "water_temp_station": "8442645"
+    "water_temp_station": "8442645",
+    "shore_facing_deg": 110
   },
   {
     "id": "cape-cod-ma",
@@ -1236,7 +1308,8 @@
     "temp_region": "northeast",
     "conditions_region": "atlantic_north",
     "temp_offset": 1,
-    "water_temp_station": "8447386"
+    "water_temp_station": "8447386",
+    "shore_facing_deg": 90
   },
   {
     "id": "marthas-vineyard-ma",
@@ -1255,7 +1328,8 @@
     "temp_region": "northeast",
     "conditions_region": "atlantic_north",
     "temp_offset": 2,
-    "water_temp_station": "8449130"
+    "water_temp_station": "8449130",
+    "shore_facing_deg": 170
   },
   {
     "id": "point-judith-ri",
@@ -1273,7 +1347,8 @@
     "temp_region": "northeast",
     "conditions_region": "atlantic_north",
     "temp_offset": 1,
-    "water_temp_station": "8452660"
+    "water_temp_station": "8452660",
+    "shore_facing_deg": 180
   },
   {
     "id": "rehoboth-beach-de",
@@ -1289,7 +1364,8 @@
     ],
     "nws_zone": "ANZ455",
     "temp_region": "midatlantic",
-    "conditions_region": "atlantic_mid"
+    "conditions_region": "atlantic_mid",
+    "shore_facing_deg": 95
   },
   {
     "id": "cbbt-va",
@@ -1325,7 +1401,8 @@
     "nws_zone": "AMZ250",
     "temp_region": "nc_south",
     "conditions_region": "atlantic_mid",
-    "temp_offset": -1
+    "temp_offset": -1,
+    "shore_facing_deg": 140
   },
   {
     "id": "oak-island-nc",
@@ -1343,7 +1420,8 @@
     "nws_zone": "AMZ252",
     "temp_region": "nc_south",
     "conditions_region": "atlantic_mid",
-    "water_temp_station": "8658120"
+    "water_temp_station": "8658120",
+    "shore_facing_deg": 180
   },
   {
     "id": "pawleys-island-sc",
@@ -1360,7 +1438,8 @@
     "nws_zone": "AMZ256",
     "temp_region": "sc_ga",
     "conditions_region": "atlantic_mid",
-    "water_temp_station": "8661070"
+    "water_temp_station": "8661070",
+    "shore_facing_deg": 130
   },
   {
     "id": "folly-beach-sc",
@@ -1377,7 +1456,8 @@
     ],
     "nws_zone": "AMZ360",
     "temp_region": "sc_ga",
-    "conditions_region": "atlantic_south"
+    "conditions_region": "atlantic_south",
+    "shore_facing_deg": 140
   },
   {
     "id": "st-simons-island-ga",
@@ -1393,7 +1473,8 @@
     ],
     "nws_zone": "AMZ450",
     "temp_region": "sc_ga",
-    "conditions_region": "atlantic_south"
+    "conditions_region": "atlantic_south",
+    "shore_facing_deg": 120
   },
   {
     "id": "amelia-island-fl",
@@ -1409,7 +1490,8 @@
     "nws_zone": "AMZ452",
     "temp_region": "fl_northeast",
     "conditions_region": "atlantic_south",
-    "water_temp_station": "8720218"
+    "water_temp_station": "8720218",
+    "shore_facing_deg": 90
   },
   {
     "id": "sebastian-inlet-fl",
@@ -1428,7 +1510,8 @@
     "temp_region": "fl_central_east",
     "conditions_region": "atlantic_south",
     "temp_offset": 1,
-    "water_temp_station": "8721604"
+    "water_temp_station": "8721604",
+    "shore_facing_deg": 80
   },
   {
     "id": "islamorada-fl",
@@ -1444,7 +1527,8 @@
     "nws_zone": "GMZ042",
     "temp_region": "fl_keys",
     "conditions_region": "atlantic_south",
-    "water_temp_station": "8723970"
+    "water_temp_station": "8723970",
+    "shore_facing_deg": 135
   },
   {
     "id": "marathon-fl",
@@ -1461,7 +1545,8 @@
     "nws_zone": "GMZ043",
     "temp_region": "fl_keys",
     "conditions_region": "atlantic_south",
-    "water_temp_station": "8724580"
+    "water_temp_station": "8724580",
+    "shore_facing_deg": 160
   },
   {
     "id": "tampa-skyway-fl",
@@ -1491,7 +1576,8 @@
     ],
     "nws_zone": "GMZ850",
     "temp_region": "fl_gulf_north",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "shore_facing_deg": 250
   },
   {
     "id": "st-george-island-fl",
@@ -1506,7 +1592,8 @@
     ],
     "nws_zone": "GMZ755",
     "temp_region": "fl_gulf_north",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "shore_facing_deg": 175
   },
   {
     "id": "dauphin-island-al",
@@ -1523,7 +1610,8 @@
     ],
     "nws_zone": "GMZ650",
     "temp_region": "gulf_central",
-    "conditions_region": "gulf"
+    "conditions_region": "gulf",
+    "shore_facing_deg": 180
   },
   {
     "id": "venice-la",
@@ -1554,7 +1642,8 @@
     "nws_zone": "GMZ355",
     "temp_region": "gulf_west",
     "conditions_region": "gulf",
-    "water_temp_station": "8772471"
+    "water_temp_station": "8772471",
+    "shore_facing_deg": 140
   },
   {
     "id": "corpus-christi-tx",
@@ -1571,7 +1660,8 @@
     "nws_zone": "GMZ232",
     "temp_region": "gulf_west",
     "conditions_region": "gulf",
-    "water_temp_station": "8775237"
+    "water_temp_station": "8775237",
+    "shore_facing_deg": 110
   },
   {
     "id": "newport-beach-ca",
@@ -1587,7 +1677,8 @@
     ],
     "nws_zone": "PZZ655",
     "temp_region": "pacific_socal",
-    "conditions_region": "pacific_south"
+    "conditions_region": "pacific_south",
+    "shore_facing_deg": 210
   },
   {
     "id": "redondo-beach-ca",
@@ -1604,7 +1695,8 @@
     "nws_zone": "PZZ655",
     "temp_region": "pacific_socal",
     "conditions_region": "pacific_south",
-    "water_temp_station": "9410840"
+    "water_temp_station": "9410840",
+    "shore_facing_deg": 255
   },
   {
     "id": "pacific-city-or",
@@ -1620,7 +1712,8 @@
     "nws_zone": "PZZ252",
     "temp_region": "pacific_nw",
     "conditions_region": "pacific",
-    "water_temp_station": "9435380"
+    "water_temp_station": "9435380",
+    "shore_facing_deg": 270
   },
   {
     "id": "seaside-or",
@@ -1637,7 +1730,8 @@
     ],
     "nws_zone": "PZZ251",
     "temp_region": "pacific_nw",
-    "conditions_region": "pacific"
+    "conditions_region": "pacific",
+    "shore_facing_deg": 275
   },
   {
     "id": "neah-bay-wa",
@@ -1655,7 +1749,8 @@
     "nws_zone": "PZZ130",
     "temp_region": "pacific_nw",
     "conditions_region": "pacific",
-    "temp_offset": -1
+    "temp_offset": -1,
+    "shore_facing_deg": 10
   },
   {
     "id": "hilo-hi",
@@ -1670,7 +1765,8 @@
     ],
     "nws_zone": "PHZ122",
     "temp_region": "hawaii",
-    "conditions_region": "hawaii_conditions"
+    "conditions_region": "hawaii_conditions",
+    "shore_facing_deg": 45
   },
   {
     "id": "poipu-hi",
@@ -1685,6 +1781,7 @@
     ],
     "nws_zone": "PHZ112",
     "temp_region": "hawaii",
-    "conditions_region": "hawaii_conditions"
+    "conditions_region": "hawaii_conditions",
+    "shore_facing_deg": 180
   }
 ]

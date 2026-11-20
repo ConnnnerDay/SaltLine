@@ -399,3 +399,24 @@ def test_range_labels_round_and_collapse_equal_ends() -> None:
     assert _range_label((10.4, 13.4), "kt", step=1.0) == "10–13 kt"
     assert _range_label((4.4, 4.6), "ft", step=0.5) == "4.5 ft"
     assert _range_label((4.0, 4.0), "ft", step=0.5) == "4 ft"
+
+
+def test_a_west_facing_gulf_beach_gets_west_winds_onshore() -> None:
+    """Naples faces the Gulf to the west: a W wind is onshore there and an
+    E wind offshore, the reverse of the south-facing Panhandle default."""
+    from types import SimpleNamespace
+
+    from app.domain.scoring import onshore_offshore_dirs, wind_orientation_for
+    from app.domain.wind import wind_effect_for
+
+    naples = SimpleNamespace(conditions_region="gulf", shore_facing_deg=265)
+    orientation = wind_orientation_for(naples)
+    onshore, offshore = onshore_offshore_dirs(orientation)
+    assert {"W", "WSW", "WNW"} <= onshore and {"E", "ENE", "ESE"} <= offshore
+    assert "N" not in onshore | offshore  # along the shore
+    effect = wind_effect_for(orientation, "W")
+    assert (effect.sea_bearing, effect.relation) == (265, "onshore")
+
+    # Without a facing, the region's coast still applies.
+    bridge = SimpleNamespace(conditions_region="gulf", shore_facing_deg=None)
+    assert wind_orientation_for(bridge) == "gulf"

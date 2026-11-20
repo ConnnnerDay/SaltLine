@@ -81,7 +81,7 @@ low/high spread, where the buoy gives one live point-in-time reading
 turned into a degenerate zero-width range (`(v, v)`) only when NWS
 didn't report. Wind direction prefers NWS's parsed direction, falling
 back to the buoy's. `score_conditions`'s `coast` parameter comes from
-`app.domain.scoring.wind_orientation_for_region(location.conditions_region)`.
+`app.domain.scoring.wind_orientation_for(location)` (the beach's own facing, else its region).
 `score` is `None` (via `score_conditions`'s own contract) only when
 neither source reported wind/wave at all — the same condition that
 already produces `ForecastState.PARTIAL` above.
@@ -188,7 +188,7 @@ from app.domain.outlook import DayOutlook, build_day_outlook
 from app.domain.scoring import (
     ForecastScore,
     score_conditions,
-    wind_orientation_for_region,
+    wind_orientation_for,
 )
 from app.domain.timing import HourlyOutlook, build_hourly_outlook
 from app.domain.wind import WindEffect, wind_effect_for
@@ -676,7 +676,7 @@ async def assemble_forecast(
         sun_times=sun_times,
         now=now,
         solunar=solunar,
-        coast=wind_orientation_for_region(location.conditions_region),
+        coast=wind_orientation_for(location),
     )
 
     conditions = ForecastConditions(
@@ -735,7 +735,7 @@ async def assemble_forecast(
             tz_name=location.timezone,
             lat=location.lat,
             lng=location.lng,
-            coast=wind_orientation_for_region(location.conditions_region),
+            coast=wind_orientation_for(location),
             water_temperature=water_temperature,
             tide_predictions=tides_result.value,
             weather_days=point_weather.days if point_weather else None,
@@ -764,7 +764,7 @@ async def assemble_forecast(
     conditions.weather = point_weather
     conditions.swell = marine_zone_conditions.swell if marine_zone_conditions else []
     conditions.wind_effect = wind_effect_for(
-        wind_orientation_for_region(location.conditions_region), wind_direction
+        wind_orientation_for(location), wind_direction
     )
     if point_weather and _storms_today(point_weather, now, location.timezone):
         warnings.append(
@@ -802,7 +802,7 @@ async def assemble_forecast(
             ),
             state=location.state,
             today=now.astimezone(safe_zone(location.timezone)).date(),
-            coast=wind_orientation_for_region(location.conditions_region),
+            coast=wind_orientation_for(location),
             wind_direction=wind_direction,
             wind_range_kt=wind_range,
             hour=now.astimezone(safe_zone(location.timezone)).hour,

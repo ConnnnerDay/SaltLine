@@ -69,6 +69,7 @@ _DEFAULT_TEMP_REGION = "nc_south"
 _DEFAULT_CONDITIONS_REGION = "atlantic_mid"
 _DEFAULT_TIMEZONE = "America/New_York"
 _NWS_ZONE_INHERIT_MILES = 75.0
+_SHORE_FACING_INHERIT_MILES = 10.0
 
 # IANA timezone by coastal state. Every US coastal state is single-timezone
 # except Florida, whose panhandle (west of the Apalachicola River, ~85°W) is
@@ -113,6 +114,9 @@ class CuratedLocation(BaseModel):
     temp_region: str
     conditions_region: str
     temp_offset: int = 0
+    shore_facing_deg: int | None = None
+    """Compass bearing the beach faces (toward the water), for onshore vs
+    offshore wind. None (bridges, bays) falls back to the region's coast."""
     water_temp_station: str | None = None
     """CO-OPS station for water temperature, when the tide station
     (`coops_station`) has no temperature sensor. Unset means use
@@ -156,6 +160,7 @@ class ResolvedLocation(BaseModel):
     temp_offset: int
     is_dynamic: bool
     anchor_miles: float | None = None
+    shore_facing_deg: int | None = None
 
 
 @lru_cache(maxsize=1)
@@ -377,6 +382,13 @@ def resolve_dynamic_location(
     if nearest and nearest_miles <= _NWS_ZONE_INHERIT_MILES:
         nws_zone = nearest.location.nws_zone
 
+    # A beach's facing only carries over to a point on the same stretch.
+    shore_facing_deg = (
+        nearest.location.shore_facing_deg
+        if nearest and nearest_miles <= _SHORE_FACING_INHERIT_MILES
+        else None
+    )
+
     name = _dynamic_name(lat, lng, nearest.location if nearest else None, nearest_miles)
 
     anchor_candidates = [nearest_miles]
@@ -397,6 +409,7 @@ def resolve_dynamic_location(
         water_temp_station=water_temp_station,
         ndbc_stations=ndbc_ids,
         nws_zone=nws_zone,
+        shore_facing_deg=shore_facing_deg,
         temp_region=temp_region,
         conditions_region=conditions_region,
         temp_offset=temp_offset,
@@ -425,4 +438,5 @@ def resolved_from_curated(location: CuratedLocation) -> ResolvedLocation:
         conditions_region=location.conditions_region,
         temp_offset=location.temp_offset,
         is_dynamic=False,
+        shore_facing_deg=location.shore_facing_deg,
     )

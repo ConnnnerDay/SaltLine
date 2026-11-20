@@ -1,4 +1,4 @@
-import { Baitfish, CRAB, HOOK, INK, Label, PAPER, Panel, RED, SAND, THREAD, WATER, ink } from './bait-art'
+import { Baitfish, BlueCrab, FISH, FISH_BACK, HOOK, INK, Label, PAPER, Panel, RED, SAND, THREAD, WATER, ink } from './bait-art'
 
 /**
  * More panels in the bait-art style, for the other how-tos:
@@ -21,6 +21,28 @@ function Bar({ x1, x2, y, color = RED }: { x1: number; x2: number; y: number; co
   )
 }
 
+/** A marlin side view, facing left: bill tip x 6, lower jaw tip (44, 59),
+ * tall dorsal, crescent tail with its fork at (170, 53). */
+function Billfish() {
+  return (
+    <g>
+      <path d="M48 50 L6 50 L48 54 Z" fill={FISH_BACK} {...ink} strokeWidth={2} />
+      <path d="M64 44 L76 26 C82 32 96 38 128 44 Z" fill={FISH_BACK} {...ink} strokeWidth={2.4} />
+      <path d="M162 52 L184 26 C178 38 172 46 170 53 C172 60 178 68 184 80 L162 56 Z" fill={FISH_BACK} {...ink} strokeWidth={2.4} />
+      <path d="M46 50 C70 36 124 38 162 50 L162 56 C124 66 76 68 48 60 L44 59 L50 56 Z" fill={FISH} {...ink} strokeWidth={2.6} />
+      <path d="M50 48 C74 40 122 42 160 51 L161 53 C126 48 84 46 52 52 Z" fill={FISH_BACK} />
+      {[84, 98, 112, 126].map((bx) => (
+        <path key={bx} d={`M${bx} 46 l-2 12`} stroke={FISH_BACK} strokeWidth="2" strokeLinecap="round" opacity="0.6" />
+      ))}
+      <path d="M46 50 C70 36 124 38 162 50 L162 56 C124 66 76 68 48 60 L44 59 L50 56 Z" fill="none" {...ink} strokeWidth={2.6} />
+      <path d="M66 57 L90 72 L82 58 Z" fill={FISH_BACK} {...ink} strokeWidth={2} />
+      <path d="M62 46 C66 50 66 56 62 60" fill="none" stroke={INK} strokeWidth="1.6" />
+      <circle cx="54" cy="51" r="3" fill={PAPER} stroke={INK} strokeWidth="1.5" />
+      <circle cx="54.6" cy="51" r="1.4" fill={INK} />
+    </g>
+  )
+}
+
 /** Where to put the tape for this kind of size rule, or null. */
 export function MeasureArt({ measure }: { measure: Measure }) {
   // Baitfish at (22, 30), w 130: snout x 22, tail fork x 164, tail tips x 170.
@@ -28,24 +50,39 @@ export function MeasureArt({ measure }: { measure: Measure }) {
   if (measure === 'TL') {
     return (
       <Panel label="Total length: from the tip of the closed mouth to the tip of the tail, lobes pinched together" h={116}>
-        {fish}
-        <path d="M176 26 l-8 8 M176 70 l-8 -8" stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
-        <Label x={160} y={20} text="PINCH" />
-        <path d="M22 50 L22 88 M170 48 L170 88" stroke={INK} strokeWidth="1.5" strokeDasharray="3 3" />
-        <Bar x1={22} x2={170} y={88} />
+        <Baitfish x={22} y={30} w={130} pinched />
+        <path d="M168 28 V40 M168 68 V56" stroke={RED} strokeWidth="3" strokeLinecap="round" />
+        <path d="M163 38 L168 45 L173 38 Z M163 58 L168 51 L173 58 Z" fill={RED} />
+        <Label x={160} y={20} text="PINCH THE TAIL" />
+        <path d="M22 50 L22 88 M178 50 L178 88" stroke={INK} strokeWidth="1.5" strokeDasharray="3 3" />
+        <Bar x1={22} x2={178} y={88} />
         <Label x={96} y={108} text="TOTAL LENGTH" />
       </Panel>
     )
   }
-  if (measure === 'FL' || measure === 'LJFL') {
+  if (measure === 'LJFL') {
     return (
-      <Panel label={measure === 'FL' ? 'Fork length: from the tip of the snout to the fork in the tail' : 'Lower jaw fork length: from the tip of the lower jaw to the fork in the tail'} h={116}>
+      <Panel label="Lower jaw fork length: from the tip of the lower jaw to the fork in the tail, not counting the bill" h={116}>
+        <Billfish />
+        <path d="M8 46 l8 8 M16 46 l-8 8" stroke={RED} strokeWidth="2.5" strokeLinecap="round" />
+        <Label x={36} y={24} text="NOT THE BILL" tx={14} ty={44} color={RED} />
+        <path d="M44 60 L44 88 M170 54 L170 88" stroke={INK} strokeWidth="1.5" strokeDasharray="3 3" />
+        <circle cx="44" cy="59" r="3.5" fill={RED} stroke={INK} strokeWidth="1.5" />
+        <circle cx="170" cy="53" r="3.5" fill={RED} stroke={INK} strokeWidth="1.5" />
+        <Bar x1={44} x2={170} y={88} />
+        <Label x={107} y={108} text="LOWER JAW TO FORK" />
+      </Panel>
+    )
+  }
+  if (measure === 'FL') {
+    return (
+      <Panel label="Fork length: from the tip of the snout to the fork in the tail" h={116}>
         {fish}
         <path d="M22 50 L22 88 M164 48 L164 88" stroke={INK} strokeWidth="1.5" strokeDasharray="3 3" />
         <circle cx="164" cy="48" r="4" fill={RED} stroke={INK} strokeWidth="1.5" />
         <Label x={150} y={22} text="THE FORK" tx={162} ty={44} />
         <Bar x1={22} x2={164} y={88} />
-        <Label x={96} y={108} text={measure === 'FL' ? 'FORK LENGTH' : 'LOWER JAW TO FORK'} />
+        <Label x={96} y={108} text="FORK LENGTH" />
       </Panel>
     )
   }
@@ -61,12 +98,8 @@ export function MeasureArt({ measure }: { measure: Measure }) {
   if (measure === 'CW') {
     return (
       <Panel label="Carapace width: straight across the shell at its widest, spine tip to spine tip" h={116}>
-        {[0, 1, 2].map((i) => (
-          <path key={i} d={`M${72 + i * 14} 74 l-10 16 M${128 - i * 14} 74 l10 16`} {...ink} strokeWidth={3} />
-        ))}
-        <path d="M40 52 C40 26 160 26 160 52 C160 76 40 76 40 52 Z" fill={CRAB} {...ink} />
-        <path d="M40 50 L22 44 L40 58 Z M160 50 L178 44 L160 58 Z" fill={CRAB} {...ink} strokeWidth={2.5} />
-        <Bar x1={22} x2={178} y={20} />
+        <BlueCrab x={100} y={60} />
+        <Bar x1={44} x2={156} y={58} />
         <Label x={100} y={106} text="SPINE TIP TO SPINE TIP" />
       </Panel>
     )
@@ -76,18 +109,18 @@ export function MeasureArt({ measure }: { measure: Measure }) {
 
 // ---------- handling ----------
 
-type HandleId = 'shuffle' | 'descend' | 'towel' | 'in-water' | 'snip' | 'pliers' | 'hot-water'
+type HandleId = 'shuffle' | 'descend' | 'towel' | 'snip' | 'pliers'
 
-/** The panels that fit a handling tip, from its wording (at most two). */
-export function handleArtFor(text: string): HandleId[] {
+/** The panels that fit a handling tip, from its wording (at most two).
+ * Only steps that are hard to picture get one; the towel grip is basic
+ * enough that it's shown to beginners only. */
+export function handleArtFor(text: string, { beginner = false }: { beginner?: boolean } = {}): HandleId[] {
   const ids: HandleId[] = []
   if (/shuffle/i.test(text)) ids.push('shuffle')
   if (/descending device/i.test(text)) ids.push('descend')
-  if (/towel/i.test(text)) ids.push('towel')
-  if (/in the water|out of the water/i.test(text)) ids.push('in-water')
+  if (beginner && /towel/i.test(text)) ids.push('towel')
   if (/cut the (line|leader)/i.test(text)) ids.push('snip')
-  if (/pliers|dehooker/i.test(text)) ids.push('pliers')
-  if (/as hot as you can stand/i.test(text)) ids.push('hot-water')
+  if (/pliers|dehooker/i.test(text) && !ids.includes('towel')) ids.push('pliers')
   return ids.slice(0, 2)
 }
 
@@ -120,11 +153,19 @@ function Foot({ x, y }: { x: number; y: number }) {
   )
 }
 
-function Hand({ x, y, flip = false }: { x: number; y: number; flip?: boolean }) {
+/** Needle-nose pliers, jaws closed on (x, y) and pointing along `angle`
+ * (degrees, 0 = right): long tapered jaws, a rivet, and red grips. */
+function Pliers({ x, y, angle, s = 1 }: { x: number; y: number; angle: number; s?: number }) {
   return (
-    <g transform={`translate(${x} ${y}) scale(${flip ? -1 : 1} 1)`}>
-      <path d="M0 0 C0 -10 34 -12 44 -4 C50 0 48 8 40 8 L0 10 Z" fill="#f1c9a5" {...ink} strokeWidth={2.5} />
-      <path d="M0 0 L-24 2 L-24 10 L0 10" fill="#7aa6c2" {...ink} strokeWidth={2.5} />
+    <g transform={`translate(${x} ${y}) rotate(${angle}) scale(${s})`}>
+      <path d="M-34 -10 C-52 -14 -66 -16 -72 -15 M-34 10 C-52 14 -66 16 -72 15" fill="none" stroke={INK} strokeWidth="7.4" strokeLinecap="round" />
+      <path d="M-34 -10 C-52 -14 -66 -16 -72 -15 M-34 10 C-52 14 -66 16 -72 15" fill="none" stroke={HOOK} strokeWidth="4.6" strokeLinecap="round" />
+      <path d="M-50 -13 C-60 -15 -70 -16 -72 -15 M-50 13 C-60 15 -70 16 -72 15" fill="none" stroke={INK} strokeWidth="10" strokeLinecap="round" />
+      <path d="M-50 -13 C-60 -15 -70 -16 -72 -15 M-50 13 C-60 15 -70 16 -72 15" fill="none" stroke={RED} strokeWidth="7" strokeLinecap="round" />
+      <path d="M0 0 L-30 -5 C-34 -6 -38 -3 -38 0 C-38 3 -34 6 -30 5 Z" fill={HOOK} {...ink} strokeWidth={2} />
+      <path d="M-2 0 L-30 0" stroke={INK} strokeWidth="1.2" />
+      <path d="M-30 -5 L-34 -10 M-30 5 L-34 10" stroke={INK} strokeWidth="2" />
+      <circle cx="-33" cy="0" r="3.4" fill={HOOK} stroke={INK} strokeWidth="1.8" />
     </g>
   )
 }
@@ -149,11 +190,12 @@ const HANDLE: Record<HandleId, { label: string; art: React.ReactNode }> = {
     art: (
       <>
         <Water top={30} />
-        <Baitfish x={58} y={58} w={90} s={1} />
-        <path d="M52 4 L52 92" stroke={INK} strokeWidth="2" />
-        <path d="M52 72 C60 72 62 78 58 80 L54 78" fill="none" stroke={HOOK} strokeWidth="4" strokeLinecap="round" />
-        <path d="M46 92 L58 92 L56 110 L48 110 Z" fill="#6b7280" {...ink} strokeWidth={2.5} />
-        <Label x={130} y={50} text="CLIPPED TO THE LIP" tx={62} ty={76} />
+        <Baitfish x={58} y={60} w={90} s={1} />
+        <path d="M54 4 L54 44" stroke={INK} strokeWidth="2" />
+        <path d="M47 44 L61 44 L59 60 L49 60 Z" fill="#6b7280" {...ink} strokeWidth={2.5} />
+        <path d="M54 60 L54 72 C54 80 62 82 63 76" fill="none" stroke={INK} strokeWidth="4.4" strokeLinecap="round" />
+        <path d="M54 60 L54 72 C54 80 62 82 63 76" fill="none" stroke={HOOK} strokeWidth="2.4" strokeLinecap="round" />
+        <Label x={136} y={50} text="CLIPPED TO THE LIP" tx={66} ty={74} />
         <path d="M24 54 L24 118" stroke={RED} strokeWidth="4" markerEnd="url(#bait-arrow)" />
         <Label x={100} y={128} text="SEND IT BACK DOWN" />
       </>
@@ -163,26 +205,14 @@ const HANDLE: Record<HandleId, { label: string; art: React.ReactNode }> = {
     label: 'Pin a spiny fish under a towel and unhook it with pliers',
     art: (
       <>
-        <Baitfish x={28} y={58} w={130} />
-        <path d="M30 76 l-10 14 M34 78 l-6 16" stroke={INK} strokeWidth="2" />
-        <path d="M80 40 L100 18 M48 72 L34 96" stroke={RED} strokeWidth="3" />
-        <path d="M70 34 L170 46 L176 96 L76 92 Z" fill="#8ecae6" {...ink} opacity="0.92" />
-        <path d="M90 50 l70 8 M88 66 l72 8 M86 82 l72 6" stroke="#5aa9cf" strokeWidth="3" />
-        <Label x={100} y={124} text="PIN IT, THEN UNHOOK" />
-        <Label x={50} y={20} text="SHARP SPINES" color={RED} tx={92} ty={24} />
-      </>
-    ),
-  },
-  'in-water': {
-    label: 'Keep a big fish in the water and support its belly while you unhook it',
-    art: (
-      <>
-        <Water top={60} />
-        <Baitfish x={40} y={52} w={120} />
-        <Hand x={74} y={94} />
-        <Hand x={136} y={96} flip />
-        <Label x={100} y={28} text="KEEP IT WET" />
-        <Label x={100} y={128} text="SUPPORT THE BELLY" />
+        <Baitfish x={28} y={56} w={130} />
+        <path d="M66 38 L174 46 L180 98 L62 94 Z" fill="#8ecae6" {...ink} />
+        <path d="M84 52 l76 7 M82 68 l80 7 M80 84 l80 5" stroke="#5aa9cf" strokeWidth="3" />
+        <path d="M31 72 C24 72 22 80 28 82" fill="none" stroke={INK} strokeWidth="3.6" strokeLinecap="round" />
+        <path d="M31 72 C24 72 22 80 28 82" fill="none" stroke={HOOK} strokeWidth="1.8" strokeLinecap="round" />
+        <Pliers x={28} y={80} angle={-80} s={0.6} />
+        <Label x={124} y={26} text="TOWEL OVER THE SPINES" tx={120} ty={42} />
+        <Label x={110} y={124} text="PIN IT, THEN UNHOOK" />
       </>
     ),
   },
@@ -192,10 +222,13 @@ const HANDLE: Record<HandleId, { label: string; art: React.ReactNode }> = {
       <>
         <Baitfish x={70} y={50} w={100} />
         <path d="M70 68 C50 68 30 44 12 20" fill="none" stroke={INK} strokeWidth="2" />
-        <g transform="translate(50 56) rotate(-40)">
-          <path d="M0 0 L-28 -8 M0 0 L-28 8" stroke={HOOK} strokeWidth="5" strokeLinecap="round" />
-          <circle cx="8" cy="-8" r="7" fill="none" stroke={RED} strokeWidth="4" />
-          <circle cx="8" cy="8" r="7" fill="none" stroke={RED} strokeWidth="4" />
+        <g transform="translate(38 84) rotate(-38)">
+          <path d="M0 0 L30 -8 M0 0 L30 8" stroke={INK} strokeWidth="6.4" strokeLinecap="round" />
+          <path d="M0 0 L30 -8 M0 0 L30 8" stroke={HOOK} strokeWidth="4" strokeLinecap="round" />
+          <path d="M0 0 L-12 -8 M0 0 L-12 8" stroke={RED} strokeWidth="4" strokeLinecap="round" />
+          <circle cx="-18" cy="-10" r="6.5" fill="none" stroke={RED} strokeWidth="4" />
+          <circle cx="-18" cy="10" r="6.5" fill="none" stroke={RED} strokeWidth="4" />
+          <circle cx="0" cy="0" r="2" fill={INK} />
         </g>
         <Label x={100} y={128} text="CUT THE LEADER CLOSE" />
       </>
@@ -206,25 +239,11 @@ const HANDLE: Record<HandleId, { label: string; art: React.ReactNode }> = {
     art: (
       <>
         <Baitfish x={58} y={44} w={108} s={1} />
-        <path d="M60 62 L16 104 M64 66 L24 112" stroke={HOOK} strokeWidth="6" strokeLinecap="round" />
-        <path d="M60 62 L16 104 M64 66 L24 112" stroke={INK} strokeWidth="1.5" strokeLinecap="round" />
-        <circle cx="40" cy="86" r="4" fill={INK} />
+        <path d="M62 60 C55 60 53 68 59 70" fill="none" stroke={INK} strokeWidth="3.6" strokeLinecap="round" />
+        <path d="M62 60 C55 60 53 68 59 70" fill="none" stroke={HOOK} strokeWidth="1.8" strokeLinecap="round" />
+        <Pliers x={60} y={68} angle={-36} s={0.78} />
         <Label x={124} y={24} text="SHARP TEETH" color={RED} tx={60} ty={60} />
         <Label x={120} y={124} text="USE LONG PLIERS" />
-      </>
-    ),
-  },
-  'hot-water': {
-    label: 'If you are stung, soak it in water as hot as you can stand',
-    art: (
-      <>
-        <path d="M50 52 L150 52 L140 124 L60 124 Z" fill="#f8f9fa" {...ink} />
-        <path d="M56 68 L144 68 L138 118 L62 118 Z" fill="#ffb4a2" stroke="none" />
-        {[70, 100, 130].map((x) => (
-          <path key={x} d={`M${x} 46 q-8 -10 0 -18 q8 -8 0 -18`} fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" />
-        ))}
-        <path d="M120 66 L120 20 C120 12 140 12 140 20 L140 70" fill="#f1c9a5" {...ink} />
-        <Label x={100} y={134} text="AS HOT AS YOU CAN STAND" color={RED} />
       </>
     ),
   },

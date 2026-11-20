@@ -271,7 +271,7 @@ export default async function FishDetailPage({ params }: Props) {
             </div>
           </div>
 
-          <Identify id={fish.id} names={names} say={say} />
+          <Identify id={fish.id} names={names} say={say} beginner={prefs?.experience === 'beginner'} />
 
           {fish.access !== 'incidental' && (
             <Suspense

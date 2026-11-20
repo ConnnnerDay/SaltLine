@@ -109,18 +109,18 @@ export function MeasureArt({ measure }: { measure: Measure }) {
 
 // ---------- handling ----------
 
-type HandleId = 'shuffle' | 'descend' | 'towel' | 'in-water' | 'snip' | 'pliers' | 'hot-water'
+type HandleId = 'shuffle' | 'descend' | 'towel' | 'snip' | 'pliers'
 
-/** The panels that fit a handling tip, from its wording (at most two). */
-export function handleArtFor(text: string): HandleId[] {
+/** The panels that fit a handling tip, from its wording (at most two).
+ * Only steps that are hard to picture get one; the towel grip is basic
+ * enough that it's shown to beginners only. */
+export function handleArtFor(text: string, { beginner = false }: { beginner?: boolean } = {}): HandleId[] {
   const ids: HandleId[] = []
   if (/shuffle/i.test(text)) ids.push('shuffle')
   if (/descending device/i.test(text)) ids.push('descend')
-  if (/towel/i.test(text)) ids.push('towel')
-  if (/in the water|out of the water/i.test(text)) ids.push('in-water')
+  if (beginner && /towel/i.test(text)) ids.push('towel')
   if (/cut the (line|leader)/i.test(text)) ids.push('snip')
-  if (/pliers|dehooker/i.test(text)) ids.push('pliers')
-  if (/as hot as you can stand/i.test(text)) ids.push('hot-water')
+  if (/pliers|dehooker/i.test(text) && !ids.includes('towel')) ids.push('pliers')
   return ids.slice(0, 2)
 }
 
@@ -153,11 +153,19 @@ function Foot({ x, y }: { x: number; y: number }) {
   )
 }
 
-function Hand({ x, y, flip = false }: { x: number; y: number; flip?: boolean }) {
+/** Needle-nose pliers, jaws closed on (x, y) and pointing along `angle`
+ * (degrees, 0 = right): long tapered jaws, a rivet, and red grips. */
+function Pliers({ x, y, angle, s = 1 }: { x: number; y: number; angle: number; s?: number }) {
   return (
-    <g transform={`translate(${x} ${y}) scale(${flip ? -1 : 1} 1)`}>
-      <path d="M0 0 C0 -10 34 -12 44 -4 C50 0 48 8 40 8 L0 10 Z" fill="#f1c9a5" {...ink} strokeWidth={2.5} />
-      <path d="M0 0 L-24 2 L-24 10 L0 10" fill="#7aa6c2" {...ink} strokeWidth={2.5} />
+    <g transform={`translate(${x} ${y}) rotate(${angle}) scale(${s})`}>
+      <path d="M-34 -10 C-52 -14 -66 -16 -72 -15 M-34 10 C-52 14 -66 16 -72 15" fill="none" stroke={INK} strokeWidth="7.4" strokeLinecap="round" />
+      <path d="M-34 -10 C-52 -14 -66 -16 -72 -15 M-34 10 C-52 14 -66 16 -72 15" fill="none" stroke={HOOK} strokeWidth="4.6" strokeLinecap="round" />
+      <path d="M-50 -13 C-60 -15 -70 -16 -72 -15 M-50 13 C-60 15 -70 16 -72 15" fill="none" stroke={INK} strokeWidth="10" strokeLinecap="round" />
+      <path d="M-50 -13 C-60 -15 -70 -16 -72 -15 M-50 13 C-60 15 -70 16 -72 15" fill="none" stroke={RED} strokeWidth="7" strokeLinecap="round" />
+      <path d="M0 0 L-30 -5 C-34 -6 -38 -3 -38 0 C-38 3 -34 6 -30 5 Z" fill={HOOK} {...ink} strokeWidth={2} />
+      <path d="M-2 0 L-30 0" stroke={INK} strokeWidth="1.2" />
+      <path d="M-30 -5 L-34 -10 M-30 5 L-34 10" stroke={INK} strokeWidth="2" />
+      <circle cx="-33" cy="0" r="3.4" fill={HOOK} stroke={INK} strokeWidth="1.8" />
     </g>
   )
 }
@@ -202,24 +210,9 @@ const HANDLE: Record<HandleId, { label: string; art: React.ReactNode }> = {
         <path d="M84 52 l76 7 M82 68 l80 7 M80 84 l80 5" stroke="#5aa9cf" strokeWidth="3" />
         <path d="M31 72 C24 72 22 80 28 82" fill="none" stroke={INK} strokeWidth="3.6" strokeLinecap="round" />
         <path d="M31 72 C24 72 22 80 28 82" fill="none" stroke={HOOK} strokeWidth="1.8" strokeLinecap="round" />
-        <path d="M27 80 L10 112 M31 82 L18 116" stroke={HOOK} strokeWidth="6" strokeLinecap="round" />
-        <path d="M27 80 L10 112 M31 82 L18 116" stroke={INK} strokeWidth="1.5" strokeLinecap="round" />
-        <circle cx="21" cy="96" r="3.5" fill={INK} />
+        <Pliers x={28} y={80} angle={-80} s={0.6} />
         <Label x={124} y={26} text="TOWEL OVER THE SPINES" tx={120} ty={42} />
         <Label x={110} y={124} text="PIN IT, THEN UNHOOK" />
-      </>
-    ),
-  },
-  'in-water': {
-    label: 'Keep a big fish in the water and support its belly while you unhook it',
-    art: (
-      <>
-        <Water top={60} />
-        <Baitfish x={40} y={52} w={120} />
-        <Hand x={74} y={94} />
-        <Hand x={136} y={96} flip />
-        <Label x={100} y={28} text="KEEP IT WET" />
-        <Label x={100} y={128} text="SUPPORT THE BELLY" />
       </>
     ),
   },
@@ -246,28 +239,11 @@ const HANDLE: Record<HandleId, { label: string; art: React.ReactNode }> = {
     art: (
       <>
         <Baitfish x={58} y={44} w={108} s={1} />
-        <path d="M60 62 L16 104 M64 66 L24 112" stroke={HOOK} strokeWidth="6" strokeLinecap="round" />
-        <path d="M60 62 L16 104 M64 66 L24 112" stroke={INK} strokeWidth="1.5" strokeLinecap="round" />
-        <circle cx="40" cy="86" r="4" fill={INK} />
+        <path d="M62 60 C55 60 53 68 59 70" fill="none" stroke={INK} strokeWidth="3.6" strokeLinecap="round" />
+        <path d="M62 60 C55 60 53 68 59 70" fill="none" stroke={HOOK} strokeWidth="1.8" strokeLinecap="round" />
+        <Pliers x={60} y={68} angle={-36} s={0.78} />
         <Label x={124} y={24} text="SHARP TEETH" color={RED} tx={60} ty={60} />
         <Label x={120} y={124} text="USE LONG PLIERS" />
-      </>
-    ),
-  },
-  'hot-water': {
-    label: 'If you are stung, soak it in water as hot as you can stand',
-    art: (
-      <>
-        <path d="M28 56 L172 56 L162 122 L38 122 Z" fill="#f8f9fa" {...ink} />
-        <path d="M34 70 L166 70 L158 116 L42 116 Z" fill="#ffb4a2" stroke="none" />
-        {[118, 140, 162].map((x) => (
-          <path key={x} d={`M${x} 50 q-8 -10 0 -18 q8 -8 0 -18`} fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" />
-        ))}
-        <path d="M66 10 L82 10 L82 104 L66 104 Z" fill="#f1c9a5" {...ink} strokeWidth={2.5} />
-        <path d="M64 100 L104 100 C114 100 114 114 104 114 L64 114 Z" fill="#f1c9a5" {...ink} />
-        <path d="M34 70 L166 70 L158 116 L42 116 Z" fill="#ffb4a2" opacity="0.45" stroke="none" />
-        <path d="M34 70 L166 70" stroke="#e5826b" strokeWidth="2" />
-        <Label x={100} y={134} text="AS HOT AS YOU CAN STAND" color={RED} />
       </>
     ),
   },

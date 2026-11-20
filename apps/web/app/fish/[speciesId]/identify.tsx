@@ -14,10 +14,13 @@ export function Identify({
   id,
   names,
   say,
+  beginner = false,
 }: {
   id: string
   names: Map<string, string>
   say: (text: string) => string
+  /** The profile says "just starting out": show the basic handling art too. */
+  beginner?: boolean
 }) {
   const notes = fishNotes(id)
   const lookalikes = (notes.lookalikes ?? []).filter((look) => names.has(look.id))
@@ -75,7 +78,7 @@ export function Identify({
           <h3 className="text-sm font-bold text-text">Handle with care</h3>
           <ul className="flex flex-col gap-3 text-sm leading-relaxed text-text">
             {handle.map((line) => {
-              const art = handleArtFor(line)
+              const art = handleArtFor(line, { beginner })
               return (
                 <li key={line} className={art.length ? 'flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4' : 'flex gap-2'}>
                   {art.length ? (

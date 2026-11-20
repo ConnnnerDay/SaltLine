@@ -715,7 +715,17 @@ const GUIDANCE_TIER_PILL: Record<GuidanceTier, string> = {
  * cards. Each card shows apps/api's own `reasons` (the exact numbers the
  * pick was scored on) so no recommendation appears without its "why".
  */
-function WhatsBiting({ guidance, linkFish = false }: { guidance: FishingGuidance; linkFish?: boolean }) {
+function WhatsBiting({
+  guidance,
+  linkFish = false,
+  dayVerdict = null,
+}: {
+  guidance: FishingGuidance
+  linkFish?: boolean
+  /** The day's own rating: the picks are rated for the fish (season,
+   * water), so a rough day says so above them. */
+  dayVerdict?: ForecastVerdict | null
+}) {
   // Reasons every pick shares (today's wind, surf, season) are said once,
   // above the cards; each card keeps only what's particular to that fish.
   const shared =
@@ -735,9 +745,16 @@ function WhatsBiting({ guidance, linkFish = false }: { guidance: FishingGuidance
         }
       />
 
+      {(dayVerdict === 'Poor' || dayVerdict === 'Challenging') && guidance.species.length > 0 && (
+        <p className="-mt-1 rounded-md border border-marginal-border bg-marginal-bg px-3 py-2 text-sm text-marginal-text">
+          Today is rated {dayVerdict} here. These ratings are for the fish (season and water), not
+          the weather: they&apos;re who&apos;s around if you do go.
+        </p>
+      )}
+
       {shared.length > 0 && (
         <div className="-mt-1 flex flex-col gap-1.5">
-          <span className="text-sm font-semibold text-text">Why they&apos;re biting today</span>
+          <span className="text-sm font-semibold text-text">True for all of them today</span>
           <ul className="flex flex-wrap gap-1.5">
             {shared.map((reason) => (
               <li key={reason} className="rounded-full border border-border bg-surface-raised px-2.5 py-1 text-xs text-text">
@@ -1700,7 +1717,11 @@ export function ForecastCard({
             tab: 'fish',
             content: (
               <>
-                {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} linkFish={profile !== null} />}
+                {forecast.recommendations && <WhatsBiting
+                    guidance={forecast.recommendations}
+                    linkFish={profile !== null}
+                    dayVerdict={forecast.conditions?.score?.verdict ?? null}
+                  />}
               </>
             ),
           },

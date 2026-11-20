@@ -331,7 +331,7 @@ def _conditions_modifier(
                 reasons.append("Light wind suits it")
             elif wind_avg > 15:
                 points -= 2
-                reasons.append("Too windy for it")
+                reasons.append("Windier than it likes")
 
     if wave_range_ft is not None:
         wave_avg = sum(wave_range_ft) / 2
@@ -348,7 +348,7 @@ def _conditions_modifier(
                 reasons.append("Calm surf suits it")
             elif wave_avg > 4:
                 points -= 2
-                reasons.append("Surf is too rough for it")
+                reasons.append("Rougher surf than it likes")
 
     if hour is not None:
         low_light = hour < 7 or hour > 18

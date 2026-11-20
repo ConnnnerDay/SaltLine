@@ -35,8 +35,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_db_session, require_authenticated_user_id
 from app.api.internal_auth import require_internal_signature
 from app.domain.alerts import AlertRule
+from app.domain.analytics import AnalyticsEvent
 from app.domain.catches import CatchEntry
-from app.domain.preferences import UserPreferences
+from app.domain.preferences import PreferencesOut, UserPreferences
 from app.domain.saved_locations import SavedLocation
 
 router = APIRouter(
@@ -44,14 +45,6 @@ router = APIRouter(
     tags=["account"],
     dependencies=[Depends(require_internal_signature)],
 )
-
-
-class ExportedPreferences(BaseModel):
-    units: str
-    fishing_style: str | None
-    wind_threshold_kt: float | None
-    surf_threshold_ft: float | None
-    default_location_id: str | None
 
 
 class ExportedSavedLocation(BaseModel):
@@ -79,7 +72,10 @@ class ExportedAlert(BaseModel):
 
 
 class AccountExport(BaseModel):
-    preferences: ExportedPreferences | None
+    preferences: PreferencesOut | None
+    """Every preference the profile stores (fishing types, gear, target
+    groups, times, tide, layout, favorite fish...), not just the original
+    five fields."""
     saved_locations: list[ExportedSavedLocation]
     catches: list[ExportedCatch] = []
     alerts: list[ExportedAlert] = []
@@ -123,13 +119,7 @@ async def export_account_data(
 
     return AccountExport(
         preferences=(
-            ExportedPreferences(
-                units=prefs.units,
-                fishing_style=prefs.fishing_style,
-                wind_threshold_kt=prefs.wind_threshold_kt,
-                surf_threshold_ft=prefs.surf_threshold_ft,
-                default_location_id=prefs.default_location_id,
-            )
+            PreferencesOut.model_validate(prefs, from_attributes=True)
             if prefs is not None
             else None
         ),
@@ -169,6 +159,10 @@ async def delete_account_data(
     session: AsyncSession = Depends(get_db_session),  # noqa: B008
 ) -> None:
     await session.execute(delete(AlertRule).where(AlertRule.user_id == user_id))
+    # Analytics events carry the user id; deleting the account removes them.
+    await session.execute(
+        delete(AnalyticsEvent).where(AnalyticsEvent.user_id == user_id)
+    )
     await session.execute(delete(CatchEntry).where(CatchEntry.user_id == user_id))
     await session.execute(delete(SavedLocation).where(SavedLocation.user_id == user_id))
     await session.execute(

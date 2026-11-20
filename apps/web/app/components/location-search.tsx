@@ -29,6 +29,21 @@ export type LocationSearchProps = {
  * https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ for the pattern
  * this follows.
  */
+function coordinateResult(query: string): LocationSearchResult | null {
+  const match = query.trim().match(/^(-?\d{1,2}(?:\.\d+)?)\s*[, ]\s*(-?\d{1,3}(?:\.\d+)?)$/)
+  if (!match) return null
+  const lat = Number(match[1])
+  const lng = Number(match[2])
+  if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null
+  return {
+    id: `pt_${lat.toFixed(3)}_${lng.toFixed(3)}`,
+    name: `${lat.toFixed(3)}, ${lng.toFixed(3)}`,
+    state: '',
+    lat,
+    lng,
+  }
+}
+
 export function LocationSearch({
   onSelect,
   label = 'Search for a location',
@@ -148,7 +163,9 @@ export function LocationSearch({
 
   const activeOptionId =
     activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined
-  const showNoResults = isOpen && !isLoading && results.length === 0 && !error
+  // "34.21, -77.80": a point on the coast, as the map would give it.
+  const coordinate = coordinateResult(query)
+  const showNoResults = isOpen && !isLoading && results.length === 0 && !error && !coordinate
   const showSearching = isOpen && isLoading && results.length === 0
   // ARIA's combobox role requires `aria-controls` to be present at all
   // times (axe-core's aria-required-attr) *and* to reference an element
@@ -285,9 +302,24 @@ export function LocationSearch({
                     aria-selected="false"
                     className="px-3 py-2 text-sm text-text-muted"
                   >
-                    No matches for &ldquo;{query.trim()}&rdquo;.
+                    No listed spot matches &ldquo;{query.trim()}&rdquo;. Tap the map near it
+                    for a forecast at that exact spot.
                   </div>
                 )}
+          {coordinate && isOpen && !isLoading && (
+            <div
+              role="option"
+              aria-selected="false"
+              tabIndex={-1}
+              onMouseDown={(event) => {
+                event.preventDefault()
+                selectResult(coordinate)
+              }}
+              className="cursor-pointer px-3 py-2 text-sm font-semibold text-text hover:bg-surface-raised"
+            >
+              Forecast for {coordinate.name}
+            </div>
+          )}
         </div>
       </Card>
     </div>

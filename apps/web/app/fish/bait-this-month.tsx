@@ -18,7 +18,12 @@ type Bait = {
   targets: string[]
 }
 
-const BAITS = (baitData as { baits: Bait[] }).baits
+// Lures and trolling tackle (shad darts, cedar plugs) aren't bait.
+const BAITS = (baitData as { baits: Bait[] }).baits.filter((bait) => !/\bdarts?\b|\bjigs?\b|\bplugs?\b|feathers?/i.test(bait.name))
+
+/** The bait's name without its parenthetical, for matching a "catch your
+ * own" entry to the bait-shop entry for the same bait. */
+const core = (name: string) => name.replace(/\s*\(.*\)/, '').trim().toLowerCase()
 
 function coastOf(region: string): Bait['coast'] | 'any' {
   if (region.startsWith('atlantic') || region === 'gulf') return 'east'
@@ -34,11 +39,54 @@ function coastOf(region: string): Bait['coast'] | 'any' {
  * the guide and the current month. What's in season comes first; the rest
  * is one tap away with the months it's around.
  */
-export function BaitThisMonth({ region, month, units }: { region: string; month: number; units: Units }) {
+export function BaitThisMonth({
+  region,
+  month,
+  units,
+  fish = [],
+}: {
+  region: string
+  month: number
+  units: Units
+  /** The catalogue's fish, to keep a region's list to baits for fish
+   * that live there (the bait tables cover a whole coast). */
+  fish?: { name: string; regions: string[] }[]
+}) {
   const coast = coastOf(region)
-  const here = BAITS.filter((bait) => coast === 'any' || bait.coast === coast || bait.coast === 'all')
-  const inSeason = here.filter((bait) => bait.months.includes(month))
-  const later = here.filter((bait) => !bait.months.includes(month))
+  // A bait's target fish that live in the picked region. A target the
+  // catalogue doesn't know is kept rather than guessed away.
+  const targetsHere = (bait: Bait) =>
+    region === 'all'
+      ? bait.targets
+      : bait.targets.filter((target) => {
+          const known = fish.filter((entry) => entry.name.toLowerCase().includes(target.toLowerCase()))
+          return known.length === 0 || known.some((entry) => entry.regions.includes(region))
+        })
+  const here = BAITS.filter(
+    (bait) =>
+      (coast === 'any' || bait.coast === coast || bait.coast === 'all') &&
+      (bait.targets.length === 0 || targetsHere(bait).length > 0),
+  )
+  // A "catch or gather" bait that's also sold (Mullet / Cut mullet) is
+  // one entry: the shop one, with how to get your own as a second line.
+  const shopNames = here.filter((bait) => bait.kind === 'shop').map((bait) => bait.name.toLowerCase())
+  // The closest match wins ("Live finger mullet" takes "Finger mullet",
+  // not "Mullet"); a note that only says to buy it adds nothing.
+  const gatherFor = (bait: Bait) =>
+    here
+      .filter(
+        (other) =>
+          other.kind === 'natural' &&
+          other.months.includes(month) &&
+          bait.name.toLowerCase().includes(core(other.name)) &&
+          !/bait shops?/i.test(noteFor(other)),
+      )
+      .sort((x, y) => core(y.name).length - core(x.name).length)[0]
+  const merged = here.filter(
+    (bait) => bait.kind === 'shop' || !shopNames.some((name) => name.includes(core(bait.name))),
+  )
+  const inSeason = merged.filter((bait) => bait.months.includes(month))
+  const later = merged.filter((bait) => !bait.months.includes(month))
   const say = (text: string) => localizeText(text, units)
   const [showAll, setShowAll] = useState(false)
   // Shop and natural baits interleaved, so the first few show both kinds.
@@ -82,15 +130,21 @@ export function BaitThisMonth({ region, month, units }: { region: string; month:
                 </span>
               </span>
               <span className="text-xs leading-relaxed text-text-muted">{say(noteFor(bait))}</span>
+              {bait.kind === 'shop' && gatherFor(bait) && (
+                <span className="text-xs leading-relaxed text-text-muted">
+                  <span className="font-semibold text-go-text">Or catch your own: </span>
+                  {say(noteFor(gatherFor(bait)!))}
+                </span>
+              )}
               {hooksFor(bait.name).length > 0 && (
                 <div className="text-xs">
                   <HookIt hows={hooksFor(bait.name)} say={say} />
                 </div>
               )}
-              {bait.targets.length > 0 && (
+              {targetsHere(bait).length > 0 && (
                 <span className="text-xs text-text">
                   <span className="text-text-muted">For: </span>
-                  {bait.targets.join(', ')}
+                  {targetsHere(bait).join(', ')}
                 </span>
               )}
             </li>

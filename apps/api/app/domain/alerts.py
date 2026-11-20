@@ -18,6 +18,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import re
 import smtplib
 from collections.abc import Awaitable, Callable
 from datetime import date, datetime
@@ -84,6 +85,48 @@ class AlertsOut(BaseModel):
     rules: list[AlertRuleOut]
 
 
+_KT_TO_KMH = 1.852
+_FT_TO_M = 0.3048
+_RANGE = r"(\d+(?:\.\d+)?)(?:(\s*(?:–|-|to)\s*)(\d+(?:\.\d+)?))?"
+
+
+def _metric_text(text: str) -> str:
+    """The forecast summary's feet, knots and °F in metric (the same
+    conversions apps/web's localizeText applies on the page)."""
+
+    def conv(fn: Any, unit: str) -> Any:
+        def sub(m: re.Match[str]) -> str:
+            low, sep, high = m.group(1), m.group(2), m.group(3)
+            out = fn(float(low))
+            return f"{out}{sep}{fn(float(high))} {unit}" if high else f"{out} {unit}"
+
+        return sub
+
+    text = re.sub(
+        _RANGE + r"\s*°\s*F\b",
+        lambda m: (
+            f"{round((float(m.group(1)) - 32) * 5 / 9)}"
+            + (
+                f"{m.group(2)}{round((float(m.group(3)) - 32) * 5 / 9)}"
+                if m.group(3)
+                else ""
+            )
+            + "°C"
+        ),
+        text,
+    )
+    text = re.sub(
+        _RANGE + r"\s*(?:ft|feet|foot)\b",
+        conv(lambda v: f"{v * _FT_TO_M:.1f}", "m"),
+        text,
+    )
+    return re.sub(
+        _RANGE + r"\s*(?:kt|knots?)\b",
+        conv(lambda v: round(v * _KT_TO_KMH), "km/h"),
+        text,
+    )
+
+
 def smtp_configured() -> bool:
     return bool(os.environ.get("SMTP_HOST"))
 
@@ -113,8 +156,10 @@ def compose_alert(
     location_id: str,
     envelope: dict[str, Any],
     site_url: str,
+    units: str = "imperial",
 ) -> tuple[str, str]:
-    """(subject, plain-text body) for one alert."""
+    """(subject, plain-text body) for one alert, in the user's units."""
+    metric = units == "metric"
     conditions = envelope.get("conditions") or {}
     score = conditions.get("score") or {}
     verdict = score.get("verdict", "Good")
@@ -124,18 +169,33 @@ def compose_alert(
     )
     lines = [f"{location_name} looks {verdict.lower()} for fishing today."]
     if score.get("summary"):
-        lines.append(score["summary"])
+        summary = str(score["summary"])
+        lines.append(_metric_text(summary) if metric else summary)
     water = conditions.get("water_temperature") or {}
     facts = []
     if water.get("value") is not None:
-        facts.append(f"Water {round(water['value'])}°F")
+        value = float(water["value"])
+        facts.append(
+            f"Water {round((value - 32) * 5 / 9)}°C"
+            if metric
+            else f"Water {round(value)}°F"
+        )
     if conditions.get("wind_range_kt"):
         low, high = conditions["wind_range_kt"]
         direction = conditions.get("wind_direction") or ""
-        facts.append(f"Wind {direction} {low:g}-{high:g} kt".replace("  ", " "))
+        speed = (
+            f"{round(low * _KT_TO_KMH)}-{round(high * _KT_TO_KMH)} km/h"
+            if metric
+            else f"{low:g}-{high:g} kt"
+        )
+        facts.append(f"Wind {direction} {speed}".replace("  ", " "))
     if conditions.get("wave_range_ft"):
         low, high = conditions["wave_range_ft"]
-        facts.append(f"Waves {low:g}-{high:g} ft")
+        facts.append(
+            f"Waves {low * _FT_TO_M:.1f}-{high * _FT_TO_M:.1f} m"
+            if metric
+            else f"Waves {low:g}-{high:g} ft"
+        )
     if facts:
         lines.append(" · ".join(facts))
     picks = ((envelope.get("recommendations") or {}).get("species") or [])[:3]
@@ -183,6 +243,29 @@ ForecastLookup = Callable[[str], Awaitable[tuple[str, str, dict[str, Any]]]]
 Sender = Callable[[str, str, str], None]
 
 
+async def _personalized(
+    session: AsyncSession, user_id: str, envelope: dict[str, Any], now: datetime
+) -> tuple[dict[str, Any], str]:
+    """(*envelope* with *user_id*'s fishing profile applied, their units),
+    or the envelope unchanged and "imperial" when they have no profile (or
+    anything goes wrong)."""
+    from app.domain.models import ForecastEnvelope
+    from app.domain.personalize import personalize
+    from app.domain.preferences import PreferencesOut, UserPreferences
+
+    try:
+        row = await session.get(UserPreferences, user_id)
+        if row is None:
+            return envelope, "imperial"
+        prefs = PreferencesOut.model_validate(row, from_attributes=True)
+        out = personalize(ForecastEnvelope.model_validate(envelope), prefs, now=now)
+        units = prefs.units
+        return out.model_dump(mode="json"), str(getattr(units, "value", units))
+    except Exception:
+        _logger.warning("could not personalize alert forecast", exc_info=True)
+        return envelope, "imperial"
+
+
 async def run_alert_check(
     sessionmaker: async_sessionmaker[AsyncSession],
     lookup: ForecastLookup,
@@ -218,6 +301,10 @@ async def run_alert_check(
             if found is None:
                 continue
             name, tz_name, envelope = found
+            # The verdict the user sees on the page is personalized (a day
+            # over their comfort limits drops a level); the email has to
+            # agree with it, not with the shared one.
+            envelope, units = await _personalized(session, rule.user_id, envelope, now)
             local = now.astimezone(safe_zone(tz_name))
             verdict = ((envelope.get("conditions") or {}).get("score") or {}).get(
                 "verdict"
@@ -235,6 +322,7 @@ async def run_alert_check(
                 location_id=rule.location_id,
                 envelope=envelope,
                 site_url=site_url,
+                units=units,
             )
             try:
                 await asyncio.to_thread(send, rule.email, subject, body)

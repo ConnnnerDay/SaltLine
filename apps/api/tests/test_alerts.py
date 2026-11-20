@@ -290,3 +290,53 @@ def test_account_export_and_delete_include_alerts(client: TestClient) -> None:
     )
     assert client.delete("/v1/me").status_code == 204
     assert client.get("/v1/me/alerts").json()["rules"] == []
+
+
+async def test_alert_uses_the_users_personalized_verdict(db_state: AppState) -> None:
+    """Over the user's comfort limit, the page shows the day a level lower
+    (Good -> Fair); a "Good or better" email must not go out."""
+    from app.domain.preferences import UserPreferences
+    from tests.test_personalize import _envelope
+
+    assert db_state.db_sessionmaker is not None
+    async with db_state.db_sessionmaker() as session:
+        session.add(UserPreferences(user_id="user-1", wind_threshold_kt=10))
+        await session.commit()
+    await _add_rule(db_state)
+    envelope = _envelope(wind=[10.0, 15.0]).model_dump(mode="json")
+
+    async def lookup(location_id: str) -> tuple[str, str, dict[str, object]]:
+        return "Wrightsville Beach", "America/New_York", envelope
+
+    sent = await run_alert_check(
+        db_state.db_sessionmaker,
+        lookup,
+        now=_NOW,
+        site_url="http://x",
+        send=lambda *a: None,
+    )
+    assert sent == 0
+
+
+def test_compose_alert_in_metric() -> None:
+    envelope = {
+        **_ENVELOPE,
+        "conditions": {
+            **_ENVELOPE["conditions"],  # type: ignore[dict-item]
+            "score": {
+                "verdict": "Good",
+                "score": 72,
+                "summary": "Moderate surf (2–3 ft), light wind (10–15 kt) and water 65°F.",
+            },
+        },
+    }
+    _subject, body = compose_alert(
+        location_name="Wrightsville Beach",
+        location_id="wrightsville-beach-nc",
+        envelope=envelope,
+        site_url="http://x",
+        units="metric",
+    )
+    assert "Water 18°C · Wind N 19-28 km/h · Waves 0.6-0.9 m" in body
+    assert "Moderate surf (0.6–0.9 m), light wind (19–28 km/h) and water 18°C." in body
+    assert "°F" not in body and " kt" not in body and " ft" not in body

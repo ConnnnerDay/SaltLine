@@ -74,10 +74,48 @@ _WIND_DIR_RE = re.compile(
     re.IGNORECASE,
 )
 _WIND_SPEED_RE = re.compile(r"(\d+)(?:\s*to\s*(\d+))?\s*(?:kt|knots?)", re.IGNORECASE)
-_SEA_HEIGHT_RE = re.compile(
-    r"(?:seas?|waves?)\s*(?:around\s+)?(\d+)(?:\s*to\s*(\d+))?\s*(?:ft|feet|foot)",
+# Gusts aren't sustained wind, and "occasionally to 13 feet" is the odd
+# bigger set, not the sea state: both are left out of the ranges.
+_GUSTS_RE = re.compile(
+    r"(?:with\s+)?(?:occasional\s+)?gusts?\s+(?:up\s+)?to\s+"
+    r"(?:\d+\s*(?:kt|knots?)|gale\s+force|storm\s+force)",
     re.IGNORECASE,
 )
+_OCCASIONAL_SEAS_RE = re.compile(
+    r",?\s*occasionally\s+to\s+\d+\s*(?:ft|feet|foot)", re.IGNORECASE
+)
+_SEAS_SENTENCE_RE = re.compile(r"\b(?:seas?|waves?)\b[^.]*", re.IGNORECASE)
+_HEIGHT_RE = re.compile(r"(\d+)(?:\s*to\s*(\d+))?\s*(?:ft|feet|foot)", re.IGNORECASE)
+
+
+def _wind_range(text: str) -> tuple[float, float] | None:
+    """Every sustained speed in a period ("NE winds 20 to 25 kt, increasing
+    to 25 to 30 kt") as one low-high range; gusts excluded."""
+    speeds = _WIND_SPEED_RE.findall(_GUSTS_RE.sub("", text))
+    if not speeds:
+        return None
+    lows = [float(low) for low, _ in speeds]
+    highs = [float(high or low) for low, high in speeds]
+    return min(lows), max(highs)
+
+
+def _sea_range(text: str) -> tuple[float, float] | None:
+    """Every sea height in a period's seas/waves sentence ("Seas 4 to 5 ft,
+    building to 5 to 7 ft"; "1 foot or less, then around 2 ft") as one
+    low-high range; the wave-detail sentence and "occasionally to" sets
+    excluded."""
+    match = _SEAS_SENTENCE_RE.search(_WAVE_DETAIL_STRIP_RE.sub("", text))
+    if not match:
+        return None
+    heights = _HEIGHT_RE.findall(_OCCASIONAL_SEAS_RE.sub("", match.group(0)))
+    if not heights:
+        return None
+    lows = [float(low) for low, _ in heights]
+    highs = [float(high or low) for low, high in heights]
+    return min(lows), max(highs)
+
+
+_WAVE_DETAIL_STRIP_RE = re.compile(r"wave detail:[^.]*\.?", re.IGNORECASE)
 _GRIDPOINT_WIND_SPEED_RE = re.compile(r"(\d+)(?:\s*to\s*(\d+))?\s*mph", re.IGNORECASE)
 _MPH_TO_KNOTS = 0.868976
 
@@ -212,17 +250,11 @@ def parse_marine_zone_conditions(periods: list[dict[str, Any]]) -> MarineZoneCon
             raw = dir_match.group(1)
             wind_directions.append(_DIR_MAP.get(raw.lower(), raw.upper()))
 
-        wind_match = _WIND_SPEED_RE.search(text)
-        if wind_match:
-            low = float(wind_match.group(1))
-            high = float(wind_match.group(2)) if wind_match.group(2) else low
-            wind_ranges.append((low, high))
+        if (wind := _wind_range(text)) is not None:
+            wind_ranges.append(wind)
 
-        sea_match = _SEA_HEIGHT_RE.search(text)
-        if sea_match:
-            low = float(sea_match.group(1))
-            high = float(sea_match.group(2)) if sea_match.group(2) else low
-            wave_ranges.append((low, high))
+        if (seas := _sea_range(text)) is not None:
+            wave_ranges.append(seas)
 
     conditions = MarineZoneConditions(
         wind_direction=wind_directions[0] if wind_directions else None,
@@ -297,12 +329,10 @@ def parse_marine_zone_days(periods: list[dict[str, Any]]) -> list[MarineDay]:
             if day.wind_direction is None and (match := _WIND_DIR_RE.search(text)):
                 raw = match.group(1)
                 day.wind_direction = _DIR_MAP.get(raw.lower(), raw.upper())
-            if match := _WIND_SPEED_RE.search(text):
-                low = float(match.group(1))
-                winds.append((low, float(match.group(2)) if match.group(2) else low))
-            if match := _SEA_HEIGHT_RE.search(text):
-                low = float(match.group(1))
-                seas.append((low, float(match.group(2)) if match.group(2) else low))
+            if (wind := _wind_range(text)) is not None:
+                winds.append(wind)
+            if (sea := _sea_range(text)) is not None:
+                seas.append(sea)
         if winds:
             day.wind_low_kt = min(w[0] for w in winds)
             day.wind_high_kt = max(w[1] for w in winds)

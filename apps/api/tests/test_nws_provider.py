@@ -548,3 +548,36 @@ async def test_find_marine_zone_probes_around_a_point_on_land() -> None:
         transport=httpx.MockTransport(handler), max_retries=0, backoff_base_seconds=0.0
     ) as client:
         assert await find_marine_zone(client, 38.99, -74.8) == "ANZ452"
+
+
+def test_marine_ranges_follow_changes_later_in_a_period() -> None:
+    """NWS text often changes mid-period; the range has to cover it.
+    Gusts and "occasionally to" sets aren't the sustained range."""
+    from app.providers.nws import parse_marine_zone_conditions
+
+    def period(text: str) -> dict[str, str]:
+        return {"name": "Tonight", "detailedForecast": text}
+
+    rising = parse_marine_zone_conditions(
+        [
+            period(
+                "Northeast winds 20 to 25 knots, increasing to 25 to 30 knots in "
+                "the afternoon. Occasional gusts to Gale Force. Seas 7 to 9 feet, "
+                "occasionally to 11 feet, building to 8 to 11 feet, occasionally "
+                "to 14 feet in the afternoon. Wave Detail: East 9 feet at 9 seconds."
+            )
+        ]
+    )
+    assert (rising.wind_low_kt, rising.wind_high_kt) == (20, 30)
+    assert (rising.wave_low_ft, rising.wave_high_ft) == (7, 11)
+
+    gusty = parse_marine_zone_conditions(
+        [
+            period(
+                "NE winds 15 to 20 kt with gusts up to 25 kt. Seas 1 foot or less, "
+                "then around 2 ft after midnight. Wave Detail: SE 1 foot at 9 seconds."
+            )
+        ]
+    )
+    assert (gusty.wind_low_kt, gusty.wind_high_kt) == (15, 20)
+    assert (gusty.wave_low_ft, gusty.wave_high_ft) == (1, 2)

@@ -12,7 +12,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from app.domain.scoring import onshore_offshore_dirs
+from app.domain.scoring import facing_bearing, onshore_offshore_dirs
 
 # Compass bearing the beach faces (toward the water), per orientation.
 _SEA_BEARING = {"east": 90, "west": 270, "gulf": 180}
@@ -27,7 +27,10 @@ class WindEffect(BaseModel):
 def wind_effect_for(orientation: str, wind_direction: str | None) -> WindEffect:
     onshore, offshore = onshore_offshore_dirs(orientation)
     relation: Literal["onshore", "offshore", "cross"] | None = None
-    if wind_direction and orientation in _SEA_BEARING:
+    sea_bearing = facing_bearing(orientation)
+    if sea_bearing is None:
+        sea_bearing = _SEA_BEARING.get(orientation)
+    if wind_direction and sea_bearing is not None:
         direction = wind_direction.upper()
         relation = (
             "onshore"
@@ -38,6 +41,6 @@ def wind_effect_for(orientation: str, wind_direction: str | None) -> WindEffect:
         )
     return WindEffect(
         orientation=orientation,
-        sea_bearing=_SEA_BEARING.get(orientation),
+        sea_bearing=sea_bearing,
         relation=relation,
     )

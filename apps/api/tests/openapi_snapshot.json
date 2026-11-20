@@ -599,6 +599,17 @@
             "title": "Nws Zone",
             "type": "string"
           },
+          "shore_facing_deg": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shore Facing Deg"
+          },
           "state": {
             "title": "State",
             "type": "string"
@@ -1862,6 +1873,17 @@
           "nws_zone": {
             "title": "Nws Zone",
             "type": "string"
+          },
+          "shore_facing_deg": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shore Facing Deg"
           },
           "state": {
             "title": "State",

@@ -137,11 +137,46 @@ def wind_orientation_for_region(conditions_region: str) -> str:
     return "east"
 
 
+_COMPASS_16 = (
+    "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+    "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW",
+)  # fmt: skip
+
+
+def wind_orientation_for(location: object) -> str:
+    """The orientation to score wind against: "facing:<deg>" when the spot
+    knows which way its beach faces (Naples faces west, Malibu south),
+    else its region's coast (`wind_orientation_for_region`)."""
+    facing = getattr(location, "shore_facing_deg", None)
+    if facing is not None:
+        return f"facing:{int(facing) % 360}"
+    return wind_orientation_for_region(str(getattr(location, "conditions_region", "")))
+
+
+def facing_bearing(orientation: str) -> int | None:
+    if orientation.startswith("facing:"):
+        return int(orientation.split(":", 1)[1])
+    return None
+
+
 def onshore_offshore_dirs(orientation: str) -> tuple[set[str], set[str]]:
     """Return `(onshore_dirs, offshore_dirs)` for a coastline
-    orientation. Unknown values fall back to the east-facing (Atlantic)
-    sets.
+    orientation. "facing:<deg>": wind from within 67.5° of the way the
+    beach faces is onshore, from within 67.5° of the opposite way
+    offshore, the rest along the shore. Unknown values fall back to the
+    east-facing (Atlantic) sets.
     """
+    facing = facing_bearing(orientation)
+    if facing is not None:
+        onshore: set[str] = set()
+        offshore: set[str] = set()
+        for index, name in enumerate(_COMPASS_16):
+            off_by = abs((index * 22.5 - facing + 180) % 360 - 180)
+            if off_by <= 67.5:
+                onshore.add(name)
+            elif off_by >= 112.5:
+                offshore.add(name)
+        return onshore, offshore
     return _DIRS_BY_ORIENTATION.get(orientation, _DIRS_BY_ORIENTATION["east"])
 
 

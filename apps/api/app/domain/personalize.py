@@ -28,7 +28,7 @@ overlay applied per request on a copy -- it never changes the cache.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from app.domain.guidance import (
@@ -165,11 +165,18 @@ def _tide_state_by_hour(
     return states
 
 
+def _hour_start(hour: dict[str, Any]) -> datetime:
+    value = hour["time"]
+    moment = value if isinstance(value, datetime) else datetime.fromisoformat(value)
+    return moment if moment.tzinfo else moment.replace(tzinfo=UTC)
+
+
 def your_window(
     outlook: dict[str, Any] | None,
     tides: dict[str, Any] | None,
     prefs: PreferencesOut,
     tz_name: str,
+    now: datetime | None = None,
 ) -> dict[str, Any] | None:
     """The best stretch inside the user's usual hours: the longest run of
     the best activity tier available there (the same rule as the shared
@@ -183,6 +190,10 @@ def your_window(
             str(time.value if hasattr(time, "value") else time), set()
         )
     hours = [h for h in outlook.get("hours", []) if h["hour"] in allowed]
+    if now is not None:
+        # Only hours that haven't ended: in the evening, a dawn window
+        # from this morning is no use.
+        hours = [h for h in hours if _hour_start(h) + timedelta(hours=1) > now]
     if not hours:
         return None
     tide_note: str | None = None
@@ -313,7 +324,9 @@ def _rebuilt_pack(
     return rebuilt.model_dump(mode="json") if rebuilt else None
 
 
-def personalize(envelope: ForecastEnvelope, prefs: PreferencesOut) -> ForecastEnvelope:
+def personalize(
+    envelope: ForecastEnvelope, prefs: PreferencesOut, now: datetime | None = None
+) -> ForecastEnvelope:
     """A personalized copy of *envelope*; the input is never mutated."""
     conditions = dict(envelope.conditions) if envelope.conditions else None
     recommendations = (
@@ -409,7 +422,13 @@ def personalize(envelope: ForecastEnvelope, prefs: PreferencesOut) -> ForecastEn
         recommendations["pack"] = pack
 
     hourly = dict(envelope.hourly_outlook) if envelope.hourly_outlook else None
-    window = your_window(hourly, envelope.tides, prefs, envelope.location.timezone)
+    window = your_window(
+        hourly,
+        envelope.tides,
+        prefs,
+        envelope.location.timezone,
+        now=now or datetime.now(UTC),
+    )
     if hourly is not None and window is not None:
         hourly["your_window"] = window
 

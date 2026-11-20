@@ -33,7 +33,7 @@ from app.domain.guidance import (
     load_regulations,
     regulation_for,
 )
-from app.domain.scoring import wind_orientation_for_region
+from app.domain.scoring import wind_orientation_for
 from app.infra.timezones import safe_zone
 from app.providers.locations import load_water_temp_profiles
 
@@ -174,7 +174,7 @@ async def _spot_for(
             basis.get("month") or now.astimezone(safe_zone(location.timezone)).month
         ),
         wave_range_ft=_pair(conditions.get("wave_range_ft")),
-        coast=wind_orientation_for_region(location.conditions_region),
+        coast=wind_orientation_for(location),
         wind_direction=conditions.get("wind_direction"),
         wind_range_kt=_pair(conditions.get("wind_range_kt")),
         hour=now.astimezone(safe_zone(location.timezone)).hour,

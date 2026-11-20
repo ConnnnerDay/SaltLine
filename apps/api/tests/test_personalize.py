@@ -242,6 +242,10 @@ def _hour(hour: int, tag: str) -> dict[str, object]:
     }
 
 
+# Early on the fixture day, so no hour has passed yet.
+_TIMED_NOW = datetime(2026, 11, 17, 5, 0, tzinfo=UTC)
+
+
 def _timed_envelope() -> ForecastEnvelope:
     tags = {6: "high", 7: "high", 10: "prime", 11: "prime", 18: "high", 19: "med"}
     hours = [_hour(h, tags.get(h, "low")) for h in range(24)]
@@ -276,7 +280,9 @@ def test_your_window_stays_inside_usual_times() -> None:
     from app.domain.preferences import FishingTime
 
     out = personalize(
-        _timed_envelope(), PreferencesOut(fishing_times=[FishingTime.DAWN])
+        _timed_envelope(),
+        PreferencesOut(fishing_times=[FishingTime.DAWN]),
+        now=_TIMED_NOW,
     )
     assert out.hourly_outlook is not None
     window = out.hourly_outlook["your_window"]
@@ -292,7 +298,7 @@ def test_your_window_prefers_the_users_tide() -> None:
         fishing_times=[FishingTime.MORNING, FishingTime.EVENING],
         tide_preference=TidePreference.INCOMING,
     )
-    out = personalize(_timed_envelope(), prefs)
+    out = personalize(_timed_envelope(), prefs, now=_TIMED_NOW)
     assert out.hourly_outlook is not None
     window = out.hourly_outlook["your_window"]
     # 10-11 AM is prime but on the falling (outgoing) tide; 6-7 PM is the
@@ -368,3 +374,15 @@ def test_favorite_fish_lead_when_biting() -> None:
     assert len(ids) == len(shore)
     fav = next(pick for pick in picks if pick["id"] == "tarpon")
     assert "One of your fish" in fav["reasons"] and fav["matches_profile"]
+
+
+def test_your_window_skips_hours_that_have_passed() -> None:
+    """At 9 AM a 6-7 AM dawn window is over; the next stretch is used."""
+    from app.domain.preferences import FishingTime
+
+    prefs = PreferencesOut(fishing_times=[FishingTime.DAWN, FishingTime.EVENING])
+    nine_am = datetime(2026, 11, 17, 14, 0, tzinfo=UTC)  # 9 AM Eastern
+    out = personalize(_timed_envelope(), prefs, now=nine_am)
+    assert out.hourly_outlook is not None
+    window = out.hourly_outlook["your_window"]
+    assert window["start"][11:13] == "18"

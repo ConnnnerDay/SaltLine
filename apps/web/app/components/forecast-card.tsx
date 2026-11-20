@@ -14,7 +14,7 @@ import { RIGS, rigsFor, type RigId } from '@/lib/rigs'
 import { KNOTS, RIG_KNOTS } from '@/lib/knots'
 import { RIG_FIT, RIG_WATER_TIPS, WATER_LABEL, WATER_NOUN, WATER_PHRASE, watersFor } from '@/lib/fishing-style'
 import type { Preferences } from '@/app/api/preferences/route'
-import { WhereToFish, YourDay } from './your-day'
+import { TideNow, WhereToFish, YourLimits } from './your-day'
 import { SunAndMoon, WeatherAlerts, type SkyConditions } from './sky'
 import { NextDays } from './next-days'
 import { WindAndWaves } from './wind-waves'
@@ -1552,16 +1552,6 @@ export function ForecastCard({
         ]}
         sections={[
           {
-            id: 'your-day',
-            label: 'Your day',
-            tab: 'today',
-            content: (
-              <>
-                <YourDay forecast={forecast} profile={profile} />
-              </>
-            ),
-          },
-          {
             id: 'when',
             label: 'When to fish',
             tab: 'today',
@@ -1609,9 +1599,10 @@ export function ForecastCard({
             label: 'Wind & waves',
             tab: 'conditions',
             content: (
-              <>
+              <div className="flex flex-col gap-4 in-data-[density=compact]:gap-3">
                 <WindAndWaves forecast={forecast} />
-              </>
+                <YourLimits forecast={forecast} profile={profile} />
+              </div>
             ),
           },
           {
@@ -1633,6 +1624,7 @@ export function ForecastCard({
                 {forecast.tides && (
                   <Card className="flex flex-col gap-4">
                     <SectionHeader title="Tides" aside="Next 24 hours" />
+                    <TideNow forecast={forecast} profile={profile} />
                     <TideChart tides={forecast.tides} timezone={forecast.location.timezone} />
                     <details className="collapsible group">
                       <summary className="flex w-fit cursor-pointer items-center gap-1.5 text-sm font-semibold text-primary">

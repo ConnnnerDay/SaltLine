@@ -10,6 +10,7 @@ import { fetchForecast } from '@/lib/get-forecast'
 import { fetchNearbyCams } from '@/lib/get-cams'
 import { logForecastFailure, userFacingReason } from '@/lib/diagnose-api'
 import { InternalApiError } from '@/lib/internal-api-client'
+import { NOT_COASTAL } from '@/app/components/forecast-card'
 
 export const dynamic = 'force-dynamic'
 
@@ -86,9 +87,13 @@ export default async function SharedForecastPage({ params }: Props) {
     if (err instanceof InternalApiError && err.status === 404) {
       notFound()
     }
-    logForecastFailure(locationId, err)
-    errorReason = userFacingReason(err)
-    error = err instanceof Error ? err.message : 'Unknown error'
+    if (err instanceof InternalApiError && err.status === 422) {
+      error = NOT_COASTAL
+    } else {
+      logForecastFailure(locationId, err)
+      errorReason = userFacingReason(err)
+      error = err instanceof Error ? err.message : 'Unknown error'
+    }
   }
 
   return (

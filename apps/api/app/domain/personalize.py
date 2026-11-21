@@ -460,12 +460,15 @@ def personalize(
         shore = [list(recommendations.get("species") or [])]
         extras = [list(recommendations.get(pool) or []) for pool in extra_pools]
         pools = shore + extras if fishing & shore_kinds else extras + shore
+        # Best tier first (a Fair creek fish never above a Prime shore one),
+        # taking turns between the lists within a tier.
+        tier_order = {"prime": 0, "good": 1, "fair": 2}
         ranked = [
-            (rank, which, pick)
+            (tier_order.get(_tier(pick["score"]), 3), rank, which, pick)
             for which, pool in enumerate(pools)
             for rank, pick in enumerate(pool)
         ]
-        ranked.sort(key=lambda item: item[:2])
+        ranked.sort(key=lambda item: item[:3])
         merged = [pick for *_, pick in ranked]
         recommendations["species"] = merged[:MAX_PICKS]
         if not prefs.target_groups:

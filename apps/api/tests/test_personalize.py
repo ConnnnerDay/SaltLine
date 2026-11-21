@@ -538,3 +538,29 @@ def test_every_outlook_day_is_rated_for_the_main_style() -> None:
         "Good",
     )
     assert days[1]["score"] == 55
+
+
+def test_merged_picks_never_put_a_lower_tier_first() -> None:
+    from app.domain.guidance import build_fishing_guidance
+    from app.domain.personalize import _tier
+    from app.domain.preferences import FishingType
+
+    order = {"prime": 0, "good": 1, "fair": 2}
+    for region, temp, month in (("gulf", 67.0, 11), ("atlantic_south", 80.0, 7)):
+        guidance = build_fishing_guidance(
+            region=region,
+            water_temp_f=temp,
+            water_temp_is_fallback=False,
+            month=month,
+            coast="gulf",
+            wind_direction="E",
+            wind_range_kt=(5.0, 10.0),
+            wave_range_ft=(2.0, 3.0),
+        ).model_dump(mode="json")
+        envelope = _envelope().model_copy(update={"recommendations": guidance})
+        for kinds in ([FishingType.KAYAK], [FishingType.SURF, FishingType.OFFSHORE]):
+            out = personalize(envelope, PreferencesOut(fishing_types=kinds))
+            tiers = [
+                order[_tier(p["score"])] for p in (out.recommendations or {})["species"]
+            ]
+            assert tiers == sorted(tiers), (region, kinds, tiers)

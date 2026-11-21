@@ -6,6 +6,78 @@ contract: versioned `/v1` endpoints, deployed on an always-on Render
 service, signed and called only from `apps/web`'s backend-for-frontend —
 never directly from a browser.
 
+## How the fishing score works
+
+Every forecast gets a **day score** out of 100 and a verdict, and each fish
+in "What's biting" gets its own **fish score** and tier. The forecast page's
+"Why this score" fold lists every factor behind a day's score, with its
+points.
+
+### Day score (`app/domain/scoring.py`, `score_conditions`)
+
+Every day starts at **50**; each factor below adds or takes away points,
+and the total is clamped to 0–100.
+
+| Factor | Source | Points |
+|---|---|---|
+| **Wind speed** (high end of the forecast range) | NWS marine zone, buoy | light ≤8 kt **+14** · ≤12 kt +8 · ≤16 kt +2 · ≤20 kt −8 · ≤25 kt −16 · stronger −26 |
+| **Surf height** (high end of the range) | NWS marine zone, buoy | flat ≤1.5 ft **+10** · ≤3 ft +6 · ≤5 ft −4 · ≤7 ft −12 · bigger −22 |
+| Wind direction | coastline orientation | offshore +4 (only up to 16 kt) · onshore −4 · Hawaii: none |
+| **Season**: today's fish picks in their best water | fish guidance | 3+ fish **+6** · 1–2 fish +2 · some in season, none in their best water −2 · nothing in season −6 |
+| Live water reading (not a monthly estimate) | NOAA CO-OPS | +1 |
+| Water vs this month's normal | normals table | 5°F+ colder −5 ("cold snap") |
+| Water over the last 24 hours | CO-OPS hourly | dropped 3°F+ −5 · cool water (<70°F) warmed 2°F+ +3 |
+| Dawn / dusk bite window | sun times | +4 each, within 2 hours of sunrise or sunset |
+| Solunar period | moon phase | excellent +8 · good +4 · fair 0 · poor −6 |
+| Moon brightness | moon phase | +1 to +2 |
+| Barometer, 3-hour trend | NWS station | falling +4 (not once the wind is strong or storms arrive) · rising −2 · rising rapidly −6 |
+| Sky (daytime) | NWS forecast | overcast +3 · snow or ice −6 |
+| Rain likely (60%+) | NWS forecast | −3 |
+| Thunderstorms | NWS forecast | −15 |
+| Freezing air (≤32°F) | NWS forecast | −3 |
+| Gusts 25 kt+, at least 5 kt over the forecast wind | NDBC buoy | −4 |
+| Groundswell, 12 s+ and 3 ft+ | NWS marine zone | −4 ("heavy shorebreak") |
+| Rip current risk | NWS surf zone forecast | high −4 · moderate −1 |
+| High surf warning / advisory | NWS alerts | −14 / −7 |
+| Coastal flood warning · wind advisory · small craft advisory | NWS alerts | −6 · −5 · −4 |
+| Freeze · excessive heat · dense fog · heat advisory · rip current · beach hazards | NWS alerts | −4 · −4 · −3 · −2 · −2 · −2 |
+
+**Safety caps**, applied after the points:
+- A gale, storm, hurricane, tropical storm, special marine, storm surge or
+  tsunami **warning** makes the day **Poor**.
+- **Thunderstorms** keep the day below Fair.
+
+**Verdicts:** 80+ Excellent · 64–79 Good · 48–63 Fair · 32–47
+Challenging · under 32 Poor.
+
+The season factor is relative on purpose: a January day with winter fish
+in their best water scores the same as a July day with summer fish, so
+cold months aren't marked down just for being cold. Wind and surf carry the
+most weight because they decide whether a spot can be fished at all.
+
+**Your comfort limits** (signed in): a day over your max wind or surf drops
+one verdict level and says so; the number is unchanged.
+
+The 5-day outlook scores each day the same way from that day's marine
+forecast, weather (storms, rain, sky) and the season count.
+
+### Fish score (`app/domain/guidance.py`)
+
+Each fish that lives in the region is scored; those scoring 30 or more are
+picks, and the best become "What's biting":
+
+| Factor | Points |
+|---|---|
+| Water temperature | up to **50** in its ideal range, less toward the edges of its range; out of range, not a pick |
+| Season | peak month **30** · good month 15 · off season 0 |
+| Spawning, when spawning brings it within reach (inlets, the surf, a run past the piers) and the water is in its spawning range | +4 (fish that spawn offshore: 0) |
+| A seasonal run on now in the region (`app/data/runs.json`) | +3 |
+| Today's conditions for that fish (wind direction, wind, surf, time of day, by its preferences) | about −5 to +15 |
+
+**Tiers:** 88+ Prime · 70+ Good · otherwise Fair. **The tier follows the
+day:** on a Poor day every fish is held to Fair, and on a Challenging day
+each drops one step, with a note above the picks.
+
 ## Status
 
 **Fishing profile + personalized forecasts (original setup restored).**
@@ -290,7 +362,9 @@ Boots, has real CI, and now has:
   `docs/R1_RECONCILIATION_AUDIT.md`, re-flagged rather than silently
   ported or dropped). `apps/api/tests/test_scoring.py` characterizes
   every threshold band, the four coastline orientations, the verdict
-  tiers, and the `None`-input → `Unknown`-verdict path.
+  tiers, and the `None`-input → `Unknown`-verdict path. (Since extended:
+  see [How the fishing score works](#how-the-fishing-score-works) for the
+  current factors.)
 
 - Confidence model (`app/domain/confidence.py`, `assess_confidence`): a
   four-factor evidence-quality score with **no legacy precedent** —

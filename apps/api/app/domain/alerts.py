@@ -164,10 +164,16 @@ def compose_alert(
     score = conditions.get("score") or {}
     verdict = score.get("verdict", "Good")
     points = score.get("score")
-    subject = f"Saltline: {location_name} is {verdict}" + (
+    # Rated for the angler's main style when they have one ("pier").
+    style = f" for {score['style']} fishing" if score.get("style") else ""
+    subject = f"Saltline: {location_name} is {verdict}{style}" + (
         f" ({points}/100) today" if points is not None else " today"
     )
-    lines = [f"{location_name} looks {verdict.lower()} for fishing today."]
+    lines = [
+        f"{location_name} looks {verdict.lower()} for {score['style']} fishing today."
+        if score.get("style")
+        else f"{location_name} looks {verdict.lower()} for fishing today."
+    ]
     if score.get("summary"):
         summary = str(score["summary"])
         lines.append(_metric_text(summary) if metric else summary)

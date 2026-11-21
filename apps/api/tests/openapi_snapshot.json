@@ -3468,7 +3468,7 @@
     },
     "/v1/species/{species_id}/spots": {
       "get": {
-        "description": "*ids* (the user's spots) ranked for this fish today: biting spots by\nscore, best first; the rest after, in the order given.",
+        "description": "*ids* (the user's spots) ranked for this fish today: biting spots by\nscore, best first; the rest after, in the order given. Each spot's day\nis rated as the signed-in user sees it.",
         "operationId": "spots_for_species_v1_species__species_id__spots_get",
         "parameters": [
           {

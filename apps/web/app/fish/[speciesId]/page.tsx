@@ -333,7 +333,13 @@ export default async function FishDetailPage({ params }: Props) {
                 </Card>
               }
             >
-              <BestSpots speciesId={fish.id} name={fish.name} spotIds={spotIds.slice(0, 12)} units={units} />
+              <BestSpots
+                speciesId={fish.id}
+                name={fish.name}
+                spotIds={spotIds.slice(0, 12)}
+                units={units}
+                userId={userId}
+              />
             </Suspense>
           )}
 

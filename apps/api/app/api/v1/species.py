@@ -25,6 +25,7 @@ from pydantic import BaseModel
 
 from app.api.deps import AppState, get_app_state, resolve_location_id
 from app.api.internal_auth import require_internal_signature
+from app.api.v1.forecasts import load_preferences, personalized_with
 from app.domain.forecast_cache import get_or_assemble_forecast
 from app.domain.guidance import (
     Regulation,
@@ -34,6 +35,7 @@ from app.domain.guidance import (
     regulation_for,
     tier_for_day,
 )
+from app.domain.preferences import PreferencesOut
 from app.domain.scoring import wind_orientation_for
 from app.infra.timezones import safe_zone
 from app.providers.locations import load_water_temp_profiles
@@ -141,7 +143,11 @@ def _pair(value: Any) -> tuple[float, float] | None:
 
 
 async def _spot_for(
-    species_id: str, location_id: str, state: AppState, now: datetime
+    species_id: str,
+    location_id: str,
+    state: AppState,
+    now: datetime,
+    prefs: PreferencesOut | None = None,
 ) -> SpotForSpecies | None:
     try:
         location = await resolve_location_id(location_id, state)
@@ -154,6 +160,9 @@ async def _spot_for(
         )
     except HTTPException:  # an unknown or out-of-range spot just drops out
         return None
+    # The day as the signed-in angler sees it on the forecast page (their
+    # main style, their comfort limits).
+    envelope = personalized_with(envelope, prefs)
     conditions = envelope.conditions or {}
     basis = (envelope.recommendations or {}).get("basis") or {}
     water = (conditions.get("water_temperature") or {}).get("value")
@@ -202,15 +211,18 @@ async def spots_for_species(
     species_id: str,
     ids: list[str] = Query(default=[], max_length=MAX_SPOTS),  # noqa: B008
     state: AppState = Depends(get_app_state),  # noqa: B008
+    user_id: str | None = Depends(require_internal_signature),
 ) -> list[SpotForSpecies]:
     """*ids* (the user's spots) ranked for this fish today: biting spots by
-    score, best first; the rest after, in the order given."""
+    score, best first; the rest after, in the order given. Each spot's day
+    is rated as the signed-in user sees it."""
     if not any(s["id"] == species_id for s in load_catalogue()):
         raise HTTPException(status_code=404, detail="unknown species")
     now = datetime.now(UTC)
     unique = list(dict.fromkeys(ids))[:MAX_SPOTS]
+    prefs = await load_preferences(user_id, state)
     found = await asyncio.gather(
-        *(_spot_for(species_id, i, state, now) for i in unique)
+        *(_spot_for(species_id, i, state, now, prefs) for i in unique)
     )
     spots = [spot for spot in found if spot is not None]
     # Best for this fish first; on a tie, the spot with the better day overall

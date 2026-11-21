@@ -509,3 +509,32 @@ def test_todays_outlook_carries_the_comfort_downgrade() -> None:
     assert out.conditions is not None
     assert out.conditions["score"]["verdict"] == "Fair"  # Good, down a level
     assert out.conditions["days"][0]["verdict"] == "Fair"
+
+
+def test_every_outlook_day_is_rated_for_the_main_style() -> None:
+    from app.domain.preferences import FishingType
+
+    envelope = _styled_envelope()
+    assert envelope.conditions is not None
+    envelope.conditions["days"] = [
+        {"label": "Today", "score": 50, "verdict": "Fair"},
+        {
+            "label": "Tomorrow",
+            "score": 30,
+            "verdict": "Poor",
+            "score_by_style": {
+                "surf": {"score": 30, "verdict": "Poor"},
+                "pier": {"score": 55, "verdict": "Fair"},
+            },
+        },
+        {"label": "Sun", "score": 70, "verdict": "Good"},  # cached before styles
+    ]
+    out = personalize(envelope, PreferencesOut(fishing_types=[FishingType.PIER]))
+    assert out.conditions is not None
+    days = out.conditions["days"]
+    assert (days[0]["verdict"], days[1]["verdict"], days[2]["verdict"]) == (
+        "Good",
+        "Fair",
+        "Good",
+    )
+    assert days[1]["score"] == 55

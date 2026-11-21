@@ -98,15 +98,23 @@ def _score_for_style(
         return conditions
     out = dict(conditions)
     out["score"] = {**by_style[style], "style": STYLE_PROFILES[style].label}
-    # The outlook's "Today" is the headline itself (assembly copies it in):
-    # keep the two the same for this style.
+    # Every outlook day rated for this style too ("Today" is the headline
+    # itself, which assembly copies in).
     days = list(out.get("days") or [])
+    for index, day in enumerate(days):
+        styled = (day.get("score_by_style") or {}).get(style)
+        if index == 0:
+            styled = {
+                "score": out["score"].get("score"),
+                "verdict": out["score"].get("verdict"),
+            }
+        if styled:
+            days[index] = {
+                **day,
+                "score": styled.get("score"),
+                "verdict": styled.get("verdict"),
+            }
     if days:
-        days[0] = {
-            **days[0],
-            "score": out["score"].get("score"),
-            "verdict": out["score"].get("verdict"),
-        }
         out["days"] = days
 
     def rank(verdict: str | None) -> int:

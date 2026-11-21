@@ -190,7 +190,7 @@ from app.domain.normalize import (
     normalize_marine_zone_wind_range,
     normalize_water_temperature,
 )
-from app.domain.outlook import DayOutlook, build_day_outlook
+from app.domain.outlook import DayOutlook, DayScore, build_day_outlook
 from app.domain.scoring import (
     STYLE_PROFILES,
     ForecastScore,
@@ -862,6 +862,10 @@ async def assemble_forecast(
             update={
                 "score": score.score,
                 "verdict": score.verdict.value,
+                "score_by_style": {
+                    style: DayScore(score=result.score, verdict=result.verdict.value)
+                    for style, result in score_by_style.items()
+                },
                 "wind_range_kt": wind_range,
                 "wave_range_ft": wave_range,
                 "wind_direction": wind_direction or conditions.days[0].wind_direction,

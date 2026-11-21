@@ -253,6 +253,7 @@ def score_conditions(
     wind_gust_kt: float | None = None,
     swell: list[tuple[float, int]] | None = None,
     air_temp_f: float | None = None,
+    water_temp_change_24h: float | None = None,
 ) -> ForecastScore:
     """Score fishability from the marine and astronomical signals given.
 
@@ -389,7 +390,13 @@ def score_conditions(
             score += 1
 
     if pressure_trend:
-        if pressure_trend.startswith("falling"):
+        # The pre-front bite is before the weather turns: once the wind is
+        # strong or storms are here, falling pressure is just the storm.
+        if (
+            pressure_trend.startswith("falling")
+            and wind_max <= _WIND_STRONG_KT
+            and not storms
+        ):
             score += 4
             factors.append(
                 ScoreFactor(
@@ -480,6 +487,30 @@ def score_conditions(
         factors.append(
             ScoreFactor(impact=-6, description="Snow or ice in the forecast")
         )
+
+    # A quick drop (upwelling, a front stirring the water) shuts fish down
+    # for a day or two; cool water warming up turns them on.
+    if water_temp_change_24h is not None:
+        if water_temp_change_24h <= -3:
+            score -= 5
+            factors.append(
+                ScoreFactor(
+                    impact=-5,
+                    description=f"Water dropped {-water_temp_change_24h:g}°F since yesterday: fish slow down",
+                )
+            )
+        elif (
+            water_temp_change_24h >= 2
+            and water_temperature is not None
+            and water_temperature.value < 70
+        ):
+            score += 3
+            factors.append(
+                ScoreFactor(
+                    impact=3,
+                    description=f"Water warmed {water_temp_change_24h:g}°F since yesterday: fish turn on",
+                )
+            )
 
     if precip_pct is not None and precip_pct >= 60 and not storms:
         score -= 3

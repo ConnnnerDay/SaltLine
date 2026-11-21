@@ -528,3 +528,46 @@ class TestWeatherAndAlerts:
         base = score_conditions((5.0, 8.0), (1.0, 2.0)).score or 0
         cold = score_conditions((5.0, 8.0), (1.0, 2.0), air_temp_f=28).score or 0
         assert cold == base - 3
+
+    def test_water_temperature_swings(self) -> None:
+        base = (
+            score_conditions(
+                (5.0, 8.0), (1.0, 2.0), water_temperature=_water_temp(60)
+            ).score
+            or 0
+        )
+        drop = (
+            score_conditions(
+                (5.0, 8.0),
+                (1.0, 2.0),
+                water_temperature=_water_temp(60),
+                water_temp_change_24h=-4,
+            ).score
+            or 0
+        )
+        warm = (
+            score_conditions(
+                (5.0, 8.0),
+                (1.0, 2.0),
+                water_temperature=_water_temp(60),
+                water_temp_change_24h=2.5,
+            ).score
+            or 0
+        )
+        hot = score_conditions(
+            (5.0, 8.0),
+            (1.0, 2.0),
+            water_temperature=_water_temp(80),
+            water_temp_change_24h=2.5,
+        )
+        assert drop == base - 5
+        assert warm == base + 3
+        assert not any("warmed" in f.description for f in hot.factors)
+
+    def test_no_pre_front_bonus_once_the_storm_is_here(self) -> None:
+        gale = score_conditions((25.0, 30.0), (6.0, 11.0), pressure_trend="falling")
+        storm = score_conditions(
+            (5.0, 8.0), (1.0, 2.0), pressure_trend="falling", storms=True
+        )
+        for result in (gale, storm):
+            assert not any("Falling pressure" in f.description for f in result.factors)

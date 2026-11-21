@@ -212,6 +212,7 @@ from app.providers.noaa_coops import (
     fetch_coops_wind,
     fetch_tide_predictions,
     fetch_water_temperature,
+    fetch_water_temperature_change,
 )
 from app.providers.nws import (
     GridpointWindForecast,
@@ -474,6 +475,10 @@ async def assemble_forecast(
     *,
     now: datetime,
 ) -> ForecastEnvelope:
+    # Alongside the main fetches (gather's typing stops at six).
+    water_temp_change_task = asyncio.create_task(
+        fetch_water_temperature_change(client, location.water_temp_station)
+    )
     (
         marine_zone_result,
         water_temp_result,
@@ -489,6 +494,7 @@ async def assemble_forecast(
         _fetch_tides(client, location.coops_station, now, location.timezone),
         fetch_point_weather(client, location.lat, location.lng, [location.name]),
     )
+    water_temp_change = await water_temp_change_task
 
     sources = [
         _source_status(_SOURCE_NWS_MARINE_ZONE, marine_zone_result, now),
@@ -731,6 +737,7 @@ async def assemble_forecast(
                 marine_zone_conditions.swell if marine_zone_conditions else []
             )
         ],
+        water_temp_change_24h=water_temp_change,
         air_temp_f=(
             point_weather.now.temperature_f
             if point_weather and point_weather.now

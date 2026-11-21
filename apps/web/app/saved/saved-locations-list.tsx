@@ -181,6 +181,7 @@ function LocationForecastSummary({ forecast, units }: { forecast: ForecastEnvelo
           </span>
         )}
       </span>
+      {score?.style && <span className="-mt-1 text-xs font-semibold text-text-muted">For {score.style} fishing</span>}
       {facts.length > 0 && <span className="text-sm text-text-muted">{facts.join(' · ')}</span>}
       {bestWindow && (
         <span className="text-sm text-text">

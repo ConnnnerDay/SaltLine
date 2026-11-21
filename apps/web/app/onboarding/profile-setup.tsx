@@ -122,7 +122,7 @@ export function ProfileSetup({ next, spots = [] }: { next: string; spots?: MapSp
 
   const isLast = step === STEP_TITLES.length - 1
 
-  // Re-running setup (account menu "Fishing profile") edits the saved
+  // Re-running setup (Preferences, "Walk through setup again") edits the saved
   // profile rather than starting from blank.
   useEffect(() => {
     let cancelled = false
@@ -425,6 +425,9 @@ export function ProfileSetup({ next, spots = [] }: { next: string; spots?: MapSp
 
       {step === 6 && (
         <div className="flex flex-col gap-4">
+          <p className="text-sm text-text-muted">
+            Just starting out gets you extra beginner tips with today&apos;s gear and more step-by-step pictures.
+          </p>
           <div className="flex flex-wrap gap-2" role="group" aria-label="Experience">
             {(
               [

@@ -16,6 +16,7 @@ from app.providers.noaa_coops import (
     fetch_coops_wind,
     fetch_tide_predictions,
     fetch_water_temperature,
+    fetch_water_temperature_change,
 )
 
 
@@ -265,3 +266,29 @@ def test_coops_direction_prefers_compass_label_then_degrees() -> None:
     assert _coops_direction({"d": "32.0"}) == "NNE"
     assert _coops_direction({"d": "355"}) == "N"
     assert _coops_direction({"d": ""}) is None
+
+
+@pytest.mark.asyncio
+async def test_water_temperature_change_over_a_day() -> None:
+    rows = [
+        {"t": f"2024-07-15 {h % 24:02d}:00", "v": f"{70 - h * 0.2:.1f}"}
+        for h in range(25)
+    ]
+    rows[5]["v"] = ""  # a missing reading is skipped
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert "range=26" in str(request.url)
+        return _datagetter_response(data=rows)
+
+    async with BoundedHTTPClient(transport=httpx.MockTransport(handler)) as client:
+        assert await fetch_water_temperature_change(client, "8658163") == -4.8
+
+
+@pytest.mark.asyncio
+async def test_water_temperature_change_needs_a_day_of_readings() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return _datagetter_response(data=[{"t": "2024-07-15 12:00", "v": "70"}])
+
+    async with BoundedHTTPClient(transport=httpx.MockTransport(handler)) as client:
+        assert await fetch_water_temperature_change(client, "8658163") is None
+        assert await fetch_water_temperature_change(client, "") is None

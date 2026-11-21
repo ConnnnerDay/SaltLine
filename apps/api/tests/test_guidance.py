@@ -9,6 +9,7 @@ contract.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Any
 
 import pytest
 
@@ -143,7 +144,7 @@ def test_picks_are_sorted_capped_and_above_threshold() -> None:
 def test_red_drum_in_october_at_65f_is_a_good_pick_with_reasons() -> None:
     guidance = _guidance()
     red_drum = next(pick for pick in guidance.species if pick.id == "red-drum")
-    assert red_drum.score == 80  # 50 temperature + 30 peak month
+    assert red_drum.score == 83  # 50 temperature + 30 peak month + 3 fall run
     # In season at an ideal temperature is "good"; "prime" also needs
     # today's conditions in its favor.
     assert red_drum.tier is GuidanceTier.GOOD
@@ -152,6 +153,7 @@ def test_red_drum_in_october_at_65f_is_a_good_pick_with_reasons() -> None:
         "October is a peak month",
         # Aug-Nov spawners, but 65°F is below their 70-82°F spawning water.
         "Spawning season",
+        "The fall red drum run is on",
     ]
     assert red_drum.rig and red_drum.bait and red_drum.hook_size and red_drum.sinker
 
@@ -401,7 +403,8 @@ def test_hawaii_has_no_wind_direction_effect() -> None:
 def test_conditions_reasons_appear_on_picks() -> None:
     guidance = _guidance(coast="east", wind_direction="NE", wind_range_kt=(10.0, 15.0))
     red_drum = next(pick for pick in guidance.species if pick.id == "red-drum")
-    assert red_drum.score == 50 + 30 + 5 + 3  # temp + peak month + onshore + wind
+    # temp + peak month + fall run + onshore + wind
+    assert red_drum.score == 50 + 30 + 3 + 5 + 3
     assert any("Onshore NE wind" in reason for reason in red_drum.reasons)
     assert "Moderate wind stirs up bait" in red_drum.reasons
 
@@ -435,7 +438,10 @@ def test_pack_murky_water_adjusts_color_and_weight() -> None:
     pack = _pack(wave_range_ft=(3.0, 5.0))
     rows = {row.kind: row.value for row in pack.rows}
     assert rows["color"].startswith("Chartreuse")
-    assert rows["weight"].endswith("go heavier in rough surf")
+    # A pyramid already holds in rough surf; anything else says go heavier.
+    assert "pyramid" in rows["weight"].lower() or rows["weight"].endswith(
+        "go heavier in rough surf"
+    )
 
 
 def test_pack_cold_water_tip() -> None:
@@ -448,8 +454,28 @@ def test_pack_skips_non_lure_phrases() -> None:
     from app.domain.guidance import _NOT_A_LURE
 
     pack = _pack()
-    lures = next(row.value for row in pack.rows if row.kind == "lure").lower()
-    assert not any(phrase in lures for phrase in _NOT_A_LURE)
+    lures = next(row.value for row in pack.rows if row.kind == "lure")
+    assert not any(_NOT_A_LURE.search(entry) for entry in lures.split(" · "))
+
+
+def test_not_a_lure_phrases_cover_the_catalogue_wording() -> None:
+    from app.domain.guidance import _NOT_A_LURE
+
+    for phrase in (
+        "Not a strong lure target",
+        "not usually targeted on lures",
+        "Primarily caught on bait",
+        "small jigs occasionally work",
+        "Not applicable",
+    ):
+        assert _NOT_A_LURE.search(phrase), phrase
+    for lure in (
+        "Tiny metal jigs (1/4-1/2 oz)",
+        "Small spoons",
+        "Sabiki rigs",
+        "Bucktail jigs",
+    ):
+        assert not _NOT_A_LURE.search(lure), lure
 
 
 def test_no_pack_without_picks() -> None:
@@ -528,7 +554,7 @@ def test_spawning_fish_say_so() -> None:
         max_picks=200,
     )
     red = next(pick for pick in in_range.species if pick.id == "red-drum")
-    assert any("spawning range" in reason for reason in red.reasons)
+    assert any(reason.startswith("Spawning now (") for reason in red.reasons)
     cooler = build_fishing_guidance(
         region="atlantic_mid",
         water_temp_f=62.0,
@@ -608,3 +634,125 @@ def test_regional_seasons_only_name_real_species_and_regions() -> None:
             assert region in catalogue[species_id]["regions"], (species_id, region)
             assert not set(months["peak"]) & set(months["good"]), species_id
             assert all(1 <= m <= 12 for m in months["peak"] + months["good"])
+
+
+def _rated(score: int, verdict: str | None) -> dict[str, Any]:
+    from app.domain.guidance import rate_picks_for_day
+
+    pick = {"id": "x", "score": score, "tier": "prime", "reasons": ["Water 70°F"]}
+    return rate_picks_for_day([pick], verdict)[0]
+
+
+def test_poor_day_holds_every_pick_to_fair() -> None:
+    rated = _rated(95, "Poor")
+    assert rated["tier"] == "fair"
+    assert rated["reasons"][0] == "Held to Fair: today is rated Poor here"
+
+
+def test_challenging_day_drops_a_step() -> None:
+    assert _rated(95, "Challenging")["tier"] == "good"
+    assert _rated(75, "Challenging")["tier"] == "fair"
+
+
+def test_good_day_leaves_tiers_alone_and_rating_is_idempotent() -> None:
+    from app.domain.guidance import rate_picks_for_day
+
+    assert _rated(95, "Good")["tier"] == "prime"
+    once = _rated(95, "Poor")
+    twice = rate_picks_for_day([once], "Poor")[0]
+    assert twice["reasons"].count("Held to Fair: today is rated Poor here") == 1
+    # Back to a good day (e.g. re-rated after personalizing): note removed.
+    again = rate_picks_for_day([once], "Good")[0]
+    assert again["tier"] == "prime" and again["reasons"] == ["Water 70°F"]
+
+
+def test_strong_offshore_wind_is_not_called_clear_water() -> None:
+    from app.domain.guidance import _conditions_modifier
+
+    _, light = _conditions_modifier(
+        ["calm_water"],
+        coast="east",
+        wind_direction="W",
+        wind_range_kt=(5, 10),
+        wave_range_ft=None,
+        hour=None,
+    )
+    _, strong = _conditions_modifier(
+        ["calm_water"],
+        coast="east",
+        wind_direction="W",
+        wind_range_kt=(20, 25),
+        wave_range_ft=None,
+        hour=None,
+    )
+    assert any("keeps the water clear" in reason for reason in light)
+    assert not any("keeps the water clear" in reason for reason in strong)
+
+
+def test_spawning_scores_only_when_it_brings_fish_within_reach() -> None:
+    from app.domain.guidance import _spawn_points
+
+    red = {
+        "spawn": {
+            "months": [9],
+            "temp_low": 70,
+            "temp_high": 82,
+            "note": "Red drum spawn near inlets and the surf zone.",
+        }
+    }
+    wahoo = {
+        "spawn": {
+            "months": [9],
+            "temp_low": 70,
+            "temp_high": 82,
+            "note": "Wahoo spawn in open water offshore.",
+        }
+    }
+    assert _spawn_points(red, 9, 75.0) > 0
+    assert _spawn_points(red, 9, 60.0) == 0  # water out of the spawning range
+    assert _spawn_points(red, 4, 75.0) == 0  # out of season
+    assert _spawn_points(wahoo, 9, 75.0) == 0
+
+
+def test_runs_match_the_web_copy() -> None:
+    """app/data/runs.json is copied from apps/web/lib/runs.ts; each run's
+    id, months and fish must agree."""
+    import re
+    from pathlib import Path
+
+    from app.domain.guidance import load_runs
+
+    source = Path(__file__).resolve().parents[2] / "web" / "lib" / "runs.ts"
+    if not source.exists():  # api checked out on its own
+        pytest.skip("apps/web not present")
+    text = source.read_text()
+    web = {
+        match.group(1): (
+            [int(m) for m in re.findall(r"\d+", match.group(2))],
+            re.findall(r"'([^']+)'", match.group(3)),
+        )
+        for match in re.finditer(
+            r"id: '([^']+)',.*?months: \[([^\]]*)\],\s*fish: \[([^\]]*)\]",
+            text,
+            re.DOTALL,
+        )
+    }
+    api = {run["id"]: (run["months"], run["fish"]) for run in load_runs()}
+    assert web == api
+
+
+def test_fish_in_an_active_run_get_the_bonus() -> None:
+    from app.domain.guidance import _active_run
+
+    assert _active_run("red-drum", "atlantic_south", 10) is not None
+    assert _active_run("red-drum", "atlantic_south", 4) is None
+    assert _active_run("red-drum", "pacific_north", 10) is None
+    fall = build_fishing_guidance(
+        region="atlantic_south",
+        water_temp_f=72.0,
+        water_temp_is_fallback=False,
+        month=10,
+        max_picks=200,
+    )
+    red = next(pick for pick in fall.species if pick.id == "red-drum")
+    assert any(reason.endswith("run is on") for reason in red.reasons)

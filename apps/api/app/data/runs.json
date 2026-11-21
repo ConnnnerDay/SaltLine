@@ -1,0 +1,412 @@
+{
+  "_comment": "Copied from apps/web/lib/runs.ts (id, title, regions, months, fish); tests/test_guidance.py checks the two match.",
+  "runs": [
+    {
+      "id": "mullet-run",
+      "title": "Fall mullet run",
+      "regions": [
+        "atlantic_mid",
+        "atlantic_south"
+      ],
+      "months": [
+        9,
+        10,
+        11
+      ],
+      "fish": [
+        "bluefish",
+        "red-drum",
+        "jack-crevalle",
+        "tarpon",
+        "snook",
+        "flounder",
+        "spanish-mackerel"
+      ]
+    },
+    {
+      "id": "fall-drum",
+      "title": "Fall red drum run",
+      "regions": [
+        "atlantic_mid",
+        "atlantic_south"
+      ],
+      "months": [
+        9,
+        10,
+        11
+      ],
+      "fish": [
+        "red-drum"
+      ]
+    },
+    {
+      "id": "flounder-run",
+      "title": "Fall flounder run",
+      "regions": [
+        "atlantic_mid",
+        "atlantic_south",
+        "gulf"
+      ],
+      "months": [
+        10,
+        11,
+        12
+      ],
+      "fish": [
+        "flounder",
+        "southern-flounder",
+        "gulf-flounder"
+      ]
+    },
+    {
+      "id": "false-albacore",
+      "title": "False albacore blitz",
+      "regions": [
+        "atlantic_mid",
+        "atlantic_north"
+      ],
+      "months": [
+        9,
+        10,
+        11
+      ],
+      "fish": [
+        "false-albacore",
+        "atlantic-bonito"
+      ]
+    },
+    {
+      "id": "fall-kings",
+      "title": "Fall king mackerel run",
+      "regions": [
+        "atlantic_mid",
+        "atlantic_south"
+      ],
+      "months": [
+        10,
+        11
+      ],
+      "fish": [
+        "king-mackerel"
+      ]
+    },
+    {
+      "id": "spring-cobia",
+      "title": "Spring cobia run",
+      "regions": [
+        "atlantic_mid",
+        "atlantic_south",
+        "gulf"
+      ],
+      "months": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "fish": [
+        "cobia"
+      ]
+    },
+    {
+      "id": "spanish-arrive",
+      "title": "Spanish mackerel arrive",
+      "regions": [
+        "atlantic_mid",
+        "atlantic_south",
+        "gulf"
+      ],
+      "months": [
+        4,
+        5,
+        6
+      ],
+      "fish": [
+        "spanish-mackerel",
+        "bluefish"
+      ]
+    },
+    {
+      "id": "pompano-spring",
+      "title": "Spring pompano run",
+      "regions": [
+        "atlantic_south",
+        "gulf"
+      ],
+      "months": [
+        3,
+        4
+      ],
+      "fish": [
+        "pompano"
+      ]
+    },
+    {
+      "id": "pompano-fall",
+      "title": "Fall pompano run",
+      "regions": [
+        "atlantic_south",
+        "gulf"
+      ],
+      "months": [
+        10,
+        11,
+        12
+      ],
+      "fish": [
+        "pompano"
+      ]
+    },
+    {
+      "id": "tarpon-migration",
+      "title": "Tarpon migration",
+      "regions": [
+        "atlantic_south",
+        "gulf"
+      ],
+      "months": [
+        5,
+        6,
+        7
+      ],
+      "fish": [
+        "tarpon"
+      ]
+    },
+    {
+      "id": "spring-stripers",
+      "title": "Spring striper run",
+      "regions": [
+        "atlantic_north",
+        "atlantic_mid"
+      ],
+      "months": [
+        4,
+        5,
+        6
+      ],
+      "fish": [
+        "striped-bass",
+        "bluefish"
+      ]
+    },
+    {
+      "id": "fall-stripers",
+      "title": "Fall striper blitz",
+      "regions": [
+        "atlantic_north",
+        "atlantic_mid"
+      ],
+      "months": [
+        9,
+        10,
+        11,
+        12
+      ],
+      "fish": [
+        "striped-bass",
+        "bluefish",
+        "false-albacore"
+      ]
+    },
+    {
+      "id": "tautog-fall",
+      "title": "Fall tautog bite",
+      "regions": [
+        "atlantic_north",
+        "atlantic_mid"
+      ],
+      "months": [
+        10,
+        11,
+        12
+      ],
+      "fish": [
+        "tautog",
+        "black-sea-bass"
+      ]
+    },
+    {
+      "id": "squid-spring",
+      "title": "Spring squid run",
+      "regions": [
+        "atlantic_north"
+      ],
+      "months": [
+        4,
+        5,
+        6
+      ],
+      "fish": []
+    },
+    {
+      "id": "bull-reds-gulf",
+      "title": "Bull reds in the passes",
+      "regions": [
+        "gulf"
+      ],
+      "months": [
+        8,
+        9,
+        10
+      ],
+      "fish": [
+        "red-drum"
+      ]
+    },
+    {
+      "id": "trout-winter",
+      "title": "Winter trout in deep holes",
+      "regions": [
+        "gulf",
+        "atlantic_south"
+      ],
+      "months": [
+        12,
+        1,
+        2
+      ],
+      "fish": [
+        "speckled-trout",
+        "red-drum",
+        "black-drum"
+      ]
+    },
+    {
+      "id": "sheepshead-spring",
+      "title": "Sheepshead spawn",
+      "regions": [
+        "atlantic_south",
+        "gulf"
+      ],
+      "months": [
+        2,
+        3,
+        4
+      ],
+      "fish": [
+        "sheepshead"
+      ]
+    },
+    {
+      "id": "grunion",
+      "title": "Grunion runs",
+      "regions": [
+        "pacific_south"
+      ],
+      "months": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "fish": []
+    },
+    {
+      "id": "white-seabass",
+      "title": "White seabass season",
+      "regions": [
+        "pacific_south"
+      ],
+      "months": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "fish": [
+        "white-seabass"
+      ]
+    },
+    {
+      "id": "yellowtail-summer",
+      "title": "Yellowtail season",
+      "regions": [
+        "pacific_south"
+      ],
+      "months": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "fish": [
+        "yellowtail",
+        "pacific-bonito",
+        "kelp-bass-calico-bass"
+      ]
+    },
+    {
+      "id": "surfperch-winter",
+      "title": "Barred surfperch peak",
+      "regions": [
+        "pacific_south",
+        "pacific"
+      ],
+      "months": [
+        12,
+        1,
+        2,
+        3,
+        4
+      ],
+      "fish": [
+        "barred-surfperch",
+        "redtail-surfperch"
+      ]
+    },
+    {
+      "id": "salmon-run",
+      "title": "Salmon run",
+      "regions": [
+        "pacific"
+      ],
+      "months": [
+        7,
+        8,
+        9,
+        10
+      ],
+      "fish": [
+        "chinook-salmon",
+        "coho-salmon"
+      ]
+    },
+    {
+      "id": "oama-run",
+      "title": "Oama run",
+      "regions": [
+        "hawaii_conditions"
+      ],
+      "months": [
+        7,
+        8,
+        9,
+        10
+      ],
+      "fish": [
+        "weke-goatfish"
+      ]
+    },
+    {
+      "id": "halalu",
+      "title": "Halalu season",
+      "regions": [
+        "hawaii_conditions"
+      ],
+      "months": [
+        6,
+        7,
+        8,
+        9
+      ],
+      "fish": [
+        "akule"
+      ]
+    }
+  ]
+}

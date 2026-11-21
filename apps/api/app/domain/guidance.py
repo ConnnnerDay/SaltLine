@@ -58,6 +58,7 @@ from app.infra.timezones import safe_zone
 _DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 _CATALOGUE_PATH = _DATA_DIR / "guidance_species.json"
 _REGIONAL_SEASONS_PATH = _DATA_DIR / "regional_seasons.json"
+_RUNS_PATH = _DATA_DIR / "runs.json"
 _REGULATIONS_PATH = _DATA_DIR / "guidance_regulations.json"
 _REGULATIONS_STALE_MONTHS = 6
 """Legacy regulations.py's `_STALE_MONTHS`: older snapshots get flagged."""
@@ -307,7 +308,10 @@ def _conditions_modifier(
                 points -= 3
                 reasons.append(f"Offshore {wind_direction} wind works against it")
         elif "calm_water" in tags:
-            if is_offshore:
+            # Only a light-to-moderate offshore breeze keeps it clear; a
+            # strong one is just wind (scored below).
+            strong = wind_range_kt is not None and wind_range_kt[1] > 16
+            if is_offshore and not strong:
                 points += 5
                 reasons.append(f"Offshore {wind_direction} wind keeps the water clear")
             elif is_onshore:
@@ -331,7 +335,7 @@ def _conditions_modifier(
                 reasons.append("Light wind suits it")
             elif wind_avg > 15:
                 points -= 2
-                reasons.append("Too windy for it")
+                reasons.append("Windier than it likes")
 
     if wave_range_ft is not None:
         wave_avg = sum(wave_range_ft) / 2
@@ -348,7 +352,7 @@ def _conditions_modifier(
                 reasons.append("Calm surf suits it")
             elif wave_avg > 4:
                 points -= 2
-                reasons.append("Surf is too rough for it")
+                reasons.append("Rougher surf than it likes")
 
     if hour is not None:
         low_light = hour < 7 or hour > 18
@@ -386,6 +390,50 @@ def _tier(score: float) -> GuidanceTier:
     return GuidanceTier.FAIR
 
 
+# On a rough day the fish ratings come down with the day's own rating:
+# a fish can be in season at the right water temperature and still not
+# be worth a trip in 25 kt and 8 ft seas.
+_DAY_CAP_REASON = {
+    "Poor": "Held to Fair: today is rated Poor here",
+    "Challenging": "Down a step: today is rated Challenging here",
+}
+_TIER_STEP_DOWN = {
+    GuidanceTier.PRIME: GuidanceTier.GOOD,
+    GuidanceTier.GOOD: GuidanceTier.FAIR,
+    GuidanceTier.FAIR: GuidanceTier.FAIR,
+}
+
+
+def tier_for_day(score: float, day_verdict: str | None) -> GuidanceTier:
+    """A pick's tier from its *score*, lowered for a Poor (to Fair) or
+    Challenging (one step) day."""
+    tier = _tier(score)
+    if day_verdict == "Poor":
+        return GuidanceTier.FAIR
+    if day_verdict == "Challenging":
+        return _TIER_STEP_DOWN[tier]
+    return tier
+
+
+def rate_picks_for_day(
+    picks: list[dict[str, Any]], day_verdict: str | None
+) -> list[dict[str, Any]]:
+    """*picks* (JSON-shaped `SpeciesPick`s) re-tiered for the day's verdict.
+    Idempotent: the tier is worked out from each pick's score again and any
+    earlier day note is replaced, so it's safe to apply after personalizing
+    changes the verdict."""
+    rated: list[dict[str, Any]] = []
+    for pick in picks:
+        reasons = [
+            r for r in pick.get("reasons", []) if r not in _DAY_CAP_REASON.values()
+        ]
+        tier = tier_for_day(pick["score"], day_verdict)
+        if tier != _tier(pick["score"]) and day_verdict in _DAY_CAP_REASON:
+            reasons = [_DAY_CAP_REASON[day_verdict], *reasons]
+        rated.append({**pick, "tier": tier.value, "reasons": reasons})
+    return rated
+
+
 def _temperature_reason(
     species: dict[str, Any], water_temp: float, is_fallback: bool
 ) -> str:
@@ -416,23 +464,75 @@ def _season_reason(species: dict[str, Any], month: int) -> str:
     return f"Off-season in {name}"
 
 
+# A spawning note that puts the fish out of reach of the shore ("spawn in
+# open water offshore"), versus one that brings them in or past it (inlets,
+# the surf, a fall "run" past the piers).
+_SPAWNS_OFFSHORE = re.compile(r"offshore|open water|continental shelf", re.IGNORECASE)
+_SPAWNS_NEARSHORE = re.compile(
+    r"nearshore|inshore|surf|inlet|pass(es)?\b|pier|jett|beach|bay|estuar|river|flats|reef|run\b",
+    re.IGNORECASE,
+)
+_SPAWN_POINTS = 4.0
+_RUN_POINTS = 3.0
+
+
+@lru_cache(maxsize=1)
+def load_runs() -> list[dict[str, Any]]:
+    """app/data/runs.json: the seasonal runs and migrations (the fall
+    mullet run, spring cobia...), copied from apps/web/lib/runs.ts."""
+    runs: list[dict[str, Any]] = json.loads(_RUNS_PATH.read_text())["runs"]
+    return runs
+
+
+def _active_run(species_id: str, region: str, month: int) -> dict[str, Any] | None:
+    """The run on now in *region* that this fish is part of, if any: the
+    most specific one (the fall red drum run over the fall mullet run that
+    red drum also follow)."""
+    runs = [
+        run
+        for run in load_runs()
+        if region in run["regions"]
+        and month in run["months"]
+        and species_id in run["fish"]
+    ]
+    return min(runs, key=lambda run: len(run["fish"])) if runs else None
+
+
+def _spawn_points(species: dict[str, Any], month: int, water_temp_f: float) -> float:
+    """Points for a fish in its spawning season with the water in its
+    spawning range, when spawning gathers it where shore anglers reach it
+    (inlets, the surf, a run past the piers). Fish that leave for open
+    water to spawn get nothing."""
+    spawn = species.get("spawn")
+    if not spawn or month not in spawn["months"]:
+        return 0.0
+    if not spawn["temp_low"] <= water_temp_f <= spawn["temp_high"]:
+        return 0.0
+    note = spawn.get("note", "")
+    if _SPAWNS_OFFSHORE.search(note) and not _SPAWNS_NEARSHORE.search(note):
+        return 0.0
+    return _SPAWN_POINTS
+
+
 def _spawn_reasons(
     species: dict[str, Any], month: int, water_temp_f: float
 ) -> list[str]:
     """A note when *month* is in the fish's spawning season (legacy
-    SPAWNING_DATA): information for the angler, not a score change. Says
-    whether the water is in the spawning range too."""
+    SPAWNING_DATA). Says whether the water is in the spawning range too,
+    and whether that gathers them within reach (`_spawn_points`)."""
     spawn = species.get("spawn")
     if not spawn or month not in spawn["months"]:
         return []
     low, high = spawn["temp_low"], spawn["temp_high"]
     if low <= water_temp_f <= high:
-        return [
-            (
-                f"Spawning season, and the water is in their {low:g}–{high:g}°F "
-                "spawning range: go easy on the big breeders"
-            )
-        ]
+        if _spawn_points(species, month, water_temp_f) > 0:
+            return [
+                (
+                    f"Spawning now ({low:g}–{high:g}°F water): gathered up within "
+                    "reach. Go easy on the big breeders"
+                )
+            ]
+        return [f"Spawning now, mostly offshore ({low:g}–{high:g}°F water)"]
     return ["Spawning season"]
 
 
@@ -447,7 +547,13 @@ def _tackle_note(wave_range: tuple[float, float] | None) -> str | None:
     )
 
 
-_NOT_A_LURE = ("not a primary", "rarely", "not typically", "occasionally")
+# Lure-line entries that say the fish isn't really a lure fish ("Not a
+# strong lure target", "Primarily caught on bait", "small jigs
+# occasionally"): not something to pack.
+_NOT_A_LURE = re.compile(
+    r"^(not|no)\b|\bnot (a|typically|usually|commonly|targeted)\b|primarily|rarely|occasional",
+    re.IGNORECASE,
+)
 # Lures and gear that turn up in some species' bait lines.
 _NOT_A_BAIT = re.compile(
     r"\b(plugs?|lures?|jigs?|spoons?|swimbaits?|soft plastics?|flies|fly)\b",
@@ -525,7 +631,7 @@ def build_pack_for_today(
     lures = [
         lure
         for lure in _tokens([pick.lures for pick in working])
-        if not any(phrase in lure.lower() for phrase in _NOT_A_LURE)
+        if not _NOT_A_LURE.search(lure)
     ][:4]
     if lures:
         if low_light and warm and not any("topwater" in lure.lower() for lure in lures):
@@ -640,7 +746,15 @@ def build_fishing_guidance(
             wave_range_ft=wave_range_ft,
             hour=hour,
         )
-        score = max(0.0, temp_points + _season_points(species, month) + modifier)
+        run = _active_run(species["id"], region, month)
+        score = max(
+            0.0,
+            temp_points
+            + _season_points(species, month)
+            + _spawn_points(species, month, water_temp_f)
+            + (_RUN_POINTS if run else 0.0)
+            + modifier,
+        )
         if score < SCORE_THRESHOLD:
             continue
         explanation = (
@@ -662,6 +776,7 @@ def build_fishing_guidance(
                         ),
                         _season_reason(species, month),
                         *_spawn_reasons(species, month, water_temp_f),
+                        *([f"The {run['title'].lower()} is on"] if run else []),
                         *condition_reasons,
                     ],
                     explanation=explanation,

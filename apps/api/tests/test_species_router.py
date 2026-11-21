@@ -72,13 +72,17 @@ def test_spots_rank_the_users_spots_for_this_fish(
     from app.providers.locations import load_curated_locations, resolved_from_curated
 
     curated = {loc.id: loc for loc in load_curated_locations()}
-    water = {"wrightsville-beach-nc": 64.0, "sandy-hook-nj": 52.0, "destin-fl": 64.0}
-    # Same water at Wrightsville and Destin, so red drum ties: Destin's
+    water = {
+        "wrightsville-beach-nc": 64.0,
+        "sandy-hook-nj": 52.0,
+        "carolina-beach-nc": 64.0,
+    }
+    # Same water at Wrightsville and Carolina Beach, so red drum ties: Carolina Beach's
     # better day must rank it first.
     verdict = {
         "wrightsville-beach-nc": "Fair",
         "sandy-hook-nj": "Good",
-        "destin-fl": "Good",
+        "carolina-beach-nc": "Good",
     }
 
     async def fake_resolve(location_id: str, state: object) -> object:
@@ -115,7 +119,7 @@ def test_spots_rank_the_users_spots_for_this_fish(
     monkeypatch.setattr(species_router, "get_or_assemble_forecast", fake_forecast)
 
     # Pin the clock: the hour feeds time-of-day reasons ("Bites slower in
-    # midday sun"), which otherwise broke the Wrightsville/Destin tie
+    # midday sun"), which otherwise broke the Wrightsville/Carolina Beach tie
     # depending on when the test ran. 23:30 UTC is after dark at both.
     class _Clock(datetime):
         @classmethod
@@ -129,7 +133,7 @@ def test_spots_rank_the_users_spots_for_this_fish(
             ("ids", "sandy-hook-nj"),
             ("ids", "wrightsville-beach-nc"),
             ("ids", "nowhere"),
-            ("ids", "destin-fl"),
+            ("ids", "carolina-beach-nc"),
         ],
     )
     assert resp.status_code == 200
@@ -138,7 +142,7 @@ def test_spots_rank_the_users_spots_for_this_fish(
     assert {s["location_id"] for s in spots} == {
         "sandy-hook-nj",
         "wrightsville-beach-nc",
-        "destin-fl",
+        "carolina-beach-nc",
     }
     biting = [s for s in spots if s["biting"]]
     assert biting and spots[: len(biting)] == biting
@@ -147,7 +151,7 @@ def test_spots_rank_the_users_spots_for_this_fish(
     )
     assert all(s["reasons"] for s in biting)
     assert [s["location_id"] for s in biting][:2] == [
-        "destin-fl",
+        "carolina-beach-nc",
         "wrightsville-beach-nc",
     ]
     # Ties on the fish's score go to the better day overall.

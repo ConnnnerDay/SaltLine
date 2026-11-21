@@ -6,6 +6,10 @@
  * on now and what's coming. `fish` are catalogue ids, for links.
  *
  * Region keys are apps/api's `conditions_region` (lib/fish.ts REGIONS).
+ *
+ * apps/api/app/data/runs.json copies each run's id, title, regions, months
+ * and fish (a fish in a run on now scores higher); its test fails if the
+ * two drift apart, so change both together.
  */
 
 export type Run = {

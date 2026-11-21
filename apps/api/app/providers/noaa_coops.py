@@ -143,6 +143,36 @@ async def fetch_water_temperature(
     )
 
 
+async def fetch_water_temperature_change(
+    client: BoundedHTTPClient, station_id: str
+) -> float | None:
+    """How much the station's water temperature has changed over the last
+    ~24 hours (°F; positive is warming), from its hourly readings. `None`
+    when there's no station, too few readings, or any failure: it only
+    nudges the score."""
+    if not station_id:
+        return None
+    url = (
+        f"{_DATAGETTER_URL}?range=26&station={station_id}"
+        "&product=water_temperature&units=english&interval=h"
+        "&time_zone=lst_ldt&format=json"
+    )
+    try:
+        data = cast(
+            "dict[str, Any]", await client.get_json(url, headers=_COOPS_HEADERS)
+        )
+        values = [
+            float(row["v"])
+            for row in data.get("data") or []
+            if row.get("v") not in (None, "")
+        ]
+    except (ProviderError, ValueError, KeyError, TypeError):
+        return None
+    if len(values) < 20:  # not a full day of readings
+        return None
+    return round(values[-1] - values[0], 1)
+
+
 async def fetch_coops_wind(
     client: BoundedHTTPClient, station_id: str
 ) -> CoopsWindReading | None:

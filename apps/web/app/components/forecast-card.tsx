@@ -14,7 +14,7 @@ import { RIGS, rigsFor, type RigId } from '@/lib/rigs'
 import { KNOTS, RIG_KNOTS } from '@/lib/knots'
 import { RIG_FIT, RIG_WATER_TIPS, WATER_LABEL, WATER_NOUN, WATER_PHRASE, watersFor } from '@/lib/fishing-style'
 import type { Preferences } from '@/app/api/preferences/route'
-import { WhereToFish, YourDay } from './your-day'
+import { TideNow, WhereToFish, YourLimits } from './your-day'
 import { SunAndMoon, WeatherAlerts, type SkyConditions } from './sky'
 import { NextDays } from './next-days'
 import { WindAndWaves } from './wind-waves'
@@ -144,6 +144,8 @@ export type ForecastEnvelope = {
       score: number | null
       verdict: ForecastVerdict
       summary: string
+      /** Everything that moved the score, biggest first (apps/api scoring). */
+      factors?: { impact: number; description: string }[]
       /** Set when the signed-in user's comfort limits downgraded the verdict. */
       personalized_from?: ForecastVerdict
     } | null
@@ -349,7 +351,7 @@ function TideTable({
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm sm:w-auto">
           <caption className="sr-only">
-            Upcoming high and low tides for {tides.station_id}
+            Upcoming high and low tides
           </caption>
           <thead>
             <tr className="text-text-muted">
@@ -383,6 +385,10 @@ function TideTable({
   )
 }
 
+/** A lure line that says the fish isn't a lure fish ("Not a strong lure
+ * target", "Primarily caught on bait"); same rule as apps/api's pack. */
+const NOT_A_LURE = /^(not|no)\b|\bnot (a|typically|usually|commonly|targeted)\b|^primarily|^rarely/i
+
 const ACTIVITY_BAR: Record<ActivityTag, string> = {
   prime: 'bg-tier-prime',
   high: 'bg-tier-high',
@@ -392,9 +398,9 @@ const ACTIVITY_BAR: Record<ActivityTag, string> = {
 
 const ACTIVITY_LABEL: Record<ActivityTag, string> = {
   prime: 'Prime',
-  high: 'High',
-  med: 'Good',
-  low: 'Low',
+  high: 'Active',
+  med: 'Moderate',
+  low: 'Slow',
 }
 
 /**
@@ -711,9 +717,28 @@ const GUIDANCE_TIER_PILL: Record<GuidanceTier, string> = {
  * cards. Each card shows apps/api's own `reasons` (the exact numbers the
  * pick was scored on) so no recommendation appears without its "why".
  */
-function WhatsBiting({ guidance, linkFish = false }: { guidance: FishingGuidance; linkFish?: boolean }) {
+function WhatsBiting({
+  guidance,
+  linkFish = false,
+  dayVerdict = null,
+}: {
+  guidance: FishingGuidance
+  linkFish?: boolean
+  /** The day's own rating: apps/api holds every pick to Fair on a Poor
+   * day and drops each a step on a Challenging one, and says so here. */
+  dayVerdict?: ForecastVerdict | null
+}) {
   // Reasons every pick shares (today's wind, surf, season) are said once,
   // above the cards; each card keeps only what's particular to that fish.
+  // apps/api's per-pick day note ("Held to Fair: today is rated Poor
+  // here") is said once, in the banner above.
+  guidance = {
+    ...guidance,
+    species: guidance.species.map((pick) => ({
+      ...pick,
+      reasons: pick.reasons.filter((reason) => !/^(Held to Fair|Down a step): today is rated/.test(reason)),
+    })),
+  }
   const shared =
     guidance.species.length > 1
       ? guidance.species[0].reasons.filter((reason) =>
@@ -731,9 +756,17 @@ function WhatsBiting({ guidance, linkFish = false }: { guidance: FishingGuidance
         }
       />
 
+      {(dayVerdict === 'Poor' || dayVerdict === 'Challenging') && guidance.species.length > 0 && (
+        <p className="-mt-1 rounded-md border border-marginal-border bg-marginal-bg px-3 py-2 text-sm text-marginal-text">
+          {dayVerdict === 'Poor'
+            ? 'Today is rated Poor here, so every fish is held to Fair. They’re who’s around if you do go.'
+            : 'Today is rated Challenging here, so each fish is rated a step lower.'}
+        </p>
+      )}
+
       {shared.length > 0 && (
         <div className="-mt-1 flex flex-col gap-1.5">
-          <span className="text-sm font-semibold text-text">Why they&apos;re biting today</span>
+          <span className="text-sm font-semibold text-text">True for all of them today</span>
           <ul className="flex flex-wrap gap-1.5">
             {shared.map((reason) => (
               <li key={reason} className="rounded-full border border-border bg-surface-raised px-2.5 py-1 text-xs text-text">
@@ -1010,6 +1043,18 @@ function RigsAndTips({
     )
     .map(({ entry }) => entry)
 
+  // Each knot is taught once, under the first rig that uses it; later
+  // rigs just name it.
+  const knotsTaught = new Set<string>()
+  const knotPlan = new Map(
+    ordered.map(([id]) => {
+      const fresh = RIG_KNOTS[id].filter((knotId) => !knotsTaught.has(knotId))
+      const repeat = RIG_KNOTS[id].filter((knotId) => knotsTaught.has(knotId))
+      fresh.forEach((knotId) => knotsTaught.add(knotId))
+      return [id, { fresh, repeat }]
+    }),
+  )
+
   const fittingWater = (id: RigId) => waters.find((water) => RIG_FIT[water].includes(id))
   const waterTips = (id: RigId) =>
     waters
@@ -1046,7 +1091,10 @@ function RigsAndTips({
       <ol className="flex flex-col gap-4">
         {ordered.map(([id, group]) => {
           const rig = RIGS[id]
-          const fish = [...group.main, ...group.also]
+          // A fish's hook and sinker go under its main rig only; under an
+          // alternative rig it's just named in "For today".
+          const fish = group.main.length > 0 ? group.main : group.also
+          const knots = knotPlan.get(id) ?? { fresh: [], repeat: [] }
           return (
             <li
               key={id}
@@ -1129,8 +1177,14 @@ function RigsAndTips({
 
                 <section className="flex flex-col gap-2 border-t border-border pt-3">
                   <h4 className="section-label">Knots for this rig</h4>
+                  {knots.repeat.length > 0 && (
+                    <p className="text-xs text-text-muted">
+                      {knots.fresh.length > 0 ? 'Also ' : ''}
+                      {knots.repeat.map((knotId) => KNOTS[knotId].name).join(' and ')}, shown with the rig above.
+                    </p>
+                  )}
                   <ul className="flex flex-col gap-1.5">
-                    {RIG_KNOTS[id].map((knotId) => {
+                    {knots.fresh.map((knotId) => {
                       const knot = KNOTS[knotId]
                       return (
                         <li key={knotId}>
@@ -1180,7 +1234,7 @@ function RigsAndTips({
                         </span>
                         <span className="text-xs text-text-muted">
                           Setup: {pick.rig}
-                          {pick.lures && !/not (a |typically )?(primary )?lure|rarely taken on lures/i.test(pick.lures) && ` · Lures: ${pick.lures}`}
+                          {pick.lures && !NOT_A_LURE.test(pick.lures) && ` · Lures: ${pick.lures}`}
                         </span>
                       </li>
                     ))}
@@ -1523,6 +1577,33 @@ export function ForecastCard({
               <p className="max-w-3xl text-sm leading-relaxed text-text-muted sm:text-base">{score.summary}</p>
             </ShowIf>
           )}
+          {score?.factors && score.factors.length > 0 && (
+            <details className="group w-fit max-w-3xl">
+              <summary className="flex w-fit cursor-pointer items-center gap-1.5 text-sm font-semibold text-primary">
+                Why this score
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="transition-transform group-open:rotate-180">
+                  <path d="M6 9 L12 15 L18 9" />
+                </svg>
+              </summary>
+              <ul className="mt-2 flex flex-col gap-1 text-sm">
+                {score.factors.map((factor) => (
+                  <li key={factor.description} className="flex items-baseline gap-2.5">
+                    <span
+                      className={cx(
+                        'w-9 shrink-0 text-right font-bold tabular-nums',
+                        factor.impact > 0 ? 'text-go-text' : factor.impact < 0 ? 'text-danger-text' : 'text-text-muted',
+                      )}
+                    >
+                      {factor.impact > 0 ? '+' : factor.impact < 0 ? '−' : ''}
+                      {Math.abs(Math.round(factor.impact))}
+                    </span>
+                    <span className="text-text">{localizeText(factor.description, units)}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-xs text-text-muted">Points up or down from an even 50.</p>
+            </details>
+          )}
           {weatherNow && (
             <ShowIf option="show_weather">
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text">
@@ -1551,16 +1632,6 @@ export function ForecastCard({
           { key: 'week', label: 'Week', hint: 'Days ahead, nearby spots' },
         ]}
         sections={[
-          {
-            id: 'your-day',
-            label: 'Your day',
-            tab: 'today',
-            content: (
-              <>
-                <YourDay forecast={forecast} profile={profile} />
-              </>
-            ),
-          },
           {
             id: 'when',
             label: 'When to fish',
@@ -1609,9 +1680,10 @@ export function ForecastCard({
             label: 'Wind & waves',
             tab: 'conditions',
             content: (
-              <>
+              <div className="flex flex-col gap-4 in-data-[density=compact]:gap-3">
                 <WindAndWaves forecast={forecast} />
-              </>
+                <YourLimits forecast={forecast} profile={profile} />
+              </div>
             ),
           },
           {
@@ -1633,6 +1705,7 @@ export function ForecastCard({
                 {forecast.tides && (
                   <Card className="flex flex-col gap-4">
                     <SectionHeader title="Tides" aside="Next 24 hours" />
+                    <TideNow forecast={forecast} profile={profile} />
                     <TideChart tides={forecast.tides} timezone={forecast.location.timezone} />
                     <details className="collapsible group">
                       <summary className="flex w-fit cursor-pointer items-center gap-1.5 text-sm font-semibold text-primary">
@@ -1683,7 +1756,11 @@ export function ForecastCard({
             tab: 'fish',
             content: (
               <>
-                {forecast.recommendations && <WhatsBiting guidance={forecast.recommendations} linkFish={profile !== null} />}
+                {forecast.recommendations && <WhatsBiting
+                    guidance={forecast.recommendations}
+                    linkFish={profile !== null}
+                    dayVerdict={forecast.conditions?.score?.verdict ?? null}
+                  />}
               </>
             ),
           },

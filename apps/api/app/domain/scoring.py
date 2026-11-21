@@ -91,6 +91,33 @@ _DIRS_BY_ORIENTATION: dict[str, tuple[set[str], set[str]]] = {
 
 _SOLUNAR_RATING_BONUS = {"Excellent": 8, "Good": 4, "Fair": 0, "Poor": -6}
 
+# NWS alerts that make the shore unsafe: the day is Poor whatever else
+# it has going for it.
+_DANGEROUS_ALERTS = (
+    "gale warning",
+    "storm warning",
+    "hurricane",
+    "tropical storm",
+    "special marine warning",
+    "storm surge",
+    "tsunami",
+)
+# Alerts that cost points: (event substring, impact, description).
+_HAZARD_ALERTS: tuple[tuple[str, float, str], ...] = (
+    ("high surf warning", -14, "High Surf Warning in effect"),
+    ("high surf advisory", -7, "High Surf Advisory in effect"),
+    ("coastal flood warning", -6, "Coastal Flood Warning in effect"),
+    ("wind advisory", -5, "Wind Advisory in effect"),
+    ("small craft advisory", -4, "Small Craft Advisory in effect"),
+    ("freeze warning", -4, "Freeze Warning in effect"),
+    ("hard freeze", -4, "Freeze Warning in effect"),
+    ("excessive heat", -4, "Heat warning in effect"),
+    ("heat advisory", -2, "Heat Advisory in effect"),
+    ("dense fog", -3, "Dense Fog Advisory in effect"),
+    ("rip current", -2, "Rip currents: stay out of the water"),
+    ("beach hazards", -2, "Beach Hazards Statement in effect"),
+)
+
 
 class ScoreVerdict(str, Enum):
     EXCELLENT = "Excellent"
@@ -216,12 +243,30 @@ def score_conditions(
     now: datetime | None = None,
     solunar: SolunarTimes | None = None,
     coast: str = "east",
+    pressure_trend: str | None = None,
+    storms: bool = False,
+    precip_pct: int | None = None,
+    alerts: list[str] | None = None,
+    water_temp_normal_f: float | None = None,
+    sky: str | None = None,
+    rip_current_risk: str | None = None,
+    wind_gust_kt: float | None = None,
+    swell: list[tuple[float, int]] | None = None,
+    air_temp_f: float | None = None,
+    water_temp_change_24h: float | None = None,
+    fish_in_season: tuple[int, int] | None = None,
 ) -> ForecastScore:
     """Score fishability from the marine and astronomical signals given.
 
     Returns `ForecastScore(score=None, verdict=UNKNOWN, ...)` if neither
     *wind_range* nor *wave_range* is available — the legacy function's
     behavior for "conditions unknown."
+
+    Beyond wind, surf and the sun and moon, the day also reads the
+    barometer's 3-hour *pressure_trend* ("falling", "rising rapidly"...),
+    thunderstorms (*storms*: the day is at best Challenging), the chance
+    of rain, NWS *alerts* by event name (a gale, storm or hurricane
+    warning makes it Poor) and the water against this month's normal.
     """
     if wind_range is None or wave_range is None:
         return ForecastScore(
@@ -279,7 +324,10 @@ def score_conditions(
 
     if wind_direction:
         onshore_dirs, offshore_dirs = onshore_offshore_dirs(coast)
-        if wind_direction in offshore_dirs:
+        # Offshore wind flattens and clears the water, but only up to a
+        # breeze: past that it's blowing casts back and lines off the bottom,
+        # and the wind penalty above already says so.
+        if wind_direction in offshore_dirs and wind_max <= _WIND_MODERATE_HIGH_KT:
             score += 4
             factors.append(
                 ScoreFactor(
@@ -295,7 +343,52 @@ def score_conditions(
                 )
             )
 
-    if water_temperature is not None:
+    # How good the season is right now: the fish that are in season and in
+    # their best water today, as (working, picks) -- working picks score
+    # Good or better, picks is everything in range. Relative to the season,
+    # so a January day full of winter fish isn't marked down for being
+    # cold. Without it (no guidance), the old fixed water-temperature bands.
+    if fish_in_season is not None:
+        working, picks = fish_in_season
+        temp_label = (
+            f" at {water_temperature.value:.0f}°F"
+            if water_temperature is not None
+            else ""
+        )
+        if working >= 3:
+            score += 6
+            factors.append(
+                ScoreFactor(
+                    impact=6,
+                    description=f"Good season: {working} fish in their best water{temp_label}",
+                )
+            )
+        elif working >= 1:
+            score += 2
+            factors.append(
+                ScoreFactor(
+                    impact=2,
+                    description=f"{working} fish in their best water{temp_label}",
+                )
+            )
+        elif picks >= 1:
+            score -= 2
+            factors.append(
+                ScoreFactor(
+                    impact=-2,
+                    description=f"Slow season: few fish in their best water{temp_label}",
+                )
+            )
+        else:
+            score -= 6
+            factors.append(
+                ScoreFactor(
+                    impact=-6, description=f"Almost nothing in season{temp_label}"
+                )
+            )
+        if water_temperature is not None and not water_temperature.is_fallback:
+            score += 1
+    elif water_temperature is not None:
         temp_f = water_temperature.value
         if 58 <= temp_f <= 78:
             score += 6
@@ -342,7 +435,164 @@ def score_conditions(
         elif illum < 10 or illum > 95:
             score += 1
 
+    if pressure_trend:
+        # The pre-front bite is before the weather turns: once the wind is
+        # strong or storms are here, falling pressure is just the storm.
+        if (
+            pressure_trend.startswith("falling")
+            and wind_max <= _WIND_STRONG_KT
+            and not storms
+        ):
+            score += 4
+            factors.append(
+                ScoreFactor(
+                    impact=4,
+                    description="Falling pressure: fish often feed ahead of a front",
+                )
+            )
+        elif pressure_trend == "rising rapidly":
+            score -= 6
+            factors.append(
+                ScoreFactor(
+                    impact=-6,
+                    description="Pressure rising fast behind a front: the bite often slows",
+                )
+            )
+        elif pressure_trend.startswith("rising"):
+            score -= 2
+            factors.append(
+                ScoreFactor(impact=-2, description="Rising pressure after a front")
+            )
+
+    if water_temperature is not None and water_temp_normal_f is not None:
+        below = water_temp_normal_f - water_temperature.value
+        if below >= 5:
+            score -= 5
+            factors.append(
+                ScoreFactor(
+                    impact=-5,
+                    description=f"Water {below:.0f}°F colder than normal: a cold snap slows the bite",
+                )
+            )
+
+    # Gusts well above the forecast range: hard casting, a bowed line.
+    if wind_gust_kt is not None and wind_gust_kt >= 25 and wind_gust_kt > wind_max + 5:
+        score -= 4
+        factors.append(
+            ScoreFactor(impact=-4, description=f"Gusts to {wind_gust_kt:.0f} kt")
+        )
+
+    # Long-period groundswell (12 s+) of any size breaks hard on the beach:
+    # heavy shorebreak that rolls sinkers and tangles lines.
+    big_groundswell = [
+        (height, period)
+        for height, period in swell or []
+        if period >= 12 and height >= 3
+    ]
+    if big_groundswell:
+        height, period = max(big_groundswell)
+        score -= 4
+        factors.append(
+            ScoreFactor(
+                impact=-4,
+                description=f"{height:g} ft groundswell at {period} s: heavy shorebreak",
+            )
+        )
+
+    risk = (rip_current_risk or "").lower()
+    if risk.startswith("high"):
+        score -= 4
+        factors.append(
+            ScoreFactor(
+                impact=-4, description="High rip current risk: stay out of the water"
+            )
+        )
+    elif risk.startswith("moderate"):
+        score -= 1
+        factors.append(ScoreFactor(impact=-1, description="Moderate rip current risk"))
+
+    if air_temp_f is not None and air_temp_f <= 32:
+        score -= 3
+        factors.append(
+            ScoreFactor(
+                impact=-3,
+                description=f"Freezing air ({air_temp_f:.0f}°F): iced guides, cold hands",
+            )
+        )
+
+    # Cloud cover: fish feed more boldly without bright sun on the water.
+    if sky == "cloudy":
+        score += 3
+        factors.append(
+            ScoreFactor(
+                impact=3, description="Overcast: fish feed more boldly out of the glare"
+            )
+        )
+    elif sky == "snow":
+        score -= 6
+        factors.append(
+            ScoreFactor(impact=-6, description="Snow or ice in the forecast")
+        )
+
+    # A quick drop (upwelling, a front stirring the water) shuts fish down
+    # for a day or two; cool water warming up turns them on.
+    if water_temp_change_24h is not None:
+        if water_temp_change_24h <= -3:
+            score -= 5
+            factors.append(
+                ScoreFactor(
+                    impact=-5,
+                    description=f"Water dropped {-water_temp_change_24h:g}°F since yesterday: fish slow down",
+                )
+            )
+        elif (
+            water_temp_change_24h >= 2
+            and water_temperature is not None
+            and water_temperature.value < 70
+        ):
+            score += 3
+            factors.append(
+                ScoreFactor(
+                    impact=3,
+                    description=f"Water warmed {water_temp_change_24h:g}°F since yesterday: fish turn on",
+                )
+            )
+
+    if precip_pct is not None and precip_pct >= 60 and not storms:
+        score -= 3
+        factors.append(
+            ScoreFactor(impact=-3, description=f"Rain likely ({precip_pct}%)")
+        )
+    if storms:
+        score -= 15
+        factors.append(
+            ScoreFactor(impact=-15, description="Thunderstorms in the forecast")
+        )
+
+    dangerous: str | None = None
+    for event in alerts or []:
+        low = event.lower()
+        if any(name in low for name in _DANGEROUS_ALERTS):
+            dangerous = dangerous or event
+            continue
+        if "rip current" in low and any(
+            "rip current" in f.description.lower() for f in factors
+        ):
+            continue  # the surf zone forecast's own risk already counts
+        for name, impact, description in _HAZARD_ALERTS:
+            if name in low and not any(f.description == description for f in factors):
+                score += impact
+                factors.append(ScoreFactor(impact=impact, description=description))
+    if dangerous:
+        factors.append(ScoreFactor(impact=-50, description=f"{dangerous} in effect"))
+
     score = max(0.0, min(100.0, score))
+    # Safety caps: a dangerous alert makes the day Poor; thunderstorms
+    # keep it out of Fair or better, whatever the fish are doing.
+    if dangerous:
+        score = min(score, _VERDICT_CHALLENGING - 1)
+    elif storms:
+        score = min(score, _VERDICT_FAIR - 1)
     if score >= _VERDICT_EXCELLENT:
         verdict = ScoreVerdict.EXCELLENT
     elif score >= _VERDICT_GOOD:

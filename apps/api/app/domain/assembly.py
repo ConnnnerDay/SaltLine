@@ -165,7 +165,13 @@ from typing import Any, Generic, TypeVar
 from pydantic import BaseModel
 
 from app.domain.confidence import AgedObservation, StationDistance, assess_confidence
-from app.domain.guidance import build_fishing_guidance, local_month
+from app.domain.guidance import (
+    GOOD_SCORE,
+    FishingGuidance,
+    build_fishing_guidance,
+    local_month,
+    rate_picks_for_day,
+)
 from app.domain.models import (
     ForecastEnvelope,
     ForecastState,
@@ -208,6 +214,7 @@ from app.providers.noaa_coops import (
     fetch_coops_wind,
     fetch_tide_predictions,
     fetch_water_temperature,
+    fetch_water_temperature_change,
 )
 from app.providers.nws import (
     GridpointWindForecast,
@@ -434,6 +441,28 @@ def _reconcile_range(
     return None
 
 
+def _rip_risk_today(weather: PointWeather | None) -> str | None:
+    """The surf zone forecast's rip current risk for its first period."""
+    if weather is None or weather.surf_zone is None:
+        return None
+    return next(
+        (p.rip_current_risk for p in weather.surf_zone.periods if p.rip_current_risk),
+        None,
+    )
+
+
+def _precip_today(
+    weather: PointWeather | None, now: datetime, tz_name: str
+) -> int | None:
+    """Today's chance of rain: the current period's, else the day's."""
+    if weather is None:
+        return None
+    if weather.now is not None and weather.now.precip_pct is not None:
+        return weather.now.precip_pct
+    today = now.astimezone(safe_zone(tz_name)).date()
+    return next((day.precip_pct for day in weather.days if day.date == today), None)
+
+
 def _storms_today(weather: PointWeather, now: datetime, tz_name: str) -> bool:
     today = now.astimezone(safe_zone(tz_name)).date()
     return (weather.now is not None and weather.now.sky == "storm") or any(
@@ -448,6 +477,10 @@ async def assemble_forecast(
     *,
     now: datetime,
 ) -> ForecastEnvelope:
+    # Alongside the main fetches (gather's typing stops at six).
+    water_temp_change_task = asyncio.create_task(
+        fetch_water_temperature_change(client, location.water_temp_station)
+    )
     (
         marine_zone_result,
         water_temp_result,
@@ -463,6 +496,7 @@ async def assemble_forecast(
         _fetch_tides(client, location.coops_station, now, location.timezone),
         fetch_point_weather(client, location.lat, location.lng, [location.name]),
     )
+    water_temp_change = await water_temp_change_task
 
     sources = [
         _source_status(_SOURCE_NWS_MARINE_ZONE, marine_zone_result, now),
@@ -668,6 +702,40 @@ async def assemble_forecast(
                     )
                 )
 
+    normals = monthly_water_temps_for_region(
+        location.temp_region, location.temp_offset, water_temp_profiles
+    )
+    # The fish picks come first: how many are in season and in their best
+    # water feeds the day's score (a season-relative measure, not a fixed
+    # "warm water is good"). Enrichment only: a guidance bug must never
+    # cost the visitor the forecast itself.
+    guidance: FishingGuidance | None
+    try:
+        guidance = build_fishing_guidance(
+            region=location.conditions_region,
+            water_temp_f=water_temperature.value,
+            water_temp_is_fallback=water_temperature.is_fallback,
+            month=local_month(now, location.timezone),
+            wave_range_ft=wave_range,
+            monthly_temps=normals,
+            state=location.state,
+            today=now.astimezone(safe_zone(location.timezone)).date(),
+            coast=wind_orientation_for(location),
+            wind_direction=wind_direction,
+            wind_range_kt=wind_range,
+            hour=now.astimezone(safe_zone(location.timezone)).hour,
+        )
+    except Exception:
+        _logger.exception("fishing guidance failed for %s", location.id)
+        guidance = None
+    fish_in_season = (
+        (
+            sum(1 for pick in guidance.species if pick.score >= GOOD_SCORE),
+            len(guidance.species),
+        )
+        if guidance is not None
+        else None
+    )
     score = score_conditions(
         wind_range,
         wave_range,
@@ -677,6 +745,38 @@ async def assemble_forecast(
         now=now,
         solunar=solunar,
         coast=wind_orientation_for(location),
+        pressure_trend=(
+            point_weather.barometer.trend
+            if point_weather and point_weather.barometer
+            else None
+        ),
+        storms=bool(
+            point_weather and _storms_today(point_weather, now, location.timezone)
+        ),
+        precip_pct=_precip_today(point_weather, now, location.timezone),
+        alerts=[alert.event for alert in alerts],
+        water_temp_normal_f=normals.get(local_month(now, location.timezone)),
+        # Cloud cover only matters for the daytime bite.
+        sky=(
+            point_weather.now.sky
+            if point_weather and point_weather.now and point_weather.now.is_daytime
+            else None
+        ),
+        rip_current_risk=_rip_risk_today(point_weather),
+        wind_gust_kt=buoy_observation.wind_gust_kt if buoy_observation else None,
+        swell=[
+            (component.height_ft, component.period_s)
+            for component in (
+                marine_zone_conditions.swell if marine_zone_conditions else []
+            )
+        ],
+        water_temp_change_24h=water_temp_change,
+        fish_in_season=fish_in_season,
+        air_temp_f=(
+            point_weather.now.temperature_f
+            if point_weather and point_weather.now
+            else None
+        ),
     )
 
     conditions = ForecastConditions(
@@ -739,6 +839,7 @@ async def assemble_forecast(
             water_temperature=water_temperature,
             tide_predictions=tides_result.value,
             weather_days=point_weather.days if point_weather else None,
+            fish_in_season=fish_in_season,
         )
     except Exception:
         _logger.exception("day outlook failed for %s", location.id)
@@ -755,9 +856,6 @@ async def assemble_forecast(
                 "wind_direction": wind_direction or conditions.days[0].wind_direction,
             }
         )
-    normals = monthly_water_temps_for_region(
-        location.temp_region, location.temp_offset, water_temp_profiles
-    )
     conditions.water_temp_normals_f = [
         round(normals[month], 1) for month in range(1, 13) if month in normals
     ]
@@ -787,26 +885,19 @@ async def assemble_forecast(
         tz_name=location.timezone,
     )
 
-    # Enrichment only: a guidance bug must never cost the visitor the
-    # forecast itself, so a failure here drops `recommendations` and logs.
-    recommendations: dict[str, Any] | None
+    recommendations: dict[str, Any] | None = None
     try:
-        recommendations = build_fishing_guidance(
-            region=location.conditions_region,
-            water_temp_f=water_temperature.value,
-            water_temp_is_fallback=water_temperature.is_fallback,
-            month=local_month(now, location.timezone),
-            wave_range_ft=wave_range,
-            monthly_temps=monthly_water_temps_for_region(
-                location.temp_region, location.temp_offset, water_temp_profiles
-            ),
-            state=location.state,
-            today=now.astimezone(safe_zone(location.timezone)).date(),
-            coast=wind_orientation_for(location),
-            wind_direction=wind_direction,
-            wind_range_kt=wind_range,
-            hour=now.astimezone(safe_zone(location.timezone)).hour,
-        ).model_dump(mode="json")
+        if guidance is None:
+            raise LookupError("no guidance")
+        recommendations = guidance.model_dump(mode="json")
+        day_verdict = conditions.score.verdict.value if conditions.score else None
+        for key in ("species", "boat_species", "tidal_species"):
+            if recommendations.get(key):
+                recommendations[key] = rate_picks_for_day(
+                    recommendations[key], day_verdict
+                )
+    except LookupError:
+        recommendations = None
     except Exception:
         _logger.exception("fishing guidance failed for %s", location.id)
         recommendations = None

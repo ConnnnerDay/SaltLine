@@ -114,6 +114,12 @@ class TestWindDirection:
         )
         assert any(f.impact == 4 for f in result.factors)
 
+    def test_no_clean_offshore_bonus_in_strong_wind(self) -> None:
+        result = score_conditions(
+            (20.0, 25.0), (1.0, 2.0), wind_direction="W", coast="east"
+        )
+        assert not any("offshore" in f.description for f in result.factors)
+
     def test_onshore_wind_penalty_east_coast(self) -> None:
         result = score_conditions(
             (5.0, 8.0), (1.0, 2.0), wind_direction="E", coast="east"
@@ -420,3 +426,181 @@ def test_a_west_facing_gulf_beach_gets_west_winds_onshore() -> None:
     # Without a facing, the region's coast still applies.
     bridge = SimpleNamespace(conditions_region="gulf", shore_facing_deg=None)
     assert wind_orientation_for(bridge) == "gulf"
+
+
+class TestWeatherAndAlerts:
+    def test_falling_pressure_helps_rising_fast_hurts(self) -> None:
+        base = score_conditions((5.0, 8.0), (1.0, 2.0)).score or 0
+        falling = (
+            score_conditions((5.0, 8.0), (1.0, 2.0), pressure_trend="falling").score
+            or 0
+        )
+        rising = (
+            score_conditions(
+                (5.0, 8.0), (1.0, 2.0), pressure_trend="rising rapidly"
+            ).score
+            or 0
+        )
+        assert falling > base > rising
+
+    def test_thunderstorms_cap_the_day_below_fair(self) -> None:
+        result = score_conditions((0.0, 5.0), (0.5, 1.0), storms=True)
+        assert result.verdict in (ScoreVerdict.CHALLENGING, ScoreVerdict.POOR)
+        assert any("Thunderstorms" in f.description for f in result.factors)
+
+    def test_gale_warning_makes_the_day_poor(self) -> None:
+        result = score_conditions((0.0, 5.0), (0.5, 1.0), alerts=["Gale Warning"])
+        assert result.verdict is ScoreVerdict.POOR
+        assert result.summary.startswith("Gale Warning in effect")
+
+    def test_surf_advisory_costs_points_once(self) -> None:
+        base = score_conditions((5.0, 8.0), (1.0, 2.0)).score or 0
+        once = (
+            score_conditions(
+                (5.0, 8.0),
+                (1.0, 2.0),
+                alerts=["High Surf Advisory", "High Surf Advisory"],
+            ).score
+            or 0
+        )
+        assert once == base - 7
+
+    def test_cold_snap_against_the_monthly_normal(self) -> None:
+        normal = (
+            score_conditions(
+                (5.0, 8.0),
+                (1.0, 2.0),
+                water_temperature=_water_temp(64),
+                water_temp_normal_f=65,
+            ).score
+            or 0
+        )
+        cold = score_conditions(
+            (5.0, 8.0),
+            (1.0, 2.0),
+            water_temperature=_water_temp(58),
+            water_temp_normal_f=65,
+        )
+        assert any("colder than normal" in f.description for f in cold.factors)
+        assert (cold.score or 0) < normal
+
+    def test_overcast_helps_snow_hurts(self) -> None:
+        base = score_conditions((5.0, 8.0), (1.0, 2.0)).score or 0
+        cloudy = score_conditions((5.0, 8.0), (1.0, 2.0), sky="cloudy").score or 0
+        snow = score_conditions((5.0, 8.0), (1.0, 2.0), sky="snow").score or 0
+        assert cloudy > base > snow
+
+    def test_minor_alerts_cost_a_little(self) -> None:
+        base = score_conditions((5.0, 8.0), (1.0, 2.0)).score or 0
+        fog = score_conditions((5.0, 8.0), (1.0, 2.0), alerts=["Dense Fog Advisory"])
+        rip = score_conditions((5.0, 8.0), (1.0, 2.0), alerts=["Rip Current Statement"])
+        assert (fog.score or 0) == base - 3
+        assert (rip.score or 0) == base - 2
+        assert fog.verdict is not ScoreVerdict.POOR
+
+    def test_gusts_well_above_the_range_cost_points(self) -> None:
+        base = score_conditions((10.0, 15.0), (1.0, 2.0)).score or 0
+        gusty = score_conditions((10.0, 15.0), (1.0, 2.0), wind_gust_kt=28).score or 0
+        mild = score_conditions((10.0, 15.0), (1.0, 2.0), wind_gust_kt=18).score or 0
+        assert gusty == base - 4
+        assert mild == base
+
+    def test_long_period_groundswell_means_heavy_shorebreak(self) -> None:
+        base = score_conditions((5.0, 8.0), (1.0, 2.0)).score or 0
+        ground = score_conditions((5.0, 8.0), (1.0, 2.0), swell=[(4.0, 14), (2.0, 5)])
+        chop = score_conditions((5.0, 8.0), (1.0, 2.0), swell=[(4.0, 6)])
+        assert (ground.score or 0) == base - 4
+        assert any("groundswell" in f.description for f in ground.factors)
+        assert (chop.score or 0) == base
+
+    def test_rip_current_risk_counts_once(self) -> None:
+        base = score_conditions((5.0, 8.0), (1.0, 2.0)).score or 0
+        high = score_conditions(
+            (5.0, 8.0),
+            (1.0, 2.0),
+            rip_current_risk="High",
+            alerts=["Rip Current Statement"],
+        )
+        assert (high.score or 0) == base - 4
+        assert sum("rip current" in f.description.lower() for f in high.factors) == 1
+
+    def test_freezing_air(self) -> None:
+        base = score_conditions((5.0, 8.0), (1.0, 2.0)).score or 0
+        cold = score_conditions((5.0, 8.0), (1.0, 2.0), air_temp_f=28).score or 0
+        assert cold == base - 3
+
+    def test_water_temperature_swings(self) -> None:
+        base = (
+            score_conditions(
+                (5.0, 8.0), (1.0, 2.0), water_temperature=_water_temp(60)
+            ).score
+            or 0
+        )
+        drop = (
+            score_conditions(
+                (5.0, 8.0),
+                (1.0, 2.0),
+                water_temperature=_water_temp(60),
+                water_temp_change_24h=-4,
+            ).score
+            or 0
+        )
+        warm = (
+            score_conditions(
+                (5.0, 8.0),
+                (1.0, 2.0),
+                water_temperature=_water_temp(60),
+                water_temp_change_24h=2.5,
+            ).score
+            or 0
+        )
+        hot = score_conditions(
+            (5.0, 8.0),
+            (1.0, 2.0),
+            water_temperature=_water_temp(80),
+            water_temp_change_24h=2.5,
+        )
+        assert drop == base - 5
+        assert warm == base + 3
+        assert not any("warmed" in f.description for f in hot.factors)
+
+    def test_no_pre_front_bonus_once_the_storm_is_here(self) -> None:
+        gale = score_conditions((25.0, 30.0), (6.0, 11.0), pressure_trend="falling")
+        storm = score_conditions(
+            (5.0, 8.0), (1.0, 2.0), pressure_trend="falling", storms=True
+        )
+        for result in (gale, storm):
+            assert not any("Falling pressure" in f.description for f in result.factors)
+
+
+class TestSeason:
+    def test_winter_full_of_winter_fish_scores_like_summer(self) -> None:
+        winter = score_conditions(
+            (5.0, 10.0),
+            (1.0, 2.0),
+            water_temperature=_water_temp(40),
+            fish_in_season=(6, 6),
+        )
+        summer = score_conditions(
+            (5.0, 10.0),
+            (1.0, 2.0),
+            water_temperature=_water_temp(68),
+            fish_in_season=(6, 6),
+        )
+        assert winter.score == summer.score
+        assert not any("Off-peak" in f.description for f in winter.factors)
+
+    def test_season_factor_follows_how_many_fish_are_working(self) -> None:
+        def day(fish: tuple[int, int]) -> int:
+            return (
+                score_conditions((5.0, 10.0), (1.0, 2.0), fish_in_season=fish).score
+                or 0
+            )
+
+        assert day((6, 6)) > day((2, 6)) > day((0, 6)) > day((0, 0))
+
+    def test_without_fish_counts_the_old_water_bands_apply(self) -> None:
+        cold = score_conditions(
+            (5.0, 10.0), (1.0, 2.0), water_temperature=_water_temp(40)
+        )
+        assert any("Off-peak water temp" in f.description for f in cold.factors)

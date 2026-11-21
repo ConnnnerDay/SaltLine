@@ -1,12 +1,7 @@
 import { requestUnits } from '@/lib/request-units'
 import { height, heightRange, speed, speedRange } from '@/lib/units'
 import type { Preferences } from '@/app/api/preferences/route'
-import {
-  FISHING_TIMES,
-  FISHING_TYPES,
-  TARGET_GROUPS,
-  TIDE_PREFERENCES,
-} from '@/lib/profile-options'
+import { TIDE_PREFERENCES } from '@/lib/profile-options'
 import {
   limitsFor,
   TIDE_TIPS,
@@ -21,58 +16,19 @@ import { Card } from './ui'
 import { cx } from './ui/cx'
 
 /**
- * "Your fishing today": the forecast read through the signed-in user's
- * fishing profile (preferences), shown only when they have one.
+ * The forecast read through the signed-in user's fishing profile, placed
+ * in the sections it belongs to rather than a card of its own:
  *
- * - What we know about you: chips for how/what/when you fish, with an
- *   edit link, so the personalization is never a mystery.
- * - Today vs your limits: today's wind and wave ranges drawn against the
- *   user's comfort limits (or a typical limit for the kayak/boat they
- *   fish from), as a band on a scale with the limit marked.
- * - The tide right now, and whether it's their preferred tide.
+ * - `YourLimits` (under "Wind & waves"): today's wind and wave ranges
+ *   drawn against the user's comfort limits, with the limit marked.
+ * - `TideNow` (top of "Tides"): the tide right now, and whether it's
+ *   their preferred tide.
  *
  * The where-to-fish guides (`WhereToFish`, below) live in "Rigs & tips".
  */
 
-function hasProfile(profile: Preferences | null): profile is Preferences {
-  return Boolean(
-    profile &&
-      (profile.fishing_types?.length ||
-        profile.target_groups?.length ||
-        profile.fishing_times?.length ||
-        profile.tide_preference ||
-        profile.wind_threshold_kt != null ||
-        profile.surf_threshold_ft != null),
-  )
-}
-
 const label = (options: { value: string; label: string }[], value: string) =>
   options.find((option) => option.value === value)?.label ?? value
-
-function ProfileChips({ profile }: { profile: Preferences }) {
-  const chips = [
-    ...(profile.fishing_types ?? []).map((value) => label(FISHING_TYPES, value)),
-    ...(profile.target_groups ?? []).map((value) => label(TARGET_GROUPS, value)),
-    ...(profile.fishing_times ?? []).map((value) => label(FISHING_TIMES, value)),
-    ...(profile.tide_preference
-      ? [`${label(TIDE_PREFERENCES, profile.tide_preference)} tide`]
-      : []),
-  ]
-  if (chips.length === 0) return null
-  return (
-    <ul aria-label="Your fishing profile" className="flex flex-wrap gap-1.5">
-      {chips.map((chip) => (
-        <li
-          key={chip}
-          className="rounded-full border border-border bg-surface-raised px-2.5 py-1 text-xs font-semibold text-text"
-        >
-          {chip}
-        </li>
-      ))}
-    </ul>
-  )
-}
-
 
 /** One "today vs your limit" row: a scale from 0, today's range as a
  * band (green up to the limit, red beyond it, the verdict also in words),
@@ -148,30 +104,13 @@ function LimitGauge({
   )
 }
 
-export function YourDay({
-  forecast,
-  profile,
-}: {
-  forecast: ForecastEnvelope
-  profile: Preferences | null
-}) {
-  if (!hasProfile(profile)) return null
-
+/** "Today vs your limits": today's wind and wave ranges against the
+ * user's comfort limits (or a typical limit for the kayak or boat they
+ * fish from). Shown under "Wind & waves"; nothing without a limit. */
+export function YourLimits({ forecast, profile }: { forecast: ForecastEnvelope; profile: Preferences | null }) {
+  if (!profile) return null
   const conditions = forecast.conditions
   const limits = limitsFor(profile)
-  const tide = tideNow(forecast.tides)
-  const timeFormatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: forecast.location.timezone,
-    hour: 'numeric',
-    minute: '2-digit',
-  })
-  const preferred = profile.tide_preference
-  const tideMatches =
-    tide &&
-    preferred &&
-    (preferred === tide.direction ||
-      (preferred === tide.next.kind && tide.minutesAway < 90))
-
   const gauges = [
     limits.wind && conditions?.wind_range_kt && (
       <LimitGauge key="wind" title="Wind" kind="speed" range={conditions.wind_range_kt} limit={limits.wind} />
@@ -180,60 +119,61 @@ export function YourDay({
       <LimitGauge key="waves" title="Waves" kind="height" range={conditions.wave_range_ft} limit={limits.waves} />
     ),
   ].filter(Boolean)
+  if (gauges.length === 0) return null
 
   return (
-    <Card className="flex flex-col gap-5">
+    <Card className="flex flex-col gap-4">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <h2 className="section-label">Your fishing today</h2>
+        <h2 className="section-label">Today vs your limits</h2>
         <a href="/preferences" className="text-xs font-semibold">
-          Edit your profile
+          Change limits
         </a>
       </div>
-
-      <ProfileChips profile={profile} />
-
-      {(gauges.length > 0 || tide) && (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {gauges.length > 0 && (
-            <section className="flex flex-col gap-4 rounded-md border border-border bg-surface-raised p-4">
-              <h3 className="section-label">Today vs your limits</h3>
-              {gauges}
-            </section>
-          )}
-          {tide && (
-            <section className="flex flex-col gap-2 rounded-md border border-border bg-surface-raised p-4">
-              <h3 className="section-label">Tide right now</h3>
-              <p className="flex items-center gap-2.5 text-lg font-bold text-text">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="text-primary">
-                  {tide.direction === 'incoming' ? <path d="M12 19V5M5 12l7-7 7 7" /> : <path d="M12 5v14M5 12l7 7 7-7" />}
-                </svg>
-                {tide.direction === 'incoming' ? 'Coming in' : 'Going out'}
-              </p>
-              <p className="text-sm text-text-muted">
-                {tide.next.kind === 'high' ? 'High' : 'Low'} tide at{' '}
-                <span className="font-semibold text-text">
-                  {timeFormatter.format(new Date(tide.next.time))}
-                </span>{' '}
-                ({height(tide.next.height_ft, requestUnits())})
-              </p>
-              {preferred && (
-                <p
-                  className={cx(
-                    'w-fit rounded-full px-2.5 py-0.5 text-xs font-bold',
-                    tideMatches ? 'bg-go-bg text-go-text' : 'bg-border text-text-muted',
-                  )}
-                >
-                  {tideMatches
-                    ? `Your ${label(TIDE_PREFERENCES, preferred).toLowerCase()} tide`
-                    : `You prefer ${label(TIDE_PREFERENCES, preferred).toLowerCase()} tide`}
-                </p>
-              )}
-            </section>
-          )}
-        </div>
-      )}
-
+      {gauges}
     </Card>
+  )
+}
+
+/** One line for the top of "Tides": which way it's running now, the next
+ * high or low, and whether that's the user's preferred tide. */
+export function TideNow({ forecast, profile }: { forecast: ForecastEnvelope; profile: Preferences | null }) {
+  const tide = tideNow(forecast.tides)
+  if (!tide) return null
+  const timeFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: forecast.location.timezone,
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+  const preferred = profile?.tide_preference ?? null
+  const tideMatches =
+    preferred && (preferred === tide.direction || (preferred === tide.next.kind && tide.minutesAway < 90))
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      <p className="flex items-center gap-2 font-bold text-text">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="text-primary">
+          {tide.direction === 'incoming' ? <path d="M12 19V5M5 12l7-7 7 7" /> : <path d="M12 5v14M5 12l7 7 7-7" />}
+        </svg>
+        {tide.direction === 'incoming' ? 'Coming in now' : 'Going out now'}
+      </p>
+      <p className="text-sm text-text-muted">
+        {tide.next.kind === 'high' ? 'High' : 'Low'} at{' '}
+        <span className="font-semibold text-text">{timeFormatter.format(new Date(tide.next.time))}</span> (
+        {height(tide.next.height_ft, requestUnits())})
+      </p>
+      {preferred && (
+        <p
+          className={cx(
+            'w-fit rounded-full px-2.5 py-0.5 text-xs font-bold',
+            tideMatches ? 'bg-go-bg text-go-text' : 'bg-border text-text-muted',
+          )}
+        >
+          {tideMatches
+            ? `Your ${label(TIDE_PREFERENCES, preferred).toLowerCase()} tide`
+            : `You prefer ${label(TIDE_PREFERENCES, preferred).toLowerCase()} tide`}
+        </p>
+      )}
+    </div>
   )
 }
 

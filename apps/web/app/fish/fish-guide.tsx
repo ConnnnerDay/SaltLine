@@ -152,7 +152,12 @@ export function FishGuide({
         </div>
       </div>
 
-      <BaitThisMonth region={mineOnly ? 'all' : region} month={month} units={units} />
+      <BaitThisMonth
+        region={mineOnly ? 'all' : region}
+        month={month}
+        units={units}
+        fish={species.map((fish) => ({ name: fish.name, regions: fish.regions }))}
+      />
 
       <p className="text-sm text-text-muted" aria-live="polite">
         {results.length} fish{mineOnly ? ' in My fish' : region !== 'all' && ` in the ${REGION_LABEL[region]}`}

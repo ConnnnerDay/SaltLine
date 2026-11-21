@@ -29,7 +29,9 @@ const LONG_HOURS = SHORT_HOURS.map((label) =>
   label.replace(/^(\d+)a$/, '$1 AM').replace(/^(\d+)p$/, '$1 PM'),
 )
 
-const TAG_LABEL = { prime: 'Prime', high: 'High', med: 'Good', low: 'Low' } as const
+// Activity words, not the day's verdict words (Good, Fair...), so an
+// hour's activity is never confused with the day's rating.
+const TAG_LABEL = { prime: 'Prime', high: 'Active', med: 'Moderate', low: 'Slow' } as const
 
 const TIER_BG = {
   prime: 'bg-tier-prime',

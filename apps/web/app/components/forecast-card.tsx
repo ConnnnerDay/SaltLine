@@ -144,6 +144,8 @@ export type ForecastEnvelope = {
       score: number | null
       verdict: ForecastVerdict
       summary: string
+      /** Everything that moved the score, biggest first (apps/api scoring). */
+      factors?: { impact: number; description: string }[]
       /** Set when the signed-in user's comfort limits downgraded the verdict. */
       personalized_from?: ForecastVerdict
     } | null
@@ -1574,6 +1576,33 @@ export function ForecastCard({
             <ShowIf option="show_summary">
               <p className="max-w-3xl text-sm leading-relaxed text-text-muted sm:text-base">{score.summary}</p>
             </ShowIf>
+          )}
+          {score?.factors && score.factors.length > 0 && (
+            <details className="group w-fit max-w-3xl">
+              <summary className="flex w-fit cursor-pointer items-center gap-1.5 text-sm font-semibold text-primary">
+                Why this score
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="transition-transform group-open:rotate-180">
+                  <path d="M6 9 L12 15 L18 9" />
+                </svg>
+              </summary>
+              <ul className="mt-2 flex flex-col gap-1 text-sm">
+                {score.factors.map((factor) => (
+                  <li key={factor.description} className="flex items-baseline gap-2.5">
+                    <span
+                      className={cx(
+                        'w-9 shrink-0 text-right font-bold tabular-nums',
+                        factor.impact > 0 ? 'text-go-text' : factor.impact < 0 ? 'text-danger-text' : 'text-text-muted',
+                      )}
+                    >
+                      {factor.impact > 0 ? '+' : factor.impact < 0 ? '−' : ''}
+                      {Math.abs(Math.round(factor.impact))}
+                    </span>
+                    <span className="text-text">{localizeText(factor.description, units)}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-xs text-text-muted">Points up or down from an even 50.</p>
+            </details>
           )}
           {weatherNow && (
             <ShowIf option="show_weather">

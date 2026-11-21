@@ -571,3 +571,36 @@ class TestWeatherAndAlerts:
         )
         for result in (gale, storm):
             assert not any("Falling pressure" in f.description for f in result.factors)
+
+
+class TestSeason:
+    def test_winter_full_of_winter_fish_scores_like_summer(self) -> None:
+        winter = score_conditions(
+            (5.0, 10.0),
+            (1.0, 2.0),
+            water_temperature=_water_temp(40),
+            fish_in_season=(6, 6),
+        )
+        summer = score_conditions(
+            (5.0, 10.0),
+            (1.0, 2.0),
+            water_temperature=_water_temp(68),
+            fish_in_season=(6, 6),
+        )
+        assert winter.score == summer.score
+        assert not any("Off-peak" in f.description for f in winter.factors)
+
+    def test_season_factor_follows_how_many_fish_are_working(self) -> None:
+        def day(fish: tuple[int, int]) -> int:
+            return (
+                score_conditions((5.0, 10.0), (1.0, 2.0), fish_in_season=fish).score
+                or 0
+            )
+
+        assert day((6, 6)) > day((2, 6)) > day((0, 6)) > day((0, 0))
+
+    def test_without_fish_counts_the_old_water_bands_apply(self) -> None:
+        cold = score_conditions(
+            (5.0, 10.0), (1.0, 2.0), water_temperature=_water_temp(40)
+        )
+        assert any("Off-peak water temp" in f.description for f in cold.factors)

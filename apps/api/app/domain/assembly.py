@@ -166,6 +166,8 @@ from pydantic import BaseModel
 
 from app.domain.confidence import AgedObservation, StationDistance, assess_confidence
 from app.domain.guidance import (
+    GOOD_SCORE,
+    FishingGuidance,
     build_fishing_guidance,
     local_month,
     rate_picks_for_day,
@@ -703,6 +705,37 @@ async def assemble_forecast(
     normals = monthly_water_temps_for_region(
         location.temp_region, location.temp_offset, water_temp_profiles
     )
+    # The fish picks come first: how many are in season and in their best
+    # water feeds the day's score (a season-relative measure, not a fixed
+    # "warm water is good"). Enrichment only: a guidance bug must never
+    # cost the visitor the forecast itself.
+    guidance: FishingGuidance | None
+    try:
+        guidance = build_fishing_guidance(
+            region=location.conditions_region,
+            water_temp_f=water_temperature.value,
+            water_temp_is_fallback=water_temperature.is_fallback,
+            month=local_month(now, location.timezone),
+            wave_range_ft=wave_range,
+            monthly_temps=normals,
+            state=location.state,
+            today=now.astimezone(safe_zone(location.timezone)).date(),
+            coast=wind_orientation_for(location),
+            wind_direction=wind_direction,
+            wind_range_kt=wind_range,
+            hour=now.astimezone(safe_zone(location.timezone)).hour,
+        )
+    except Exception:
+        _logger.exception("fishing guidance failed for %s", location.id)
+        guidance = None
+    fish_in_season = (
+        (
+            sum(1 for pick in guidance.species if pick.score >= GOOD_SCORE),
+            len(guidance.species),
+        )
+        if guidance is not None
+        else None
+    )
     score = score_conditions(
         wind_range,
         wave_range,
@@ -738,6 +771,7 @@ async def assemble_forecast(
             )
         ],
         water_temp_change_24h=water_temp_change,
+        fish_in_season=fish_in_season,
         air_temp_f=(
             point_weather.now.temperature_f
             if point_weather and point_weather.now
@@ -805,6 +839,7 @@ async def assemble_forecast(
             water_temperature=water_temperature,
             tide_predictions=tides_result.value,
             weather_days=point_weather.days if point_weather else None,
+            fish_in_season=fish_in_season,
         )
     except Exception:
         _logger.exception("day outlook failed for %s", location.id)
@@ -850,32 +885,19 @@ async def assemble_forecast(
         tz_name=location.timezone,
     )
 
-    # Enrichment only: a guidance bug must never cost the visitor the
-    # forecast itself, so a failure here drops `recommendations` and logs.
-    recommendations: dict[str, Any] | None
+    recommendations: dict[str, Any] | None = None
     try:
-        recommendations = build_fishing_guidance(
-            region=location.conditions_region,
-            water_temp_f=water_temperature.value,
-            water_temp_is_fallback=water_temperature.is_fallback,
-            month=local_month(now, location.timezone),
-            wave_range_ft=wave_range,
-            monthly_temps=monthly_water_temps_for_region(
-                location.temp_region, location.temp_offset, water_temp_profiles
-            ),
-            state=location.state,
-            today=now.astimezone(safe_zone(location.timezone)).date(),
-            coast=wind_orientation_for(location),
-            wind_direction=wind_direction,
-            wind_range_kt=wind_range,
-            hour=now.astimezone(safe_zone(location.timezone)).hour,
-        ).model_dump(mode="json")
+        if guidance is None:
+            raise LookupError("no guidance")
+        recommendations = guidance.model_dump(mode="json")
         day_verdict = conditions.score.verdict.value if conditions.score else None
         for key in ("species", "boat_species", "tidal_species"):
             if recommendations.get(key):
                 recommendations[key] = rate_picks_for_day(
                     recommendations[key], day_verdict
                 )
+    except LookupError:
+        recommendations = None
     except Exception:
         _logger.exception("fishing guidance failed for %s", location.id)
         recommendations = None

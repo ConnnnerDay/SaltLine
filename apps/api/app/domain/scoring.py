@@ -254,6 +254,7 @@ def score_conditions(
     swell: list[tuple[float, int]] | None = None,
     air_temp_f: float | None = None,
     water_temp_change_24h: float | None = None,
+    fish_in_season: tuple[int, int] | None = None,
 ) -> ForecastScore:
     """Score fishability from the marine and astronomical signals given.
 
@@ -342,7 +343,52 @@ def score_conditions(
                 )
             )
 
-    if water_temperature is not None:
+    # How good the season is right now: the fish that are in season and in
+    # their best water today, as (working, picks) -- working picks score
+    # Good or better, picks is everything in range. Relative to the season,
+    # so a January day full of winter fish isn't marked down for being
+    # cold. Without it (no guidance), the old fixed water-temperature bands.
+    if fish_in_season is not None:
+        working, picks = fish_in_season
+        temp_label = (
+            f" at {water_temperature.value:.0f}°F"
+            if water_temperature is not None
+            else ""
+        )
+        if working >= 3:
+            score += 6
+            factors.append(
+                ScoreFactor(
+                    impact=6,
+                    description=f"Good season: {working} fish in their best water{temp_label}",
+                )
+            )
+        elif working >= 1:
+            score += 2
+            factors.append(
+                ScoreFactor(
+                    impact=2,
+                    description=f"{working} fish in their best water{temp_label}",
+                )
+            )
+        elif picks >= 1:
+            score -= 2
+            factors.append(
+                ScoreFactor(
+                    impact=-2,
+                    description=f"Slow season: few fish in their best water{temp_label}",
+                )
+            )
+        else:
+            score -= 6
+            factors.append(
+                ScoreFactor(
+                    impact=-6, description=f"Almost nothing in season{temp_label}"
+                )
+            )
+        if water_temperature is not None and not water_temperature.is_fallback:
+            score += 1
+    elif water_temperature is not None:
         temp_f = water_temperature.value
         if 58 <= temp_f <= 78:
             score += 6

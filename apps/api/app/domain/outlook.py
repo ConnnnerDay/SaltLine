@@ -71,6 +71,7 @@ def build_day_outlook(
     water_temperature: Observation | None,
     tide_predictions: list[TidePrediction] | None,
     weather_days: list[WeatherDay] | None = None,
+    fish_in_season: tuple[int, int] | None = None,
 ) -> list[DayOutlook]:
     zone = safe_zone(tz_name)
     today = now.astimezone(zone).date()
@@ -101,6 +102,7 @@ def build_day_outlook(
             storms=bool(weather and weather.sky == "storm"),
             precip_pct=weather.precip_pct if weather else None,
             sky=weather.sky if weather else None,
+            fish_in_season=fish_in_season,
         )
         out.append(
             DayOutlook(

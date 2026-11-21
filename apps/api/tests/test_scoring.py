@@ -786,3 +786,30 @@ class TestTides:
         assert delta("offshore", 1.4) == 0
         assert delta("bridge", 0.6) < 0 < delta("kayak", 0.6)
         assert delta("surf", 1.0) == 0  # an ordinary tide changes nothing
+
+
+class TestStormChance:
+    def test_storm_wording_is_graded(self) -> None:
+        from app.domain.scoring import storm_level
+
+        assert storm_level("Showers And Thunderstorms", 97) == "likely"
+        assert storm_level("Showers And Thunderstorms Likely", None) == "likely"
+        assert storm_level("Chance Showers And Thunderstorms", 37) == "chance"
+        assert storm_level("Chance Showers And Thunderstorms", 22) == "slight"
+        assert storm_level("Slight Chance Showers And Thunderstorms", 15) == "slight"
+        assert storm_level("Chance Showers And Thunderstorms", 70) == "likely"
+        assert storm_level("Chance Rain Showers", 48) is None
+        assert storm_level(None, None) is None
+
+    def test_only_likely_storms_cap_the_day(self) -> None:
+        base = score_conditions((5.0, 10.0), (1.0, 2.0)).score or 0
+        chance = score_conditions((5.0, 10.0), (1.0, 2.0), storm_chance="chance")
+        slight = score_conditions((5.0, 10.0), (1.0, 2.0), storm_chance="slight")
+        likely = score_conditions(
+            (5.0, 10.0), (1.0, 2.0), storms=True, storm_chance="likely"
+        )
+        assert (chance.score or 0) == base - 6
+        assert (slight.score or 0) == base - 2
+        # Not capped below Fair the way a likely-storm day is.
+        assert chance.verdict not in (ScoreVerdict.CHALLENGING, ScoreVerdict.POOR)
+        assert likely.verdict in (ScoreVerdict.CHALLENGING, ScoreVerdict.POOR)

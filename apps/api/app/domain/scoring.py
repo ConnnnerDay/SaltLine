@@ -377,6 +377,24 @@ def _wind_name(wind_kt: float) -> str:
     return "Gale-force wind"
 
 
+def storm_level(short_forecast: str | None, precip_pct: int | None) -> str | None:
+    """How sure a forecast is of thunderstorms: "likely" (the day's
+    thunderstorm penalty and cap), "chance", "slight", or None (no thunder
+    mentioned). NWS words it "Slight Chance Showers And Thunderstorms",
+    "Chance ...", "... Likely" or just "Showers And Thunderstorms"; the
+    chance of rain settles it when it's 60% or more."""
+    text = (short_forecast or "").lower()
+    if not any(word in text for word in ("thunder", "tstorm", "t-storm")):
+        return None
+    if precip_pct is not None and precip_pct >= 60:
+        return "likely"
+    if "slight chance" in text or "isolated" in text:
+        return "slight"
+    if "chance" in text or "scattered" in text:
+        return "chance" if precip_pct is None or precip_pct >= 30 else "slight"
+    return "likely"
+
+
 def _sentence(parts: list[str]) -> str:
     """The top factors as one sentence: "Moderate surf (2–5 ft), onshore
     wind (NE) bringing murkier water, a dusk bite window and a good
@@ -415,6 +433,7 @@ def score_conditions(
     coast: str = "east",
     pressure_trend: str | None = None,
     storms: bool = False,
+    storm_chance: str | None = None,
     precip_pct: int | None = None,
     alerts: list[str] | None = None,
     water_temp_normal_f: float | None = None,
@@ -813,6 +832,14 @@ def score_conditions(
         score -= 15
         factors.append(
             ScoreFactor(impact=-15, description="Thunderstorms in the forecast")
+        )
+    elif storm_chance == "chance":
+        score -= 6
+        factors.append(ScoreFactor(impact=-6, description="A chance of thunderstorms"))
+    elif storm_chance == "slight":
+        score -= 2
+        factors.append(
+            ScoreFactor(impact=-2, description="A slight chance of thunderstorms")
         )
 
     dangerous: str | None = None

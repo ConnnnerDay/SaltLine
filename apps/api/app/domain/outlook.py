@@ -19,7 +19,7 @@ from datetime import date, datetime, time, timedelta
 from pydantic import BaseModel
 
 from app.domain.models import Observation
-from app.domain.scoring import STYLE_PROFILES, score_conditions
+from app.domain.scoring import STYLE_PROFILES, score_conditions, storm_level
 from app.infra.timezones import safe_zone
 from app.providers.astronomy import compute_solunar_times, compute_sun_times
 from app.providers.noaa_coops import TidePrediction
@@ -117,7 +117,15 @@ def build_day_outlook(
                 water_temperature=water_temperature,
                 solunar=solunar,
                 coast=coast,
-                storms=bool(weather and weather.sky == "storm"),
+                storms=storm_level(
+                    weather.short_forecast if weather else None,
+                    weather.precip_pct if weather else None,
+                )
+                == "likely",
+                storm_chance=storm_level(
+                    weather.short_forecast if weather else None,
+                    weather.precip_pct if weather else None,
+                ),
                 precip_pct=weather.precip_pct if weather else None,
                 sky=weather.sky if weather else None,
                 fish_in_season=fish_in_season,

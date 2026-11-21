@@ -195,6 +195,7 @@ from app.domain.scoring import (
     STYLE_PROFILES,
     ForecastScore,
     score_conditions,
+    storm_level,
     wind_orientation_for,
 )
 from app.domain.timing import HourlyOutlook, build_hourly_outlook
@@ -466,6 +467,32 @@ def _precip_today(
         return weather.now.precip_pct
     today = now.astimezone(safe_zone(tz_name)).date()
     return next((day.precip_pct for day in weather.days if day.date == today), None)
+
+
+_STORM_RANK = {"slight": 1, "chance": 2, "likely": 3}
+
+
+def _storm_level_today(
+    weather: PointWeather | None, now: datetime, tz_name: str
+) -> str | None:
+    """The surest thunderstorm wording in today's forecast (the current
+    period or today's), graded by `storm_level`."""
+    if weather is None:
+        return None
+    today = now.astimezone(safe_zone(tz_name)).date()
+    levels = [
+        storm_level(weather.now.short_forecast, weather.now.precip_pct)
+        if weather.now
+        else None,
+        *(
+            storm_level(day.short_forecast, day.precip_pct)
+            for day in weather.days
+            if day.date == today
+        ),
+    ]
+    return max(
+        (level for level in levels if level), key=_STORM_RANK.__getitem__, default=None
+    )
 
 
 def _storms_today(weather: PointWeather, now: datetime, tz_name: str) -> bool:
@@ -763,9 +790,9 @@ async def assemble_forecast(
             if point_weather and point_weather.barometer
             else None
         ),
-        "storms": bool(
-            point_weather and _storms_today(point_weather, now, location.timezone)
-        ),
+        # Graded: "Chance Showers And Thunderstorms" at 37% isn't a storm day.
+        "storms": _storm_level_today(point_weather, now, location.timezone) == "likely",
+        "storm_chance": _storm_level_today(point_weather, now, location.timezone),
         "precip_pct": _precip_today(point_weather, now, location.timezone),
         "alerts": [alert.event for alert in alerts],
         "water_temp_normal_f": normals.get(local_month(now, location.timezone)),

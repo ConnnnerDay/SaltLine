@@ -307,7 +307,10 @@ def _conditions_modifier(
                 points -= 3
                 reasons.append(f"Offshore {wind_direction} wind works against it")
         elif "calm_water" in tags:
-            if is_offshore:
+            # Only a light-to-moderate offshore breeze keeps it clear; a
+            # strong one is just wind (scored below).
+            strong = wind_range_kt is not None and wind_range_kt[1] > 16
+            if is_offshore and not strong:
                 points += 5
                 reasons.append(f"Offshore {wind_direction} wind keeps the water clear")
             elif is_onshore:
@@ -384,6 +387,50 @@ def _tier(score: float) -> GuidanceTier:
     if score >= GOOD_SCORE:
         return GuidanceTier.GOOD
     return GuidanceTier.FAIR
+
+
+# On a rough day the fish ratings come down with the day's own rating:
+# a fish can be in season at the right water temperature and still not
+# be worth a trip in 25 kt and 8 ft seas.
+_DAY_CAP_REASON = {
+    "Poor": "Held to Fair: today is rated Poor here",
+    "Challenging": "Down a step: today is rated Challenging here",
+}
+_TIER_STEP_DOWN = {
+    GuidanceTier.PRIME: GuidanceTier.GOOD,
+    GuidanceTier.GOOD: GuidanceTier.FAIR,
+    GuidanceTier.FAIR: GuidanceTier.FAIR,
+}
+
+
+def tier_for_day(score: float, day_verdict: str | None) -> GuidanceTier:
+    """A pick's tier from its *score*, lowered for a Poor (to Fair) or
+    Challenging (one step) day."""
+    tier = _tier(score)
+    if day_verdict == "Poor":
+        return GuidanceTier.FAIR
+    if day_verdict == "Challenging":
+        return _TIER_STEP_DOWN[tier]
+    return tier
+
+
+def rate_picks_for_day(
+    picks: list[dict[str, Any]], day_verdict: str | None
+) -> list[dict[str, Any]]:
+    """*picks* (JSON-shaped `SpeciesPick`s) re-tiered for the day's verdict.
+    Idempotent: the tier is worked out from each pick's score again and any
+    earlier day note is replaced, so it's safe to apply after personalizing
+    changes the verdict."""
+    rated: list[dict[str, Any]] = []
+    for pick in picks:
+        reasons = [
+            r for r in pick.get("reasons", []) if r not in _DAY_CAP_REASON.values()
+        ]
+        tier = tier_for_day(pick["score"], day_verdict)
+        if tier != _tier(pick["score"]) and day_verdict in _DAY_CAP_REASON:
+            reasons = [_DAY_CAP_REASON[day_verdict], *reasons]
+        rated.append({**pick, "tier": tier.value, "reasons": reasons})
+    return rated
 
 
 def _temperature_reason(

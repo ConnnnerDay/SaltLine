@@ -279,7 +279,10 @@ def score_conditions(
 
     if wind_direction:
         onshore_dirs, offshore_dirs = onshore_offshore_dirs(coast)
-        if wind_direction in offshore_dirs:
+        # Offshore wind flattens and clears the water, but only up to a
+        # breeze: past that it's blowing casts back and lines off the bottom,
+        # and the wind penalty above already says so.
+        if wind_direction in offshore_dirs and wind_max <= _WIND_MODERATE_HIGH_KT:
             score += 4
             factors.append(
                 ScoreFactor(

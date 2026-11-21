@@ -114,6 +114,12 @@ class TestWindDirection:
         )
         assert any(f.impact == 4 for f in result.factors)
 
+    def test_no_clean_offshore_bonus_in_strong_wind(self) -> None:
+        result = score_conditions(
+            (20.0, 25.0), (1.0, 2.0), wind_direction="W", coast="east"
+        )
+        assert not any("offshore" in f.description for f in result.factors)
+
     def test_onshore_wind_penalty_east_coast(self) -> None:
         result = score_conditions(
             (5.0, 8.0), (1.0, 2.0), wind_direction="E", coast="east"

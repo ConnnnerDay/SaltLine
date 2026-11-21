@@ -39,6 +39,7 @@ from app.domain.guidance import (
     SpeciesPick,
     build_fishing_guidance,
     build_pack_for_today,
+    rate_picks_for_day,
 )
 from app.domain.models import ForecastEnvelope, Warning, WarningSeverity
 from app.domain.preferences import PreferencesOut
@@ -407,6 +408,16 @@ def personalize(
             recommendations["pack"] = _rebuilt_pack(
                 recommendations, conditions, envelope
             )
+
+    # The picks follow the day's (possibly now lowered) verdict; re-ranked
+    # or merged picks come straight from guidance and need it too.
+    if recommendations and conditions is not None:
+        day_verdict = (conditions.get("score") or {}).get("verdict")
+        for key in ("species", "boat_species", "tidal_species"):
+            if recommendations.get(key):
+                recommendations[key] = rate_picks_for_day(
+                    recommendations[key], day_verdict
+                )
 
     if recommendations and recommendations.get("pack"):
         pack = _filter_pack(recommendations["pack"], prefs)

@@ -722,12 +722,21 @@ function WhatsBiting({
 }: {
   guidance: FishingGuidance
   linkFish?: boolean
-  /** The day's own rating: the picks are rated for the fish (season,
-   * water), so a rough day says so above them. */
+  /** The day's own rating: apps/api holds every pick to Fair on a Poor
+   * day and drops each a step on a Challenging one, and says so here. */
   dayVerdict?: ForecastVerdict | null
 }) {
   // Reasons every pick shares (today's wind, surf, season) are said once,
   // above the cards; each card keeps only what's particular to that fish.
+  // apps/api's per-pick day note ("Held to Fair: today is rated Poor
+  // here") is said once, in the banner above.
+  guidance = {
+    ...guidance,
+    species: guidance.species.map((pick) => ({
+      ...pick,
+      reasons: pick.reasons.filter((reason) => !/^(Held to Fair|Down a step): today is rated/.test(reason)),
+    })),
+  }
   const shared =
     guidance.species.length > 1
       ? guidance.species[0].reasons.filter((reason) =>
@@ -747,8 +756,9 @@ function WhatsBiting({
 
       {(dayVerdict === 'Poor' || dayVerdict === 'Challenging') && guidance.species.length > 0 && (
         <p className="-mt-1 rounded-md border border-marginal-border bg-marginal-bg px-3 py-2 text-sm text-marginal-text">
-          Today is rated {dayVerdict} here. These ratings are for the fish (season and water), not
-          the weather: they&apos;re who&apos;s around if you do go.
+          {dayVerdict === 'Poor'
+            ? 'Today is rated Poor here, so every fish is held to Fair. They’re who’s around if you do go.'
+            : 'Today is rated Challenging here, so each fish is rated a step lower.'}
         </p>
       )}
 

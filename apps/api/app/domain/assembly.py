@@ -165,7 +165,11 @@ from typing import Any, Generic, TypeVar
 from pydantic import BaseModel
 
 from app.domain.confidence import AgedObservation, StationDistance, assess_confidence
-from app.domain.guidance import build_fishing_guidance, local_month
+from app.domain.guidance import (
+    build_fishing_guidance,
+    local_month,
+    rate_picks_for_day,
+)
 from app.domain.models import (
     ForecastEnvelope,
     ForecastState,
@@ -807,6 +811,12 @@ async def assemble_forecast(
             wind_range_kt=wind_range,
             hour=now.astimezone(safe_zone(location.timezone)).hour,
         ).model_dump(mode="json")
+        day_verdict = conditions.score.verdict.value if conditions.score else None
+        for key in ("species", "boat_species", "tidal_species"):
+            if recommendations.get(key):
+                recommendations[key] = rate_picks_for_day(
+                    recommendations[key], day_verdict
+                )
     except Exception:
         _logger.exception("fishing guidance failed for %s", location.id)
         recommendations = None

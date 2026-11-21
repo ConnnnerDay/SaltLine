@@ -9,6 +9,7 @@ contract.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Any
 
 import pytest
 
@@ -628,3 +629,56 @@ def test_regional_seasons_only_name_real_species_and_regions() -> None:
             assert region in catalogue[species_id]["regions"], (species_id, region)
             assert not set(months["peak"]) & set(months["good"]), species_id
             assert all(1 <= m <= 12 for m in months["peak"] + months["good"])
+
+
+def _rated(score: int, verdict: str | None) -> dict[str, Any]:
+    from app.domain.guidance import rate_picks_for_day
+
+    pick = {"id": "x", "score": score, "tier": "prime", "reasons": ["Water 70°F"]}
+    return rate_picks_for_day([pick], verdict)[0]
+
+
+def test_poor_day_holds_every_pick_to_fair() -> None:
+    rated = _rated(95, "Poor")
+    assert rated["tier"] == "fair"
+    assert rated["reasons"][0] == "Held to Fair: today is rated Poor here"
+
+
+def test_challenging_day_drops_a_step() -> None:
+    assert _rated(95, "Challenging")["tier"] == "good"
+    assert _rated(75, "Challenging")["tier"] == "fair"
+
+
+def test_good_day_leaves_tiers_alone_and_rating_is_idempotent() -> None:
+    from app.domain.guidance import rate_picks_for_day
+
+    assert _rated(95, "Good")["tier"] == "prime"
+    once = _rated(95, "Poor")
+    twice = rate_picks_for_day([once], "Poor")[0]
+    assert twice["reasons"].count("Held to Fair: today is rated Poor here") == 1
+    # Back to a good day (e.g. re-rated after personalizing): note removed.
+    again = rate_picks_for_day([once], "Good")[0]
+    assert again["tier"] == "prime" and again["reasons"] == ["Water 70°F"]
+
+
+def test_strong_offshore_wind_is_not_called_clear_water() -> None:
+    from app.domain.guidance import _conditions_modifier
+
+    _, light = _conditions_modifier(
+        ["calm_water"],
+        coast="east",
+        wind_direction="W",
+        wind_range_kt=(5, 10),
+        wave_range_ft=None,
+        hour=None,
+    )
+    _, strong = _conditions_modifier(
+        ["calm_water"],
+        coast="east",
+        wind_direction="W",
+        wind_range_kt=(20, 25),
+        wave_range_ft=None,
+        hour=None,
+    )
+    assert any("keeps the water clear" in reason for reason in light)
+    assert not any("keeps the water clear" in reason for reason in strong)

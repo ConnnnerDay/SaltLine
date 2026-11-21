@@ -32,6 +32,7 @@ from app.domain.guidance import (
     load_catalogue,
     load_regulations,
     regulation_for,
+    tier_for_day,
 )
 from app.domain.scoring import wind_orientation_for
 from app.infra.timezones import safe_zone
@@ -191,7 +192,7 @@ async def _spot_for(
     if pick is not None:
         out.biting = True
         out.score = pick.score
-        out.tier = pick.tier.value
+        out.tier = tier_for_day(pick.score, verdict).value
         out.reasons = pick.reasons
     return out
 

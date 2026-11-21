@@ -52,7 +52,8 @@ export default async function SavedPage() {
     locations = await Promise.all(
       saved.map(async (location) => {
         try {
-          const forecast = await fetchForecast(location.location_id)
+          // Rated as this angler sees it (main style, comfort limits).
+          const forecast = await fetchForecast(location.location_id, session.user.id)
           return { ...location, forecast }
         } catch {
           return { ...location, forecast: null }

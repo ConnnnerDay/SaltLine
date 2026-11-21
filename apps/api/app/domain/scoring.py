@@ -72,6 +72,7 @@ _VERDICT_FAIR = 48
 _VERDICT_CHALLENGING = 32
 
 _DAWN_DUSK_WINDOW = timedelta(hours=2)
+_TIDE_TURN_WINDOW = timedelta(minutes=45)
 
 _ONSHORE_DIRS_EAST = {"S", "SE", "E", "SSE", "ESE", "SSW", "ENE", "NE"}
 _OFFSHORE_DIRS_EAST = {"N", "NW", "W", "NNW", "WNW", "NNE"}
@@ -139,6 +140,10 @@ class StyleProfile:
     rip_current: bool = True
     groundswell_points: float = -4
     alert_points: dict[str, float] = field(default_factory=dict)
+    # Big (spring) tides move the most water: food for bridges, jetties
+    # and piers, a hazard for a kayak. Small (neap) tides the reverse.
+    big_tide_points: float = 2
+    small_tide_points: float = -1
 
 
 _SHORE_WIND = (8.0, 12.0, 16.0, 20.0, 25.0)
@@ -166,6 +171,8 @@ STYLE_PROFILES: dict[str, StyleProfile] = {
         offshore_points=2,
         rip_current=False,
         groundswell_points=-1,
+        big_tide_points=4,
+        small_tide_points=-2,
         alert_points={
             "small craft advisory": -1,
             "high surf advisory": -2,
@@ -181,6 +188,8 @@ STYLE_PROFILES: dict[str, StyleProfile] = {
         offshore_points=2,
         rip_current=False,
         groundswell_points=0,
+        big_tide_points=5,
+        small_tide_points=-3,
         alert_points={
             "small craft advisory": -1,
             "high surf advisory": 0,
@@ -196,6 +205,8 @@ STYLE_PROFILES: dict[str, StyleProfile] = {
         onshore_points=-2,
         rip_current=False,
         groundswell_points=-8,
+        big_tide_points=4,
+        small_tide_points=-3,
         alert_points={
             "small craft advisory": -1,
             "high surf advisory": -12,
@@ -212,6 +223,8 @@ STYLE_PROFILES: dict[str, StyleProfile] = {
         offshore_points=-6,
         onshore_points=-2,
         rip_current=False,
+        big_tide_points=-3,
+        small_tide_points=1,
         alert_points={**_AFLOAT_ALERTS, "small craft advisory": -16},
     ),
     # Boats: seas, not surf; the beach's onshore/offshore logic doesn't apply.
@@ -237,6 +250,8 @@ STYLE_PROFILES: dict[str, StyleProfile] = {
         onshore_points=0,
         rip_current=False,
         groundswell_points=-4,
+        big_tide_points=0,
+        small_tide_points=0,
         alert_points={**_AFLOAT_ALERTS, "small craft advisory": -14},
     ),
 }
@@ -362,6 +377,24 @@ def _wind_name(wind_kt: float) -> str:
     return "Gale-force wind"
 
 
+def storm_level(short_forecast: str | None, precip_pct: int | None) -> str | None:
+    """How sure a forecast is of thunderstorms: "likely" (the day's
+    thunderstorm penalty and cap), "chance", "slight", or None (no thunder
+    mentioned). NWS words it "Slight Chance Showers And Thunderstorms",
+    "Chance ...", "... Likely" or just "Showers And Thunderstorms"; the
+    chance of rain settles it when it's 60% or more."""
+    text = (short_forecast or "").lower()
+    if not any(word in text for word in ("thunder", "tstorm", "t-storm")):
+        return None
+    if precip_pct is not None and precip_pct >= 60:
+        return "likely"
+    if "slight chance" in text or "isolated" in text:
+        return "slight"
+    if "chance" in text or "scattered" in text:
+        return "chance" if precip_pct is None or precip_pct >= 30 else "slight"
+    return "likely"
+
+
 def _sentence(parts: list[str]) -> str:
     """The top factors as one sentence: "Moderate surf (2–5 ft), onshore
     wind (NE) bringing murkier water, a dusk bite window and a good
@@ -400,6 +433,7 @@ def score_conditions(
     coast: str = "east",
     pressure_trend: str | None = None,
     storms: bool = False,
+    storm_chance: str | None = None,
     precip_pct: int | None = None,
     alerts: list[str] | None = None,
     water_temp_normal_f: float | None = None,
@@ -411,6 +445,8 @@ def score_conditions(
     water_temp_change_24h: float | None = None,
     fish_in_season: tuple[int, int] | None = None,
     style: str = "surf",
+    tide_turns: list[datetime] | None = None,
+    tide_strength: float | None = None,
 ) -> ForecastScore:
     """Score fishability from the marine and astronomical signals given.
 
@@ -522,6 +558,47 @@ def score_conditions(
                         if style == "kayak"
                         else f"Onshore wind ({wind_direction}){facing_phrase(coast)}"
                         " bringing murkier water"
+                    ),
+                )
+            )
+
+    # A tide turning within 45 minutes of sunrise or sunset: the water
+    # starts moving in low light, the classic bite. (Tides turn about every
+    # six hours, so a wider window would catch one most days.)
+    if sun_times and tide_turns:
+        for edge, name in ((sun_times.sunrise, "dawn"), (sun_times.sunset, "dusk")):
+            if any(abs(turn - edge) <= _TIDE_TURN_WINDOW for turn in tide_turns):
+                score += 3
+                factors.append(
+                    ScoreFactor(
+                        impact=3,
+                        description=f"Tide turns near {name}: moving water in low light",
+                    )
+                )
+                break
+
+    if tide_strength is not None:
+        if tide_strength >= 1.2 and profile.big_tide_points:
+            score += profile.big_tide_points
+            factors.append(
+                ScoreFactor(
+                    impact=profile.big_tide_points,
+                    description=(
+                        "Big tides: strong currents to paddle against"
+                        if profile.big_tide_points < 0
+                        else "Big tides: strong moving water"
+                    ),
+                )
+            )
+        elif tide_strength <= 0.7 and profile.small_tide_points:
+            score += profile.small_tide_points
+            factors.append(
+                ScoreFactor(
+                    impact=profile.small_tide_points,
+                    description=(
+                        "Small tides: easy currents"
+                        if profile.small_tide_points > 0
+                        else "Small tides: weak current"
                     ),
                 )
             )
@@ -755,6 +832,14 @@ def score_conditions(
         score -= 15
         factors.append(
             ScoreFactor(impact=-15, description="Thunderstorms in the forecast")
+        )
+    elif storm_chance == "chance":
+        score -= 6
+        factors.append(ScoreFactor(impact=-6, description="A chance of thunderstorms"))
+    elif storm_chance == "slight":
+        score -= 2
+        factors.append(
+            ScoreFactor(impact=-2, description="A slight chance of thunderstorms")
         )
 
     dangerous: str | None = None

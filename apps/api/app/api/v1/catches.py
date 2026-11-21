@@ -21,6 +21,7 @@ from app.api.deps import (
     resolve_location_id,
 )
 from app.api.internal_auth import require_internal_signature
+from app.api.v1.forecasts import load_preferences, personalized_with
 from app.domain.catches import (
     CatchConditions,
     CatchEntry,
@@ -117,6 +118,8 @@ async def log_catch(
             load_water_temp_profiles(),
             now=datetime.now(UTC),
         )
+        # The day as this angler saw it (their main style, their limits).
+        envelope = personalized_with(envelope, await load_preferences(user_id, state))
         snapshot = conditions_snapshot(
             envelope.conditions, envelope.tides, body.caught_at
         )

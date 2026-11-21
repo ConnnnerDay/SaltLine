@@ -190,11 +190,12 @@ from app.domain.normalize import (
     normalize_marine_zone_wind_range,
     normalize_water_temperature,
 )
-from app.domain.outlook import DayOutlook, build_day_outlook
+from app.domain.outlook import DayOutlook, DayScore, build_day_outlook
 from app.domain.scoring import (
     STYLE_PROFILES,
     ForecastScore,
     score_conditions,
+    storm_level,
     wind_orientation_for,
 )
 from app.domain.timing import HourlyOutlook, build_hourly_outlook
@@ -214,6 +215,7 @@ from app.providers.noaa_coops import (
     WaterTemperatureReading,
     fetch_coops_wind,
     fetch_tide_predictions,
+    fetch_tide_strength,
     fetch_water_temperature,
     fetch_water_temperature_change,
 )
@@ -467,6 +469,32 @@ def _precip_today(
     return next((day.precip_pct for day in weather.days if day.date == today), None)
 
 
+_STORM_RANK = {"slight": 1, "chance": 2, "likely": 3}
+
+
+def _storm_level_today(
+    weather: PointWeather | None, now: datetime, tz_name: str
+) -> str | None:
+    """The surest thunderstorm wording in today's forecast (the current
+    period or today's), graded by `storm_level`."""
+    if weather is None:
+        return None
+    today = now.astimezone(safe_zone(tz_name)).date()
+    levels = [
+        storm_level(weather.now.short_forecast, weather.now.precip_pct)
+        if weather.now
+        else None,
+        *(
+            storm_level(day.short_forecast, day.precip_pct)
+            for day in weather.days
+            if day.date == today
+        ),
+    ]
+    return max(
+        (level for level in levels if level), key=_STORM_RANK.__getitem__, default=None
+    )
+
+
 def _storms_today(weather: PointWeather, now: datetime, tz_name: str) -> bool:
     today = now.astimezone(safe_zone(tz_name)).date()
     return (weather.now is not None and weather.now.sky == "storm") or any(
@@ -485,6 +513,12 @@ async def assemble_forecast(
     water_temp_change_task = asyncio.create_task(
         fetch_water_temperature_change(client, location.water_temp_station)
     )
+    local_today = now.astimezone(safe_zone(location.timezone)).date()
+    tide_strength_task = asyncio.create_task(
+        fetch_tide_strength(
+            client, location.coops_station, local_today, location.timezone
+        )
+    )
     (
         marine_zone_result,
         water_temp_result,
@@ -501,6 +535,7 @@ async def assemble_forecast(
         fetch_point_weather(client, location.lat, location.lng, [location.name]),
     )
     water_temp_change = await water_temp_change_task
+    tide_strength = await tide_strength_task
 
     sources = [
         _source_status(_SOURCE_NWS_MARINE_ZONE, marine_zone_result, now),
@@ -755,9 +790,9 @@ async def assemble_forecast(
             if point_weather and point_weather.barometer
             else None
         ),
-        "storms": bool(
-            point_weather and _storms_today(point_weather, now, location.timezone)
-        ),
+        # Graded: "Chance Showers And Thunderstorms" at 37% isn't a storm day.
+        "storms": _storm_level_today(point_weather, now, location.timezone) == "likely",
+        "storm_chance": _storm_level_today(point_weather, now, location.timezone),
         "precip_pct": _precip_today(point_weather, now, location.timezone),
         "alerts": [alert.event for alert in alerts],
         "water_temp_normal_f": normals.get(local_month(now, location.timezone)),
@@ -783,6 +818,13 @@ async def assemble_forecast(
             else None
         ),
     }
+    score_inputs["tide_turns"] = [
+        prediction.time
+        for prediction in tides_result.value or []
+        if prediction.time.astimezone(safe_zone(location.timezone)).date()
+        == local_today
+    ]
+    score_inputs["tide_strength"] = (tide_strength or {}).get(local_today)
     score_by_style = {
         style: score_conditions(wind_range, wave_range, style=style, **score_inputs)
         for style in STYLE_PROFILES
@@ -851,6 +893,7 @@ async def assemble_forecast(
             tide_predictions=tides_result.value,
             weather_days=point_weather.days if point_weather else None,
             fish_in_season=fish_in_season,
+            tide_strength=tide_strength,
         )
     except Exception:
         _logger.exception("day outlook failed for %s", location.id)
@@ -862,6 +905,10 @@ async def assemble_forecast(
             update={
                 "score": score.score,
                 "verdict": score.verdict.value,
+                "score_by_style": {
+                    style: DayScore(score=result.score, verdict=result.verdict.value)
+                    for style, result in score_by_style.items()
+                },
                 "wind_range_kt": wind_range,
                 "wave_range_ft": wave_range,
                 "wind_direction": wind_direction or conditions.days[0].wind_direction,

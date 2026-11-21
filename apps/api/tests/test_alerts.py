@@ -6,6 +6,7 @@ Same ephemeral-SQLite fixtures as test_saved_locations_router.py.
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Iterator
+from typing import Any
 
 import httpx
 import pytest
@@ -119,6 +120,24 @@ def test_compose_alert() -> None:
     assert "Water 65°F · Wind N 10-15 kt · Waves 2-3 ft" in body
     assert "What's biting: Red drum, Bluefish" in body
     assert "http://192.168.1.100:5757/forecast/wrightsville-beach-nc" in body
+
+
+def test_compose_alert_names_the_style() -> None:
+    import copy
+
+    envelope: dict[str, Any] = copy.deepcopy(_ENVELOPE)
+    envelope["conditions"]["score"]["style"] = "pier"
+    subject, body = compose_alert(
+        location_name="Wrightsville Beach",
+        location_id="wrightsville-beach-nc",
+        envelope=envelope,
+        site_url="http://example.test/",
+    )
+    assert (
+        subject
+        == "Saltline: Wrightsville Beach is Good for pier fishing (72/100) today"
+    )
+    assert "looks good for pier fishing today" in body
 
 
 # --- run_alert_check ----------------------------------------------------------

@@ -13,16 +13,24 @@ in "What's biting" gets its own **fish score** and tier. The forecast page's
 "Why this score" fold lists every factor behind a day's score, with its
 points.
 
+The day is scored separately for each way of fishing (see
+[By fishing style](#by-fishing-style)). Signed-in anglers see it for their
+main style, the first of their fishing types ("Mainly fish from" in
+Preferences), everywhere a rating appears: the forecast, the 5-day
+outlook, Saved spots, nearby spots, "Best of your spots", the catch log
+and email alerts. Anyone else sees the surf score.
+
 ### Day score (`app/domain/scoring.py`, `score_conditions`)
 
 Every day starts at **50**; each factor below adds or takes away points,
-and the total is clamped to 0–100.
+and the total is clamped to 0–100. The points shown are for surf fishing;
+the styles that differ are in the next table.
 
 | Factor | Source | Points |
 |---|---|---|
 | **Wind speed** (high end of the forecast range) | NWS marine zone, buoy | light ≤8 kt **+14** · ≤12 kt +8 · ≤16 kt +2 · ≤20 kt −8 · ≤25 kt −16 · stronger −26 |
 | **Surf height** (high end of the range) | NWS marine zone, buoy | flat ≤1.5 ft **+10** · ≤3 ft +6 · ≤5 ft −4 · ≤7 ft −12 · bigger −22 |
-| Wind direction | coastline orientation | offshore +4 (only up to 16 kt) · onshore −4 · Hawaii: none |
+| Wind direction | the way the spot's shore faces (else its coast) | offshore +4 (only up to 16 kt) · onshore −4; the factor names the shore ("on this south-facing shore") |
 | **Season**: today's fish picks in their best water | fish guidance | 3+ fish **+6** · 1–2 fish +2 · some in season, none in their best water −2 · nothing in season −6 |
 | Live water reading (not a monthly estimate) | NOAA CO-OPS | +1 |
 | Water vs this month's normal | normals table | 5°F+ colder −5 ("cold snap") |
@@ -33,7 +41,9 @@ and the total is clamped to 0–100.
 | Barometer, 3-hour trend | NWS station | falling +4 (not once the wind is strong or storms arrive) · rising −2 · rising rapidly −6 |
 | Sky (daytime) | NWS forecast | overcast +3 · snow or ice −6 |
 | Rain likely (60%+) | NWS forecast | −3 |
-| Thunderstorms | NWS forecast | −15 |
+| Thunderstorms | NWS forecast | likely (60%+, or no "chance" in the wording) −15 · "chance of" −6 · "slight chance" −2 |
+| Tide turning within 45 min of sunrise or sunset | CO-OPS predictions | +3 ("moving water in low light") |
+| Tide size: the day's range vs the station's two-week average | CO-OPS predictions | big (1.2x+) +2 · small (0.7x and under) −1 |
 | Freezing air (≤32°F) | NWS forecast | −3 |
 | Gusts 25 kt+, at least 5 kt over the forecast wind | NDBC buoy | −4 |
 | Groundswell, 12 s+ and 3 ft+ | NWS marine zone | −4 ("heavy shorebreak") |
@@ -45,7 +55,8 @@ and the total is clamped to 0–100.
 **Safety caps**, applied after the points:
 - A gale, storm, hurricane, tropical storm, special marine, storm surge or
   tsunami **warning** makes the day **Poor**.
-- **Thunderstorms** keep the day below Fair.
+- **Thunderstorms likely** keep the day below Fair (a chance of them only
+  costs points).
 
 **Verdicts:** 80+ Excellent · 64–79 Good · 48–63 Fair · 32–47
 Challenging · under 32 Poor.
@@ -59,7 +70,30 @@ most weight because they decide whether a spot can be fished at all.
 one verdict level and says so; the number is unchanged.
 
 The 5-day outlook scores each day the same way from that day's marine
-forecast, weather (storms, rain, sky) and the season count.
+forecast, weather (storms, rain, sky), tides (turns near that day's sunrise
+and sunset, and its tide size) and the season count.
+
+### By fishing style
+
+What matters depends on where you stand. Each style (`STYLE_PROFILES`)
+changes only the rows below; everything else is as in the table above.
+
+| | Wind | Surf / seas | Wind direction | Rip currents, beach hazards | Groundswell | Big / small tide | Small craft advisory · fog |
+|---|---|---|---|---|---|---|---|
+| **Surf, wade** | as above | as above | offshore +4 · onshore −4 | count | −4 | +2 / −1 | −4 · −3 |
+| **Pier** | as above | barely counts until big: +8 · +6 · 0 · −4 · −12; high surf warning −6, advisory −2 | offshore +2 · onshore −2 | don't count | −1 | +4 / −2 | −1 · −3 |
+| **Bridge** | as above | +8 · +6 · +1 · −2 · −6; high surf warning −2, advisory 0 | offshore +2 · onshore −2 | don't count | 0 | +5 / −3 | −1 · −3 |
+| **Jetty** | as above | harder: +8 · +5 · −6 · −16 · −30; high surf warning −24, advisory −12 | offshore +4 · onshore −2 | don't count | −8 | +4 / −3 | −1 · −3 |
+| **Kayak** | stricter: ≤6 kt +14 · ≤10 +8 · ≤12 −2 · ≤15 −12 · ≤20 −22 · more −32 | +10 · +2 · −8 · −18 · −30 (launching through it) | offshore **−2 to −10**, growing with the wind ("it blows you away from shore") · onshore −2 | don't count | −4 | −3 / +1 | **−16** · −8 |
+| **Inshore boat** | ≤8 +14 · ≤12 +8 · ≤15 0 · ≤20 −10 · ≤25 −18 · more −28 | seas: +10 · +6 · −6 · −14 · −24 | doesn't apply | don't count | −2 | +2 / −1 | −12 · −8 |
+| **Offshore boat** | ≤10 +12 · ≤14 +8 · ≤18 +2 · ≤22 −8 · ≤27 −18 · more −28 | seas: +10 · +8 · 0 · −10 · −22 | doesn't apply | don't count | −4 | 0 / 0 | −14 · −8 |
+
+Surf and seas bands are ≤1.5 · ≤3 · ≤5 · ≤7 · over 7 ft. Wind is named by
+its speed whatever the style ("very strong" to 33 kt, a gale from 34). A
+wind advisory costs afloat styles −8 (shore −5).
+
+When another style you fish has a better day, at least Fair after your
+comfort limits, the forecast says so ("Good for pier fishing today").
 
 ### Fish score (`app/domain/guidance.py`)
 

@@ -51,3 +51,47 @@ def test_day_outlook_scores_each_day_and_splits_tides_by_local_date() -> None:
     assert [t.kind for t in calm.tides] == ["high", "low"]
     assert [t.kind for t in rough.tides] == ["high"]
     assert calm.moon_phase and calm.solunar_rating
+
+
+def test_each_outlook_day_gets_its_own_tide_factors_and_style_scores() -> None:
+    from datetime import date
+
+    from app.providers.astronomy import compute_sun_times
+
+    calm = MarineDay(
+        label="Wed", wind_low_kt=5, wind_high_kt=8, wave_low_ft=1, wave_high_ft=2
+    )
+    sunrise = compute_sun_times(
+        datetime(2026, 11, 18, 17, tzinfo=UTC), 34.2, -77.8, "America/New_York"
+    ).sunrise
+    tides = [TidePrediction(time=sunrise, kind="high", height_ft=4.0)]  # turns at dawn
+    kwargs = {
+        "now": datetime(2026, 11, 17, 15, tzinfo=UTC),
+        "tz_name": "America/New_York",
+        "lat": 34.2,
+        "lng": -77.8,
+        "coast": "east",
+        "water_temperature": None,
+        "tide_predictions": tides,
+    }
+    plain = build_day_outlook([calm, calm], **kwargs)  # type: ignore[arg-type]
+    tidal = build_day_outlook(
+        [calm, calm],
+        tide_strength={date(2026, 11, 18): 1.4},
+        **kwargs,  # type: ignore[arg-type]
+    )
+    no_turns = build_day_outlook(
+        [calm, calm],
+        **{**kwargs, "tide_predictions": []},  # type: ignore[arg-type]
+    )
+    # Tomorrow's tide turns at dawn (+3 for every style); today's doesn't.
+    assert plain[0].score == no_turns[0].score
+    assert (plain[1].score or 0) - (no_turns[1].score or 0) == 3
+    # Tomorrow is a big tide: surf +2, bridge +5, kayak -3; today unchanged.
+    assert tidal[0].score == plain[0].score
+    gain = {
+        style: (tidal[1].score_by_style[style].score or 0)
+        - (plain[1].score_by_style[style].score or 0)
+        for style in ("surf", "bridge", "kayak")
+    }
+    assert gain == {"surf": 2, "bridge": 5, "kayak": -3}

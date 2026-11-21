@@ -313,7 +313,7 @@ def test_no_usual_times_means_no_window() -> None:
     assert "your_window" not in out.hourly_outlook
 
 
-def test_boat_and_tidal_fish_join_the_picks_only_for_those_anglers() -> None:
+def test_boat_fish_join_for_boaters_and_freshwater_fish_never_do() -> None:
     from app.domain.guidance import build_fishing_guidance
     from app.domain.preferences import FishingType
 
@@ -344,11 +344,12 @@ def test_boat_and_tidal_fish_join_the_picks_only_for_those_anglers() -> None:
     # shore fish score higher (condition bonuses offshore fish never get).
     mixed = picks(FishingType.SURF, FishingType.OFFSHORE)
     assert mixed[0] in shore_ids and mixed[1] in boat_ids and mixed[2] in shore_ids
-    # Kayak: tidal fish can join; never boat-only ones.
-    kayak = picks(FishingType.KAYAK)
-    assert not set(kayak) & boat_ids
-    assert kayak[0] in shore_ids and kayak[1] in tidal_ids
-    assert len(kayak) == len(shore_ids)
+    # Kayak, wading, bridge: shore fish only -- the "tidal" list is
+    # freshwater river fish, never a saltwater spot's pick.
+    for kind in (FishingType.KAYAK, FishingType.WADE, FishingType.BRIDGE):
+        assert picks(kind) == shore_ids
+    # Inshore boat: boat fish join, freshwater ones still don't.
+    assert not set(picks(FishingType.INSHORE)) & tidal_ids
 
 
 def test_favorite_fish_lead_when_biting() -> None:
@@ -509,3 +510,70 @@ def test_todays_outlook_carries_the_comfort_downgrade() -> None:
     assert out.conditions is not None
     assert out.conditions["score"]["verdict"] == "Fair"  # Good, down a level
     assert out.conditions["days"][0]["verdict"] == "Fair"
+
+
+def test_every_outlook_day_is_rated_for_the_main_style() -> None:
+    from app.domain.preferences import FishingType
+
+    envelope = _styled_envelope()
+    assert envelope.conditions is not None
+    envelope.conditions["days"] = [
+        {"label": "Today", "score": 50, "verdict": "Fair"},
+        {
+            "label": "Tomorrow",
+            "score": 30,
+            "verdict": "Poor",
+            "score_by_style": {
+                "surf": {"score": 30, "verdict": "Poor"},
+                "pier": {"score": 55, "verdict": "Fair"},
+            },
+        },
+        {"label": "Sun", "score": 70, "verdict": "Good"},  # cached before styles
+    ]
+    out = personalize(envelope, PreferencesOut(fishing_types=[FishingType.PIER]))
+    assert out.conditions is not None
+    days = out.conditions["days"]
+    assert (days[0]["verdict"], days[1]["verdict"], days[2]["verdict"]) == (
+        "Good",
+        "Fair",
+        "Good",
+    )
+    assert days[1]["score"] == 55
+
+
+def test_merged_picks_never_put_a_lower_tier_first() -> None:
+    from app.domain.guidance import build_fishing_guidance
+    from app.domain.personalize import _tier
+    from app.domain.preferences import FishingType
+
+    order = {"prime": 0, "good": 1, "fair": 2}
+    for region, temp, month in (("gulf", 67.0, 11), ("atlantic_south", 80.0, 7)):
+        guidance = build_fishing_guidance(
+            region=region,
+            water_temp_f=temp,
+            water_temp_is_fallback=False,
+            month=month,
+            coast="gulf",
+            wind_direction="E",
+            wind_range_kt=(5.0, 10.0),
+            wave_range_ft=(2.0, 3.0),
+        ).model_dump(mode="json")
+        envelope = _envelope().model_copy(update={"recommendations": guidance})
+        for kinds in ([FishingType.KAYAK], [FishingType.SURF, FishingType.OFFSHORE]):
+            out = personalize(envelope, PreferencesOut(fishing_types=kinds))
+            tiers = [
+                order[_tier(p["score"])] for p in (out.recommendations or {})["species"]
+            ]
+            assert tiers == sorted(tiers), (region, kinds, tiers)
+
+
+def test_a_starred_freshwater_fish_does_not_join_saltwater_picks() -> None:
+    from app.domain.guidance import build_fishing_guidance
+
+    guidance = build_fishing_guidance(
+        region="gulf", water_temp_f=70.0, water_temp_is_fallback=False, month=5
+    ).model_dump(mode="json")
+    envelope = _envelope().model_copy(update={"recommendations": guidance})
+    out = personalize(envelope, PreferencesOut(favorite_species=["largemouth-bass"]))
+    ids = [pick["id"] for pick in (out.recommendations or {})["species"]]
+    assert "largemouth-bass" not in ids

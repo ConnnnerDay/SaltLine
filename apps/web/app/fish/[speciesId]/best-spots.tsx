@@ -33,11 +33,14 @@ export async function BestSpots({
   name,
   spotIds,
   units,
+  userId,
 }: {
   speciesId: string
   name: string
   spotIds: string[]
   units: Units
+  /** Each spot's day is rated as this angler sees it (main style, limits). */
+  userId?: string
 }) {
   if (spotIds.length === 0) {
     return (
@@ -53,6 +56,7 @@ export async function BestSpots({
   const query = spotIds.map((id) => `ids=${encodeURIComponent(id)}`).join('&')
   const spots = await internalApiFetch<SpotForSpecies[]>(
     `/v1/species/${encodeURIComponent(speciesId)}/spots?${query}`,
+    { userId },
   ).catch(() => null)
   if (!spots || spots.length === 0) return null
   const biting = spots.filter((spot) => spot.biting)

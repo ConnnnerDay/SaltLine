@@ -98,15 +98,23 @@ def _score_for_style(
         return conditions
     out = dict(conditions)
     out["score"] = {**by_style[style], "style": STYLE_PROFILES[style].label}
-    # The outlook's "Today" is the headline itself (assembly copies it in):
-    # keep the two the same for this style.
+    # Every outlook day rated for this style too ("Today" is the headline
+    # itself, which assembly copies in).
     days = list(out.get("days") or [])
+    for index, day in enumerate(days):
+        styled = (day.get("score_by_style") or {}).get(style)
+        if index == 0:
+            styled = {
+                "score": out["score"].get("score"),
+                "verdict": out["score"].get("verdict"),
+            }
+        if styled:
+            days[index] = {
+                **day,
+                "score": styled.get("score"),
+                "verdict": styled.get("verdict"),
+            }
     if days:
-        days[0] = {
-            **days[0],
-            "score": out["score"].get("score"),
-            "verdict": out["score"].get("verdict"),
-        }
         out["days"] = days
 
     def rank(verdict: str | None) -> int:
@@ -339,10 +347,9 @@ def _favorite_picks(
         state=state,
         max_picks=10_000,
     )
-    scored = {
-        pick.id: pick
-        for pick in [*every.species, *every.boat_species, *every.tidal_species]
-    }
+    # Freshwater and brackish river fish (`tidal_species`) never join a
+    # saltwater spot's picks, even starred.
+    scored = {pick.id: pick for pick in [*every.species, *every.boat_species]}
     picks = []
     for species_id in favorite_ids:
         pick = scored.get(species_id)
@@ -431,15 +438,14 @@ def personalize(
         days[0] = {**days[0], "verdict": conditions["score"].get("verdict")}
         conditions["days"] = days
 
-    # Boat-only and tidal-creek fish join the picks for anglers who fish
-    # that way (app.domain.guidance keeps them in their own lists).
+    # Boat-only fish join the picks for anglers who fish from a boat
+    # (app.domain.guidance keeps them in their own list). The "tidal" list
+    # is freshwater and brackish river fish (bass, catfish, gar...): they
+    # never join a saltwater spot's picks.
     fishing = {str(getattr(kind, "value", kind)) for kind in prefs.fishing_types or []}
     extra_pools = [
         pool
-        for pool, kinds in (
-            ("boat_species", {"inshore", "offshore"}),
-            ("tidal_species", {"kayak", "wade", "bridge", "inshore"}),
-        )
+        for pool, kinds in (("boat_species", {"inshore", "offshore"}),)
         if fishing & kinds
     ]
     if recommendations and extra_pools:
@@ -452,12 +458,15 @@ def personalize(
         shore = [list(recommendations.get("species") or [])]
         extras = [list(recommendations.get(pool) or []) for pool in extra_pools]
         pools = shore + extras if fishing & shore_kinds else extras + shore
+        # Best tier first (a Fair creek fish never above a Prime shore one),
+        # taking turns between the lists within a tier.
+        tier_order = {"prime": 0, "good": 1, "fair": 2}
         ranked = [
-            (rank, which, pick)
+            (tier_order.get(_tier(pick["score"]), 3), rank, which, pick)
             for which, pool in enumerate(pools)
             for rank, pick in enumerate(pool)
         ]
-        ranked.sort(key=lambda item: item[:2])
+        ranked.sort(key=lambda item: item[:3])
         merged = [pick for *_, pick in ranked]
         recommendations["species"] = merged[:MAX_PICKS]
         if not prefs.target_groups:

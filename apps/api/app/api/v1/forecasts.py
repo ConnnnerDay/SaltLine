@@ -63,25 +63,42 @@ router = APIRouter(
 _logger = logging.getLogger(__name__)
 
 
-async def _personalized(
-    envelope: ForecastEnvelope, user_id: str | None, state: AppState
-) -> ForecastEnvelope:
-    """Apply the signed-in user's fishing profile (app.domain.personalize).
-    Anonymous requests, or any failure loading the profile, get the shared
-    envelope unchanged -- personalization never costs anyone the forecast."""
+async def load_preferences(
+    user_id: str | None, state: AppState
+) -> PreferencesOut | None:
+    """The signed-in user's fishing profile, or None (anonymous, no profile,
+    or any failure loading it)."""
     if not user_id or state.db_sessionmaker is None:
-        return envelope
+        return None
     try:
         async with state.db_sessionmaker() as session:
             row = await session.get(UserPreferences, user_id)
-        if row is None:
-            return envelope
-        return personalize(
-            envelope, PreferencesOut.model_validate(row, from_attributes=True)
-        )
+    except Exception:
+        _logger.warning("could not load preferences", exc_info=True)
+        return None
+    return PreferencesOut.model_validate(row, from_attributes=True) if row else None
+
+
+def personalized_with(
+    envelope: ForecastEnvelope, prefs: PreferencesOut | None
+) -> ForecastEnvelope:
+    """*envelope* with the profile applied (app.domain.personalize); the
+    shared envelope unchanged without one, or on any failure --
+    personalization never costs anyone the forecast."""
+    if prefs is None:
+        return envelope
+    try:
+        return personalize(envelope, prefs)
     except Exception:
         _logger.warning("could not personalize forecast", exc_info=True)
         return envelope
+
+
+async def _personalized(
+    envelope: ForecastEnvelope, user_id: str | None, state: AppState
+) -> ForecastEnvelope:
+    """Apply the signed-in user's fishing profile (app.domain.personalize)."""
+    return personalized_with(envelope, await load_preferences(user_id, state))
 
 
 @router.get("/{location_id}")

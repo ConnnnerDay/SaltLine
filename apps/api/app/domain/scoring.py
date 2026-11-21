@@ -303,6 +303,24 @@ def wind_orientation_for(location: object) -> str:
     return wind_orientation_for_region(str(getattr(location, "conditions_region", "")))
 
 
+_FACING_NAMES = (
+    "north", "north-northeast", "northeast", "east-northeast", "east",
+    "east-southeast", "southeast", "south-southeast", "south",
+    "south-southwest", "southwest", "west-southwest", "west",
+    "west-northwest", "northwest", "north-northwest",
+)  # fmt: skip
+
+
+def facing_phrase(orientation: str) -> str:
+    """ " on this south-facing shore" when the spot knows which way its
+    shore faces (an island's south side, a west-facing Gulf beach), so
+    "offshore" is clear; "" otherwise."""
+    facing = facing_bearing(orientation)
+    if facing is None:
+        return ""
+    return f" on this {_FACING_NAMES[round(facing / 22.5) % 16]}-facing shore"
+
+
 def facing_bearing(orientation: str) -> int | None:
     if orientation.startswith("facing:"):
         return int(orientation.split(":", 1)[1])
@@ -328,6 +346,20 @@ def onshore_offshore_dirs(orientation: str) -> tuple[set[str], set[str]]:
                 offshore.add(name)
         return onshore, offshore
     return _DIRS_BY_ORIENTATION.get(orientation, _DIRS_BY_ORIENTATION["east"])
+
+
+def _wind_name(wind_kt: float) -> str:
+    """Plain words for the top of the wind range (a gale is 34 kt+)."""
+    for limit, name in (
+        (8, "Light wind"),
+        (12, "Moderate wind"),
+        (16, "Breezy"),
+        (20, "Strong wind"),
+        (33, "Very strong wind"),
+    ):
+        if wind_kt <= limit:
+            return name
+    return "Gale-force wind"
 
 
 def _sentence(parts: list[str]) -> str:
@@ -412,22 +444,16 @@ def score_conditions(
 
     profile = STYLE_PROFILES.get(style, STYLE_PROFILES["surf"])
 
-    wind_names = (
-        "Light wind",
-        "Moderate wind",
-        "Breezy",
-        "Strong wind",
-        "Very strong wind",
-        "Gale-force wind",
-    )
     band = next(
         (i for i, limit in enumerate(profile.wind_limits_kt) if wind_max <= limit),
         len(profile.wind_limits_kt),
     )
     impact = profile.wind_points[band]
     score += impact
+    # Named by the wind itself, whatever the style's points: a kayak's
+    # 20-25 kt is very strong wind for it, not a gale (34 kt and up).
     factors.append(
-        ScoreFactor(impact=impact, description=f"{wind_names[band]} ({wind_lbl})")
+        ScoreFactor(impact=impact, description=f"{_wind_name(wind_max)} ({wind_lbl})")
     )
 
     surf_names = (
@@ -465,7 +491,10 @@ def score_conditions(
             factors.append(
                 ScoreFactor(
                     impact=danger,
-                    description=f"Offshore wind ({wind_direction}): it blows you away from shore",
+                    description=(
+                        f"Offshore wind ({wind_direction}){facing_phrase(coast)}: "
+                        "it blows you away from shore"
+                    ),
                 )
             )
         elif (
@@ -477,7 +506,9 @@ def score_conditions(
             factors.append(
                 ScoreFactor(
                     impact=profile.offshore_points,
-                    description=f"Clean offshore wind ({wind_direction})",
+                    description=(
+                        f"Clean offshore wind ({wind_direction}){facing_phrase(coast)}"
+                    ),
                 )
             )
         elif wind_direction in onshore_dirs and profile.onshore_points:
@@ -486,9 +517,11 @@ def score_conditions(
                 ScoreFactor(
                     impact=profile.onshore_points,
                     description=(
-                        f"Onshore wind ({wind_direction}): choppy paddling"
+                        f"Onshore wind ({wind_direction}){facing_phrase(coast)}: "
+                        "choppy paddling"
                         if style == "kayak"
-                        else f"Onshore wind ({wind_direction}) bringing murkier water"
+                        else f"Onshore wind ({wind_direction}){facing_phrase(coast)}"
+                        " bringing murkier water"
                     ),
                 )
             )

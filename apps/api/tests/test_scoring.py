@@ -722,3 +722,28 @@ class TestStyles:
             f for f in kayak.factors if f.description.startswith("Light surf")
         )
         assert surf_band.impact == 2
+
+    def test_wind_direction_names_the_shore_when_it_is_known(self) -> None:
+        south = score_conditions(
+            (5.0, 10.0),
+            (1.0, 2.0),
+            wind_direction="NE",
+            coast="facing:190",
+            style="kayak",
+        )
+        assert any(
+            f.description.startswith("Offshore wind (NE) on this south-facing shore")
+            for f in south.factors
+        )
+        region = score_conditions(
+            (5.0, 8.0), (1.0, 2.0), wind_direction="W", coast="east"
+        )
+        assert any(f.description == "Clean offshore wind (W)" for f in region.factors)
+
+    def test_wind_is_named_by_its_speed_not_the_style_band(self) -> None:
+        kayak = score_conditions((20.0, 25.0), (1.0, 2.0), style="kayak")
+        assert any(
+            f.description == "Very strong wind (20–25 kt)" for f in kayak.factors
+        )
+        gale = score_conditions((30.0, 40.0), (1.0, 2.0))
+        assert any(f.description.startswith("Gale-force wind") for f in gale.factors)

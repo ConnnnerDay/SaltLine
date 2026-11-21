@@ -98,6 +98,16 @@ def _score_for_style(
         return conditions
     out = dict(conditions)
     out["score"] = {**by_style[style], "style": STYLE_PROFILES[style].label}
+    # The outlook's "Today" is the headline itself (assembly copies it in):
+    # keep the two the same for this style.
+    days = list(out.get("days") or [])
+    if days:
+        days[0] = {
+            **days[0],
+            "score": out["score"].get("score"),
+            "verdict": out["score"].get("verdict"),
+        }
+        out["days"] = days
 
     def rank(verdict: str | None) -> int:
         return _VERDICT_ORDER.index(verdict) if verdict in _VERDICT_ORDER else -1
@@ -392,6 +402,21 @@ def personalize(
             score["personalized_from"] = original
             conditions["score"] = score
         conditions["comfort"] = {"over_limit": True, "reasons": breaches}
+        # Wind and surf limits hold whatever the style: the other style's
+        # day drops a level too, and is only worth mentioning if it's
+        # still Fair or better.
+        hint = conditions.get("style_hint")
+        if hint:
+            lowered = _downgrade(hint["verdict"])
+            if _VERDICT_ORDER.index(lowered) >= _VERDICT_ORDER.index("Fair") and (
+                _VERDICT_ORDER.index(lowered)
+                > _VERDICT_ORDER.index(conditions["score"]["verdict"])
+            ):
+                # The number is the style's own; with the label lowered by
+                # your limits it would contradict it, so it's left out.
+                conditions["style_hint"] = {**hint, "verdict": lowered, "score": None}
+            else:
+                conditions.pop("style_hint")
         warnings.append(
             Warning(
                 code="over_comfort_limit",
@@ -399,6 +424,12 @@ def personalize(
                 severity=WarningSeverity.ADVISORY,
             )
         )
+
+    # The outlook's "Today" is the headline: same final verdict, limits and all.
+    if conditions is not None and conditions.get("days") and conditions.get("score"):
+        days = list(conditions["days"])
+        days[0] = {**days[0], "verdict": conditions["score"].get("verdict")}
+        conditions["days"] = days
 
     # Boat-only and tidal-creek fish join the picks for anglers who fish
     # that way (app.domain.guidance keeps them in their own lists).

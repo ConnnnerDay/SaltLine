@@ -31,7 +31,7 @@ type Props = { params: Promise<{ speciesId: string }> }
 const ACCESS_NOTE: Record<FishDetail['access'], string> = {
   shore: 'Caught from the beach, pier, jetty or bridge.',
   boat: 'Mostly a boat fish: shows up in "What’s biting" if your profile says you fish from a boat.',
-  tidal: 'Lives in brackish creeks and rivers: shows up for kayak, wading, bridge and inshore-boat anglers.',
+  tidal: 'A freshwater fish of coastal rivers and brackish creeks: listed here, never suggested as a pick at a saltwater spot.',
   incidental: 'Bait fish or not a hook-and-line target: listed here, never suggested as a pick.',
 }
 
@@ -324,7 +324,7 @@ export default async function FishDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {fish.access !== 'incidental' && (
+          {fish.access !== 'incidental' && fish.access !== 'tidal' && (
             <Suspense
               fallback={
                 <Card className="flex flex-col gap-2">

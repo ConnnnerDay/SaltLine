@@ -61,7 +61,7 @@ export const REGION_LABEL: Record<string, string> = Object.fromEntries(
 export const ACCESS_LABEL: Record<FishSummary['access'], string> = {
   shore: 'Shore & pier',
   boat: 'Boat',
-  tidal: 'Tidal creeks',
+  tidal: 'Freshwater & brackish',
   incidental: 'Bait / non-target',
 }
 

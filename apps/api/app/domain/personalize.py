@@ -347,10 +347,9 @@ def _favorite_picks(
         state=state,
         max_picks=10_000,
     )
-    scored = {
-        pick.id: pick
-        for pick in [*every.species, *every.boat_species, *every.tidal_species]
-    }
+    # Freshwater and brackish river fish (`tidal_species`) never join a
+    # saltwater spot's picks, even starred.
+    scored = {pick.id: pick for pick in [*every.species, *every.boat_species]}
     picks = []
     for species_id in favorite_ids:
         pick = scored.get(species_id)
@@ -439,15 +438,14 @@ def personalize(
         days[0] = {**days[0], "verdict": conditions["score"].get("verdict")}
         conditions["days"] = days
 
-    # Boat-only and tidal-creek fish join the picks for anglers who fish
-    # that way (app.domain.guidance keeps them in their own lists).
+    # Boat-only fish join the picks for anglers who fish from a boat
+    # (app.domain.guidance keeps them in their own list). The "tidal" list
+    # is freshwater and brackish river fish (bass, catfish, gar...): they
+    # never join a saltwater spot's picks.
     fishing = {str(getattr(kind, "value", kind)) for kind in prefs.fishing_types or []}
     extra_pools = [
         pool
-        for pool, kinds in (
-            ("boat_species", {"inshore", "offshore"}),
-            ("tidal_species", {"kayak", "wade", "bridge", "inshore"}),
-        )
+        for pool, kinds in (("boat_species", {"inshore", "offshore"}),)
         if fishing & kinds
     ]
     if recommendations and extra_pools:

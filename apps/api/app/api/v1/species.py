@@ -193,7 +193,9 @@ async def _spot_for(
     pick = next(
         (
             p
-            for p in [*every.species, *every.boat_species, *every.tidal_species]
+            # Freshwater river fish (`tidal_species`) aren't scored at
+            # saltwater spots.
+            for p in [*every.species, *every.boat_species]
             if p.id == species_id
         ),
         None,

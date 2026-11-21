@@ -61,7 +61,7 @@ was fine, a third wasn't).
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from typing import Any, Literal, cast
 from zoneinfo import ZoneInfo
 
@@ -171,6 +171,43 @@ async def fetch_water_temperature_change(
     if len(values) < 20:  # not a full day of readings
         return None
     return round(values[-1] - values[0], 1)
+
+
+TIDE_STRENGTH_DAYS = 14
+
+
+async def fetch_tide_strength(
+    client: BoundedHTTPClient, station_id: str, today: date, tz_name: str
+) -> float | None:
+    """How big today's tide is for this station: today's range (highest
+    high minus lowest low) over its average daily range across the next
+    two weeks, which spans a spring and a neap. 1.2+ is a big (spring)
+    tide, 0.7 and under a small (neap) one. `None` without a station, with
+    too few days, or on any failure: it only nudges the score."""
+    if not station_id:
+        return None
+    try:
+        predictions = await fetch_tide_predictions(
+            client,
+            station_id,
+            today.strftime("%Y%m%d"),
+            (today + timedelta(days=TIDE_STRENGTH_DAYS)).strftime("%Y%m%d"),
+            tz_name=tz_name,
+        )
+    except (ProviderError, ValueError, KeyError, TypeError):
+        return None
+    by_day: dict[date, list[float]] = {}
+    for prediction in predictions:
+        by_day.setdefault(prediction.time.date(), []).append(prediction.height_ft)
+    ranges = {
+        day: max(heights) - min(heights)
+        for day, heights in by_day.items()
+        if len(heights) >= 2
+    }
+    if today not in ranges or len(ranges) < 7:
+        return None
+    mean = sum(ranges.values()) / len(ranges)
+    return round(ranges[today] / mean, 2) if mean > 0 else None
 
 
 async def fetch_coops_wind(

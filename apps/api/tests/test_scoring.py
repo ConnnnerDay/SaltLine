@@ -747,3 +747,42 @@ class TestStyles:
         )
         gale = score_conditions((30.0, 40.0), (1.0, 2.0))
         assert any(f.description.startswith("Gale-force wind") for f in gale.factors)
+
+
+class TestTides:
+    def test_tide_turning_at_dawn_scores(self) -> None:
+        from datetime import timedelta
+
+        sun = SunTimes(sunrise=_NOW, sunset=_NOW + timedelta(hours=11))
+        base = score_conditions((5.0, 8.0), (1.0, 2.0), sun_times=sun).score or 0
+        near = score_conditions(
+            (5.0, 8.0),
+            (1.0, 2.0),
+            sun_times=sun,
+            tide_turns=[_NOW + timedelta(minutes=30)],
+        )
+        far = score_conditions(
+            (5.0, 8.0),
+            (1.0, 2.0),
+            sun_times=sun,
+            tide_turns=[_NOW + timedelta(minutes=80)],
+        )
+        assert (near.score or 0) == base + 3
+        assert any("Tide turns near dawn" in f.description for f in near.factors)
+        assert far.score == base
+
+    def test_big_tides_help_bridges_and_worry_kayaks(self) -> None:
+        def delta(style: str, strength: float) -> int:
+            base = score_conditions((5.0, 8.0), (1.0, 2.0), style=style).score or 0
+            tide = (
+                score_conditions(
+                    (5.0, 8.0), (1.0, 2.0), style=style, tide_strength=strength
+                ).score
+                or 0
+            )
+            return tide - base
+
+        assert delta("bridge", 1.4) > delta("surf", 1.4) > 0 > delta("kayak", 1.4)
+        assert delta("offshore", 1.4) == 0
+        assert delta("bridge", 0.6) < 0 < delta("kayak", 0.6)
+        assert delta("surf", 1.0) == 0  # an ordinary tide changes nothing

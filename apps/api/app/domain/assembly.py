@@ -214,6 +214,7 @@ from app.providers.noaa_coops import (
     WaterTemperatureReading,
     fetch_coops_wind,
     fetch_tide_predictions,
+    fetch_tide_strength,
     fetch_water_temperature,
     fetch_water_temperature_change,
 )
@@ -485,6 +486,12 @@ async def assemble_forecast(
     water_temp_change_task = asyncio.create_task(
         fetch_water_temperature_change(client, location.water_temp_station)
     )
+    local_today = now.astimezone(safe_zone(location.timezone)).date()
+    tide_strength_task = asyncio.create_task(
+        fetch_tide_strength(
+            client, location.coops_station, local_today, location.timezone
+        )
+    )
     (
         marine_zone_result,
         water_temp_result,
@@ -501,6 +508,7 @@ async def assemble_forecast(
         fetch_point_weather(client, location.lat, location.lng, [location.name]),
     )
     water_temp_change = await water_temp_change_task
+    tide_strength = await tide_strength_task
 
     sources = [
         _source_status(_SOURCE_NWS_MARINE_ZONE, marine_zone_result, now),
@@ -783,6 +791,13 @@ async def assemble_forecast(
             else None
         ),
     }
+    score_inputs["tide_turns"] = [
+        prediction.time
+        for prediction in tides_result.value or []
+        if prediction.time.astimezone(safe_zone(location.timezone)).date()
+        == local_today
+    ]
+    score_inputs["tide_strength"] = tide_strength
     score_by_style = {
         style: score_conditions(wind_range, wave_range, style=style, **score_inputs)
         for style in STYLE_PROFILES

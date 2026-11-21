@@ -15,6 +15,7 @@ from app.providers.noaa_coops import (
     NoaaDataUnavailableError,
     fetch_coops_wind,
     fetch_tide_predictions,
+    fetch_tide_strength,
     fetch_water_temperature,
     fetch_water_temperature_change,
 )
@@ -292,3 +293,26 @@ async def test_water_temperature_change_needs_a_day_of_readings() -> None:
     async with BoundedHTTPClient(transport=httpx.MockTransport(handler)) as client:
         assert await fetch_water_temperature_change(client, "8658163") is None
         assert await fetch_water_temperature_change(client, "") is None
+
+
+@pytest.mark.asyncio
+async def test_tide_strength_compares_today_with_the_fortnight() -> None:
+    from datetime import date
+
+    rows = []
+    for day in range(1, 15):
+        swing = 6.0 if day == 1 else 4.0  # today is a big (spring) tide
+        rows += [
+            {"t": f"2024-07-{day:02d} 03:00", "v": f"{swing:.1f}", "type": "H"},
+            {"t": f"2024-07-{day:02d} 09:00", "v": "0.0", "type": "L"},
+        ]
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"predictions": rows})
+
+    async with BoundedHTTPClient(transport=httpx.MockTransport(handler)) as client:
+        strength = await fetch_tide_strength(
+            client, "8658163", date(2024, 7, 1), "America/New_York"
+        )
+        assert strength is not None and strength > 1.4
+        assert await fetch_tide_strength(client, "", date(2024, 7, 1), "UTC") is None

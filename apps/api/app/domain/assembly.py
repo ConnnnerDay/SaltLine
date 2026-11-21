@@ -797,7 +797,7 @@ async def assemble_forecast(
         if prediction.time.astimezone(safe_zone(location.timezone)).date()
         == local_today
     ]
-    score_inputs["tide_strength"] = tide_strength
+    score_inputs["tide_strength"] = (tide_strength or {}).get(local_today)
     score_by_style = {
         style: score_conditions(wind_range, wave_range, style=style, **score_inputs)
         for style in STYLE_PROFILES
@@ -866,6 +866,7 @@ async def assemble_forecast(
             tide_predictions=tides_result.value,
             weather_days=point_weather.days if point_weather else None,
             fish_in_season=fish_in_season,
+            tide_strength=tide_strength,
         )
     except Exception:
         _logger.exception("day outlook failed for %s", location.id)

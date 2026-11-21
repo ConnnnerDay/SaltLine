@@ -21,7 +21,7 @@ from pydantic import BaseModel
 from app.domain.models import Observation
 from app.domain.scoring import STYLE_PROFILES, score_conditions
 from app.infra.timezones import safe_zone
-from app.providers.astronomy import compute_solunar_times
+from app.providers.astronomy import compute_solunar_times, compute_sun_times
 from app.providers.noaa_coops import TidePrediction
 from app.providers.nws import MarineDay, WeatherDay
 
@@ -80,6 +80,7 @@ def build_day_outlook(
     tide_predictions: list[TidePrediction] | None,
     weather_days: list[WeatherDay] | None = None,
     fish_in_season: tuple[int, int] | None = None,
+    tide_strength: dict[date, float] | None = None,
 ) -> list[DayOutlook]:
     zone = safe_zone(tz_name)
     today = now.astimezone(zone).date()
@@ -89,6 +90,14 @@ def build_day_outlook(
         day = today + timedelta(days=index)
         noon = datetime.combine(day, time(12), tzinfo=zone)
         solunar = compute_solunar_times(noon, lat, lng, tz_name)
+        # That day's tide turns (the predictions cover the first few days)
+        # against that day's sunrise and sunset, and its tide size.
+        sun = compute_sun_times(noon, lat, lng, tz_name)
+        turns = [
+            p.time
+            for p in tide_predictions or []
+            if p.time.astimezone(zone).date() == day
+        ]
         wind = (
             (marine.wind_low_kt, marine.wind_high_kt)
             if marine.wind_low_kt is not None and marine.wind_high_kt is not None
@@ -113,6 +122,9 @@ def build_day_outlook(
                 sky=weather.sky if weather else None,
                 fish_in_season=fish_in_season,
                 style=style,
+                sun_times=sun,
+                tide_turns=turns,
+                tide_strength=(tide_strength or {}).get(day),
             )
             for style in STYLE_PROFILES
         }

@@ -314,5 +314,6 @@ async def test_tide_strength_compares_today_with_the_fortnight() -> None:
         strength = await fetch_tide_strength(
             client, "8658163", date(2024, 7, 1), "America/New_York"
         )
-        assert strength is not None and strength > 1.4
+        assert strength is not None and strength[date(2024, 7, 1)] > 1.4
+        assert 0.9 < strength[date(2024, 7, 5)] < 1.0
         assert await fetch_tide_strength(client, "", date(2024, 7, 1), "UTC") is None

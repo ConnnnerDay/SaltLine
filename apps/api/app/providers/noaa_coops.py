@@ -178,12 +178,13 @@ TIDE_STRENGTH_DAYS = 14
 
 async def fetch_tide_strength(
     client: BoundedHTTPClient, station_id: str, today: date, tz_name: str
-) -> float | None:
-    """How big today's tide is for this station: today's range (highest
-    high minus lowest low) over its average daily range across the next
-    two weeks, which spans a spring and a neap. 1.2+ is a big (spring)
-    tide, 0.7 and under a small (neap) one. `None` without a station, with
-    too few days, or on any failure: it only nudges the score."""
+) -> dict[date, float] | None:
+    """How big each day's tide is for this station, from today on: the
+    day's range (highest high minus lowest low) over the station's average
+    daily range across the next two weeks, which spans a spring and a neap.
+    1.2+ is a big (spring) tide, 0.7 and under a small (neap) one. `None`
+    without a station, with too few days, or on any failure: it only
+    nudges the score."""
     if not station_id:
         return None
     try:
@@ -207,7 +208,9 @@ async def fetch_tide_strength(
     if today not in ranges or len(ranges) < 7:
         return None
     mean = sum(ranges.values()) / len(ranges)
-    return round(ranges[today] / mean, 2) if mean > 0 else None
+    if mean <= 0:
+        return None
+    return {day: round(value / mean, 2) for day, value in ranges.items()}
 
 
 async def fetch_coops_wind(

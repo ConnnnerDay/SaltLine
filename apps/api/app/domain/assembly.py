@@ -707,6 +707,12 @@ async def assemble_forecast(
         precip_pct=_precip_today(point_weather, now, location.timezone),
         alerts=[alert.event for alert in alerts],
         water_temp_normal_f=normals.get(local_month(now, location.timezone)),
+        # Cloud cover only matters for the daytime bite.
+        sky=(
+            point_weather.now.sky
+            if point_weather and point_weather.now and point_weather.now.is_daytime
+            else None
+        ),
     )
 
     conditions = ForecastConditions(

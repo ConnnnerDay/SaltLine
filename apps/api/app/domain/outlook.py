@@ -100,6 +100,7 @@ def build_day_outlook(
             coast=coast,
             storms=bool(weather and weather.sky == "storm"),
             precip_pct=weather.precip_pct if weather else None,
+            sky=weather.sky if weather else None,
         )
         out.append(
             DayOutlook(

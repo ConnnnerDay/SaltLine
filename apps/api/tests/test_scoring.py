@@ -483,3 +483,17 @@ class TestWeatherAndAlerts:
         )
         assert any("colder than normal" in f.description for f in cold.factors)
         assert (cold.score or 0) < normal
+
+    def test_overcast_helps_snow_hurts(self) -> None:
+        base = score_conditions((5.0, 8.0), (1.0, 2.0)).score or 0
+        cloudy = score_conditions((5.0, 8.0), (1.0, 2.0), sky="cloudy").score or 0
+        snow = score_conditions((5.0, 8.0), (1.0, 2.0), sky="snow").score or 0
+        assert cloudy > base > snow
+
+    def test_minor_alerts_cost_a_little(self) -> None:
+        base = score_conditions((5.0, 8.0), (1.0, 2.0)).score or 0
+        fog = score_conditions((5.0, 8.0), (1.0, 2.0), alerts=["Dense Fog Advisory"])
+        rip = score_conditions((5.0, 8.0), (1.0, 2.0), alerts=["Rip Current Statement"])
+        assert (fog.score or 0) == base - 3
+        assert (rip.score or 0) == base - 2
+        assert fog.verdict is not ScoreVerdict.POOR

@@ -144,7 +144,7 @@ def test_picks_are_sorted_capped_and_above_threshold() -> None:
 def test_red_drum_in_october_at_65f_is_a_good_pick_with_reasons() -> None:
     guidance = _guidance()
     red_drum = next(pick for pick in guidance.species if pick.id == "red-drum")
-    assert red_drum.score == 80  # 50 temperature + 30 peak month
+    assert red_drum.score == 83  # 50 temperature + 30 peak month + 3 fall run
     # In season at an ideal temperature is "good"; "prime" also needs
     # today's conditions in its favor.
     assert red_drum.tier is GuidanceTier.GOOD
@@ -153,6 +153,7 @@ def test_red_drum_in_october_at_65f_is_a_good_pick_with_reasons() -> None:
         "October is a peak month",
         # Aug-Nov spawners, but 65°F is below their 70-82°F spawning water.
         "Spawning season",
+        "The fall red drum run is on",
     ]
     assert red_drum.rig and red_drum.bait and red_drum.hook_size and red_drum.sinker
 
@@ -402,7 +403,8 @@ def test_hawaii_has_no_wind_direction_effect() -> None:
 def test_conditions_reasons_appear_on_picks() -> None:
     guidance = _guidance(coast="east", wind_direction="NE", wind_range_kt=(10.0, 15.0))
     red_drum = next(pick for pick in guidance.species if pick.id == "red-drum")
-    assert red_drum.score == 50 + 30 + 5 + 3  # temp + peak month + onshore + wind
+    # temp + peak month + fall run + onshore + wind
+    assert red_drum.score == 50 + 30 + 3 + 5 + 3
     assert any("Onshore NE wind" in reason for reason in red_drum.reasons)
     assert "Moderate wind stirs up bait" in red_drum.reasons
 
@@ -710,3 +712,47 @@ def test_spawning_scores_only_when_it_brings_fish_within_reach() -> None:
     assert _spawn_points(red, 9, 60.0) == 0  # water out of the spawning range
     assert _spawn_points(red, 4, 75.0) == 0  # out of season
     assert _spawn_points(wahoo, 9, 75.0) == 0
+
+
+def test_runs_match_the_web_copy() -> None:
+    """app/data/runs.json is copied from apps/web/lib/runs.ts; each run's
+    id, months and fish must agree."""
+    import re
+    from pathlib import Path
+
+    from app.domain.guidance import load_runs
+
+    source = Path(__file__).resolve().parents[2] / "web" / "lib" / "runs.ts"
+    if not source.exists():  # api checked out on its own
+        pytest.skip("apps/web not present")
+    text = source.read_text()
+    web = {
+        match.group(1): (
+            [int(m) for m in re.findall(r"\d+", match.group(2))],
+            re.findall(r"'([^']+)'", match.group(3)),
+        )
+        for match in re.finditer(
+            r"id: '([^']+)',.*?months: \[([^\]]*)\],\s*fish: \[([^\]]*)\]",
+            text,
+            re.DOTALL,
+        )
+    }
+    api = {run["id"]: (run["months"], run["fish"]) for run in load_runs()}
+    assert web == api
+
+
+def test_fish_in_an_active_run_get_the_bonus() -> None:
+    from app.domain.guidance import _active_run
+
+    assert _active_run("red-drum", "atlantic_south", 10) is not None
+    assert _active_run("red-drum", "atlantic_south", 4) is None
+    assert _active_run("red-drum", "pacific_north", 10) is None
+    fall = build_fishing_guidance(
+        region="atlantic_south",
+        water_temp_f=72.0,
+        water_temp_is_fallback=False,
+        month=10,
+        max_picks=200,
+    )
+    red = next(pick for pick in fall.species if pick.id == "red-drum")
+    assert any(reason.endswith("run is on") for reason in red.reasons)

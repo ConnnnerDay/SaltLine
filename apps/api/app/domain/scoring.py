@@ -107,7 +107,15 @@ _HAZARD_ALERTS: tuple[tuple[str, float, str], ...] = (
     ("high surf warning", -14, "High Surf Warning in effect"),
     ("high surf advisory", -7, "High Surf Advisory in effect"),
     ("coastal flood warning", -6, "Coastal Flood Warning in effect"),
+    ("wind advisory", -5, "Wind Advisory in effect"),
     ("small craft advisory", -4, "Small Craft Advisory in effect"),
+    ("freeze warning", -4, "Freeze Warning in effect"),
+    ("hard freeze", -4, "Freeze Warning in effect"),
+    ("excessive heat", -4, "Heat warning in effect"),
+    ("heat advisory", -2, "Heat Advisory in effect"),
+    ("dense fog", -3, "Dense Fog Advisory in effect"),
+    ("rip current", -2, "Rip currents: stay out of the water"),
+    ("beach hazards", -2, "Beach Hazards Statement in effect"),
 )
 
 
@@ -240,6 +248,7 @@ def score_conditions(
     precip_pct: int | None = None,
     alerts: list[str] | None = None,
     water_temp_normal_f: float | None = None,
+    sky: str | None = None,
 ) -> ForecastScore:
     """Score fishability from the marine and astronomical signals given.
 
@@ -408,6 +417,20 @@ def score_conditions(
                     description=f"Water {below:.0f}°F colder than normal: a cold snap slows the bite",
                 )
             )
+
+    # Cloud cover: fish feed more boldly without bright sun on the water.
+    if sky == "cloudy":
+        score += 3
+        factors.append(
+            ScoreFactor(
+                impact=3, description="Overcast: fish feed more boldly out of the glare"
+            )
+        )
+    elif sky == "snow":
+        score -= 6
+        factors.append(
+            ScoreFactor(impact=-6, description="Snow or ice in the forecast")
+        )
 
     if precip_pct is not None and precip_pct >= 60 and not storms:
         score -= 3

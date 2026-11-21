@@ -58,6 +58,7 @@ from app.infra.timezones import safe_zone
 _DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 _CATALOGUE_PATH = _DATA_DIR / "guidance_species.json"
 _REGIONAL_SEASONS_PATH = _DATA_DIR / "regional_seasons.json"
+_RUNS_PATH = _DATA_DIR / "runs.json"
 _REGULATIONS_PATH = _DATA_DIR / "guidance_regulations.json"
 _REGULATIONS_STALE_MONTHS = 6
 """Legacy regulations.py's `_STALE_MONTHS`: older snapshots get flagged."""
@@ -472,6 +473,29 @@ _SPAWNS_NEARSHORE = re.compile(
     re.IGNORECASE,
 )
 _SPAWN_POINTS = 4.0
+_RUN_POINTS = 3.0
+
+
+@lru_cache(maxsize=1)
+def load_runs() -> list[dict[str, Any]]:
+    """app/data/runs.json: the seasonal runs and migrations (the fall
+    mullet run, spring cobia...), copied from apps/web/lib/runs.ts."""
+    runs: list[dict[str, Any]] = json.loads(_RUNS_PATH.read_text())["runs"]
+    return runs
+
+
+def _active_run(species_id: str, region: str, month: int) -> dict[str, Any] | None:
+    """The run on now in *region* that this fish is part of, if any: the
+    most specific one (the fall red drum run over the fall mullet run that
+    red drum also follow)."""
+    runs = [
+        run
+        for run in load_runs()
+        if region in run["regions"]
+        and month in run["months"]
+        and species_id in run["fish"]
+    ]
+    return min(runs, key=lambda run: len(run["fish"])) if runs else None
 
 
 def _spawn_points(species: dict[str, Any], month: int, water_temp_f: float) -> float:
@@ -722,11 +746,13 @@ def build_fishing_guidance(
             wave_range_ft=wave_range_ft,
             hour=hour,
         )
+        run = _active_run(species["id"], region, month)
         score = max(
             0.0,
             temp_points
             + _season_points(species, month)
             + _spawn_points(species, month, water_temp_f)
+            + (_RUN_POINTS if run else 0.0)
             + modifier,
         )
         if score < SCORE_THRESHOLD:
@@ -750,6 +776,7 @@ def build_fishing_guidance(
                         ),
                         _season_reason(species, month),
                         *_spawn_reasons(species, month, water_temp_f),
+                        *([f"The {run['title'].lower()} is on"] if run else []),
                         *condition_reasons,
                     ],
                     explanation=explanation,

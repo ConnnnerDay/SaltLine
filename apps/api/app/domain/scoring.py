@@ -207,7 +207,8 @@ STYLE_PROFILES: dict[str, StyleProfile] = {
         "kayak",
         (6.0, 10.0, 12.0, 15.0, 20.0),
         (14.0, 8.0, -2.0, -12.0, -22.0, -32.0),
-        (10.0, 6.0, -8.0, -18.0, -30.0),
+        # Launching and landing: 3 ft of shorebreak is work, not a plus.
+        (10.0, 2.0, -8.0, -18.0, -30.0),
         offshore_points=-6,
         onshore_points=-2,
         rip_current=False,
@@ -390,6 +391,11 @@ def score_conditions(
     thunderstorms (*storms*: the day is at best Challenging), the chance
     of rain, NWS *alerts* by event name (a gale, storm or hurricane
     warning makes it Poor) and the water against this month's normal.
+
+    *style* is how the angler fishes (a `STYLE_PROFILES` key: surf, wade,
+    pier, bridge, jetty, kayak, inshore, offshore); it sets the wind and
+    wave bands, what wind direction means, and which hazards count. Unknown
+    styles score as surf, the default.
     """
     if wind_range is None or wave_range is None:
         return ForecastScore(
@@ -479,7 +485,11 @@ def score_conditions(
             factors.append(
                 ScoreFactor(
                     impact=profile.onshore_points,
-                    description=f"Onshore wind ({wind_direction}) bringing murkier water",
+                    description=(
+                        f"Onshore wind ({wind_direction}): choppy paddling"
+                        if style == "kayak"
+                        else f"Onshore wind ({wind_direction}) bringing murkier water"
+                    ),
                 )
             )
 
@@ -635,7 +645,11 @@ def score_conditions(
         factors.append(
             ScoreFactor(
                 impact=profile.groundswell_points,
-                description=f"{height:g} ft groundswell at {period} s: heavy shorebreak",
+                description=(
+                    f"{height:g} ft groundswell at {period} s: big, powerful swell"
+                    if profile.wave_noun == "seas"
+                    else f"{height:g} ft groundswell at {period} s: heavy shorebreak"
+                ),
             )
         )
 
@@ -721,6 +735,8 @@ def score_conditions(
             or any("rip current" in f.description.lower() for f in factors)
         ):
             continue  # not in the water, or the surf zone risk already counts
+        if "beach hazards" in low and not profile.rip_current:
+            continue  # a swimmer's warning: surf and wading only
         for name, impact, description in _HAZARD_ALERTS:
             impact = profile.alert_points.get(name, impact)
             if (

@@ -695,3 +695,30 @@ class TestStyles:
         assert score_conditions(
             (5.0, 8.0), (1.0, 2.0), style="spaceship"
         ) == score_conditions((5.0, 8.0), (1.0, 2.0))
+
+    def test_swimmer_warnings_only_count_in_the_water(self) -> None:
+        for style, counts in (("surf", True), ("pier", False), ("kayak", False)):
+            result = score_conditions(
+                (5.0, 8.0), (1.0, 2.0), alerts=["Beach Hazards Statement"], style=style
+            )
+            assert (
+                any("Beach Hazards" in f.description for f in result.factors) is counts
+            )
+
+    def test_style_specific_wording(self) -> None:
+        kayak = score_conditions(
+            (5.0, 10.0), (1.0, 2.0), wind_direction="E", coast="east", style="kayak"
+        )
+        assert any("choppy paddling" in f.description for f in kayak.factors)
+        boat = score_conditions(
+            (5.0, 10.0), (3.0, 5.0), swell=[(4.0, 13)], style="offshore"
+        )
+        assert any("big, powerful swell" in f.description for f in boat.factors)
+        assert not any("shorebreak" in f.description for f in boat.factors)
+
+    def test_kayak_does_not_like_launching_through_3_ft(self) -> None:
+        kayak = score_conditions((3.0, 5.0), (2.0, 3.0), style="kayak")
+        surf_band = next(
+            f for f in kayak.factors if f.description.startswith("Light surf")
+        )
+        assert surf_band.impact == 2

@@ -91,6 +91,25 @@ _DIRS_BY_ORIENTATION: dict[str, tuple[set[str], set[str]]] = {
 
 _SOLUNAR_RATING_BONUS = {"Excellent": 8, "Good": 4, "Fair": 0, "Poor": -6}
 
+# NWS alerts that make the shore unsafe: the day is Poor whatever else
+# it has going for it.
+_DANGEROUS_ALERTS = (
+    "gale warning",
+    "storm warning",
+    "hurricane",
+    "tropical storm",
+    "special marine warning",
+    "storm surge",
+    "tsunami",
+)
+# Alerts that cost points: (event substring, impact, description).
+_HAZARD_ALERTS: tuple[tuple[str, float, str], ...] = (
+    ("high surf warning", -14, "High Surf Warning in effect"),
+    ("high surf advisory", -7, "High Surf Advisory in effect"),
+    ("coastal flood warning", -6, "Coastal Flood Warning in effect"),
+    ("small craft advisory", -4, "Small Craft Advisory in effect"),
+)
+
 
 class ScoreVerdict(str, Enum):
     EXCELLENT = "Excellent"
@@ -216,12 +235,23 @@ def score_conditions(
     now: datetime | None = None,
     solunar: SolunarTimes | None = None,
     coast: str = "east",
+    pressure_trend: str | None = None,
+    storms: bool = False,
+    precip_pct: int | None = None,
+    alerts: list[str] | None = None,
+    water_temp_normal_f: float | None = None,
 ) -> ForecastScore:
     """Score fishability from the marine and astronomical signals given.
 
     Returns `ForecastScore(score=None, verdict=UNKNOWN, ...)` if neither
     *wind_range* nor *wave_range* is available — the legacy function's
     behavior for "conditions unknown."
+
+    Beyond wind, surf and the sun and moon, the day also reads the
+    barometer's 3-hour *pressure_trend* ("falling", "rising rapidly"...),
+    thunderstorms (*storms*: the day is at best Challenging), the chance
+    of rain, NWS *alerts* by event name (a gale, storm or hurricane
+    warning makes it Poor) and the water against this month's normal.
     """
     if wind_range is None or wave_range is None:
         return ForecastScore(
@@ -345,7 +375,71 @@ def score_conditions(
         elif illum < 10 or illum > 95:
             score += 1
 
+    if pressure_trend:
+        if pressure_trend.startswith("falling"):
+            score += 4
+            factors.append(
+                ScoreFactor(
+                    impact=4,
+                    description="Falling pressure: fish often feed ahead of a front",
+                )
+            )
+        elif pressure_trend == "rising rapidly":
+            score -= 6
+            factors.append(
+                ScoreFactor(
+                    impact=-6,
+                    description="Pressure rising fast behind a front: the bite often slows",
+                )
+            )
+        elif pressure_trend.startswith("rising"):
+            score -= 2
+            factors.append(
+                ScoreFactor(impact=-2, description="Rising pressure after a front")
+            )
+
+    if water_temperature is not None and water_temp_normal_f is not None:
+        below = water_temp_normal_f - water_temperature.value
+        if below >= 5:
+            score -= 5
+            factors.append(
+                ScoreFactor(
+                    impact=-5,
+                    description=f"Water {below:.0f}°F colder than normal: a cold snap slows the bite",
+                )
+            )
+
+    if precip_pct is not None and precip_pct >= 60 and not storms:
+        score -= 3
+        factors.append(
+            ScoreFactor(impact=-3, description=f"Rain likely ({precip_pct}%)")
+        )
+    if storms:
+        score -= 15
+        factors.append(
+            ScoreFactor(impact=-15, description="Thunderstorms in the forecast")
+        )
+
+    dangerous: str | None = None
+    for event in alerts or []:
+        low = event.lower()
+        if any(name in low for name in _DANGEROUS_ALERTS):
+            dangerous = dangerous or event
+            continue
+        for name, impact, description in _HAZARD_ALERTS:
+            if name in low and not any(f.description == description for f in factors):
+                score += impact
+                factors.append(ScoreFactor(impact=impact, description=description))
+    if dangerous:
+        factors.append(ScoreFactor(impact=-50, description=f"{dangerous} in effect"))
+
     score = max(0.0, min(100.0, score))
+    # Safety caps: a dangerous alert makes the day Poor; thunderstorms
+    # keep it out of Fair or better, whatever the fish are doing.
+    if dangerous:
+        score = min(score, _VERDICT_CHALLENGING - 1)
+    elif storms:
+        score = min(score, _VERDICT_FAIR - 1)
     if score >= _VERDICT_EXCELLENT:
         verdict = ScoreVerdict.EXCELLENT
     elif score >= _VERDICT_GOOD:

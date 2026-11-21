@@ -90,6 +90,7 @@ def build_day_outlook(
             if marine.wave_low_ft is not None and marine.wave_high_ft is not None
             else None
         )
+        weather = weather_by_date.get(day)
         score = score_conditions(
             wind,
             waves,
@@ -97,8 +98,9 @@ def build_day_outlook(
             water_temperature=water_temperature,
             solunar=solunar,
             coast=coast,
+            storms=bool(weather and weather.sky == "storm"),
+            precip_pct=weather.precip_pct if weather else None,
         )
-        weather = weather_by_date.get(day)
         out.append(
             DayOutlook(
                 high_f=weather.high_f if weather else None,

@@ -436,7 +436,10 @@ def test_pack_murky_water_adjusts_color_and_weight() -> None:
     pack = _pack(wave_range_ft=(3.0, 5.0))
     rows = {row.kind: row.value for row in pack.rows}
     assert rows["color"].startswith("Chartreuse")
-    assert rows["weight"].endswith("go heavier in rough surf")
+    # A pyramid already holds in rough surf; anything else says go heavier.
+    assert "pyramid" in rows["weight"].lower() or rows["weight"].endswith(
+        "go heavier in rough surf"
+    )
 
 
 def test_pack_cold_water_tip() -> None:
@@ -549,7 +552,7 @@ def test_spawning_fish_say_so() -> None:
         max_picks=200,
     )
     red = next(pick for pick in in_range.species if pick.id == "red-drum")
-    assert any("spawning range" in reason for reason in red.reasons)
+    assert any(reason.startswith("Spawning now (") for reason in red.reasons)
     cooler = build_fishing_guidance(
         region="atlantic_mid",
         water_temp_f=62.0,
@@ -682,3 +685,28 @@ def test_strong_offshore_wind_is_not_called_clear_water() -> None:
     )
     assert any("keeps the water clear" in reason for reason in light)
     assert not any("keeps the water clear" in reason for reason in strong)
+
+
+def test_spawning_scores_only_when_it_brings_fish_within_reach() -> None:
+    from app.domain.guidance import _spawn_points
+
+    red = {
+        "spawn": {
+            "months": [9],
+            "temp_low": 70,
+            "temp_high": 82,
+            "note": "Red drum spawn near inlets and the surf zone.",
+        }
+    }
+    wahoo = {
+        "spawn": {
+            "months": [9],
+            "temp_low": 70,
+            "temp_high": 82,
+            "note": "Wahoo spawn in open water offshore.",
+        }
+    }
+    assert _spawn_points(red, 9, 75.0) > 0
+    assert _spawn_points(red, 9, 60.0) == 0  # water out of the spawning range
+    assert _spawn_points(red, 4, 75.0) == 0  # out of season
+    assert _spawn_points(wahoo, 9, 75.0) == 0

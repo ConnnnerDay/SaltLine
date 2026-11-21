@@ -463,23 +463,52 @@ def _season_reason(species: dict[str, Any], month: int) -> str:
     return f"Off-season in {name}"
 
 
+# A spawning note that puts the fish out of reach of the shore ("spawn in
+# open water offshore"), versus one that brings them in or past it (inlets,
+# the surf, a fall "run" past the piers).
+_SPAWNS_OFFSHORE = re.compile(r"offshore|open water|continental shelf", re.IGNORECASE)
+_SPAWNS_NEARSHORE = re.compile(
+    r"nearshore|inshore|surf|inlet|pass(es)?\b|pier|jett|beach|bay|estuar|river|flats|reef|run\b",
+    re.IGNORECASE,
+)
+_SPAWN_POINTS = 4.0
+
+
+def _spawn_points(species: dict[str, Any], month: int, water_temp_f: float) -> float:
+    """Points for a fish in its spawning season with the water in its
+    spawning range, when spawning gathers it where shore anglers reach it
+    (inlets, the surf, a run past the piers). Fish that leave for open
+    water to spawn get nothing."""
+    spawn = species.get("spawn")
+    if not spawn or month not in spawn["months"]:
+        return 0.0
+    if not spawn["temp_low"] <= water_temp_f <= spawn["temp_high"]:
+        return 0.0
+    note = spawn.get("note", "")
+    if _SPAWNS_OFFSHORE.search(note) and not _SPAWNS_NEARSHORE.search(note):
+        return 0.0
+    return _SPAWN_POINTS
+
+
 def _spawn_reasons(
     species: dict[str, Any], month: int, water_temp_f: float
 ) -> list[str]:
     """A note when *month* is in the fish's spawning season (legacy
-    SPAWNING_DATA): information for the angler, not a score change. Says
-    whether the water is in the spawning range too."""
+    SPAWNING_DATA). Says whether the water is in the spawning range too,
+    and whether that gathers them within reach (`_spawn_points`)."""
     spawn = species.get("spawn")
     if not spawn or month not in spawn["months"]:
         return []
     low, high = spawn["temp_low"], spawn["temp_high"]
     if low <= water_temp_f <= high:
-        return [
-            (
-                f"Spawning season, and the water is in their {low:g}–{high:g}°F "
-                "spawning range: go easy on the big breeders"
-            )
-        ]
+        if _spawn_points(species, month, water_temp_f) > 0:
+            return [
+                (
+                    f"Spawning now ({low:g}–{high:g}°F water): gathered up within "
+                    "reach. Go easy on the big breeders"
+                )
+            ]
+        return [f"Spawning now, mostly offshore ({low:g}–{high:g}°F water)"]
     return ["Spawning season"]
 
 
@@ -693,7 +722,13 @@ def build_fishing_guidance(
             wave_range_ft=wave_range_ft,
             hour=hour,
         )
-        score = max(0.0, temp_points + _season_points(species, month) + modifier)
+        score = max(
+            0.0,
+            temp_points
+            + _season_points(species, month)
+            + _spawn_points(species, month, water_temp_f)
+            + modifier,
+        )
         if score < SCORE_THRESHOLD:
             continue
         explanation = (

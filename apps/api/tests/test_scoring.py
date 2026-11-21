@@ -426,3 +426,60 @@ def test_a_west_facing_gulf_beach_gets_west_winds_onshore() -> None:
     # Without a facing, the region's coast still applies.
     bridge = SimpleNamespace(conditions_region="gulf", shore_facing_deg=None)
     assert wind_orientation_for(bridge) == "gulf"
+
+
+class TestWeatherAndAlerts:
+    def test_falling_pressure_helps_rising_fast_hurts(self) -> None:
+        base = score_conditions((5.0, 8.0), (1.0, 2.0)).score or 0
+        falling = (
+            score_conditions((5.0, 8.0), (1.0, 2.0), pressure_trend="falling").score
+            or 0
+        )
+        rising = (
+            score_conditions(
+                (5.0, 8.0), (1.0, 2.0), pressure_trend="rising rapidly"
+            ).score
+            or 0
+        )
+        assert falling > base > rising
+
+    def test_thunderstorms_cap_the_day_below_fair(self) -> None:
+        result = score_conditions((0.0, 5.0), (0.5, 1.0), storms=True)
+        assert result.verdict in (ScoreVerdict.CHALLENGING, ScoreVerdict.POOR)
+        assert any("Thunderstorms" in f.description for f in result.factors)
+
+    def test_gale_warning_makes_the_day_poor(self) -> None:
+        result = score_conditions((0.0, 5.0), (0.5, 1.0), alerts=["Gale Warning"])
+        assert result.verdict is ScoreVerdict.POOR
+        assert result.summary.startswith("Gale Warning in effect")
+
+    def test_surf_advisory_costs_points_once(self) -> None:
+        base = score_conditions((5.0, 8.0), (1.0, 2.0)).score or 0
+        once = (
+            score_conditions(
+                (5.0, 8.0),
+                (1.0, 2.0),
+                alerts=["High Surf Advisory", "High Surf Advisory"],
+            ).score
+            or 0
+        )
+        assert once == base - 7
+
+    def test_cold_snap_against_the_monthly_normal(self) -> None:
+        normal = (
+            score_conditions(
+                (5.0, 8.0),
+                (1.0, 2.0),
+                water_temperature=_water_temp(64),
+                water_temp_normal_f=65,
+            ).score
+            or 0
+        )
+        cold = score_conditions(
+            (5.0, 8.0),
+            (1.0, 2.0),
+            water_temperature=_water_temp(58),
+            water_temp_normal_f=65,
+        )
+        assert any("colder than normal" in f.description for f in cold.factors)
+        assert (cold.score or 0) < normal

@@ -438,6 +438,18 @@ def _reconcile_range(
     return None
 
 
+def _precip_today(
+    weather: PointWeather | None, now: datetime, tz_name: str
+) -> int | None:
+    """Today's chance of rain: the current period's, else the day's."""
+    if weather is None:
+        return None
+    if weather.now is not None and weather.now.precip_pct is not None:
+        return weather.now.precip_pct
+    today = now.astimezone(safe_zone(tz_name)).date()
+    return next((day.precip_pct for day in weather.days if day.date == today), None)
+
+
 def _storms_today(weather: PointWeather, now: datetime, tz_name: str) -> bool:
     today = now.astimezone(safe_zone(tz_name)).date()
     return (weather.now is not None and weather.now.sky == "storm") or any(
@@ -672,6 +684,9 @@ async def assemble_forecast(
                     )
                 )
 
+    normals = monthly_water_temps_for_region(
+        location.temp_region, location.temp_offset, water_temp_profiles
+    )
     score = score_conditions(
         wind_range,
         wave_range,
@@ -681,6 +696,17 @@ async def assemble_forecast(
         now=now,
         solunar=solunar,
         coast=wind_orientation_for(location),
+        pressure_trend=(
+            point_weather.barometer.trend
+            if point_weather and point_weather.barometer
+            else None
+        ),
+        storms=bool(
+            point_weather and _storms_today(point_weather, now, location.timezone)
+        ),
+        precip_pct=_precip_today(point_weather, now, location.timezone),
+        alerts=[alert.event for alert in alerts],
+        water_temp_normal_f=normals.get(local_month(now, location.timezone)),
     )
 
     conditions = ForecastConditions(
@@ -759,9 +785,6 @@ async def assemble_forecast(
                 "wind_direction": wind_direction or conditions.days[0].wind_direction,
             }
         )
-    normals = monthly_water_temps_for_region(
-        location.temp_region, location.temp_offset, water_temp_profiles
-    )
     conditions.water_temp_normals_f = [
         round(normals[month], 1) for month in range(1, 13) if month in normals
     ]

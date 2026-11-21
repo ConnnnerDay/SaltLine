@@ -165,3 +165,14 @@ def test_parse_barometer_trend_and_hourly_history() -> None:
     short = parse_barometer([obs(14, 0, 101300), obs(15, 0, 101500)], "K", "K")
     assert short is not None and (short.change_3h_mb, short.trend) == (None, "steady")
     assert parse_barometer([obs(15, 0, None)], "K", "K") is None
+
+
+def test_parse_wave_detail_names_each_train_once() -> None:
+    swell = parse_wave_detail(
+        "Seas 4 to 6 ft. Wave Detail: W 2 ft at 12 seconds and W 4 ft at 12 seconds"
+        " and SW 1 ft at 5 seconds."
+    )
+    assert [(c.direction, c.height_ft, c.period_s) for c in swell] == [
+        ("W", 4.0, 12),
+        ("SW", 1.0, 5),
+    ]

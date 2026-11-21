@@ -386,3 +386,66 @@ def test_your_window_skips_hours_that_have_passed() -> None:
     assert out.hourly_outlook is not None
     window = out.hourly_outlook["your_window"]
     assert window["start"][11:13] == "18"
+
+
+def _styled_envelope() -> ForecastEnvelope:
+    envelope = _envelope(wind=[5, 10], waves=[4, 6])
+    assert envelope.conditions is not None
+    envelope.conditions["score_by_style"] = {
+        "surf": {"verdict": "Fair", "score": 50, "summary": "Rough surf."},
+        "pier": {"verdict": "Good", "score": 66, "summary": "Moderate wind."},
+        "kayak": {"verdict": "Challenging", "score": 40, "summary": "Rough."},
+    }
+    return envelope
+
+
+def test_scored_for_the_main_style() -> None:
+    from app.domain.preferences import FishingType
+
+    out = personalize(
+        _styled_envelope(), PreferencesOut(fishing_types=[FishingType.PIER])
+    )
+    assert out.conditions is not None
+    assert out.conditions["score"]["verdict"] == "Good"
+    assert out.conditions["score"]["style"] == "pier"
+    assert "style_hint" not in out.conditions
+
+
+def test_another_style_with_a_better_day_is_mentioned() -> None:
+    from app.domain.preferences import FishingType
+
+    out = personalize(
+        _styled_envelope(),
+        PreferencesOut(
+            fishing_types=[FishingType.SURF, FishingType.KAYAK, FishingType.PIER]
+        ),
+    )
+    assert out.conditions is not None
+    assert out.conditions["score"]["style"] == "surf"
+    assert out.conditions["style_hint"] == {
+        "style": "pier",
+        "verdict": "Good",
+        "score": 66,
+    }
+
+
+def test_old_envelopes_without_style_scores_are_unchanged() -> None:
+    from app.domain.preferences import FishingType
+
+    envelope = _envelope(wind=[5, 10], waves=[1, 2])
+    out = personalize(envelope, PreferencesOut(fishing_types=[FishingType.KAYAK]))
+    assert out.conditions == envelope.conditions
+
+
+def test_no_hint_when_the_better_day_is_still_bad() -> None:
+    from app.domain.preferences import FishingType
+
+    envelope = _styled_envelope()
+    assert envelope.conditions is not None
+    envelope.conditions["score_by_style"]["surf"]["verdict"] = "Poor"
+    envelope.conditions["score_by_style"]["pier"]["verdict"] = "Challenging"
+    out = personalize(
+        envelope, PreferencesOut(fishing_types=[FishingType.SURF, FishingType.PIER])
+    )
+    assert out.conditions is not None
+    assert "style_hint" not in out.conditions

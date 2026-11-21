@@ -43,6 +43,7 @@ from app.domain.guidance import (
 )
 from app.domain.models import ForecastEnvelope, Warning, WarningSeverity
 from app.domain.preferences import PreferencesOut
+from app.domain.scoring import STYLE_PROFILES
 from app.infra.timezones import safe_zone
 
 _TARGET_BONUS = 10
@@ -74,6 +75,48 @@ def _downgrade(verdict: str) -> str:
     if verdict not in _VERDICT_ORDER:
         return verdict
     return _VERDICT_ORDER[max(0, _VERDICT_ORDER.index(verdict) - 1)]
+
+
+def main_style(prefs: PreferencesOut) -> str | None:
+    """The way this angler mainly fishes: the first of their fishing types
+    (Preferences' "Mainly fish from" moves it to the front)."""
+    for kind in prefs.fishing_types or []:
+        return str(getattr(kind, "value", kind))
+    return None
+
+
+def _score_for_style(
+    conditions: dict[str, Any], prefs: PreferencesOut
+) -> dict[str, Any]:
+    """*conditions* with the day scored for the angler's main fishing style
+    (`score.style`), and `style_hint` when another style they fish has a
+    better day ("Rough for surf, but a good pier day"). Envelopes cached
+    before per-style scores existed are returned unchanged."""
+    by_style: dict[str, Any] = conditions.get("score_by_style") or {}
+    style = main_style(prefs)
+    if not style or style not in by_style:
+        return conditions
+    out = dict(conditions)
+    out["score"] = {**by_style[style], "style": STYLE_PROFILES[style].label}
+
+    def rank(verdict: str | None) -> int:
+        return _VERDICT_ORDER.index(verdict) if verdict in _VERDICT_ORDER else -1
+
+    mine = rank(out["score"].get("verdict"))
+    others = [
+        (rank(by_style[kind].get("verdict")), kind)
+        for kind in (str(getattr(k, "value", k)) for k in prefs.fishing_types or [])
+        if kind != style and kind in by_style
+    ]
+    best = max(others, default=None)
+    # Only worth saying when the other day is actually decent.
+    if best and best[0] > mine and best[0] >= _VERDICT_ORDER.index("Fair"):
+        out["style_hint"] = {
+            "style": STYLE_PROFILES[best[1]].label,
+            "verdict": by_style[best[1]].get("verdict"),
+            "score": by_style[best[1]].get("score"),
+        }
+    return out
 
 
 def comfort_breaches(
@@ -334,6 +377,9 @@ def personalize(
         dict(envelope.recommendations) if envelope.recommendations else None
     )
     warnings = list(envelope.warnings)
+
+    if conditions is not None:
+        conditions = _score_for_style(conditions, prefs)
 
     breaches = comfort_breaches(conditions, prefs)
     if breaches and conditions is not None:

@@ -192,6 +192,7 @@ from app.domain.normalize import (
 )
 from app.domain.outlook import DayOutlook, build_day_outlook
 from app.domain.scoring import (
+    STYLE_PROFILES,
     ForecastScore,
     score_conditions,
     wind_orientation_for,
@@ -285,6 +286,9 @@ class ForecastConditions(BaseModel):
     lunar: LunarDetails
     solunar: SolunarTimes
     score: ForecastScore
+    # The day scored for each way of fishing (surf, pier, kayak...); `score`
+    # is the surf one.
+    score_by_style: dict[str, ForecastScore] = {}
     wind_range_kt: tuple[float, float] | None
     wave_range_ft: tuple[float, float] | None
     wind_direction: str | None
@@ -736,48 +740,54 @@ async def assemble_forecast(
         if guidance is not None
         else None
     )
-    score = score_conditions(
-        wind_range,
-        wave_range,
-        wind_direction=wind_direction,
-        water_temperature=water_temperature,
-        sun_times=sun_times,
-        now=now,
-        solunar=solunar,
-        coast=wind_orientation_for(location),
-        pressure_trend=(
+    # The same inputs scored for every way of fishing: the shared score is
+    # the surf one; a signed-in angler sees their main style's
+    # (`personalize`), and the others say when another style has a better day.
+    score_inputs: dict[str, Any] = {
+        "wind_direction": wind_direction,
+        "water_temperature": water_temperature,
+        "sun_times": sun_times,
+        "now": now,
+        "solunar": solunar,
+        "coast": wind_orientation_for(location),
+        "pressure_trend": (
             point_weather.barometer.trend
             if point_weather and point_weather.barometer
             else None
         ),
-        storms=bool(
+        "storms": bool(
             point_weather and _storms_today(point_weather, now, location.timezone)
         ),
-        precip_pct=_precip_today(point_weather, now, location.timezone),
-        alerts=[alert.event for alert in alerts],
-        water_temp_normal_f=normals.get(local_month(now, location.timezone)),
+        "precip_pct": _precip_today(point_weather, now, location.timezone),
+        "alerts": [alert.event for alert in alerts],
+        "water_temp_normal_f": normals.get(local_month(now, location.timezone)),
         # Cloud cover only matters for the daytime bite.
-        sky=(
+        "sky": (
             point_weather.now.sky
             if point_weather and point_weather.now and point_weather.now.is_daytime
             else None
         ),
-        rip_current_risk=_rip_risk_today(point_weather),
-        wind_gust_kt=buoy_observation.wind_gust_kt if buoy_observation else None,
-        swell=[
+        "rip_current_risk": _rip_risk_today(point_weather),
+        "wind_gust_kt": buoy_observation.wind_gust_kt if buoy_observation else None,
+        "swell": [
             (component.height_ft, component.period_s)
             for component in (
                 marine_zone_conditions.swell if marine_zone_conditions else []
             )
         ],
-        water_temp_change_24h=water_temp_change,
-        fish_in_season=fish_in_season,
-        air_temp_f=(
+        "water_temp_change_24h": water_temp_change,
+        "fish_in_season": fish_in_season,
+        "air_temp_f": (
             point_weather.now.temperature_f
             if point_weather and point_weather.now
             else None
         ),
-    )
+    }
+    score_by_style = {
+        style: score_conditions(wind_range, wave_range, style=style, **score_inputs)
+        for style in STYLE_PROFILES
+    }
+    score = score_by_style["surf"]
 
     conditions = ForecastConditions(
         water_temperature=water_temperature,
@@ -794,6 +804,7 @@ async def assemble_forecast(
         lunar=_compute_lunar_details(now, location.lng, location.timezone),
         solunar=solunar,
         score=score,
+        score_by_style=score_by_style,
         wind_range_kt=wind_range,
         wave_range_ft=wave_range,
         wind_direction=wind_direction,

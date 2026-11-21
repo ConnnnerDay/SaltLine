@@ -234,6 +234,26 @@ export function PreferencesForm({
               setPreferences((p) => ({ ...p, fishing_types: toggleIn(p.fishing_types, value) }))
             }
           />
+          {(preferences.fishing_types?.length ?? 0) > 0 && (
+            <div id="mainly" className="flex scroll-mt-24 flex-col gap-2">
+              <Chips
+                label="Mainly fish from"
+                options={FISHING_TYPES.filter((option) => preferences.fishing_types?.includes(option.value))}
+                isOn={(value) => preferences.fishing_types?.[0] === value}
+                onToggle={(value) =>
+                  // The first fishing type is the main one: move it to the front.
+                  setPreferences((p) => ({
+                    ...p,
+                    fishing_types: [value, ...(p.fishing_types ?? []).filter((item) => item !== value)],
+                  }))
+                }
+              />
+              <p className="text-xs text-text-muted">
+                Your day&apos;s rating is worked out for this. A pier angler doesn&apos;t mind surf that
+                keeps a surf caster home; a kayaker minds wind most of all.
+              </p>
+            </div>
+          )}
           <Chips
             label="Mostly fishing for"
             options={TARGET_GROUPS}

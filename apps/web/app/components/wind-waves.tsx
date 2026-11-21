@@ -157,7 +157,7 @@ export function WindAndWaves({ forecast }: { forecast: ForecastEnvelope }) {
             <ul className="flex flex-col gap-2.5">
               {swell.map((train) => (
                 <li
-                  key={`${train.direction}-${train.period_s}`}
+                  key={`${train.direction}-${train.period_s}-${train.height_ft}`}
                   className="flex items-start gap-3 rounded-md border border-border bg-surface-raised px-3 py-2.5"
                 >
                   <svg viewBox="0 0 24 24" aria-hidden="true" className="mt-0.5 h-6 w-6 shrink-0 text-primary">

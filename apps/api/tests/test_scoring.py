@@ -604,3 +604,146 @@ class TestSeason:
             (5.0, 10.0), (1.0, 2.0), water_temperature=_water_temp(40)
         )
         assert any("Off-peak water temp" in f.description for f in cold.factors)
+
+
+class TestStyles:
+    def test_surf_is_the_default(self) -> None:
+        plain = score_conditions(
+            (5.0, 10.0), (3.0, 5.0), wind_direction="W", coast="east"
+        )
+        surf = score_conditions(
+            (5.0, 10.0), (3.0, 5.0), wind_direction="W", coast="east", style="surf"
+        )
+        assert plain == surf
+
+    def test_pier_barely_minds_surf_that_beats_up_the_beach(self) -> None:
+        surf = score_conditions((5.0, 10.0), (3.0, 5.0), style="surf").score or 0
+        pier = score_conditions((5.0, 10.0), (3.0, 5.0), style="pier").score or 0
+        assert pier > surf
+        # Big enough surf closes piers: still a real penalty.
+        huge = score_conditions((5.0, 10.0), (8.0, 10.0), style="pier")
+        assert any(f.impact <= -12 for f in huge.factors)
+
+    def test_kayak_offshore_wind_is_a_danger_not_a_bonus(self) -> None:
+        surf = score_conditions(
+            (5.0, 8.0), (1.0, 2.0), wind_direction="W", coast="east"
+        )
+        kayak = score_conditions(
+            (5.0, 8.0), (1.0, 2.0), wind_direction="W", coast="east", style="kayak"
+        )
+        assert any(f.description.startswith("Clean offshore") for f in surf.factors)
+        assert any(
+            "blows you away from shore" in f.description and f.impact < 0
+            for f in kayak.factors
+        )
+
+    def test_kayak_is_stricter_about_wind(self) -> None:
+        surf = score_conditions((10.0, 14.0), (1.0, 2.0)).score or 0
+        kayak = score_conditions((10.0, 14.0), (1.0, 2.0), style="kayak").score or 0
+        assert kayak < surf
+
+    def test_jetty_is_harder_on_big_surf_and_groundswell(self) -> None:
+        surf = score_conditions((5.0, 10.0), (4.0, 6.0), swell=[(4.0, 13)]).score or 0
+        jetty = (
+            score_conditions(
+                (5.0, 10.0), (4.0, 6.0), swell=[(4.0, 13)], style="jetty"
+            ).score
+            or 0
+        )
+        assert jetty < surf
+
+    def test_rip_currents_only_count_in_the_water(self) -> None:
+        for style, counts in (
+            ("surf", True),
+            ("wade", True),
+            ("pier", False),
+            ("inshore", False),
+        ):
+            result = score_conditions(
+                (5.0, 8.0),
+                (1.0, 2.0),
+                rip_current_risk="High",
+                alerts=["Rip Current Statement"],
+                style=style,
+            )
+            assert (
+                any("rip current" in f.description.lower() for f in result.factors)
+                is counts
+            )
+
+    def test_small_craft_advisory_matters_afloat(self) -> None:
+        def cost(style: str) -> int:
+            base = score_conditions((5.0, 8.0), (1.0, 2.0), style=style).score or 0
+            sca = (
+                score_conditions(
+                    (5.0, 8.0), (1.0, 2.0), alerts=["Small Craft Advisory"], style=style
+                ).score
+                or 0
+            )
+            return base - sca
+
+        assert cost("kayak") > cost("inshore") > cost("surf") > cost("pier")
+
+    def test_boats_talk_about_seas_and_ignore_beach_wind_direction(self) -> None:
+        boat = score_conditions(
+            (5.0, 8.0), (1.0, 2.0), wind_direction="E", coast="east", style="offshore"
+        )
+        assert any(f.description.startswith("Light seas") for f in boat.factors)
+        assert not any("Onshore" in f.description for f in boat.factors)
+
+    def test_unknown_style_falls_back_to_surf(self) -> None:
+        assert score_conditions(
+            (5.0, 8.0), (1.0, 2.0), style="spaceship"
+        ) == score_conditions((5.0, 8.0), (1.0, 2.0))
+
+    def test_swimmer_warnings_only_count_in_the_water(self) -> None:
+        for style, counts in (("surf", True), ("pier", False), ("kayak", False)):
+            result = score_conditions(
+                (5.0, 8.0), (1.0, 2.0), alerts=["Beach Hazards Statement"], style=style
+            )
+            assert (
+                any("Beach Hazards" in f.description for f in result.factors) is counts
+            )
+
+    def test_style_specific_wording(self) -> None:
+        kayak = score_conditions(
+            (5.0, 10.0), (1.0, 2.0), wind_direction="E", coast="east", style="kayak"
+        )
+        assert any("choppy paddling" in f.description for f in kayak.factors)
+        boat = score_conditions(
+            (5.0, 10.0), (3.0, 5.0), swell=[(4.0, 13)], style="offshore"
+        )
+        assert any("big, powerful swell" in f.description for f in boat.factors)
+        assert not any("shorebreak" in f.description for f in boat.factors)
+
+    def test_kayak_does_not_like_launching_through_3_ft(self) -> None:
+        kayak = score_conditions((3.0, 5.0), (2.0, 3.0), style="kayak")
+        surf_band = next(
+            f for f in kayak.factors if f.description.startswith("Light surf")
+        )
+        assert surf_band.impact == 2
+
+    def test_wind_direction_names_the_shore_when_it_is_known(self) -> None:
+        south = score_conditions(
+            (5.0, 10.0),
+            (1.0, 2.0),
+            wind_direction="NE",
+            coast="facing:190",
+            style="kayak",
+        )
+        assert any(
+            f.description.startswith("Offshore wind (NE) on this south-facing shore")
+            for f in south.factors
+        )
+        region = score_conditions(
+            (5.0, 8.0), (1.0, 2.0), wind_direction="W", coast="east"
+        )
+        assert any(f.description == "Clean offshore wind (W)" for f in region.factors)
+
+    def test_wind_is_named_by_its_speed_not_the_style_band(self) -> None:
+        kayak = score_conditions((20.0, 25.0), (1.0, 2.0), style="kayak")
+        assert any(
+            f.description == "Very strong wind (20–25 kt)" for f in kayak.factors
+        )
+        gale = score_conditions((30.0, 40.0), (1.0, 2.0))
+        assert any(f.description.startswith("Gale-force wind") for f in gale.factors)

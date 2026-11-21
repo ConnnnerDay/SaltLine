@@ -148,9 +148,13 @@ export type ForecastEnvelope = {
       factors?: { impact: number; description: string }[]
       /** Set when the signed-in user's comfort limits downgraded the verdict. */
       personalized_from?: ForecastVerdict
+      /** Signed in: the fishing style this score is for ("pier", "kayak"). */
+      style?: string
     } | null
     /** Set when the day exceeds the signed-in user's comfort limits. */
     comfort?: { over_limit: boolean; reasons: string[] } | null
+    /** Signed in: another style the user fishes has a better day. */
+    style_hint?: { style: string; verdict: ForecastVerdict; score: number | null } | null
     water_temperature: Observation
     wind_range_kt: [number, number] | null
     wave_range_ft: [number, number] | null
@@ -1561,10 +1565,24 @@ export function ForecastCard({
                   <span className="sr-only">, score {score.score} out of 100</span>
                 )}
               </p>
+              {score?.style && (
+                <p className="text-xs font-semibold text-text-muted">
+                  Rated for {score.style} fishing ·{' '}
+                  <a href="/preferences#mainly" className="font-semibold">
+                    change
+                  </a>
+                </p>
+              )}
+              {forecast.conditions?.style_hint && (
+                <p className="w-fit rounded-md border border-go-border bg-go-bg px-2.5 py-1 text-xs font-semibold text-go-text">
+                  {forecast.conditions.style_hint.verdict} for {forecast.conditions.style_hint.style} fishing today
+                  {forecast.conditions.style_hint.score !== null && ` (${forecast.conditions.style_hint.score}/100)`}
+                </p>
+              )}
               {forecast.conditions?.comfort?.over_limit && (
                 <p className="w-fit rounded-md border border-marginal-border bg-marginal-bg px-2.5 py-1 text-xs font-semibold text-marginal-text">
                   Over your comfort limits
-                  {score?.personalized_from && ` · ${score.personalized_from} for most anglers`}
+                  {score?.personalized_from && score.personalized_from !== verdict && ` · ${score.personalized_from} before your limits`}
                 </p>
               )}
             </div>

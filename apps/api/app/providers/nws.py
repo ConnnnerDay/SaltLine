@@ -292,13 +292,17 @@ def parse_wave_detail(text: str) -> list[SwellComponent]:
     match = _WAVE_DETAIL_RE.search(text)
     if not match:
         return []
-    components = [
-        SwellComponent(
+    # The same train can be named twice ("W 2 ft at 12 seconds, becoming
+    # W 4 ft at 12 seconds"): keep its biggest height, once.
+    trains: dict[tuple[str, int], SwellComponent] = {}
+    for direction, height, period in _SWELL_RE.findall(match.group(1)):
+        component = SwellComponent(
             direction=direction.upper(), height_ft=float(height), period_s=int(period)
         )
-        for direction, height, period in _SWELL_RE.findall(match.group(1))
-    ]
-    return sorted(components, key=lambda c: c.height_ft, reverse=True)
+        key = (component.direction, component.period_s)
+        if key not in trains or component.height_ft > trains[key].height_ft:
+            trains[key] = component
+    return sorted(trains.values(), key=lambda c: c.height_ft, reverse=True)
 
 
 def _is_night_period(name: str) -> bool:

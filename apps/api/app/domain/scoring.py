@@ -44,6 +44,7 @@ built yet:
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 
@@ -119,6 +120,128 @@ _HAZARD_ALERTS: tuple[tuple[str, float, str], ...] = (
 )
 
 
+_WAVE_LIMITS_FT = (_WAVE_FLAT_FT, _WAVE_MODERATE_FT, _WAVE_ROUGH_FT, _WAVE_HEAVY_FT)
+
+
+@dataclass(frozen=True)
+class StyleProfile:
+    """How one way of fishing weighs the day. Wind and wave points are by
+    band: wind up to each of `wind_limits_kt`, then stronger; waves up to
+    1.5, 3, 5 and 7 ft, then bigger."""
+
+    label: str
+    wind_limits_kt: tuple[float, float, float, float, float]
+    wind_points: tuple[float, float, float, float, float, float]
+    wave_points: tuple[float, float, float, float, float]
+    wave_noun: str = "surf"
+    offshore_points: float = 4
+    onshore_points: float = -4
+    rip_current: bool = True
+    groundswell_points: float = -4
+    alert_points: dict[str, float] = field(default_factory=dict)
+
+
+_SHORE_WIND = (8.0, 12.0, 16.0, 20.0, 25.0)
+_SHORE_WIND_POINTS = (14.0, 8.0, 2.0, -8.0, -16.0, -26.0)
+_SURF_POINTS = (10.0, 6.0, -4.0, -12.0, -22.0)
+# Advisories that matter afloat but barely from shore.
+_AFLOAT_ALERTS: dict[str, float] = {
+    "small craft advisory": -12,
+    "dense fog": -8,
+    "wind advisory": -8,
+}
+
+STYLE_PROFILES: dict[str, StyleProfile] = {
+    # From the beach: the original scoring, unchanged.
+    "surf": StyleProfile("surf", _SHORE_WIND, _SHORE_WIND_POINTS, _SURF_POINTS),
+    "wade": StyleProfile("wading", _SHORE_WIND, _SHORE_WIND_POINTS, _SURF_POINTS),
+    # Above the waves: surf barely matters until it's big enough to close
+    # the pier; no rip currents; small craft advisories don't apply.
+    "pier": StyleProfile(
+        "pier",
+        _SHORE_WIND,
+        _SHORE_WIND_POINTS,
+        (8.0, 6.0, 0.0, -4.0, -12.0),
+        onshore_points=-2,
+        offshore_points=2,
+        rip_current=False,
+        groundswell_points=-1,
+        alert_points={
+            "small craft advisory": -1,
+            "high surf advisory": -2,
+            "high surf warning": -6,
+        },
+    ),
+    "bridge": StyleProfile(
+        "bridge",
+        _SHORE_WIND,
+        _SHORE_WIND_POINTS,
+        (8.0, 6.0, 1.0, -2.0, -6.0),
+        onshore_points=-2,
+        offshore_points=2,
+        rip_current=False,
+        groundswell_points=0,
+        alert_points={
+            "small craft advisory": -1,
+            "high surf advisory": 0,
+            "high surf warning": -2,
+        },
+    ),
+    # On the rocks: waves and swell washing over them are the danger.
+    "jetty": StyleProfile(
+        "jetty",
+        _SHORE_WIND,
+        _SHORE_WIND_POINTS,
+        (8.0, 5.0, -6.0, -16.0, -30.0),
+        onshore_points=-2,
+        rip_current=False,
+        groundswell_points=-8,
+        alert_points={
+            "small craft advisory": -1,
+            "high surf advisory": -12,
+            "high surf warning": -24,
+        },
+    ),
+    # Afloat in a kayak: wind is everything; offshore wind blows you out.
+    "kayak": StyleProfile(
+        "kayak",
+        (6.0, 10.0, 12.0, 15.0, 20.0),
+        (14.0, 8.0, -2.0, -12.0, -22.0, -32.0),
+        # Launching and landing: 3 ft of shorebreak is work, not a plus.
+        (10.0, 2.0, -8.0, -18.0, -30.0),
+        offshore_points=-6,
+        onshore_points=-2,
+        rip_current=False,
+        alert_points={**_AFLOAT_ALERTS, "small craft advisory": -16},
+    ),
+    # Boats: seas, not surf; the beach's onshore/offshore logic doesn't apply.
+    "inshore": StyleProfile(
+        "inshore boat",
+        (8.0, 12.0, 15.0, 20.0, 25.0),
+        (14.0, 8.0, 0.0, -10.0, -18.0, -28.0),
+        (10.0, 6.0, -6.0, -14.0, -24.0),
+        wave_noun="seas",
+        offshore_points=0,
+        onshore_points=0,
+        rip_current=False,
+        groundswell_points=-2,
+        alert_points=_AFLOAT_ALERTS,
+    ),
+    "offshore": StyleProfile(
+        "offshore boat",
+        (10.0, 14.0, 18.0, 22.0, 27.0),
+        (12.0, 8.0, 2.0, -8.0, -18.0, -28.0),
+        (10.0, 8.0, 0.0, -10.0, -22.0),
+        wave_noun="seas",
+        offshore_points=0,
+        onshore_points=0,
+        rip_current=False,
+        groundswell_points=-4,
+        alert_points={**_AFLOAT_ALERTS, "small craft advisory": -14},
+    ),
+}
+
+
 class ScoreVerdict(str, Enum):
     EXCELLENT = "Excellent"
     GOOD = "Good"
@@ -180,6 +303,24 @@ def wind_orientation_for(location: object) -> str:
     return wind_orientation_for_region(str(getattr(location, "conditions_region", "")))
 
 
+_FACING_NAMES = (
+    "north", "north-northeast", "northeast", "east-northeast", "east",
+    "east-southeast", "southeast", "south-southeast", "south",
+    "south-southwest", "southwest", "west-southwest", "west",
+    "west-northwest", "northwest", "north-northwest",
+)  # fmt: skip
+
+
+def facing_phrase(orientation: str) -> str:
+    """ " on this south-facing shore" when the spot knows which way its
+    shore faces (an island's south side, a west-facing Gulf beach), so
+    "offshore" is clear; "" otherwise."""
+    facing = facing_bearing(orientation)
+    if facing is None:
+        return ""
+    return f" on this {_FACING_NAMES[round(facing / 22.5) % 16]}-facing shore"
+
+
 def facing_bearing(orientation: str) -> int | None:
     if orientation.startswith("facing:"):
         return int(orientation.split(":", 1)[1])
@@ -205,6 +346,20 @@ def onshore_offshore_dirs(orientation: str) -> tuple[set[str], set[str]]:
                 offshore.add(name)
         return onshore, offshore
     return _DIRS_BY_ORIENTATION.get(orientation, _DIRS_BY_ORIENTATION["east"])
+
+
+def _wind_name(wind_kt: float) -> str:
+    """Plain words for the top of the wind range (a gale is 34 kt+)."""
+    for limit, name in (
+        (8, "Light wind"),
+        (12, "Moderate wind"),
+        (16, "Breezy"),
+        (20, "Strong wind"),
+        (33, "Very strong wind"),
+    ):
+        if wind_kt <= limit:
+            return name
+    return "Gale-force wind"
 
 
 def _sentence(parts: list[str]) -> str:
@@ -255,6 +410,7 @@ def score_conditions(
     air_temp_f: float | None = None,
     water_temp_change_24h: float | None = None,
     fish_in_season: tuple[int, int] | None = None,
+    style: str = "surf",
 ) -> ForecastScore:
     """Score fishability from the marine and astronomical signals given.
 
@@ -267,6 +423,11 @@ def score_conditions(
     thunderstorms (*storms*: the day is at best Challenging), the chance
     of rain, NWS *alerts* by event name (a gale, storm or hurricane
     warning makes it Poor) and the water against this month's normal.
+
+    *style* is how the angler fishes (a `STYLE_PROFILES` key: surf, wade,
+    pier, bridge, jetty, kayak, inshore, offshore); it sets the wind and
+    wave bands, what wind direction means, and which hazards count. Unknown
+    styles score as surf, the default.
     """
     if wind_range is None or wave_range is None:
         return ForecastScore(
@@ -281,65 +442,87 @@ def score_conditions(
     wind_lbl = _range_label(wind_range, "kt", step=1.0)
     wave_lbl = _range_label(wave_range, "ft", step=0.5)
 
-    if wind_max <= _WIND_LIGHT_KT:
-        score += 14
-        factors.append(ScoreFactor(impact=14, description=f"Light wind ({wind_lbl})"))
-    elif wind_max <= _WIND_MODERATE_LOW_KT:
-        score += 8
-        factors.append(ScoreFactor(impact=8, description=f"Moderate wind ({wind_lbl})"))
-    elif wind_max <= _WIND_MODERATE_HIGH_KT:
-        score += 2
-        factors.append(ScoreFactor(impact=2, description=f"Breezy ({wind_lbl})"))
-    elif wind_max <= _WIND_STRONG_KT:
-        score -= 8
-        factors.append(ScoreFactor(impact=-8, description=f"Strong wind ({wind_lbl})"))
-    elif wind_max <= _WIND_VERY_STRONG_KT:
-        score -= 16
-        factors.append(
-            ScoreFactor(impact=-16, description=f"Very strong wind ({wind_lbl})")
-        )
-    else:
-        score -= 26
-        factors.append(
-            ScoreFactor(impact=-26, description=f"Gale-force wind ({wind_lbl})")
-        )
+    profile = STYLE_PROFILES.get(style, STYLE_PROFILES["surf"])
 
-    if wave_max <= _WAVE_FLAT_FT:
-        score += 10
-        factors.append(ScoreFactor(impact=10, description=f"Flat surf ({wave_lbl})"))
-    elif wave_max <= _WAVE_MODERATE_FT:
-        score += 6
-        factors.append(ScoreFactor(impact=6, description=f"Light surf ({wave_lbl})"))
-    elif wave_max <= _WAVE_ROUGH_FT:
-        score -= 4
-        factors.append(
-            ScoreFactor(impact=-4, description=f"Moderate surf ({wave_lbl})")
+    band = next(
+        (i for i, limit in enumerate(profile.wind_limits_kt) if wind_max <= limit),
+        len(profile.wind_limits_kt),
+    )
+    impact = profile.wind_points[band]
+    score += impact
+    # Named by the wind itself, whatever the style's points: a kayak's
+    # 20-25 kt is very strong wind for it, not a gale (34 kt and up).
+    factors.append(
+        ScoreFactor(impact=impact, description=f"{_wind_name(wind_max)} ({wind_lbl})")
+    )
+
+    surf_names = (
+        ("Flat", "Light", "Moderate", "Rough", "Heavy")
+        if profile.wave_noun == "surf"
+        else ("Calm", "Light", "Moderate", "Rough", "Heavy")
+    )
+    band = next(
+        (i for i, limit in enumerate(_WAVE_LIMITS_FT) if wave_max <= limit),
+        len(_WAVE_LIMITS_FT),
+    )
+    impact = profile.wave_points[band]
+    score += impact
+    factors.append(
+        ScoreFactor(
+            impact=impact,
+            description=f"{surf_names[band]} {profile.wave_noun} ({wave_lbl})",
         )
-    elif wave_max <= _WAVE_HEAVY_FT:
-        score -= 12
-        factors.append(ScoreFactor(impact=-12, description=f"Rough surf ({wave_lbl})"))
-    else:
-        score -= 22
-        factors.append(ScoreFactor(impact=-22, description=f"Heavy surf ({wave_lbl})"))
+    )
 
     if wind_direction:
         onshore_dirs, offshore_dirs = onshore_offshore_dirs(coast)
-        # Offshore wind flattens and clears the water, but only up to a
-        # breeze: past that it's blowing casts back and lines off the bottom,
-        # and the wind penalty above already says so.
-        if wind_direction in offshore_dirs and wind_max <= _WIND_MODERATE_HIGH_KT:
-            score += 4
+        # Offshore wind flattens and clears the water near shore, but only
+        # up to a breeze: past that it's blowing casts back and lines off
+        # the bottom, and the wind penalty above already says so. For a
+        # kayak it's the dangerous wind at any speed: it blows you out.
+        if wind_direction in offshore_dirs and profile.offshore_points < 0:
+            # Grows with the wind: a light land breeze is a nudge, a
+            # stiff one is a real risk of being blown out.
+            danger = round(
+                profile.offshore_points
+                * (0.35 if wind_max <= 8 else 1.0 if wind_max <= 12 else 1.7)
+            )
+            score += danger
             factors.append(
                 ScoreFactor(
-                    impact=4, description=f"Clean offshore wind ({wind_direction})"
+                    impact=danger,
+                    description=(
+                        f"Offshore wind ({wind_direction}){facing_phrase(coast)}: "
+                        "it blows you away from shore"
+                    ),
                 )
             )
-        elif wind_direction in onshore_dirs:
-            score -= 4
+        elif (
+            wind_direction in offshore_dirs
+            and profile.offshore_points > 0
+            and wind_max <= _WIND_MODERATE_HIGH_KT
+        ):
+            score += profile.offshore_points
             factors.append(
                 ScoreFactor(
-                    impact=-4,
-                    description=f"Onshore wind ({wind_direction}) bringing murkier water",
+                    impact=profile.offshore_points,
+                    description=(
+                        f"Clean offshore wind ({wind_direction}){facing_phrase(coast)}"
+                    ),
+                )
+            )
+        elif wind_direction in onshore_dirs and profile.onshore_points:
+            score += profile.onshore_points
+            factors.append(
+                ScoreFactor(
+                    impact=profile.onshore_points,
+                    description=(
+                        f"Onshore wind ({wind_direction}){facing_phrase(coast)}: "
+                        "choppy paddling"
+                        if style == "kayak"
+                        else f"Onshore wind ({wind_direction}){facing_phrase(coast)}"
+                        " bringing murkier water"
+                    ),
                 )
             )
 
@@ -489,17 +672,22 @@ def score_conditions(
         for height, period in swell or []
         if period >= 12 and height >= 3
     ]
-    if big_groundswell:
+    if big_groundswell and profile.groundswell_points:
         height, period = max(big_groundswell)
-        score -= 4
+        score += profile.groundswell_points
         factors.append(
             ScoreFactor(
-                impact=-4,
-                description=f"{height:g} ft groundswell at {period} s: heavy shorebreak",
+                impact=profile.groundswell_points,
+                description=(
+                    f"{height:g} ft groundswell at {period} s: big, powerful swell"
+                    if profile.wave_noun == "seas"
+                    else f"{height:g} ft groundswell at {period} s: heavy shorebreak"
+                ),
             )
         )
 
-    risk = (rip_current_risk or "").lower()
+    # Rip currents are a danger in the water: surf and wading only.
+    risk = (rip_current_risk or "").lower() if profile.rip_current else ""
     if risk.startswith("high"):
         score -= 4
         factors.append(
@@ -575,12 +763,20 @@ def score_conditions(
         if any(name in low for name in _DANGEROUS_ALERTS):
             dangerous = dangerous or event
             continue
-        if "rip current" in low and any(
-            "rip current" in f.description.lower() for f in factors
+        if "rip current" in low and (
+            not profile.rip_current
+            or any("rip current" in f.description.lower() for f in factors)
         ):
-            continue  # the surf zone forecast's own risk already counts
+            continue  # not in the water, or the surf zone risk already counts
+        if "beach hazards" in low and not profile.rip_current:
+            continue  # a swimmer's warning: surf and wading only
         for name, impact, description in _HAZARD_ALERTS:
-            if name in low and not any(f.description == description for f in factors):
+            impact = profile.alert_points.get(name, impact)
+            if (
+                impact
+                and name in low
+                and not any(f.description == description for f in factors)
+            ):
                 score += impact
                 factors.append(ScoreFactor(impact=impact, description=description))
     if dangerous:

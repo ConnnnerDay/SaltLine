@@ -497,3 +497,34 @@ class TestWeatherAndAlerts:
         assert (fog.score or 0) == base - 3
         assert (rip.score or 0) == base - 2
         assert fog.verdict is not ScoreVerdict.POOR
+
+    def test_gusts_well_above_the_range_cost_points(self) -> None:
+        base = score_conditions((10.0, 15.0), (1.0, 2.0)).score or 0
+        gusty = score_conditions((10.0, 15.0), (1.0, 2.0), wind_gust_kt=28).score or 0
+        mild = score_conditions((10.0, 15.0), (1.0, 2.0), wind_gust_kt=18).score or 0
+        assert gusty == base - 4
+        assert mild == base
+
+    def test_long_period_groundswell_means_heavy_shorebreak(self) -> None:
+        base = score_conditions((5.0, 8.0), (1.0, 2.0)).score or 0
+        ground = score_conditions((5.0, 8.0), (1.0, 2.0), swell=[(4.0, 14), (2.0, 5)])
+        chop = score_conditions((5.0, 8.0), (1.0, 2.0), swell=[(4.0, 6)])
+        assert (ground.score or 0) == base - 4
+        assert any("groundswell" in f.description for f in ground.factors)
+        assert (chop.score or 0) == base
+
+    def test_rip_current_risk_counts_once(self) -> None:
+        base = score_conditions((5.0, 8.0), (1.0, 2.0)).score or 0
+        high = score_conditions(
+            (5.0, 8.0),
+            (1.0, 2.0),
+            rip_current_risk="High",
+            alerts=["Rip Current Statement"],
+        )
+        assert (high.score or 0) == base - 4
+        assert sum("rip current" in f.description.lower() for f in high.factors) == 1
+
+    def test_freezing_air(self) -> None:
+        base = score_conditions((5.0, 8.0), (1.0, 2.0)).score or 0
+        cold = score_conditions((5.0, 8.0), (1.0, 2.0), air_temp_f=28).score or 0
+        assert cold == base - 3

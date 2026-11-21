@@ -438,6 +438,16 @@ def _reconcile_range(
     return None
 
 
+def _rip_risk_today(weather: PointWeather | None) -> str | None:
+    """The surf zone forecast's rip current risk for its first period."""
+    if weather is None or weather.surf_zone is None:
+        return None
+    return next(
+        (p.rip_current_risk for p in weather.surf_zone.periods if p.rip_current_risk),
+        None,
+    )
+
+
 def _precip_today(
     weather: PointWeather | None, now: datetime, tz_name: str
 ) -> int | None:
@@ -711,6 +721,19 @@ async def assemble_forecast(
         sky=(
             point_weather.now.sky
             if point_weather and point_weather.now and point_weather.now.is_daytime
+            else None
+        ),
+        rip_current_risk=_rip_risk_today(point_weather),
+        wind_gust_kt=buoy_observation.wind_gust_kt if buoy_observation else None,
+        swell=[
+            (component.height_ft, component.period_s)
+            for component in (
+                marine_zone_conditions.swell if marine_zone_conditions else []
+            )
+        ],
+        air_temp_f=(
+            point_weather.now.temperature_f
+            if point_weather and point_weather.now
             else None
         ),
     )

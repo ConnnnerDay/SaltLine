@@ -249,6 +249,10 @@ def score_conditions(
     alerts: list[str] | None = None,
     water_temp_normal_f: float | None = None,
     sky: str | None = None,
+    rip_current_risk: str | None = None,
+    wind_gust_kt: float | None = None,
+    swell: list[tuple[float, int]] | None = None,
+    air_temp_f: float | None = None,
 ) -> ForecastScore:
     """Score fishability from the marine and astronomical signals given.
 
@@ -418,6 +422,51 @@ def score_conditions(
                 )
             )
 
+    # Gusts well above the forecast range: hard casting, a bowed line.
+    if wind_gust_kt is not None and wind_gust_kt >= 25 and wind_gust_kt > wind_max + 5:
+        score -= 4
+        factors.append(
+            ScoreFactor(impact=-4, description=f"Gusts to {wind_gust_kt:.0f} kt")
+        )
+
+    # Long-period groundswell (12 s+) of any size breaks hard on the beach:
+    # heavy shorebreak that rolls sinkers and tangles lines.
+    big_groundswell = [
+        (height, period)
+        for height, period in swell or []
+        if period >= 12 and height >= 3
+    ]
+    if big_groundswell:
+        height, period = max(big_groundswell)
+        score -= 4
+        factors.append(
+            ScoreFactor(
+                impact=-4,
+                description=f"{height:g} ft groundswell at {period} s: heavy shorebreak",
+            )
+        )
+
+    risk = (rip_current_risk or "").lower()
+    if risk.startswith("high"):
+        score -= 4
+        factors.append(
+            ScoreFactor(
+                impact=-4, description="High rip current risk: stay out of the water"
+            )
+        )
+    elif risk.startswith("moderate"):
+        score -= 1
+        factors.append(ScoreFactor(impact=-1, description="Moderate rip current risk"))
+
+    if air_temp_f is not None and air_temp_f <= 32:
+        score -= 3
+        factors.append(
+            ScoreFactor(
+                impact=-3,
+                description=f"Freezing air ({air_temp_f:.0f}°F): iced guides, cold hands",
+            )
+        )
+
     # Cloud cover: fish feed more boldly without bright sun on the water.
     if sky == "cloudy":
         score += 3
@@ -449,6 +498,10 @@ def score_conditions(
         if any(name in low for name in _DANGEROUS_ALERTS):
             dangerous = dangerous or event
             continue
+        if "rip current" in low and any(
+            "rip current" in f.description.lower() for f in factors
+        ):
+            continue  # the surf zone forecast's own risk already counts
         for name, impact, description in _HAZARD_ALERTS:
             if name in low and not any(f.description == description for f in factors):
                 score += impact

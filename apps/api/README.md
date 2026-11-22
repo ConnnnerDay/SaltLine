@@ -203,6 +203,18 @@ account export and removed by account deletion. 23 new tests; suite 481.
   limit is ever borrowed from another state. The disclaimer now uses the
   roadmap's required wording, "Informational only — verify with official
   sources".
+- *Season status*: `season_status(season, month)` reads the snapshot's
+  season text for this month into `season_status` / `season_note`:
+  `prohibited` ("No harvest: release it"), `release_only`, `closed` (by its
+  dates, with the month it opens), `open`, or `check` when the text says
+  it varies. Dates after "closed" are the closure; descriptive dates
+  ("peak Apr–Sep", "rare stray Jun–Sep") are never read as a season, and a
+  season that "varies" never gets a firm "closed". The web shows a badge
+  on picks and limits, "Can I keep it?" says release when the season is
+  shut, and a banner appears wherever limits show once the snapshot is
+  past 6 months.
+- *Link check*: `python -m scripts.check_regulation_links` (needs the
+  network) requests every official-rules URL and exits 1 on any dead one.
 - *Conditions-aware ranking*: legacy `_conditions_modifier` (-5..+15 for
   onshore/offshore wind, wind speed, surf height and time of day), driven
   by condition tags the generator copies from legacy's species sets with

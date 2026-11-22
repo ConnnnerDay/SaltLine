@@ -1,3 +1,5 @@
+import { SeasonBadge, StaleLimitsWarning } from './season-badge'
+import { formatAsOf, type SeasonStatus } from '@/lib/regulations'
 import { Badge, type BadgeVariant, Button, Card } from './ui'
 import { SinkerIcon } from './how-art'
 import { HookIt } from './hook-it'
@@ -97,6 +99,9 @@ export type Regulation = {
   source_url: string | null
   as_of: string
   possibly_outdated: boolean
+  /** This month, read from `season` by apps/api. */
+  season_status?: SeasonStatus | null
+  season_note?: string | null
 }
 
 export type SpeciesPick = {
@@ -850,6 +855,9 @@ function WhatsBiting({
                       .join(' · ') || 'see state rules'}
                   </p>
                 )}
+                {pick.regulation && (
+                  <SeasonBadge status={pick.regulation.season_status} note={pick.regulation.season_note} quiet />
+                )}
                 {pick.reasons.some((reason) => !shared.includes(reason)) && (
                 <ul className="mt-0.5 flex flex-col gap-1 border-t border-border pt-2.5 text-xs leading-relaxed text-text-muted">
                   {pick.reasons.filter((reason) => !shared.includes(reason)).map((reason) => (
@@ -992,13 +1000,6 @@ function SpeciesCalendar({
       </div>
     </div>
   )
-}
-
-/** "2026-04" -> "Apr 2026" (the regulations snapshot month). */
-function formatAsOf(asOf: string): string {
-  const [year, month] = asOf.split('-').map(Number)
-  if (!year || !month) return asOf
-  return `${_MONTH_NAMES[month - 1].slice(0, 3)} ${year}`
 }
 
 /**
@@ -1328,6 +1329,9 @@ function SizeAndBagLimits({ guidance }: { guidance: FishingGuidance }) {
   const picks = guidance.species.filter((pick) => pick.regulation)
   return (
     <div className="flex flex-col gap-4">
+    {picks.some((pick) => pick.regulation!.possibly_outdated) && (
+      <StaleLimitsWarning asOf={picks[0].regulation!.as_of} />
+    )}
     <KeepCheck
       units={requestUnits()}
       asOf={formatAsOf(picks[0].regulation!.as_of)}
@@ -1351,10 +1355,10 @@ function SizeAndBagLimits({ guidance }: { guidance: FishingGuidance }) {
                 .filter(Boolean)
                 .join(' · ') || 'See state rules'}
             </span>
+            <SeasonBadge status={regulation.season_status} note={regulation.season_note} />
             {regulation.notes && <span className="text-text-muted">{regulation.notes}</span>}
             <span className="text-xs text-text-muted">
               As of {formatAsOf(regulation.as_of)}
-              {regulation.possibly_outdated && ' — may be out of date'}
               {regulation.source_url && (
                 <>
                   {' · '}

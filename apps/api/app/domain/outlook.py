@@ -144,6 +144,7 @@ def build_day_outlook(
     weather_days: list[WeatherDay] | None = None,
     fish_in_season: tuple[int, int] | None = None,
     tide_strength: dict[date, float] | None = None,
+    max_current_by_day: dict[date, float] | None = None,
 ) -> list[DayOutlook]:
     zone = safe_zone(tz_name)
     today = now.astimezone(zone).date()
@@ -196,6 +197,7 @@ def build_day_outlook(
                 sun_times=sun,
                 tide_turns=turns,
                 tide_strength=(tide_strength or {}).get(day),
+                max_current_kt=(max_current_by_day or {}).get(day),
             )
             for style in STYLE_PROFILES
         }

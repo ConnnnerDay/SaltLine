@@ -15,6 +15,7 @@ import { KNOTS, RIG_KNOTS } from '@/lib/knots'
 import { RIG_FIT, RIG_WATER_TIPS, WATER_LABEL, WATER_NOUN, WATER_PHRASE, watersFor } from '@/lib/fishing-style'
 import type { Preferences } from '@/app/api/preferences/route'
 import { TideNow, WhereToFish, YourLimits } from './your-day'
+import { TidalCurrents } from './tidal-currents'
 import { SunAndMoon, WeatherAlerts, type SkyConditions } from './sky'
 import { NextDays } from './next-days'
 import { WindAndWaves } from './wind-waves'
@@ -1724,6 +1725,7 @@ export function ForecastCard({
                   <Card className="flex flex-col gap-4">
                     <SectionHeader title="Tides" aside="Next 24 hours" />
                     <TideNow forecast={forecast} profile={profile} />
+                    <TidalCurrents forecast={forecast} />
                     <TideChart tides={forecast.tides} timezone={forecast.location.timezone} />
                     <details className="collapsible group">
                       <summary className="flex w-fit cursor-pointer items-center gap-1.5 text-sm font-semibold text-primary">

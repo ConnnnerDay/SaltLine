@@ -44,6 +44,7 @@ the styles that differ are in the next table.
 | Thunderstorms | NWS forecast | likely (60%+, or no "chance" in the wording) −15 · "chance of" −6 · "slight chance" −2 |
 | Tide turning within 45 min of sunrise or sunset | CO-OPS predictions | +3 ("moving water in low light") |
 | Tide size: the day's range vs the station's two-week average | CO-OPS predictions | big (1.2x+) +2 · small (0.7x and under) −1 |
+| Strong tidal current (2 kt+) at the nearest current station within 5 mi | CO-OPS current predictions | surf 0 (by style: bridge +3, jetty +2, pier +1, kayak −5) |
 | Freezing air (≤32°F) | NWS forecast | −3 |
 | Gusts 25 kt+, at least 5 kt over the forecast wind | NDBC buoy | −4 |
 | Groundswell, 12 s+ and 3 ft+ | NWS marine zone | −4 ("heavy shorebreak") |

@@ -159,7 +159,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel
@@ -207,6 +207,7 @@ from app.providers.astronomy import compute_lunar_details as _compute_lunar_deta
 from app.providers.astronomy import compute_solunar_times as _compute_solunar_times
 from app.providers.astronomy import compute_sun_times as _compute_sun_times
 from app.providers.astronomy import compute_twilight_times as _compute_twilight_times
+from app.providers.currents import TidalCurrents, fetch_tidal_currents
 from app.providers.locations import ResolvedLocation, monthly_water_temps_for_region
 from app.providers.ndbc import BuoyObservation, fetch_buoy_observation
 from app.providers.noaa_coops import (
@@ -291,6 +292,9 @@ class ForecastConditions(BaseModel):
     # The day scored for each way of fishing (surf, pier, kayak...); `score`
     # is the surf one.
     score_by_style: dict[str, ForecastScore] = {}
+    # Slack, max flood and max ebb at the nearest current station within a
+    # few miles (bridges, inlets, jetties), or None.
+    currents: TidalCurrents | None = None
     wind_range_kt: tuple[float, float] | None
     wave_range_ft: tuple[float, float] | None
     wind_direction: str | None
@@ -457,6 +461,28 @@ def _rip_risk_today(weather: PointWeather | None) -> str | None:
     )
 
 
+async def _currents_or_none(
+    client: BoundedHTTPClient, location: ResolvedLocation, today: date
+) -> TidalCurrents | None:
+    """Tidal currents are enrichment: any failure, even a bug, leaves them
+    out rather than costing the forecast."""
+    try:
+        return await fetch_tidal_currents(
+            client, location.lat, location.lng, today, location.timezone
+        )
+    except Exception:
+        _logger.warning("tidal currents unavailable for %s", location.id, exc_info=True)
+        return None
+
+
+def _max_current_on(currents: TidalCurrents | None, day: date) -> float | None:
+    """The day's fastest predicted current at the spot's current station."""
+    if currents is None:
+        return None
+    speeds = [e.speed_kt for e in currents.events if e.time.date() == day]
+    return max(speeds) if speeds else None
+
+
 def _precip_today(
     weather: PointWeather | None, now: datetime, tz_name: str
 ) -> int | None:
@@ -514,6 +540,9 @@ async def assemble_forecast(
         fetch_water_temperature_change(client, location.water_temp_station)
     )
     local_today = now.astimezone(safe_zone(location.timezone)).date()
+    currents_task = asyncio.create_task(
+        _currents_or_none(client, location, local_today)
+    )
     tide_strength_task = asyncio.create_task(
         fetch_tide_strength(
             client, location.coops_station, local_today, location.timezone
@@ -536,6 +565,7 @@ async def assemble_forecast(
     )
     water_temp_change = await water_temp_change_task
     tide_strength = await tide_strength_task
+    currents = await currents_task
 
     sources = [
         _source_status(_SOURCE_NWS_MARINE_ZONE, marine_zone_result, now),
@@ -825,6 +855,7 @@ async def assemble_forecast(
         == local_today
     ]
     score_inputs["tide_strength"] = (tide_strength or {}).get(local_today)
+    score_inputs["max_current_kt"] = _max_current_on(currents, local_today)
     score_by_style = {
         style: score_conditions(wind_range, wave_range, style=style, **score_inputs)
         for style in STYLE_PROFILES
@@ -894,6 +925,13 @@ async def assemble_forecast(
             weather_days=point_weather.days if point_weather else None,
             fish_in_season=fish_in_season,
             tide_strength=tide_strength,
+            max_current_by_day={
+                day: speed
+                for day in {
+                    e.time.date() for e in (currents.events if currents else [])
+                }
+                if (speed := _max_current_on(currents, day)) is not None
+            },
         )
     except Exception:
         _logger.exception("day outlook failed for %s", location.id)
@@ -918,6 +956,7 @@ async def assemble_forecast(
         round(normals[month], 1) for month in range(1, 13) if month in normals
     ]
     conditions.weather = point_weather
+    conditions.currents = currents
     conditions.swell = marine_zone_conditions.swell if marine_zone_conditions else []
     conditions.wind_effect = wind_effect_for(
         wind_orientation_for(location), wind_direction

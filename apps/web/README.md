@@ -8,6 +8,17 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Navigation bug hunt.** (1) Better Auth's 30/min default rate limit also
+covered `/get-session`, which every page load calls; tapping through tabs
+quickly (or a household on one IP) got 429s, and the header then showed a
+signed-in user "Log in / Sign up" with no tab bar. `/get-session` now has
+its own 600/min rule, and a failed session check renders nothing rather
+than the signed-out header. (2) Most pages were titled just "Saltline";
+every page now has its own title (fish pages by name, forecasts by spot,
+from the same cached request). (3) Fish guide gains a "Protected — release"
+filter; a protected fish's page shows release guidance instead of bait/rig
+and the keep-or-release check.
+
 **Profile setup after sign-up (original wizard restored).** `/onboarding`
 is now a five-step, skippable setup (signed-in only):
 1. home spot (location search)

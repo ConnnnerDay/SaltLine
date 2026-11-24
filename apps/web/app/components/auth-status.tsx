@@ -13,9 +13,11 @@ import { useSession, signOut } from '@/lib/auth-client'
  * a one-frame gap is preferable to a flash of the wrong state.
  */
 export function AuthStatus() {
-  const { data: session, isPending } = useSession()
+  const { data: session, isPending, error } = useSession()
 
-  if (isPending) return null
+  // A failed session check (network, 429) isn't "signed out": show
+  // nothing rather than a Log in link to someone who is signed in.
+  if (isPending || error) return null
 
   if (!session) {
     return (

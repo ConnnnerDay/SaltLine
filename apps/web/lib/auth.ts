@@ -176,6 +176,11 @@ export const auth = betterAuth({
     window: 60,
     max: 30,
     customRules: {
+      // Every page load checks the session (header, tab bar). Under the
+      // 30/min default a quick run through the tabs -- or a household
+      // sharing one IP -- got 429s, and the header then showed a signed-in
+      // user as signed out. It's a cheap read, not a guessing target.
+      '/get-session': { window: 60, max: 600 },
       '/sign-in/email': { window: 60, max: 5 },
       '/sign-up/email': { window: 60, max: 5 },
       '/send-verification-email': { window: 300, max: 3 },

@@ -104,8 +104,10 @@ function NavIcon({ children }: { children: React.ReactNode }) {
 /** Header links (sm and up). Signed out, the plain "Find your spot". */
 export function MainNavLinks() {
   const path = usePathname() ?? '/'
-  const { data: session, isPending } = useSession()
-  if (isPending) return null
+  const { data: session, isPending, error } = useSession()
+  // A failed session check (network, 429) isn't "signed out": show
+  // nothing rather than a Log in link to someone who is signed in.
+  if (isPending || error) return null
 
   const linkClass =
     'relative whitespace-nowrap rounded-sm py-1 text-sm font-semibold no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-header'
@@ -147,8 +149,8 @@ export function MainNavLinks() {
  * page content never hides behind it. */
 export function MobileTabBar() {
   const path = usePathname() ?? '/'
-  const { data: session, isPending } = useSession()
-  if (isPending || !session) return null
+  const { data: session, isPending, error } = useSession()
+  if (isPending || error || !session) return null
   // The setup wizard is a focused flow; no tab bar there.
   if (path.startsWith('/onboarding')) return null
 
@@ -188,8 +190,8 @@ export function MobileTabBar() {
  * Account), under the header. Nothing on single-page sections. */
 export function SectionTabs() {
   const path = usePathname() ?? '/'
-  const { data: session, isPending } = useSession()
-  if (isPending || !session) return null
+  const { data: session, isPending, error } = useSession()
+  if (isPending || error || !session) return null
   const pages = SECTION_PAGES.find((section) => section.some((page) => page.isActive(path)))
   if (!pages) return null
 

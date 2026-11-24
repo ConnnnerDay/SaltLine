@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { Container } from '@/app/components/ui'
@@ -7,6 +8,8 @@ import type { Preferences } from '@/app/api/preferences/route'
 import { fetchForecast } from '@/lib/get-forecast'
 import type { SavedLocation } from '@/app/api/saved-locations/route'
 import { SavedLocationsList, type SavedLocationWithForecast } from './saved-locations-list'
+
+export const metadata: Metadata = { title: 'Saved spots' }
 
 // Each saved location's own forecast is live, per-request data, same
 // reasoning as app/forecast/[locationId]/page.tsx.

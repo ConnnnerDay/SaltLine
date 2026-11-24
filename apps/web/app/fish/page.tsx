@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { Container } from '@/app/components/ui'
@@ -7,6 +8,8 @@ import type { Preferences } from '@/app/api/preferences/route'
 import type { FishSummary } from '@/lib/fish'
 import { FishGuide } from './fish-guide'
 import { SPECIES_PHOTOS } from '@/app/components/species-photo'
+
+export const metadata: Metadata = { title: 'Fish guide' }
 
 export const dynamic = 'force-dynamic'
 

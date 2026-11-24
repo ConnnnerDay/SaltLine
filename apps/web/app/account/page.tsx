@@ -1,8 +1,11 @@
+import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { Container } from '@/app/components/ui'
 import { auth } from '@/lib/auth'
 import { AccountPage as AccountPageBody } from './account-page'
+
+export const metadata: Metadata = { title: 'Account' }
 
 /**
  * Sprint 45 ("Privacy and deletion")'s self-service export/deletion --

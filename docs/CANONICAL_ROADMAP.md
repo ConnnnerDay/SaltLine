@@ -462,6 +462,12 @@ table above as the authoritative current state (it matches the actual
 rows below before starting new work), and record this repo's own
 handoffs as new session notes here, at the top of this section.
 
+**Session note (this repo, branch `claude/stoic-lamport-robq75`):**
+product-owner-requested bug hunt (category relevance, real-world accuracy
+of fish info, navigation). Not a numbered sprint. Details in the top
+Status entries of `apps/api/README.md` and `apps/web/README.md`. apps/api
+suite 633 passed (was 628). **Next action** unchanged from the note below.
+
 **Session note (this repo, branch `claude/serene-gates-ahrkve`):** two
 product-owner-requested changes.
 

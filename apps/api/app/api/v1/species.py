@@ -67,7 +67,7 @@ class SpeciesSummary(BaseModel):
     name: str
     regions: list[str]
     access: str
-    """shore | boat | tidal | incidental (see app.domain.guidance)."""
+    """shore | boat | tidal | incidental | protected (see app.domain.guidance)."""
     temp_min: float
     temp_max: float
     temp_ideal_low: float

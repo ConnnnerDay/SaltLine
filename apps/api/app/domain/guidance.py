@@ -12,7 +12,10 @@ lives in, with bait/rig/tackle copied verbatim by
 `shore` fish are picks for everyone; `boat` (offshore/charter) and
 `tidal` (brackish/freshwater-edge) fish are ranked into their own lists,
 which app.domain.personalize merges in for anglers who fish that way;
-`incidental` fish (bait fish, nuisance fish, non-targets) are never picked.
+`incidental` fish (bait fish, nuisance fish, non-targets) and `protected`
+fish (possession prohibited) are never picked, nor is any fish in its
+`closed_months`. Real-world fixes to the legacy data live in
+`scripts/guidance_corrections.py`.
 
 **Scoring** ports the two condition-independent parts of the legacy
 `domain/species.py:_score_species`, unchanged:
@@ -733,7 +736,9 @@ def build_fishing_guidance(
             continue
         species = for_region(species, region)
         access = species.get("access", "shore")
-        if access not in picks:  # bait fish and non-targets: never a pick
+        if access not in picks:  # bait, non-target, protected: never a pick
+            continue
+        if month in species.get("closed_months", []):  # closed season
             continue
         temp_points = _temperature_points(species, water_temp_f)
         if temp_points is None:

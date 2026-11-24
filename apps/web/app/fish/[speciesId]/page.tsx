@@ -21,18 +21,32 @@ import { hooksFor } from '@/lib/hook-bait'
 import { RUNS } from '@/lib/runs'
 import { sizeText } from '@/lib/size-rule'
 import { KeepCheck } from '@/app/components/keep-check'
-import { Suspense } from 'react'
+import { Suspense, cache } from 'react'
+import type { Metadata } from 'next'
 import type { SavedLocation } from '@/app/api/saved-locations/route'
 
 export const dynamic = 'force-dynamic'
 
 type Props = { params: Promise<{ speciesId: string }> }
 
+// Request-scoped, so the page title and the page body share one fetch.
+const getFish = cache((speciesId: string) =>
+  internalApiFetch<FishDetail>(`/v1/species/${encodeURIComponent(speciesId)}`),
+)
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { speciesId } = await params
+  const fish = await getFish(speciesId).catch(() => null)
+  return { title: fish ? fish.name : 'Fish guide' }
+}
+
 const ACCESS_NOTE: Record<FishDetail['access'], string> = {
   shore: 'Caught from the beach, pier, jetty or bridge.',
   boat: 'Mostly a boat fish: shows up in "What’s biting" if your profile says you fish from a boat.',
   tidal: 'A freshwater fish of coastal rivers and brackish creeks: listed here, never suggested as a pick at a saltwater spot.',
   incidental: 'Bait fish or not a hook-and-line target: listed here, never suggested as a pick.',
+  protected:
+    'Protected: keeping one is prohibited in federal waters and most states. If you hook one, release it right away. Never suggested as a pick.',
 }
 
 function Fact({ label, value }: { label: string; value: string }) {
@@ -103,7 +117,7 @@ export default async function FishDetailPage({ params }: Props) {
 
   let fish: FishDetail
   try {
-    fish = await internalApiFetch<FishDetail>(`/v1/species/${encodeURIComponent(speciesId)}`)
+    fish = await getFish(speciesId)
   } catch (err) {
     if (err instanceof InternalApiError && err.status === 404) notFound()
     throw err
@@ -265,6 +279,15 @@ export default async function FishDetailPage({ params }: Props) {
             </div>
 
             <div className="flex flex-col gap-4">
+              {fish.access === 'protected' ? (
+                <Card className="flex flex-col gap-3">
+                  <h2 className="section-label">If you hook one</h2>
+                  <p className="text-sm leading-relaxed text-text">
+                    This fish is protected, so don&apos;t target it. If one takes your bait, keep it in the water,
+                    cut the leader close to the hook if you can&apos;t remove it quickly, and let it swim off.
+                  </p>
+                </Card>
+              ) : (
               <Card className="flex flex-col gap-4">
                 <h2 className="section-label">How to catch it</h2>
                 <dl className="flex flex-col gap-3">
@@ -278,7 +301,8 @@ export default async function FishDetailPage({ params }: Props) {
                   <Fact label="Lures" value={say(fish.lures)} />
                 </dl>
               </Card>
-              {rigIds.length > 0 && (
+              )}
+              {rigIds.length > 0 && fish.access !== 'protected' && (
                 <Card className="flex flex-col gap-4">
                   <h2 className="section-label">How to rig it</h2>
                   {rigIds.map((rigId) => {
@@ -324,7 +348,7 @@ export default async function FishDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {fish.access !== 'incidental' && fish.access !== 'tidal' && (
+          {fish.access !== 'incidental' && fish.access !== 'tidal' && fish.access !== 'protected' && (
             <Suspense
               fallback={
                 <Card className="flex flex-col gap-2">
@@ -352,7 +376,12 @@ export default async function FishDetailPage({ params }: Props) {
                 </span>
               )}
             </div>
-            {regulations.length > 0 && (
+            {fish.access === 'protected' && (
+              <p className="rounded-md border border-accent/40 bg-accent-tint px-3 py-2 text-sm font-semibold text-text">
+                Protected species: no harvest. Keep it in the water and release it right away.
+              </p>
+            )}
+            {regulations.length > 0 && fish.access !== 'protected' && (
               <KeepCheck
                 units={units}
                 asOf={regulations[0].as_of}

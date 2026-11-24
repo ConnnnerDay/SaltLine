@@ -5,7 +5,7 @@ export type FishSummary = {
   id: string
   name: string
   regions: string[]
-  access: 'shore' | 'boat' | 'tidal' | 'incidental'
+  access: 'shore' | 'boat' | 'tidal' | 'incidental' | 'protected'
   temp_min: number
   temp_max: number
   temp_ideal_low: number
@@ -63,6 +63,7 @@ export const ACCESS_LABEL: Record<FishSummary['access'], string> = {
   boat: 'Boat',
   tidal: 'Freshwater & brackish',
   incidental: 'Bait / non-target',
+  protected: 'Protected — release',
 }
 
 export const TARGET_LABEL: Record<string, string> = {

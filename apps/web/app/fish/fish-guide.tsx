@@ -17,7 +17,7 @@ const SEASONS = [
   { key: 'peak', label: 'Peak now' },
   { key: 'spawn', label: 'Spawning now' },
 ] as const
-const ACCESS_ORDER: FishSummary['access'][] = ['shore', 'boat', 'tidal', 'incidental']
+const ACCESS_ORDER: FishSummary['access'][] = ['shore', 'boat', 'tidal', 'incidental', 'protected']
 const SEASON_RANK = { peak: 0, good: 1, off: 2 }
 
 const CHIP =

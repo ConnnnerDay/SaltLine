@@ -2917,12 +2917,6 @@
         "season": "Open year-round",
         "notes": "Swordfish require a federal HMS recreational permit. Verify current NOAA HMS rules and possession limits. Strong conservation ethic \u2014 most are released."
       },
-      "oio-bonefish-hawaii": {
-        "min_size": "None",
-        "bag_limit": "0 (catch and release only)",
-        "season": "Open year-round (C&R only)",
-        "notes": "Harvest of bonefish is prohibited in Florida. Catch and release only."
-      },
       "spanish-hogfish": {
         "min_size": "12 in TL",
         "bag_limit": "5 per day",
@@ -3745,13 +3739,6 @@
         "season": "Open year-round",
         "notes": "Swordfish require a federal HMS recreational permit. Verify current NOAA HMS rules and possession limits. Strong conservation ethic \u2014 most are released."
       },
-      "oio-bonefish-hawaii": {
-        "min_size": "No minimum",
-        "bag_limit": "No limit (rare in this area)",
-        "season": "Open year-round",
-        "notes": "Bonefish are occasional strays in GA. No bag limit but best to release.",
-        "source": "GA DNR"
-      },
       "silver-hake-whiting": {
         "min_size": "None",
         "bag_limit": "No limit",
@@ -4468,13 +4455,6 @@
         "season": "Prohibited year-round",
         "notes": "Great hammerhead sharks are a prohibited species under NOAA federal shark regulations \u2014 they may NOT be harvested or possessed. If caught, they must be released immediately with minimal harm. All anglers fishing for sharks in Atlantic/Gulf federal waters must have a valid NOAA HMS Angling permit. Verify current prohibited species list with NOAA.",
         "source": "https://www.fisheries.noaa.gov/recreational-fishing-rules"
-      },
-      "oio-bonefish-hawaii": {
-        "min_size": "No minimum",
-        "bag_limit": "No limit (rare in this area)",
-        "season": "Open year-round",
-        "notes": "Bonefish are not a target species in LA. Extremely rare.",
-        "source": "LA Wildlife & Fisheries"
       },
       "spanish-hogfish": {
         "min_size": "12 in TL",
@@ -5511,13 +5491,6 @@
         "bag_limit": "1 per angler per day",
         "season": "Open year-round",
         "notes": "Swordfish require a federal HMS recreational permit. Verify current NOAA HMS rules and possession limits. Strong conservation ethic \u2014 most are released."
-      },
-      "oio-bonefish-hawaii": {
-        "min_size": "No minimum",
-        "bag_limit": "No limit (rare in this area)",
-        "season": "Open year-round",
-        "notes": "Bonefish do not occur in MD. Would be a rare stray.",
-        "source": "MD DNR"
       },
       "witch-flounder": {
         "min_size": "12 in TL",
@@ -7257,13 +7230,6 @@
         "season": "Open year-round",
         "notes": "Swordfish require a federal HMS recreational permit. Verify current NOAA HMS rules and possession limits. Strong conservation ethic \u2014 most are released."
       },
-      "oio-bonefish-hawaii": {
-        "min_size": "No minimum",
-        "bag_limit": "No limit (rare in this area)",
-        "season": "Open year-round",
-        "notes": "Bonefish are occasional strays in NC coastal waters. No specific regulation.",
-        "source": "NC DMF"
-      },
       "silver-hake-whiting": {
         "min_size": "None",
         "bag_limit": "No limit",
@@ -7951,13 +7917,6 @@
         "bag_limit": "1 per angler per day",
         "season": "Open year-round",
         "notes": "Swordfish require a federal HMS recreational permit. Verify current NOAA HMS rules and possession limits. Strong conservation ethic \u2014 most are released."
-      },
-      "oio-bonefish-hawaii": {
-        "min_size": "No minimum",
-        "bag_limit": "No limit (rare in this area)",
-        "season": "Open year-round",
-        "notes": "Bonefish extremely rare in NJ. Release if encountered.",
-        "source": "NJ DEP"
       },
       "silver-hake-whiting": {
         "min_size": "12 in",
@@ -10448,13 +10407,6 @@
         "season": "Open year-round",
         "notes": "Swordfish require a federal HMS recreational permit. Verify current NOAA HMS rules and possession limits. Strong conservation ethic \u2014 most are released."
       },
-      "oio-bonefish-hawaii": {
-        "min_size": "No minimum",
-        "bag_limit": "No limit (rare in this area)",
-        "season": "Open year-round",
-        "notes": "Bonefish rare in SC. Catch-and-release is recommended.",
-        "source": "SC DNR"
-      },
       "silver-hake-whiting": {
         "min_size": "None",
         "bag_limit": "No limit",
@@ -11165,13 +11117,6 @@
         "season": "Prohibited year-round",
         "notes": "Great hammerhead sharks are a prohibited species under NOAA federal shark regulations \u2014 they may NOT be harvested or possessed. If caught, they must be released immediately with minimal harm. All anglers fishing for sharks in Atlantic/Gulf federal waters must have a valid NOAA HMS Angling permit. Verify current prohibited species list with NOAA.",
         "source": "https://www.fisheries.noaa.gov/recreational-fishing-rules"
-      },
-      "oio-bonefish-hawaii": {
-        "min_size": "No minimum",
-        "bag_limit": "No limit (rare in this area)",
-        "season": "Open year-round",
-        "notes": "Bonefish are extremely rare in TX. Catch-and-release only if encountered.",
-        "source": "TX TPWD"
       },
       "spanish-hogfish": {
         "min_size": "12 in TL",
@@ -11949,13 +11894,6 @@
         "bag_limit": "1 per angler per day",
         "season": "Open year-round",
         "notes": "Swordfish require a federal HMS recreational permit. Verify current NOAA HMS rules and possession limits. Strong conservation ethic \u2014 most are released."
-      },
-      "oio-bonefish-hawaii": {
-        "min_size": "No minimum",
-        "bag_limit": "No limit (rare in this area)",
-        "season": "Open year-round",
-        "notes": "Bonefish are very rare in VA. Release if caught.",
-        "source": "VA DGIF"
       },
       "witch-flounder": {
         "min_size": "12 in TL",
@@ -12762,10 +12700,10 @@
         "notes": "Oio (bonefish) regulations; most anglers practice catch and release."
       },
       "moi": {
-        "min_size": "No minimum size (but see notes)",
-        "bag_limit": "Restricted \u2014 see notes",
-        "season": "Year-round with area restrictions",
-        "notes": "Moi (Pacific threadfin) have special cultural significance in Hawaii. Historically a royal fish (kapu), moi are now partially protected: fishing for moi at certain traditional fishponds and nearshore areas may be restricted. Check HI DLNR for current area-specific rules before targeting moi. Size and bag limits may apply in some zones.",
+        "min_size": "11\"",
+        "bag_limit": "15",
+        "season": "Closed June through August",
+        "notes": "Closed season protects spawning moi. Some areas (fishponds, reserves) have extra rules; check DAR.",
         "source": "https://dlnr.hawaii.gov/dar/fishing/fishing-regulations/"
       },
       "permit": {
@@ -12848,10 +12786,10 @@
         "notes": "No state size or bag limit for manini (convict tang) in Hawaii."
       },
       "amaama-mullet": {
-        "min_size": "No minimum",
+        "min_size": "11\"",
         "bag_limit": "No limit",
-        "season": "Open year-round",
-        "notes": "Striped mullet (amaama) are a traditional Hawaiian food fish. No bag limit.",
+        "season": "Closed December through March",
+        "notes": "Closed season protects spawning ama'ama.",
         "source": "DLNR Division of Aquatic Resources"
       },
       "mu": {
@@ -12986,12 +12924,6 @@
         "season": "Open year-round",
         "notes": "Kumu (whitesaddle goatfish) are a Hawaiian bottom fish. No bag limit. Good eating.",
         "source": "DLNR"
-      },
-      "oio-bonefish-hawaii": {
-        "min_size": "None",
-        "bag_limit": "10 per day",
-        "season": "Open year-round",
-        "notes": "Oio (bonefish) regulations; most anglers practice catch and release."
       },
       "weke-ula-goatfish": {
         "min_size": "No minimum size",

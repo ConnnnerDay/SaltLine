@@ -103,7 +103,7 @@ if ! grep -q 'GOOGLE_CLIENT_ID' "${ENV_FILE}"; then
 # APPLE_CLIENT_ID=
 # APPLE_TEAM_ID=
 # APPLE_KEY_ID=
-# APPLE_PRIVATE_KEY='-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----'
+# APPLE_PRIVATE_KEY='<the .p8 file contents, line breaks written as \n>'
 SOCIAL
 fi
 set -a

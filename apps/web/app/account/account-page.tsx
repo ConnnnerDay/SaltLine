@@ -74,7 +74,7 @@ export function AccountPage() {
             Delete my account
           </Button>
         ) : (
-          <form onSubmit={handleDelete} className="flex flex-col gap-3" noValidate>
+          <form method="post" onSubmit={handleDelete} className="flex flex-col gap-3" noValidate>
             <Field
               label="Confirm your password"
               name="password"

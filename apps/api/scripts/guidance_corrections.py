@@ -231,12 +231,35 @@ FIELD_CORRECTIONS: dict[str, dict[str, Any]] = {
 }
 
 # Regulation snapshot fixes: state -> catalogue id -> fields.
-REGULATION_CORRECTIONS: dict[str, dict[str, dict[str, str]]] = {
+# `closed_periods` ("MM-DD" start/end, inclusive, may wrap the new year)
+# drive the "closed to harvest" flag on picks (Regulation.closed_now).
+_FL_FLOUNDER = {
+    "min_size": "14 in TL",
+    "bag_limit": "5 per day",
+    "season": "Closed October 15 through November 30",
+    "notes": "One rule for every flounder species in Florida (FWC, since "
+    "2021). Verify current rules with FWC.",
+    "closed_periods": [["10-15", "11-30"]],
+}
+REGULATION_CORRECTIONS: dict[str, dict[str, dict[str, Any]]] = {
+    # Legacy rows still showed the pre-2021 12 in / 10 per day rules.
+    "FL": {"southern-flounder": _FL_FLOUNDER, "gulf-flounder": _FL_FLOUNDER},
+    "TX": {
+        "southern-flounder": {
+            "min_size": "15 in TL",
+            "bag_limit": "5 per day",
+            "season": "Closed October 15 through November 30",
+            "notes": "Fall closure protects spawning flounder. Verify current "
+            "dates with TPWD.",
+            "closed_periods": [["10-15", "11-30"]],
+        },
+    },
     "HI": {
         "moi": {
             "min_size": '11"',
             "bag_limit": "15",
             "season": "Closed June through August",
+            "closed_periods": [["06-01", "08-31"]],
             "notes": "Closed season protects spawning moi. Some areas "
             "(fishponds, reserves) have extra rules; check DAR.",
         },
@@ -244,6 +267,7 @@ REGULATION_CORRECTIONS: dict[str, dict[str, dict[str, str]]] = {
             "min_size": '11"',
             "bag_limit": "No limit",
             "season": "Closed December through March",
+            "closed_periods": [["12-01", "03-31"]],
             "notes": "Closed season protects spawning ama'ama.",
         },
     },

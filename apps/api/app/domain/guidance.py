@@ -118,6 +118,18 @@ class Regulation(BaseModel):
     as_of: str
     """Snapshot month, "YYYY-MM"."""
     possibly_outdated: bool
+    closed_now: bool = False
+    """Today falls in one of the entry's `closed_periods` (harvest closed:
+    catch and release only)."""
+
+
+def _in_period(today: date, start: str, end: str) -> bool:
+    """Whether *today* is within the "MM-DD" period *start*..*end*
+    inclusive; a period may wrap the new year ("12-01".."03-31")."""
+    key = (today.month, today.day)
+    lo = tuple(int(part) for part in start.split("-"))
+    hi = tuple(int(part) for part in end.split("-"))
+    return lo <= key <= hi if lo <= hi else key >= lo or key <= hi
 
 
 class SpeciesPick(BaseModel):
@@ -227,6 +239,10 @@ def regulation_for(species_id: str, state: str, today: date) -> Regulation | Non
         source_url=data["state_sources"].get(state),
         as_of=data["as_of"],
         possibly_outdated=age is None or age > _REGULATIONS_STALE_MONTHS,
+        closed_now=any(
+            _in_period(today, start, end)
+            for start, end in entry.get("closed_periods", [])
+        ),
     )
 
 

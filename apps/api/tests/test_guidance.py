@@ -8,7 +8,7 @@ contract.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Any
 
 import pytest
@@ -18,11 +18,13 @@ from app.domain.guidance import (
     MAX_PICKS,
     SCORE_THRESHOLD,
     GuidanceTier,
+    _in_period,
     _season_points,
     _temperature_points,
     build_fishing_guidance,
     load_catalogue,
     local_month,
+    regulation_for,
 )
 
 _RED_DRUM = next(s for s in load_catalogue() if s["id"] == "red-drum")
@@ -836,3 +838,27 @@ def test_spawn_notes_belong_to_their_own_fish() -> None:
     assert catalogue["king-mackerel"]["spawn"]["note"].startswith("King mackerel")
     assert catalogue["whiting-sea-mullet"]["spawn"]["note"].startswith("Whiting")
     assert catalogue["winter-flounder"]["spawn"]["note"].startswith("Winter flounder")
+
+
+@pytest.mark.parametrize(
+    ("today", "start", "end", "expected"),
+    [
+        (date(2026, 11, 25), "10-15", "11-30", True),
+        (date(2026, 10, 14), "10-15", "11-30", False),
+        (date(2026, 12, 1), "10-15", "11-30", False),
+        (date(2026, 1, 10), "12-01", "03-31", True),  # wraps the new year
+        (date(2026, 4, 1), "12-01", "03-31", False),
+    ],
+)
+def test_in_period(today: date, start: str, end: str, expected: bool) -> None:
+    assert _in_period(today, start, end) is expected
+
+
+def test_closed_season_flags_the_regulation() -> None:
+    open_day = regulation_for("southern-flounder", "TX", date(2026, 6, 1))
+    closed_day = regulation_for("southern-flounder", "TX", date(2026, 11, 25))
+    assert open_day is not None and not open_day.closed_now
+    assert closed_day is not None and closed_day.closed_now
+    assert closed_day.min_size == "15 in TL"
+    fl = regulation_for("gulf-flounder", "FL", date(2026, 11, 1))
+    assert fl is not None and fl.closed_now and fl.bag_limit == "5 per day"

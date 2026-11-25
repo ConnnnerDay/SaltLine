@@ -1699,6 +1699,11 @@
             ],
             "title": "Bag Limit"
           },
+          "closed_now": {
+            "default": false,
+            "title": "Closed Now",
+            "type": "boolean"
+          },
           "min_size": {
             "anyOf": [
               {

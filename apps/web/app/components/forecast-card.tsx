@@ -96,6 +96,8 @@ export type Regulation = {
   source_url: string | null
   as_of: string
   possibly_outdated: boolean
+  /** Harvest season closed today: catch and release only. */
+  closed_now?: boolean
 }
 
 export type SpeciesPick = {
@@ -847,6 +849,13 @@ function WhatsBiting({
                     {[sizeText(pick.regulation), pick.regulation.bag_limit]
                       .filter(Boolean)
                       .join(' · ') || 'see state rules'}
+                  </p>
+                )}
+                {pick.regulation?.closed_now && (
+                  <p className="text-sm font-semibold text-marginal-text">
+                    ⚠ Closed to harvest in {pick.regulation.state} today
+                    {pick.regulation.season ? ` (${pick.regulation.season.replace(/^Closed /, '')})` : ''}: catch and
+                    release only.
                   </p>
                 )}
                 {pick.reasons.some((reason) => !shared.includes(reason)) && (

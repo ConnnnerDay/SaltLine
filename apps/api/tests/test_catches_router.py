@@ -7,6 +7,7 @@ catch also proves the conditions snapshot is best-effort.
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Iterator
+from datetime import UTC, datetime, timedelta
 
 import httpx
 import pytest
@@ -84,7 +85,8 @@ def test_log_a_catch_and_list_it(client: TestClient) -> None:
 
 
 def test_catch_is_logged_even_when_upstream_data_is_down(client: TestClient) -> None:
-    resp = client.post("/v1/me/catches", json=_CATCH)
+    just_now = (datetime.now(UTC) - timedelta(minutes=20)).isoformat()
+    resp = client.post("/v1/me/catches", json=_CATCH | {"caught_at": just_now})
     assert resp.status_code == 201
     conditions = resp.json()["conditions"]
     # Every provider failed, so wind/waves are unknown -- but the monthly
@@ -104,6 +106,8 @@ def test_list_is_newest_first(client: TestClient) -> None:
     "bad",
     [
         {"species": ""},
+        {"species": "   "},
+        {"caught_at": "1999-06-01T07:00:00Z"},
         {"length_in": -1},
         {"length_in": 500},
         {"weight_lb": 0},
@@ -148,3 +152,23 @@ def test_account_export_and_delete_include_catches(client: TestClient) -> None:
     assert [entry["species"] for entry in export["catches"]] == ["Red drum"]
     assert client.delete("/v1/me").status_code == 204
     assert client.get("/v1/me/catches").json() == []
+
+
+def test_a_catch_from_the_future_is_rejected(client: TestClient) -> None:
+    tomorrow = (datetime.now(UTC) + timedelta(days=1)).isoformat()
+    resp = client.post("/v1/me/catches", json=_CATCH | {"caught_at": tomorrow})
+    assert resp.status_code == 422
+
+
+def test_backlogged_catch_gets_no_snapshot_of_todays_conditions(
+    client: TestClient,
+) -> None:
+    last_week = (datetime.now(UTC) - timedelta(days=7)).isoformat()
+    resp = client.post("/v1/me/catches", json=_CATCH | {"caught_at": last_week})
+    assert resp.status_code == 201
+    assert resp.json()["conditions"] is None
+
+
+def test_species_is_trimmed(client: TestClient) -> None:
+    resp = client.post("/v1/me/catches", json=_CATCH | {"species": "  Red drum "})
+    assert resp.json()["species"] == "Red drum"

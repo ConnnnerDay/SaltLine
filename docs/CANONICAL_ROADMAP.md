@@ -466,7 +466,9 @@ handoffs as new session notes here, at the top of this section.
 product-owner-requested bug hunt (category relevance, real-world accuracy
 of fish info, navigation). Not a numbered sprint. Details in the top
 Status entries of `apps/api/README.md` and `apps/web/README.md`. apps/api
-suite 633 passed (was 628). **Next action** unchanged from the note below.
+suite 633 passed (was 628). Round 2 (feature bugs: catch log validation
+and snapshots, closed seasons, search typos, metric rig labels, auth
+forms): suite 650 passed. **Next action** unchanged from the note below.
 
 **Session note (this repo, branch `claude/serene-gates-ahrkve`):** two
 product-owner-requested changes.

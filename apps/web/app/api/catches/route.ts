@@ -65,7 +65,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const status = err instanceof InternalApiError ? err.status : 502
     const message =
       status === 422
-        ? 'check the entry: species is required, and length/weight must be realistic'
+        ? 'check the entry: species is required, the time can’t be in the future, and length/weight must be realistic'
         : status === 404
           ? 'unknown location'
           : 'could not save that catch'

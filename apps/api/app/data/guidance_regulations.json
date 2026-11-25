@@ -2351,18 +2351,30 @@
         "notes": "Gulf federal waters bag limit is 10 per person. Verify state rules for any changes."
       },
       "southern-flounder": {
-        "min_size": "12 in TL",
-        "bag_limit": "10 per day",
-        "season": "Seasonal \u2014 check FWC for closed gigging season",
-        "notes": "Southern flounder in Florida panhandle: 12-inch minimum, 10/day. Some areas have gigging season closures. Verify current rules with FWC.",
-        "source": "https://myfwc.com/fishing/saltwater/recreational/"
+        "min_size": "14 in TL",
+        "bag_limit": "5 per day",
+        "season": "Closed October 15 through November 30",
+        "notes": "One rule for every flounder species in Florida (FWC, since 2021). Verify current rules with FWC.",
+        "source": "https://myfwc.com/fishing/saltwater/recreational/",
+        "closed_periods": [
+          [
+            "10-15",
+            "11-30"
+          ]
+        ]
       },
       "gulf-flounder": {
-        "min_size": "12 in TL",
-        "bag_limit": "10 per day",
-        "season": "Open year-round",
-        "notes": "Gulf flounder are common in FL Gulf Coast waters. No specific bag limit; general flounder rules apply.",
-        "source": "FL FWC"
+        "min_size": "14 in TL",
+        "bag_limit": "5 per day",
+        "season": "Closed October 15 through November 30",
+        "notes": "One rule for every flounder species in Florida (FWC, since 2021). Verify current rules with FWC.",
+        "source": "FL FWC",
+        "closed_periods": [
+          [
+            "10-15",
+            "11-30"
+          ]
+        ]
       },
       "southern-kingfish": {
         "min_size": "None specific",
@@ -10664,10 +10676,16 @@
         "notes": "Gulf federal waters bag limit is 10 per person. Verify state rules for any changes."
       },
       "southern-flounder": {
-        "min_size": "12 in TL",
-        "bag_limit": "10 per day",
-        "season": "Open year-round (seasonal closure Oct 15 \u2013 Nov 30 in some years)",
-        "notes": "Fall closures have been implemented to protect spawning fish. Verify current season with TPWD."
+        "min_size": "15 in TL",
+        "bag_limit": "5 per day",
+        "season": "Closed October 15 through November 30",
+        "notes": "Fall closure protects spawning flounder. Verify current dates with TPWD.",
+        "closed_periods": [
+          [
+            "10-15",
+            "11-30"
+          ]
+        ]
       },
       "gulf-flounder": {
         "min_size": "12 in TL",
@@ -12704,7 +12722,13 @@
         "bag_limit": "15",
         "season": "Closed June through August",
         "notes": "Closed season protects spawning moi. Some areas (fishponds, reserves) have extra rules; check DAR.",
-        "source": "https://dlnr.hawaii.gov/dar/fishing/fishing-regulations/"
+        "source": "https://dlnr.hawaii.gov/dar/fishing/fishing-regulations/",
+        "closed_periods": [
+          [
+            "06-01",
+            "08-31"
+          ]
+        ]
       },
       "permit": {
         "min_size": "No minimum",
@@ -12790,7 +12814,13 @@
         "bag_limit": "No limit",
         "season": "Closed December through March",
         "notes": "Closed season protects spawning ama'ama.",
-        "source": "DLNR Division of Aquatic Resources"
+        "source": "DLNR Division of Aquatic Resources",
+        "closed_periods": [
+          [
+            "12-01",
+            "03-31"
+          ]
+        ]
       },
       "mu": {
         "min_size": "No minimum",

@@ -114,6 +114,18 @@ each drops one step, with a note above the picks.
 
 ## Status
 
+**Feature bug hunt, round 2.** (1) Catch log: a catch dated in the future
+or before 2000, or with a blank species, was accepted; and every catch got
+*today's* water temperature, wind, waves and rating attached, so a
+back-logged catch skewed "your patterns". Now rejected (422), species is
+trimmed, and conditions are only snapshotted for catches within 12 hours
+of now. (2) Regulation rows can carry `closed_periods`; `Regulation.closed_now`
+flags a closed harvest season on the spot's local date (favourite picks
+used the server's UTC date). Florida and Texas flounder rows corrected
+(14"/5 and 15"/5, closed Oct 15-Nov 30), plus the Hawaii moi/ama'ama
+closures. (3) Spot search tolerates a typo ("Galvston", "Wrightsvile")
+when nothing matches outright.
+
 **Fish data checked against real fishing (bug hunt).** Legacy fish that
 weren't hand-picked had their regions guessed from water temperature and
 were all tagged `shore`. `scripts/guidance_corrections.py` (applied by the

@@ -41,7 +41,7 @@ function LoginForm() {
   return (
     <>
       <Card>
-        <form onSubmit={handleSubmit} noValidate>
+        <form method="post" onSubmit={handleSubmit} noValidate>
           <Field
             label="Email"
             name="email"

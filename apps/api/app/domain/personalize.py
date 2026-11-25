@@ -28,7 +28,7 @@ overlay applied per request on a copy -- it never changes the cache.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from app.domain.guidance import (
@@ -197,6 +197,11 @@ def _rerank_for_targets(
     return sorted(out, key=lambda pick: pick["score"], reverse=True)
 
 
+def _local_date(iso: str | datetime, tz_name: str) -> date:
+    moment = datetime.fromisoformat(iso) if isinstance(iso, str) else iso
+    return moment.astimezone(safe_zone(tz_name)).date()
+
+
 def _local_hour(iso: str | datetime, tz_name: str) -> int:
     moment = iso if isinstance(iso, datetime) else datetime.fromisoformat(str(iso))
     return moment.astimezone(safe_zone(tz_name)).hour
@@ -318,6 +323,7 @@ def _favorite_picks(
     recommendations: dict[str, Any],
     conditions: dict[str, Any] | None,
     favorite_ids: list[str],
+    today: date | None = None,
 ) -> list[dict[str, Any]]:
     """The user's starred fish ("My fish") that are biting here today,
     scored exactly as "What's biting" scores everything (any list: shore,
@@ -345,6 +351,7 @@ def _favorite_picks(
         wind_range_kt=_pair(cond.get("wind_range_kt")),
         wind_direction=cond.get("wind_direction"),
         state=state,
+        today=today,
         max_picks=10_000,
     )
     # Freshwater and brackish river fish (`tidal_species`) never join a
@@ -482,7 +489,13 @@ def personalize(
         recommendations["pack"] = _rebuilt_pack(recommendations, conditions, envelope)
 
     if recommendations and prefs.favorite_species:
-        favorites = _favorite_picks(recommendations, conditions, prefs.favorite_species)
+        favorites = _favorite_picks(
+            recommendations,
+            conditions,
+            prefs.favorite_species,
+            # The spot's own date: regulation closures are by local day.
+            today=_local_date(envelope.generated_at, envelope.location.timezone),
+        )
         if favorites:
             chosen = {pick["id"] for pick in favorites}
             rest = [

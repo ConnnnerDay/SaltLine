@@ -29,6 +29,7 @@ export type FishRegulation = {
   source_url: string | null
   as_of: string
   possibly_outdated: boolean
+  closed_now?: boolean
 }
 
 export type FishDetail = FishSummary & {

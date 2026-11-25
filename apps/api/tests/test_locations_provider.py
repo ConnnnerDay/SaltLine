@@ -9,6 +9,8 @@ functions throughout; no network mocking needed.
 
 from __future__ import annotations
 
+import pytest
+
 from app.providers.locations import (
     CuratedLocation,
     find_nearest_locations,
@@ -19,6 +21,7 @@ from app.providers.locations import (
     parse_dynamic_id,
     resolve_dynamic_location,
     resolved_from_curated,
+    search_curated_locations,
     timezone_for_point,
 )
 from app.providers.stations import CoopsStationCatalogEntry, NdbcStationCatalogEntry
@@ -280,3 +283,21 @@ def test_curated_marine_zones_are_on_the_right_coast() -> None:
     }  # fmt: skip
     for loc in load_curated_locations():
         assert loc.nws_zone.startswith(prefixes[loc.state]), (loc.id, loc.nws_zone)
+
+
+@pytest.mark.parametrize(
+    ("query", "expected"),
+    [
+        ("Galvston", "galveston-tx"),
+        ("Wrightsvile", "wrightsville-beach-nc"),
+        ("myrtle bech", "myrtle-beach-sc"),
+    ],
+)
+def test_search_tolerates_a_typo(query: str, expected: str) -> None:
+    ids = [loc.id for loc in search_curated_locations(query, load_curated_locations())]
+    assert ids[:1] == [expected]
+
+
+@pytest.mark.parametrize("query", ["Denver", "zzzz", "abc"])
+def test_typo_tolerance_does_not_invent_matches(query: str) -> None:
+    assert search_curated_locations(query, load_curated_locations()) == []

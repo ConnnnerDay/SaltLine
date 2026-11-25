@@ -8,6 +8,13 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Feature bug hunt, round 2.** Pick cards say "Closed to harvest in TX
+today: catch and release only" when `regulation.closed_now`; rig diagram
+labels ("18–36 in leader") follow metric units; the catch error message
+mentions the time; and the sign-in, sign-up, password and delete-account
+forms use `method="post"`, so a submit before hydration can never put a
+password in the URL (seen under a dev-server reload loop).
+
 **Navigation bug hunt.** (1) Better Auth's 30/min default rate limit also
 covered `/get-session`, which every page load calls; tapping through tabs
 quickly (or a household on one IP) got 429s, and the header then showed a

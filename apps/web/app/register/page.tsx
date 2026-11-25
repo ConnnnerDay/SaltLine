@@ -82,7 +82,7 @@ function RegisterForm() {
   return (
     <>
       <Card>
-        <form onSubmit={handleSubmit} noValidate>
+        <form method="post" onSubmit={handleSubmit} noValidate>
           <Field
             label="Name"
             name="name"

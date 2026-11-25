@@ -4,6 +4,11 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Card, Field } from '@/app/components/ui'
 import { authClient } from '@/lib/auth-client'
+import type { SocialProviderId } from '@/lib/social-providers'
+
+const PROVIDER_NAME: Record<SocialProviderId, string> = { google: 'Google', apple: 'Apple' }
+const linkedNames = (linked: Partial<Record<SocialProviderId, string>>) =>
+  (Object.keys(linked) as SocialProviderId[]).map((id) => PROVIDER_NAME[id])
 
 /**
  * Account management: who you're signed in as (and your name), changing
@@ -25,11 +30,27 @@ export function AccountPage({
   name,
   email,
   otherSessions,
+  hasPassword,
+  linkedProviders,
+  availableProviders,
+  emailVerified,
+  emailEnabled,
+  changeEmailEnabled,
 }: {
   name: string
   email: string
   /** Signed-in sessions besides this one; `null` when unknown. */
   otherSessions: number | null
+  /** Signs in with email + password (false: Google/Apple only). */
+  hasPassword: boolean
+  /** Connected Google/Apple sign-ins: provider -> Better Auth account id. */
+  linkedProviders: Partial<Record<SocialProviderId, string>>
+  /** Google/Apple sign-in configured on this server. */
+  availableProviders: SocialProviderId[]
+  emailVerified: boolean
+  /** This server sends email (SMTP configured). */
+  emailEnabled: boolean
+  changeEmailEnabled: boolean
 }) {
   const router = useRouter()
   const [showConfirm, setShowConfirm] = useState(false)
@@ -41,10 +62,16 @@ export function AccountPage({
     event.preventDefault()
     setError(null)
     setIsDeleting(true)
-    const { error: deleteError } = await authClient.deleteUser({ password })
+    // No password (Google/Apple only): Better Auth instead requires a
+    // recent sign-in (within a day).
+    const { error: deleteError } = await authClient.deleteUser(hasPassword ? { password } : {})
     setIsDeleting(false)
     if (deleteError) {
-      setError(deleteError.message ?? 'Could not delete your account.')
+      setError(
+        deleteError.code === 'SESSION_EXPIRED'
+          ? 'For your safety, log out and sign in again, then delete your account.'
+          : (deleteError.message ?? 'Could not delete your account.'),
+      )
       return
     }
     router.push('/')
@@ -54,7 +81,23 @@ export function AccountPage({
   return (
     <div className="flex flex-col gap-6">
       <ProfileCard name={name} email={email} />
-      <PasswordCard />
+      {emailEnabled && <EmailCard email={email} verified={emailVerified} canChange={changeEmailEnabled} />}
+      {availableProviders.length > 0 && (
+        <SignInMethodsCard hasPassword={hasPassword} linked={linkedProviders} available={availableProviders} />
+      )}
+      {hasPassword ? (
+        <PasswordCard />
+      ) : (
+        <Card className="flex flex-col gap-1">
+          <h2 className="font-semibold text-text">Password</h2>
+          <p className="text-sm text-text-muted">
+            You sign in with {linkedNames(linkedProviders).join(' or ') || 'Google or Apple'}, so this
+            account has no password.
+            {/* A reset creates the missing password (Better Auth), but it's emailed. */}
+            {emailEnabled && <> To add one, log out and use “Forgot password?” with {email}.</>}
+          </p>
+        </Card>
+      )}
       <DevicesCard otherSessions={otherSessions} />
 
       <Card className="flex flex-col gap-3">
@@ -89,16 +132,27 @@ export function AccountPage({
           </Button>
         ) : (
           <form method="post" onSubmit={handleDelete} className="flex flex-col gap-3" noValidate>
-            <Field
-              label="Confirm your password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              error={error ?? undefined}
-            />
+            {hasPassword ? (
+              <Field
+                label="Confirm your password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                error={error ?? undefined}
+              />
+            ) : (
+              <>
+                <p className="text-sm text-text">Are you sure? Everything above goes with it.</p>
+                {error && (
+                  <p role="alert" className="text-sm text-text">
+                    {error}
+                  </p>
+                )}
+              </>
+            )}
             <div className="flex gap-3">
               <Button
                 type="button"
@@ -333,6 +387,183 @@ function DevicesCard({ otherSessions }: { otherSessions: number | null }) {
       {status === 'error' && (
         <p role="alert" className="text-sm text-text">
           Could not sign out your other devices. Try again.
+        </p>
+      )}
+    </Card>
+  )
+}
+
+/** Email status and change (only when this server sends email). The
+ * change goes through two links: one to the current address to approve
+ * it, then one to the new address to confirm it (lib/auth.ts). */
+function EmailCard({ email, verified, canChange }: { email: string; verified: boolean; canChange: boolean }) {
+  const [resent, setResent] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle')
+  const [newEmail, setNewEmail] = useState('')
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [error, setError] = useState<string | null>(null)
+  const [sentTo, setSentTo] = useState<string | null>(null)
+
+  async function handleChange(event: React.FormEvent) {
+    event.preventDefault()
+    const target = newEmail.trim().toLowerCase()
+    setError(null)
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(target)) return setError('That doesn’t look like an email address.')
+    if (target === email.toLowerCase()) return setError('That’s already your email.')
+    setStatus('sending')
+    const { error: changeError } = await authClient.changeEmail({ newEmail: target, callbackURL: '/account' })
+    if (changeError) {
+      setStatus('error')
+      setError(changeError.message ?? 'Could not start the change. Try again.')
+      return
+    }
+    // A confirmed address approves the change first; an unconfirmed one
+    // can't, so the link goes straight to the new address.
+    setSentTo(verified ? email : target)
+    setStatus('sent')
+    setNewEmail('')
+  }
+
+  return (
+    <Card className="flex flex-col gap-3">
+      <div>
+        <h2 className="font-semibold text-text">Email</h2>
+        <p className="mt-1 text-sm text-text-muted">
+          <span className="font-semibold text-text">{email}</span>{' '}
+          {verified ? '· confirmed' : '· not confirmed yet'}
+        </p>
+      </div>
+      {!verified && (
+        <div className="flex flex-col gap-2">
+          <Button
+            variant="secondary"
+            className="w-fit"
+            disabled={resent === 'sending' || resent === 'sent'}
+            onClick={async () => {
+              setResent('sending')
+              const { error: sendError } = await authClient.sendVerificationEmail({ email, callbackURL: '/account' })
+              setResent(sendError ? 'failed' : 'sent')
+            }}
+          >
+            {resent === 'sending' ? 'Sending…' : resent === 'sent' ? 'Sent' : 'Send the confirmation email'}
+          </Button>
+          {resent === 'sent' && (
+            <p role="status" className="text-sm text-text-muted">
+              Sent to {email}. Check spam too.
+            </p>
+          )}
+          {resent === 'failed' && (
+            <p role="alert" className="text-sm text-text">
+              Couldn&apos;t send it right now. Wait a few minutes and try again.
+            </p>
+          )}
+        </div>
+      )}
+      {canChange && (
+        <form method="post" onSubmit={handleChange} className="flex flex-col gap-3" noValidate>
+          <Field
+            label="Change to"
+            name="new-email"
+            type="email"
+            autoComplete="email"
+            value={newEmail}
+            onChange={(event) => {
+              setNewEmail(event.target.value)
+              setError(null)
+            }}
+            error={error ?? undefined}
+          />
+          <Button type="submit" variant="secondary" className="w-fit" disabled={status === 'sending' || !newEmail.trim()}>
+            {status === 'sending' ? 'Sending…' : 'Change email'}
+          </Button>
+          {status === 'sent' && sentTo && (
+            <p role="status" className="text-sm text-text-muted">
+              {sentTo === email
+                ? `Check ${email} for a link to approve the change. After that we'll send a confirmation to the new address, and your email changes when you open it.`
+                : `Check ${sentTo} for a confirmation link. Your email changes when you open it.`}
+            </p>
+          )}
+        </form>
+      )}
+    </Card>
+  )
+}
+
+/** Google/Apple sign-in on this account: connect one (signs in through
+ * the provider, then comes back here) or disconnect it, as long as
+ * another way to sign in remains. */
+function SignInMethodsCard({
+  hasPassword,
+  linked,
+  available,
+}: {
+  hasPassword: boolean
+  linked: Partial<Record<SocialProviderId, string>>
+  available: SocialProviderId[]
+}) {
+  const router = useRouter()
+  const [busy, setBusy] = useState<SocialProviderId | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const methods = (hasPassword ? 1 : 0) + Object.keys(linked).length
+
+  async function connect(provider: SocialProviderId) {
+    setBusy(provider)
+    setError(null)
+    const { error: linkError } = await authClient.linkSocial({ provider, callbackURL: '/account' })
+    if (linkError) {
+      setBusy(null)
+      setError(`Couldn't connect ${PROVIDER_NAME[provider]}. Try again.`)
+    }
+  }
+
+  async function disconnect(provider: SocialProviderId) {
+    setBusy(provider)
+    setError(null)
+    const accountId = linked[provider]
+    if (!accountId) return
+    const { error: unlinkError } = await authClient.unlinkAccount({ accountId })
+    setBusy(null)
+    if (unlinkError) {
+      setError(`Couldn't disconnect ${PROVIDER_NAME[provider]}. Try again.`)
+      return
+    }
+    router.refresh()
+  }
+
+  return (
+    <Card className="flex flex-col gap-3">
+      <div>
+        <h2 className="font-semibold text-text">Ways to sign in</h2>
+        <p className="mt-1 text-sm text-text-muted">
+          {[hasPassword && 'Email and password', ...linkedNames(linked)].filter(Boolean).join(' · ')}
+        </p>
+      </div>
+      <ul className="flex flex-col gap-2">
+        {available.map((provider) => {
+          const isLinked = Boolean(linked[provider])
+          return (
+            <li key={provider} className="flex items-center justify-between gap-3 text-sm">
+              <span className="text-text">{PROVIDER_NAME[provider]}</span>
+              {isLinked ? (
+                <Button
+                  variant="ghost"
+                  onClick={() => disconnect(provider)}
+                  // Never remove the last way to sign in.
+                  disabled={busy !== null || methods <= 1}
+                >
+                  {busy === provider ? 'Disconnecting…' : 'Disconnect'}
+                </Button>
+              ) : (
+                <Button variant="secondary" onClick={() => connect(provider)} disabled={busy !== null}>
+                  {busy === provider ? 'Opening…' : `Connect ${PROVIDER_NAME[provider]}`}
+                </Button>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+      {error && (
+        <p role="alert" className="text-sm text-text">
+          {error}
         </p>
       )}
     </Card>

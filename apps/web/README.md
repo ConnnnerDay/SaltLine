@@ -8,6 +8,22 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Google/Apple sign-in, email change, verify-email resend** (ADR-005
+amended 2026-11-25). "Continue with Google/Apple" on log-in and sign-up,
+and Connect/Disconnect on Account, appear only for providers configured
+on the server (`lib/social-providers.ts`; the pages render per request so
+adding credentials later just works). Apple's client secret is signed
+from the .p8 key on the server, re-signed daily. Account gains an Email
+card when SMTP is set: confirmed status, a resend button, and change
+email (approve from the current inbox, then confirm the new one).
+Google/Apple-only accounts see no password form and delete without a
+password (Better Auth requires a sign-in within a day). Sign-up's "Check
+your email" and a blocked log-in both get a resend button; a Google
+sign-in that can't join an existing account explains what to do.
+Verified with a local SMTP catcher (real links clicked end to end) and
+the real Google/Apple authorize redirects (credentials were test values;
+a real provider round trip needs real ones).
+
 **Account and setup improvements.** Account now shows who you're signed
 in as, lets you change your name and your password (current password
 required; "Sign out my other devices" on by default), and has "Sign out
@@ -1648,6 +1664,25 @@ entirely (`lib/auth.ts`'s `requireEmailVerification` follows
 `SMTP_HOST`'s presence).
 
 ### Other environment variables
+
+**Google and Apple sign-in** (optional; each button appears only when
+its values are set, after a restart). Both providers only send people
+back to an `https://` site (Google also allows `http://localhost` for
+testing), so set `NEXT_PUBLIC_SITE_URL` to that address first.
+
+- Google: in Google Cloud Console, APIs & Services → Credentials →
+  Create credentials → OAuth client ID → Web application. Add the
+  authorized redirect URI `<NEXT_PUBLIC_SITE_URL>/api/auth/callback/google`.
+  Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
+- Apple (Apple Developer Program membership): create a Services ID with
+  "Sign in with Apple" enabled, its domain, and the return URL
+  `<NEXT_PUBLIC_SITE_URL>/api/auth/callback/apple`; then a key with
+  Sign in with Apple. Set `APPLE_CLIENT_ID` (the Services ID),
+  `APPLE_TEAM_ID`, `APPLE_KEY_ID`, and `APPLE_PRIVATE_KEY` (the .p8
+  file's contents; write line breaks as `\n` to keep it on one line).
+
+**Email** (`SMTP_HOST` and friends, see CLAUDE.md) also turns on
+required email confirmation, the resend buttons and email change.
 
 `NEXT_PUBLIC_SITE_URL` (optional, default `http://localhost:3000`) —
 the real deployed origin, once one exists (Vercel isn't provisioned

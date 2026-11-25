@@ -2,17 +2,23 @@ import { betterAuth } from 'better-auth'
 import { nextCookies } from 'better-auth/next-js'
 import { PostgresDialect } from 'kysely'
 import { Pool } from 'pg'
-import { sendResetPasswordEmail, sendVerificationEmail, smtpConfigured } from './email'
+import {
+  sendChangeEmailConfirmation,
+  sendResetPasswordEmail,
+  sendVerificationEmail,
+  smtpConfigured,
+} from './email'
+import { enabledSocialProviders, socialProvidersConfig } from './social-providers'
 import { internalApiFetch } from './internal-api-client'
 
 /**
  * Sprint 28 ("Authentication"), per docs/architecture.md's ADR-005:
  * Better Auth in the Next.js application, email/password accounts,
  * verified email, password reset, secure HTTP-only cookies, session
- * rotation, PostgreSQL persistence. OAuth, passkeys, guest accounts, and
- * legacy-user migration are excluded, matching that ADR and the
- * canonical roadmap's "legacy app retired outright, no accounts worth
- * migrating" decision.
+ * rotation, PostgreSQL persistence. Sign in with Google/Apple was added
+ * by the product owner's 2026-11-25 amendment to that ADR (lib/
+ * social-providers.ts; each is on only when its credentials are set).
+ * Passkeys, guest accounts, and legacy-user migration stay excluded.
  *
  * Database: ADR-006 calls for one Neon PostgreSQL project with a
  * separate `auth` schema owned by a least-privilege web role -- not
@@ -81,10 +87,26 @@ const EXTRA_TRUSTED_ORIGINS = (process.env.SALTLINE_TRUSTED_ORIGINS ?? '')
  * by Better Auth and lib/require-session-user-id.ts's Origin check. */
 export const TRUSTED_ORIGINS = [SITE_URL, ...EXTRA_TRUSTED_ORIGINS]
 
+export { enabledSocialProviders }
+/** Change email needs mail delivery: both of its links are emailed. */
+export const changeEmailEnabled = smtpConfigured
+
 export const auth = betterAuth({
   appName: 'Saltline',
   baseURL: SITE_URL,
-  trustedOrigins: TRUSTED_ORIGINS,
+  // Apple posts its sign-in response back from its own origin.
+  trustedOrigins: enabledSocialProviders.includes('apple')
+    ? [...TRUSTED_ORIGINS, 'https://appleid.apple.com']
+    : TRUSTED_ORIGINS,
+  socialProviders: socialProvidersConfig(),
+  account: {
+    // Google/Apple sign-in with the email of an existing account joins
+    // that account -- only when its email was confirmed (Better Auth's
+    // requireLocalEmailVerified default), so nobody can pre-register a
+    // victim's address and inherit their Google sign-in. Otherwise the
+    // login page explains how to connect it from Account instead.
+    accountLinking: { enabled: true, trustedProviders: ['google', 'apple'] },
+  },
   database: {
     dialect: new PostgresDialect({ pool }),
     type: 'postgres',
@@ -124,6 +146,20 @@ export const auth = betterAuth({
     autoSignInAfterVerification: true,
   },
   user: {
+    // Changing your sign-in email: a confirmation link goes to the
+    // *current* address first, then a verification link to the new one,
+    // so a stolen session alone can't move the account to a new inbox.
+    // Off without SMTP: neither link could be delivered.
+    changeEmail: {
+      enabled: changeEmailEnabled,
+      sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
+        try {
+          await sendChangeEmailConfirmation(user.email, newEmail, url)
+        } catch (error) {
+          console.error('Failed to send change-email confirmation:', error)
+        }
+      },
+    },
     // Sprint 45 ("Privacy and deletion"): self-service account deletion,
     // required at v1 launch per the round-2 product decision (a public
     // product with real accounts), not deferred with the rest of that
@@ -185,6 +221,7 @@ export const auth = betterAuth({
       '/sign-up/email': { window: 60, max: 5 },
       // Checks the current password, so it's a guessing target too.
       '/change-password': { window: 60, max: 5 },
+      '/change-email': { window: 300, max: 3 },
       '/send-verification-email': { window: 300, max: 3 },
       '/request-password-reset': { window: 300, max: 3 },
       '/reset-password': { window: 300, max: 5 },

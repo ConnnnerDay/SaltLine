@@ -46,8 +46,10 @@ async function sendMail(to: string, subject: string, text: string): Promise<void
 export async function sendVerificationEmail(to: string, url: string): Promise<void> {
   await sendMail(
     to,
-    'Verify your Saltline email',
-    `Confirm your email to finish setting up your Saltline account:\n\n${url}\n\nIf you didn't create this account, you can ignore this email.`,
+    'Confirm your Saltline email',
+    // Also sent to a new address when someone changes their email, so it
+    // doesn't say "new account".
+    `Confirm this email address for your Saltline account:\n\n${url}\n\nIf you didn't sign up for Saltline or ask to use this address, you can ignore this email.`,
   )
 }
 
@@ -56,5 +58,13 @@ export async function sendResetPasswordEmail(to: string, url: string): Promise<v
     to,
     'Reset your Saltline password',
     `Reset your Saltline password:\n\n${url}\n\nIf you didn't request this, you can ignore this email and your password won't change.`,
+  )
+}
+
+export async function sendChangeEmailConfirmation(to: string, newEmail: string, url: string): Promise<void> {
+  await sendMail(
+    to,
+    'Confirm your new Saltline email',
+    `Someone (hopefully you) asked to change your Saltline sign-in email to ${newEmail}.\n\nTo approve it, open this link; we'll then send a confirmation to the new address:\n\n${url}\n\nIf this wasn't you, ignore this email and change your password: your email stays the same.`,
   )
 }

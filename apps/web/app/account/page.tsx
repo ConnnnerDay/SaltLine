@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { Container } from '@/app/components/ui'
-import { auth } from '@/lib/auth'
+import { auth, changeEmailEnabled, enabledSocialProviders } from '@/lib/auth'
+import { smtpConfigured } from '@/lib/email'
 import { AccountPage as AccountPageBody } from './account-page'
 
 export const metadata: Metadata = { title: 'Account' }
@@ -26,6 +27,9 @@ export default async function AccountPage() {
   // Signed-in devices, for "Sign out everywhere else". Best-effort: the
   // page still works (and the button still works) if this fails.
   const sessions = await auth.api.listSessions({ headers: await headers() }).catch(() => null)
+  // How this account signs in: "credential" is email + password.
+  const accounts = await auth.api.listUserAccounts({ headers: await headers() }).catch(() => null)
+  const providerIds = (accounts ?? []).map((account) => account.providerId)
 
   return (
     <main>
@@ -39,6 +43,17 @@ export default async function AccountPage() {
             name={session.user.name}
             email={session.user.email}
             otherSessions={sessions ? Math.max(0, sessions.length - 1) : null}
+            // Unknown (lookup failed): assume a password, the usual case.
+            hasPassword={accounts ? providerIds.includes('credential') : true}
+            linkedProviders={Object.fromEntries(
+              (accounts ?? [])
+                .filter((account) => (enabledSocialProviders as string[]).includes(account.providerId))
+                .map((account) => [account.providerId, account.id]),
+            )}
+            availableProviders={enabledSocialProviders}
+            emailVerified={session.user.emailVerified}
+            emailEnabled={smtpConfigured}
+            changeEmailEnabled={changeEmailEnabled}
           />
         </div>
       </Container>

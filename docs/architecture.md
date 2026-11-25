@@ -187,6 +187,22 @@ have separate rate limits.
 
 OAuth, passkeys, guest accounts, and legacy-user migration are excluded.
 
+### Amendment (2026-11-25, product owner)
+
+Sign in with Google and Sign in with Apple are added at v1, through Better
+Auth's built-in social providers. Each is enabled only when its credentials
+are configured on the server (`GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`;
+`APPLE_CLIENT_ID`/`APPLE_TEAM_ID`/`APPLE_KEY_ID`/`APPLE_PRIVATE_KEY`).
+A Google/Apple sign-in joins an existing account with the same email only
+when that account's email was confirmed (Better Auth's
+`requireLocalEmailVerified`), so pre-registering someone's address can't
+capture their sign-in; otherwise the user connects it from Account while
+signed in. FastAPI's boundary is unchanged: it still receives only the
+opaque user ID. The same decision adds self-service email change (a link
+to the current address to approve, then one to the new address to
+confirm; available only when email delivery is configured). Passkeys,
+guest accounts, and legacy-user migration stay excluded.
+
 ## ADR-006: PostgreSQL ownership
 
 ### Decision

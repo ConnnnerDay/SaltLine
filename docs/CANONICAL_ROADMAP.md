@@ -72,7 +72,7 @@ user approval. Updating code alone does not change the decision.
 ### Deferred until production evidence supports them
 
 Payments, advertising, native clients, social features, catch logging, live
-cameras, notifications, passkeys, OAuth, a full regulations product, and the
+cameras, notifications, passkeys, a full regulations product, and the
 full 851-species experience are not v1 launch requirements. Self-service data
 export and account deletion (sprint 45) are the one carve-out from this list:
 required at v1 launch, not deferred, because this is a public product
@@ -229,6 +229,15 @@ record; they do not reopen or contradict R0.
   Real photography for the product doesn't exist yet; hero imagery is
   an explicitly labeled placeholder pattern, never an AI-generated
   stand-in, per direct instruction on that point.
+
+## Product decisions on record (2026-11-25)
+
+- **Google and Apple sign-in, and email change, are v1.** The product owner
+  asked for all three after the account-section review. Recorded as an
+  amendment to ADR-005 in `docs/architecture.md`. Each provider turns on
+  only when its credentials are set on the server; email change needs
+  SMTP configured. This removes OAuth from the deferred list below;
+  passkeys stay deferred.
 
 ## Canonical technical contract
 
@@ -470,6 +479,8 @@ suite 633 passed (was 628). Round 2 (feature bugs: catch log validation
 and snapshots, closed seasons, search typos, metric rig labels, auth
 forms): suite 650 passed. Round 3 (account: name, password,
 sign out other devices; setup: named home spot, main style): web only.
+Round 4 (product owner: Google/Apple sign-in, email change, verify-email
+resend; ADR-005 amended): web only.
 **Next action** unchanged from the note below.
 
 **Session note (this repo, branch `claude/serene-gates-ahrkve`):** two

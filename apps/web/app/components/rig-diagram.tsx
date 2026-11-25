@@ -24,7 +24,8 @@ function Label({
 }) {
   return (
     <text x={x} y={y} textAnchor={anchor} className="fill-text-muted text-[11.5px] font-medium">
-      {children}
+      {/* "18–36 in leader" reads "46–91 cm leader" for metric readers. */}
+      {localizeText(children, requestUnits())}
     </text>
   )
 }

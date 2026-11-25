@@ -23,6 +23,7 @@ from app.api.deps import (
 from app.api.internal_auth import require_internal_signature
 from app.api.v1.forecasts import load_preferences, personalized_with
 from app.domain.catches import (
+    SNAPSHOT_WINDOW,
     CatchConditions,
     CatchEntry,
     CatchIn,
@@ -110,21 +111,29 @@ async def log_catch(
     location = await resolve_location_id(body.location_id, state)
 
     snapshot: CatchConditions | None = None
-    try:
-        envelope = await get_or_assemble_forecast(
-            state.forecast_cache,
-            location,
-            state.http_client,
-            load_water_temp_profiles(),
-            now=datetime.now(UTC),
-        )
-        # The day as this angler saw it (their main style, their limits).
-        envelope = personalized_with(envelope, await load_preferences(user_id, state))
-        snapshot = conditions_snapshot(
-            envelope.conditions, envelope.tides, body.caught_at
-        )
-    except Exception:  # best-effort: never refuse a catch over weather data
-        _logger.warning("no conditions snapshot for catch", exc_info=True)
+    caught = body.caught_at
+    if caught.tzinfo is None:
+        caught = caught.replace(tzinfo=UTC)
+    # Today's forecast only describes a catch made around now; a
+    # back-logged catch gets no conditions rather than today's.
+    if abs(datetime.now(UTC) - caught) <= SNAPSHOT_WINDOW:
+        try:
+            envelope = await get_or_assemble_forecast(
+                state.forecast_cache,
+                location,
+                state.http_client,
+                load_water_temp_profiles(),
+                now=datetime.now(UTC),
+            )
+            # The day as this angler saw it (their main style, their limits).
+            envelope = personalized_with(
+                envelope, await load_preferences(user_id, state)
+            )
+            snapshot = conditions_snapshot(
+                envelope.conditions, envelope.tides, body.caught_at
+            )
+        except Exception:  # best-effort: never refuse a catch over weather data
+            _logger.warning("no conditions snapshot for catch", exc_info=True)
 
     row = CatchEntry(
         user_id=user_id,

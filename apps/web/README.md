@@ -8,6 +8,68 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Account security pass.** (1) Open redirect fixed: `?next=` accepted
+`/\evil.example` and `/<tab>/evil.example`, which browsers turn into
+`//evil.example` (lib/safe-redirect.ts now rejects backslashes and
+control characters and requires the parsed URL to stay same-origin).
+(2) Known-breached passwords are refused at sign-up, change and reset
+(lib/password-check.ts: Have I Been Pwned range API, only 5 hash
+characters sent; fails open so an outage never blocks anyone;
+PASSWORD_BREACH_CHECK=0 turns it off). (3) A password reset signs out
+every device. (4) Security notice emails: password changed, password
+reset, Google/Apple connected or removed, and someone trying to sign up
+with your email (that sign-up now looks like any other, so it no longer
+reveals the account exists). (5) Account lists signed-in devices ("Safari
+on iPhone", last active) with a sign-out for each; session tokens never
+reach the browser (app/api/sessions/[id] looks them up among your own
+sessions).
+
+**Google/Apple sign-in, email change, verify-email resend** (ADR-005
+amended 2026-11-25). "Continue with Google/Apple" on log-in and sign-up,
+and Connect/Disconnect on Account, appear only for providers configured
+on the server (`lib/social-providers.ts`; the pages render per request so
+adding credentials later just works). Apple's client secret is signed
+from the .p8 key on the server, re-signed daily. Account gains an Email
+card when SMTP is set: confirmed status, a resend button, and change
+email (approve from the current inbox, then confirm the new one).
+Google/Apple-only accounts see no password form and delete without a
+password (Better Auth requires a sign-in within a day). Sign-up's "Check
+your email" and a blocked log-in both get a resend button; a Google
+sign-in that can't join an existing account explains what to do.
+Verified with a local SMTP catcher (real links clicked end to end) and
+the real Google/Apple authorize redirects (credentials were test values;
+a real provider round trip needs real ones).
+
+**Account and setup improvements.** Account now shows who you're signed
+in as, lets you change your name and your password (current password
+required; "Sign out my other devices" on by default), and has "Sign out
+everywhere else" with a count of other signed-in devices -- all Better
+Auth built-ins (`updateUser`, `changePassword`, `revokeOtherSessions`,
+`listSessions`); `/change-password` gets the same strict rate limit as
+sign-in. Email change is left out (it needs a verification flow). Setup:
+re-running it names your current home spot instead of "You already have
+a home spot"; picking two or more ways to fish asks which one days are
+rated for (it was silently whichever chip was tapped first); and a units
+tap made before the saved profile loads is no longer overwritten.
+
+**Feature bug hunt, round 2.** Exact closure dates from apps/api feed the
+season badge on picks ("Closed season now: catch and release only"); rig diagram
+labels ("18–36 in leader") follow metric units; the catch error message
+mentions the time; and the sign-in, sign-up, password and delete-account
+forms use `method="post"`, so a submit before hydration can never put a
+password in the URL (seen under a dev-server reload loop).
+
+**Navigation bug hunt.** (1) Better Auth's 30/min default rate limit also
+covered `/get-session`, which every page load calls; tapping through tabs
+quickly (or a household on one IP) got 429s, and the header then showed a
+signed-in user "Log in / Sign up" with no tab bar. `/get-session` now has
+its own 600/min rule, and a failed session check renders nothing rather
+than the signed-out header. (2) Most pages were titled just "Saltline";
+every page now has its own title (fish pages by name, forecasts by spot,
+from the same cached request). (3) Fish guide gains a "Protected — release"
+filter; a protected fish's page shows release guidance instead of bait/rig
+and the keep-or-release check.
+
 **Profile setup after sign-up (original wizard restored).** `/onboarding`
 is now a five-step, skippable setup (signed-in only):
 1. home spot (location search)
@@ -1618,6 +1680,29 @@ entirely (`lib/auth.ts`'s `requireEmailVerification` follows
 `SMTP_HOST`'s presence).
 
 ### Other environment variables
+
+**Google and Apple sign-in** (optional; each button appears only when
+its values are set, after a restart). Both providers only send people
+back to an `https://` site (Google also allows `http://localhost` for
+testing), so set `NEXT_PUBLIC_SITE_URL` to that address first.
+
+- Google: in Google Cloud Console, APIs & Services → Credentials →
+  Create credentials → OAuth client ID → Web application. Add the
+  authorized redirect URI `<NEXT_PUBLIC_SITE_URL>/api/auth/callback/google`.
+  Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
+- Apple (Apple Developer Program membership): create a Services ID with
+  "Sign in with Apple" enabled, its domain, and the return URL
+  `<NEXT_PUBLIC_SITE_URL>/api/auth/callback/apple`; then a key with
+  Sign in with Apple. Set `APPLE_CLIENT_ID` (the Services ID),
+  `APPLE_TEAM_ID`, `APPLE_KEY_ID`, and `APPLE_PRIVATE_KEY` (the .p8
+  file's contents; write line breaks as `\n` to keep it on one line).
+
+**Email** (`SMTP_HOST` and friends, see CLAUDE.md) also turns on
+required email confirmation, the resend buttons and email change.
+
+`PASSWORD_BREACH_CHECK=0` turns off the breached-password check (on by
+default; it needs outbound HTTPS to api.pwnedpasswords.com and allows
+the password if that can't be reached).
 
 `NEXT_PUBLIC_SITE_URL` (optional, default `http://localhost:3000`) —
 the real deployed origin, once one exists (Vercel isn't provisioned

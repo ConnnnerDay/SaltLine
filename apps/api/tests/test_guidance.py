@@ -8,7 +8,7 @@ contract.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Any
 
 import pytest
@@ -18,11 +18,13 @@ from app.domain.guidance import (
     MAX_PICKS,
     SCORE_THRESHOLD,
     GuidanceTier,
+    _in_period,
     _season_points,
     _temperature_points,
     build_fishing_guidance,
     load_catalogue,
     local_month,
+    regulation_for,
 )
 
 _RED_DRUM = next(s for s in load_catalogue() if s["id"] == "red-drum")
@@ -40,6 +42,7 @@ def test_catalogue_is_curated_and_every_species_is_region_gated() -> None:
         "boat",
         "tidal",
         "incidental",
+        "protected",
     }
     assert len({species["id"] for species in catalogue}) == len(catalogue)
     regions = {
@@ -81,7 +84,8 @@ def test_every_region_has_candidates() -> None:
 
 
 # --- legacy scoring, ported unchanged --------------------------------------
-# Red drum: min 45, ideal 55-75, max 85; peak [3,4,5,9,10,11], good [1,2,6,7,8,12].
+# Red drum: min 45, ideal 55-85, max 92 (summer-water fix in
+# scripts/guidance_corrections.py); peak [3,4,5,9,10,11], good [1,2,6,7,8,12].
 
 
 @pytest.mark.parametrize(
@@ -92,10 +96,10 @@ def test_every_region_has_candidates() -> None:
         (50.0, 25.0),  # halfway from min to ideal low
         (55.0, 50.0),  # ideal low
         (65.0, 50.0),  # inside ideal
-        (75.0, 50.0),  # ideal high
-        (80.0, 25.0),  # halfway from ideal high to max
-        (85.0, 0.0),  # at max
-        (85.1, None),  # above max: excluded
+        (85.0, 50.0),  # ideal high
+        (88.5, 25.0),  # halfway from ideal high to max
+        (92.0, 0.0),  # at max
+        (92.1, None),  # above max: excluded
     ],
 )
 def test_temperature_points_match_legacy(
@@ -149,7 +153,7 @@ def test_red_drum_in_october_at_65f_is_a_good_pick_with_reasons() -> None:
     # today's conditions in its favor.
     assert red_drum.tier is GuidanceTier.GOOD
     assert red_drum.reasons == [
-        "Water 65°F is in its ideal 55–75°F range",
+        "Water 65°F is in its ideal 55–85°F range",
         "October is a peak month",
         # Aug-Nov spawners, but 65°F is below their 70-82°F spawning water.
         "Spawning season",
@@ -756,6 +760,118 @@ def test_fish_in_an_active_run_get_the_bonus() -> None:
     )
     red = next(pick for pick in fall.species if pick.id == "red-drum")
     assert any(reason.endswith("run is on") for reason in red.reasons)
+
+
+# --- real-world corrections (scripts/guidance_corrections.py) --------------
+
+
+def _ids(guidance: object) -> set[str]:
+    return {
+        pick.id
+        for pool in ("species", "boat_species", "tidal_species")
+        for pick in getattr(guidance, pool)
+    }
+
+
+def test_gulf_summer_water_keeps_red_drum_and_trout() -> None:
+    # Galveston in July: water around 86F, prime time for both.
+    top = build_fishing_guidance(
+        region="gulf", water_temp_f=86.0, water_temp_is_fallback=True, month=7
+    )
+    assert "speckled-trout" in {p.id for p in top.species}
+    every = build_fishing_guidance(
+        region="gulf",
+        water_temp_f=86.0,
+        water_temp_is_fallback=True,
+        month=7,
+        max_picks=1000,
+    )
+    assert "red-drum" in {p.id for p in every.species}
+
+
+def test_protected_and_incidental_fish_are_never_picked() -> None:
+    catalogue = {s["id"]: s for s in load_catalogue()}
+    assert catalogue["sandbar-shark"]["access"] == "protected"
+    assert catalogue["queen-angelfish"]["access"] == "incidental"
+    for region, temp, month in (
+        ("atlantic_south", 80.0, 7),
+        ("atlantic_north", 40.0, 1),
+        ("gulf", 75.0, 5),
+    ):
+        picked = _ids(
+            build_fishing_guidance(
+                region=region,
+                water_temp_f=temp,
+                water_temp_is_fallback=True,
+                month=month,
+                max_picks=1000,
+            )
+        )
+        assert not any(
+            catalogue[i]["access"] in ("protected", "incidental") for i in picked
+        )
+
+
+def test_hawaii_closed_seasons_are_never_picked() -> None:
+    for month, closed in ((7, "moi"), (1, "amaama-mullet")):
+        guidance = build_fishing_guidance(
+            region="hawaii_conditions",
+            water_temp_f=78.0,
+            water_temp_is_fallback=True,
+            month=month,
+            max_picks=1000,
+        )
+        assert closed not in _ids(guidance)
+
+
+def test_offshore_fish_offered_where_their_fisheries_are() -> None:
+    catalogue = {s["id"]: s for s in load_catalogue()}
+    assert "atlantic_mid" in catalogue["white-marlin"]["regions"]  # Ocean City
+    assert "atlantic_north" in catalogue["atlantic-bluefin-tuna"]["regions"]
+    assert catalogue["black-marlin"]["regions"] == ["hawaii_conditions"]
+    assert "atlantic_north" not in catalogue["snowy-grouper"]["regions"]
+    assert "longtail-tuna" not in catalogue
+
+
+def test_spawn_notes_belong_to_their_own_fish() -> None:
+    catalogue = {s["id"]: s for s in load_catalogue()}
+    assert catalogue["king-mackerel"]["spawn"]["note"].startswith("King mackerel")
+    assert catalogue["whiting-sea-mullet"]["spawn"]["note"].startswith("Whiting")
+    assert catalogue["winter-flounder"]["spawn"]["note"].startswith("Winter flounder")
+
+
+@pytest.mark.parametrize(
+    ("today", "start", "end", "expected"),
+    [
+        (date(2026, 11, 25), "10-15", "11-30", True),
+        (date(2026, 10, 14), "10-15", "11-30", False),
+        (date(2026, 12, 1), "10-15", "11-30", False),
+        (date(2026, 1, 10), "12-01", "03-31", True),  # wraps the new year
+        (date(2026, 4, 1), "12-01", "03-31", False),
+    ],
+)
+def test_in_period(today: date, start: str, end: str, expected: bool) -> None:
+    assert _in_period(today, start, end) is expected
+
+
+def test_exact_closure_dates_set_the_season_status() -> None:
+    def status(species: str, state: str, day: date) -> str | None:
+        reg = regulation_for(species, state, day)
+        assert reg is not None
+        return reg.season_status
+
+    # TX flounder closes Oct 15 - Nov 30 (closed_periods).
+    assert status("southern-flounder", "TX", date(2026, 6, 1)) == "open"
+    assert status("southern-flounder", "TX", date(2026, 11, 25)) == "closed"
+    # The month-level reading alone would call all of October closed.
+    assert status("southern-flounder", "TX", date(2026, 10, 10)) == "open"
+    assert status("southern-flounder", "TX", date(2026, 10, 15)) == "closed"
+    fl = regulation_for("gulf-flounder", "FL", date(2026, 11, 1))
+    assert (
+        fl is not None and fl.season_status == "closed" and fl.bag_limit == "5 per day"
+    )
+    tx = regulation_for("southern-flounder", "TX", date(2026, 11, 25))
+    assert tx is not None and tx.min_size == "15 in TL"
 
 
 # --- season status (this month, read from the snapshot's season text) -------

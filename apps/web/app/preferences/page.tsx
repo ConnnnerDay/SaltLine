@@ -1,9 +1,12 @@
+import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { Container } from '@/app/components/ui'
 import { auth } from '@/lib/auth'
 import { internalApiFetch } from '@/lib/internal-api-client'
 import { PreferencesForm } from './preferences-form'
+
+export const metadata: Metadata = { title: 'Preferences' }
 
 /**
  * Sprint 36's one authenticated page -- account-required routing itself

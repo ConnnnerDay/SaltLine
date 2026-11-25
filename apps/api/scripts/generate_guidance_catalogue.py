@@ -17,6 +17,8 @@ import re
 from pathlib import Path
 from typing import Any
 
+from scripts import guidance_corrections
+
 _API_ROOT = Path(__file__).resolve().parent.parent
 _LEGACY_PATH = _API_ROOT.parent.parent / "storage" / "species_data.json"
 _OUT_PATH = _API_ROOT / "app" / "data" / "guidance_species.json"
@@ -598,13 +600,20 @@ def main() -> None:
         record["access"] = _access(entry, boat, set(classifications["nuisance"]))
         species.append(record)
 
-    # Spawning (legacy SPAWNING_DATA), matched to each fish by name.
+    species = guidance_corrections.apply(species)
+
+    # Spawning (legacy SPAWNING_DATA), matched to each fish by name: the
+    # exact legacy name first, the fuzzy _fish_key only as a fallback
+    # (on its own, "King mackerel (kingfish)" matched Whiting through the
+    # "kingfish" alias and "Winter flounder" matched summer flounder).
+    by_name: dict[str, dict[str, object]] = {}
     by_key: dict[str, dict[str, object]] = {}
     for record in species:
         for key in (record["name"], record["legacy_name"]):
+            by_name.setdefault(str(key), record)
             by_key.setdefault(_fish_key(str(key)), record)
     for spawn in _legacy_value(_LEGACY_SPECIES_MODULE, "SPAWNING_DATA"):
-        match = by_key.get(_fish_key(spawn["name"]))
+        match = by_name.get(spawn["name"]) or by_key.get(_fish_key(spawn["name"]))
         if match is not None and "spawn" not in match:
             match["spawn"] = {
                 "months": spawn["spawn_months"],
@@ -618,8 +627,9 @@ def main() -> None:
             "Fishing-guidance catalogue: hand-picked shore targets first, then "
             "every other legacy fish once (variants merged, protected species "
             "left out), region-gated by conditions_region and tagged with "
-            "access (shore/boat/tidal/incidental). Every field except "
-            "id/name/regions/access is copied verbatim from the legacy "
+            "access (shore/boat/tidal/incidental/protected), with the real-world "
+            "fixes in scripts/guidance_corrections.py applied. Every other field "
+            "is copied verbatim from the legacy "
             "storage/species_data.json entry named in legacy_name "
             "(provisional dataset, see docs/CANONICAL_ROADMAP.md). Generated "
             "by scripts/generate_guidance_catalogue.py; regenerate rather "
@@ -684,6 +694,9 @@ def _write_regulations(species: list[dict[str, object]]) -> None:
                     field: None if value is None else str(value)
                     for field, value in entries[key].items()
                 }
+    for state, fixes in guidance_corrections.REGULATION_CORRECTIONS.items():
+        for species_id, fields in fixes.items():
+            states.setdefault(state, {}).setdefault(species_id, {}).update(fields)
     sources = _state_sources()
     payload = {
         "_comment": (

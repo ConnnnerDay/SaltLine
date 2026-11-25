@@ -115,6 +115,39 @@ each drops one step, with a note above the picks.
 
 ## Status
 
+**Feature bug hunt, round 2.** (1) Catch log: a catch dated in the future
+or before 2000, or with a blank species, was accepted; and every catch got
+*today's* water temperature, wind, waves and rating attached, so a
+back-logged catch skewed "your patterns". Now rejected (422), species is
+trimmed, and conditions are only snapshotted for catches within 12 hours
+of now. (2) Regulation rows can carry `closed_periods` (exact "MM-DD" closure
+dates), which override the month-level `season_status` reading on the
+spot's local date (favourite picks
+used the server's UTC date). Florida and Texas flounder rows corrected
+(14"/5 and 15"/5, closed Oct 15-Nov 30), plus the Hawaii moi/ama'ama
+closures. (3) Spot search tolerates a typo ("Galvston", "Wrightsvile")
+when nothing matches outright.
+
+**Fish data checked against real fishing (bug hunt).** Legacy fish that
+weren't hand-picked had their regions guessed from water temperature and
+were all tagged `shore`. `scripts/guidance_corrections.py` (applied by the
+generator, so regenerating keeps it) fixes what a pass over real seasons,
+ranges and rules found: deep-water groupers out of New England/Maryland;
+white marlin at Ocean City, bluefin/mako/thresher in New England, ahi/
+mahi/ono/marlin in Hawaii, albacore on the West Coast; black marlin moved
+to Hawaii; billfish, deep reef fish and deep rockfish tagged `boat`;
+aquarium reef fish, lampreys and trap-caught shellfish `incidental`; a new
+`protected` access for possession-prohibited fish (sandbar, dusky, sand
+tiger, Caribbean reef and Atlantic angel sharks, Nassau grouper, wolffish,
+ocean pout, green sturgeon, cowcod, yelloweye) -- never picked. Gulf and
+Florida inshore staples (red drum, trout, sheepshead, flounder...) no
+longer drop out in normal 85-88F summer water, nor striped bass in
+New England summer. Hawaii moi (Jun-Aug) and ama'ama (Dec-Mar) closed
+seasons are honored via a new `closed_months` field, with corrected HI
+regulation rows. Also fixed: the generator's spawn matcher gave Whiting the
+king mackerel note (and King mackerel none). New tests in
+`tests/test_guidance.py`.
+
 **Fishing profile + personalized forecasts (original setup restored).**
 `UserPreferences` adds `fishing_types`, `uses_lures`/`uses_live_bait`/
 `uses_cut_bait` (yes/sometimes/no), `experience` and `profile_completed`

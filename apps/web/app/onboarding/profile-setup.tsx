@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Card } from '@/app/components/ui'
 import { cx } from '@/app/components/ui/cx'
@@ -106,6 +106,8 @@ export function ProfileSetup({ next, spots = [] }: { next: string; spots?: MapSp
   const [comfort, setComfort] = useState<string | null>(null)
   // Limits are stored in knots / feet and typed in the chosen units.
   const [units, setUnits] = useState<Units>('imperial')
+  // Units has a default, so "untouched" needs its own flag (see the effect below).
+  const unitsTouched = useRef(false)
   const [windKt, setWindKt] = useState<number | null>(null)
   const [surfFt, setSurfFt] = useState<number | null>(null)
   const windInput = useUnitInput(windKt, 'speed', units, (value) => {
@@ -142,7 +144,7 @@ export function ProfileSetup({ next, spots = [] }: { next: string; spots?: MapSp
         setCutBait((current) => current ?? saved.uses_cut_bait)
         setWindKt((current) => current ?? saved.wind_threshold_kt)
         setSurfFt((current) => current ?? saved.surf_threshold_ft)
-        setUnits(saved.units)
+        if (!unitsTouched.current) setUnits(saved.units)
         setExperience((current) => current ?? saved.experience)
       })
       .catch(() => {})
@@ -249,11 +251,23 @@ export function ProfileSetup({ next, spots = [] }: { next: string; spots?: MapSp
               Home spot: <span className="font-bold">{home.name}{home.state ? `, ${home.state}` : ''}</span>
             </p>
           ) : (
-            savedHomeId && (
-              <p className="text-sm text-text-muted">
-                You already have a home spot. Search only to change it.
-              </p>
-            )
+            savedHomeId &&
+            (() => {
+              // Name it when it's a listed spot; a custom pinned spot isn't in `spots`.
+              const current = spots.find((spot) => spot.id === savedHomeId)
+              return (
+                <p className="text-sm text-text-muted">
+                  {current ? (
+                    <>
+                      Home spot: <span className="font-bold text-text">{current.name}{current.state ? `, ${current.state}` : ''}</span>{' '}
+                      (current). Search or tap the map only to change it.
+                    </>
+                  ) : (
+                    'You already have a home spot. Search only to change it.'
+                  )}
+                </p>
+              )
+            })()
           )}
         </div>
       )}
@@ -278,6 +292,31 @@ export function ProfileSetup({ next, spots = [] }: { next: string; spots?: MapSp
               </Chip>
             ))}
           </div>
+          {types.length > 1 && (
+            // The first fishing type is the main one (apps/api's
+            // personalize.main_style): without this, it was whichever
+            // chip happened to be tapped first.
+            <div className="mt-2 flex flex-col gap-2">
+              <p className="text-sm font-semibold text-text" aria-hidden="true">
+                Mainly fish from
+              </p>
+              <div role="group" aria-label="Mainly fish from" className="flex flex-wrap gap-2">
+                {FISHING_TYPES.filter((type) => types.includes(type.value)).map((type) => (
+                  <Chip
+                    key={type.value}
+                    selected={types[0] === type.value}
+                    onClick={() => setTypes((current) => [type.value, ...current.filter((value) => value !== type.value)])}
+                  >
+                    {type.label}
+                  </Chip>
+                ))}
+              </div>
+              <p className="text-xs text-text-muted">
+                Your day&apos;s rating is worked out for this: surf that keeps a surf caster home may be fine
+                from a pier.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -374,7 +413,10 @@ export function ProfileSetup({ next, spots = [] }: { next: string; spots?: MapSp
                 type="button"
                 role="radio"
                 aria-checked={units === option}
-                onClick={() => setUnits(option)}
+                onClick={() => {
+                  unitsTouched.current = true
+                  setUnits(option)
+                }}
                 className={cx(
                   'rounded-full border px-3 py-1 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring',
                   units === option

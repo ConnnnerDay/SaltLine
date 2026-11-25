@@ -15,6 +15,7 @@ const MESSAGES: Record<string, string> = {
   PASSWORD_TOO_LONG: 'That password is too long. Use 128 characters or fewer.',
   INVALID_EMAIL_OR_PASSWORD: 'That email and password don’t match. Check them, or reset your password.',
   INVALID_EMAIL: 'That doesn’t look like an email address.',
+  PASSWORD_COMPROMISED: 'That password has appeared in a data breach, so it’s easy to guess. Choose a different one.',
   EMAIL_NOT_VERIFIED: 'Confirm your email first: open the link we sent to your inbox.',
 }
 

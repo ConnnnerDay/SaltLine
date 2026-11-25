@@ -50,7 +50,7 @@ function ResetPasswordForm() {
           </Button>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} noValidate>
+        <form method="post" onSubmit={handleSubmit} noValidate>
           <Field
             label="New password"
             name="newPassword"

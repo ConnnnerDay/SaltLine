@@ -92,6 +92,20 @@ fi
 if ! grep -q '^SALTLINE_TRUSTED_ORIGINS=' "${ENV_FILE}"; then
     echo "SALTLINE_TRUSTED_ORIGINS=http://localhost:${PORT},http://127.0.0.1:${PORT},http://$(hostname):${PORT},http://$(hostname).local:${PORT}" >> "${ENV_FILE}"
 fi
+if ! grep -q 'GOOGLE_CLIENT_ID' "${ENV_FILE}"; then
+    cat >> "${ENV_FILE}" <<'SOCIAL'
+
+# Optional: "Continue with Google / Apple" (apps/web/README.md, "Other
+# environment variables"). Uncomment and fill in, then re-run install.sh.
+# Both need NEXT_PUBLIC_SITE_URL to be your https:// address.
+# GOOGLE_CLIENT_ID=
+# GOOGLE_CLIENT_SECRET=
+# APPLE_CLIENT_ID=
+# APPLE_TEAM_ID=
+# APPLE_KEY_ID=
+# APPLE_PRIVATE_KEY='<the .p8 file contents, line breaks written as \n>'
+SOCIAL
+fi
 set -a
 # shellcheck disable=SC1090
 source "${ENV_FILE}"

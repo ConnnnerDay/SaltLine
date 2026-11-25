@@ -1,9 +1,12 @@
+import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { internalApiFetch } from '@/lib/internal-api-client'
 import type { Preferences } from '@/app/api/preferences/route'
 import { type BrowseLocation, LocationsSearchPage } from './locations-search'
+
+export const metadata: Metadata = { title: 'Find a spot' }
 
 /**
  * Sprint 29 ("Account-required routing"): docs/product-definition.md's

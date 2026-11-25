@@ -17,7 +17,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import JSON, Boolean, DateTime, Float, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -50,6 +50,32 @@ class CatchIn(BaseModel):
     kept: bool = False
     bait: str | None = Field(default=None, max_length=120)
     notes: str | None = Field(default=None, max_length=1000)
+
+    @field_validator("species")
+    @classmethod
+    def _species_not_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("species is required")
+        return value.strip()
+
+    @field_validator("caught_at")
+    @classmethod
+    def _caught_at_plausible(cls, value: datetime) -> datetime:
+        moment = value if value.tzinfo else value.replace(tzinfo=UTC)
+        now = datetime.now(UTC)
+        # A little slack for device clocks; a catch can't be from tomorrow.
+        if moment > now + CATCH_FUTURE_SLACK:
+            raise ValueError("caught_at is in the future")
+        if moment < EARLIEST_CATCH:
+            raise ValueError("caught_at is too far in the past")
+        return value
+
+
+CATCH_FUTURE_SLACK = timedelta(hours=1)
+EARLIEST_CATCH = datetime(2000, 1, 1, tzinfo=UTC)
+SNAPSHOT_WINDOW = timedelta(hours=12)
+"""Today's forecast describes a catch only this close to now; an older
+(back-logged) catch gets no conditions rather than today's."""
 
 
 class CatchConditions(BaseModel):

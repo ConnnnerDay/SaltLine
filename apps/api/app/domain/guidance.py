@@ -12,7 +12,10 @@ lives in, with bait/rig/tackle copied verbatim by
 `shore` fish are picks for everyone; `boat` (offshore/charter) and
 `tidal` (brackish/freshwater-edge) fish are ranked into their own lists,
 which app.domain.personalize merges in for anglers who fish that way;
-`incidental` fish (bait fish, nuisance fish, non-targets) are never picked.
+`incidental` fish (bait fish, nuisance fish, non-targets) and `protected`
+fish (possession prohibited) are never picked, nor is any fish in its
+`closed_months`. Real-world fixes to the legacy data live in
+`scripts/guidance_corrections.py`.
 
 **Scoring** ports the two condition-independent parts of the legacy
 `domain/species.py:_score_species`, unchanged:
@@ -121,6 +124,15 @@ class Regulation(BaseModel):
     season_note: str | None = None
     """Plain words for a status that matters: "No harvest: release it",
     "Closed now: opens in July"."""
+
+
+def _in_period(today: date, start: str, end: str) -> bool:
+    """Whether *today* is within the "MM-DD" period *start*..*end*
+    inclusive; a period may wrap the new year ("12-01".."03-31")."""
+    key = (today.month, today.day)
+    lo = tuple(int(part) for part in start.split("-"))
+    hi = tuple(int(part) for part in end.split("-"))
+    return lo <= key <= hi if lo <= hi else key >= lo or key <= hi
 
 
 class SpeciesPick(BaseModel):
@@ -323,6 +335,15 @@ def regulation_for(species_id: str, state: str, today: date) -> Regulation | Non
         return None if value is None else str(value)
 
     status, note = season_status(text("season"), today.month)
+    # Exact closure dates (`closed_periods`, "MM-DD" pairs from
+    # scripts/guidance_corrections.py) beat the month-level reading of the
+    # season text: "Closed Oct 15 - Nov 30" is open on Oct 10.
+    periods = entry.get("closed_periods")
+    if periods:
+        if any(_in_period(today, start, end) for start, end in periods):
+            status, note = "closed", "Closed season now: catch and release only"
+        elif status == "closed":
+            status, note = "open", None
     return Regulation(
         state=state,
         season_status=status,
@@ -843,7 +864,9 @@ def build_fishing_guidance(
             continue
         species = for_region(species, region)
         access = species.get("access", "shore")
-        if access not in picks:  # bait fish and non-targets: never a pick
+        if access not in picks:  # bait, non-target, protected: never a pick
+            continue
+        if month in species.get("closed_months", []):  # closed season
             continue
         temp_points = _temperature_points(species, water_temp_f)
         if temp_points is None:

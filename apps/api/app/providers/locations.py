@@ -45,8 +45,10 @@ sprints 13-15's provider adapters.
 
 from __future__ import annotations
 
+import difflib
 import json
 import math
+import re
 from functools import lru_cache
 from pathlib import Path
 
@@ -245,7 +247,21 @@ def search_curated_locations(
         if loc.id not in name_match_ids
         and (q in loc.state.lower() or q in loc.id.lower())
     ]
-    return (name_matches + other_matches)[:limit]
+    matches = name_matches + other_matches
+    if not matches and len(q) >= 4:
+        # Nothing contains the text: allow a typo ("Galvston", "Montak")
+        # against any word, or run of words, in a spot's name.
+        def close(loc: CuratedLocation) -> bool:
+            words = re.findall(r"[a-z']+", loc.name.lower())
+            spans = [
+                " ".join(words[i:j])
+                for i in range(len(words))
+                for j in range(i + 1, len(words) + 1)
+            ]
+            return bool(difflib.get_close_matches(q, spans, n=1, cutoff=0.8))
+
+        matches = [loc for loc in locations if close(loc)]
+    return matches[:limit]
 
 
 def timezone_for_point(state: str, lng: float) -> str | None:

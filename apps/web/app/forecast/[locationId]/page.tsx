@@ -1,4 +1,5 @@
 import { cache } from 'react'
+import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import { ForecastPageBody } from '@/app/components/forecast-page-body'
@@ -25,6 +26,16 @@ export const dynamic = 'force-dynamic'
 type Props = { params: Promise<{ locationId: string }> }
 
 const getForecast = cache(fetchForecast)
+
+/** "<Spot> forecast" in the tab and history, from the same cached
+ * request the page body makes (no extra fetch). */
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locationId } = await params
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return { title: 'Forecast' }
+  const forecast = await getForecast(locationId, session.user.id).catch(() => null)
+  return { title: forecast ? `${forecast.location.label} forecast` : 'Forecast' }
+}
 
 /**
  * The authenticated core forecast lookup (sprint 29, "account-required

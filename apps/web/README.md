@@ -8,6 +8,18 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Account and setup improvements.** Account now shows who you're signed
+in as, lets you change your name and your password (current password
+required; "Sign out my other devices" on by default), and has "Sign out
+everywhere else" with a count of other signed-in devices -- all Better
+Auth built-ins (`updateUser`, `changePassword`, `revokeOtherSessions`,
+`listSessions`); `/change-password` gets the same strict rate limit as
+sign-in. Email change is left out (it needs a verification flow). Setup:
+re-running it names your current home spot instead of "You already have
+a home spot"; picking two or more ways to fish asks which one days are
+rated for (it was silently whichever chip was tapped first); and a units
+tap made before the saved profile loads is no longer overwritten.
+
 **Feature bug hunt, round 2.** Pick cards say "Closed to harvest in TX
 today: catch and release only" when `regulation.closed_now`; rig diagram
 labels ("18–36 in leader") follow metric units; the catch error message

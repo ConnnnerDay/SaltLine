@@ -183,6 +183,8 @@ export const auth = betterAuth({
       '/get-session': { window: 60, max: 600 },
       '/sign-in/email': { window: 60, max: 5 },
       '/sign-up/email': { window: 60, max: 5 },
+      // Checks the current password, so it's a guessing target too.
+      '/change-password': { window: 60, max: 5 },
       '/send-verification-email': { window: 300, max: 3 },
       '/request-password-reset': { window: 300, max: 3 },
       '/reset-password': { window: 300, max: 5 },

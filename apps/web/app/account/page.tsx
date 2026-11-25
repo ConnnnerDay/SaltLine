@@ -23,6 +23,9 @@ export default async function AccountPage() {
   if (!session) {
     redirect('/login?next=/account')
   }
+  // Signed-in devices, for "Sign out everywhere else". Best-effort: the
+  // page still works (and the button still works) if this fails.
+  const sessions = await auth.api.listSessions({ headers: await headers() }).catch(() => null)
 
   return (
     <main>
@@ -30,9 +33,13 @@ export default async function AccountPage() {
         <div className="mx-auto flex max-w-md flex-col gap-6 py-10 sm:py-14">
           <header>
             <h1 className="text-3xl font-bold text-text sm:text-4xl">Account</h1>
-            <p className="mt-3 text-text-muted">Your data, and your account.</p>
+            <p className="mt-3 text-text-muted">Your sign-in, your data, and your account.</p>
           </header>
-          <AccountPageBody />
+          <AccountPageBody
+            name={session.user.name}
+            email={session.user.email}
+            otherSessions={sessions ? Math.max(0, sessions.length - 1) : null}
+          />
         </div>
       </Container>
     </main>

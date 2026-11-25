@@ -118,9 +118,12 @@ class Regulation(BaseModel):
     as_of: str
     """Snapshot month, "YYYY-MM"."""
     possibly_outdated: bool
-    closed_now: bool = False
-    """Today falls in one of the entry's `closed_periods` (harvest closed:
-    catch and release only)."""
+    season_status: str | None = None
+    """This month, read from `season`: "open", "closed", "release_only",
+    "prohibited" or "check" (it varies; verify); None when unknown."""
+    season_note: str | None = None
+    """Plain words for a status that matters: "No harvest: release it",
+    "Closed now: opens in July"."""
 
 
 def _in_period(today: date, start: str, end: str) -> bool:
@@ -216,6 +219,107 @@ def _months_between(as_of: str, today: date) -> int | None:
     return (today.year - year) * 12 + (today.month - month)
 
 
+_MONTHS = {
+    name: index
+    for index, name in enumerate(
+        (
+            "jan",
+            "feb",
+            "mar",
+            "apr",
+            "may",
+            "jun",
+            "jul",
+            "aug",
+            "sep",
+            "oct",
+            "nov",
+            "dec",
+        ),
+        start=1,
+    )
+}
+_MONTH_NAMES = (
+    "January", "February", "March", "April", "May", "June", "July",
+    "August", "September", "October", "November", "December",
+)  # fmt: skip
+_MONTH = r"(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?(?:\s+\d{1,2})?"
+_RANGE = re.compile(_MONTH + r"\s*(?:–|-|—|through|to)\s*" + _MONTH, re.IGNORECASE)
+# Dates that describe when the fish is around or typically allowed, not
+# the legal season: never read as a closure.
+_NOT_A_SEASON = re.compile(
+    r"peak|rare|stray|occasional|typically|when open|run\b|runs\b|years?\b|in most",
+    re.IGNORECASE,
+)
+
+
+def _months_in(text: str) -> set[int]:
+    """Every month covered by the "Apr 1 – Jun 30", "Dec–Jan" ranges in
+    *text* (ranges can wrap the new year)."""
+    months: set[int] = set()
+    for match in _RANGE.finditer(text):
+        start, end = _MONTHS[match.group(1).lower()], _MONTHS[match.group(2).lower()]
+        month = start
+        while True:
+            months.add(month)
+            if month == end:
+                break
+            month = month % 12 + 1
+    return months
+
+
+_CHECK = "Season varies: check the official rules before keeping"
+
+
+def season_status(season: str | None, month: int) -> tuple[str | None, str | None]:
+    """(status, note) for *month* from a snapshot season line: no harvest,
+    catch-and-release only, closed or open by its dates, or "check" when it
+    varies. Descriptive dates ("peak Apr–Sep", "rare stray Jun–Sep") are
+    never read as a closure."""
+    if not season:
+        return None, None
+    text = season.strip()
+    low = text.lower()
+    if re.search(
+        r"prohibit|closed to retention|closed year-round|no harvest|no take", low
+    ) and not re.search(r"many areas|some areas", low):
+        return "prohibited", "No harvest: release it"
+    if re.search(r"catch[- ]and[- ]release only|c&r only", low):
+        return "release_only", "Catch-and-release only"
+    if low.startswith(("varies", "set annually")):
+        return "check", _CHECK
+    # Dates after "closed" are the closure, never the open season ("Mar 1
+    # through May 31 CLOSED" puts them before it).
+    closed_part = re.search(r"\bclosed\b.*", text, re.IGNORECASE)
+    if closed_part:
+        closed = _months_in(closed_part.group(0)) or _months_in(text)
+        if month in closed:
+            where = " in federal waters" if "federal" in low else ""
+            return "closed", f"Closed season now{where}: check before keeping"
+        if closed:
+            return "open", None
+    if low.startswith(("open year-round", "year-round")):
+        return "open", None
+    if not closed_part and not _NOT_A_SEASON.search(low):
+        open_months = _months_in(text)
+        if open_months:
+            if month in open_months:
+                return "open", None
+            following = [(month + step - 1) % 12 + 1 for step in range(1, 13)]
+            opens = _MONTH_NAMES[next(m for m in following if m in open_months) - 1]
+            if re.search(r"varies|vary", low):
+                return (
+                    "check",
+                    f"Likely closed now (opens in {opens}): check the official rules",
+                )
+            return "closed", f"Closed season now: opens in {opens}"
+    if re.search(
+        r"season|varies|vary|check|set annually|quota|closure|closed|restricted", low
+    ):
+        return "check", _CHECK
+    return None, None
+
+
 def regulation_for(species_id: str, state: str, today: date) -> Regulation | None:
     """*species_id*'s limits in *state*, or `None` when the snapshot has no
     entry (never a guess borrowed from another state)."""
@@ -230,8 +334,20 @@ def regulation_for(species_id: str, state: str, today: date) -> Regulation | Non
         value = entry.get(field)
         return None if value is None else str(value)
 
+    status, note = season_status(text("season"), today.month)
+    # Exact closure dates (`closed_periods`, "MM-DD" pairs from
+    # scripts/guidance_corrections.py) beat the month-level reading of the
+    # season text: "Closed Oct 15 - Nov 30" is open on Oct 10.
+    periods = entry.get("closed_periods")
+    if periods:
+        if any(_in_period(today, start, end) for start, end in periods):
+            status, note = "closed", "Closed season now: catch and release only"
+        elif status == "closed":
+            status, note = "open", None
     return Regulation(
         state=state,
+        season_status=status,
+        season_note=note,
         min_size=text("min_size"),
         bag_limit=text("bag_limit"),
         season=text("season"),
@@ -239,10 +355,6 @@ def regulation_for(species_id: str, state: str, today: date) -> Regulation | Non
         source_url=data["state_sources"].get(state),
         as_of=data["as_of"],
         possibly_outdated=age is None or age > _REGULATIONS_STALE_MONTHS,
-        closed_now=any(
-            _in_period(today, start, end)
-            for start, end in entry.get("closed_periods", [])
-        ),
     )
 
 

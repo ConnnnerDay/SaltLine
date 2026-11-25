@@ -2,6 +2,7 @@
 
 import { useId, useState } from 'react'
 import { cx } from './ui/cx'
+import type { SeasonStatus } from '@/lib/regulations'
 import { MeasureArt } from './how-art'
 import { MEASURE_HOW, parseSizeRule } from '@/lib/size-rule'
 import { length as showLength, localizeText, unitLabel, type Units } from '@/lib/units'
@@ -17,6 +18,9 @@ export type KeepOption = {
   season: string | null
   notes: string | null
   source_url: string | null
+  /** apps/api's read of `season` for this month. */
+  season_status?: SeasonStatus | null
+  season_note?: string | null
 }
 
 const TONE = {
@@ -86,6 +90,27 @@ export function KeepCheck({
       }
     }
     if (close) verdict.detail = `${verdict.detail} That’s within half ${units === 'metric' ? 'a centimetre or so' : 'an inch'} of the limit, so measure again.`
+  }
+  // A legal-size fish still can't be kept out of season: the season
+  // status (this month) outranks the size rule.
+  const status = option.season_status
+  if (rule.kind !== 'prohibited' && (status === 'prohibited' || status === 'release_only')) {
+    verdict = {
+      tone: 'release',
+      title: status === 'prohibited' ? `Release it: can’t be kept in ${option.state}` : `Release it: catch-and-release only in ${option.state}`,
+      detail: option.season ? say(option.season) : undefined,
+    }
+  } else if (status === 'closed' && (verdict === null || verdict.tone === 'keep')) {
+    const federal = /federal/i.test(option.season_note ?? '')
+    verdict = {
+      tone: federal ? 'check' : 'release',
+      title: federal ? 'Federal-waters season is closed now' : 'Season is closed now: release it',
+      detail: federal
+        ? 'State waters can differ, so check the official rules before keeping it.'
+        : option.season_note?.replace(/^.*opens in/i, `${option.state}’s season opens in`).concat('.'),
+    }
+  } else if (status === 'check' && verdict?.tone === 'keep') {
+    verdict.detail = `${verdict.detail ?? ''} ${option.season_note ?? ''}`.trim()
   }
 
   return (

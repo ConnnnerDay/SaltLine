@@ -95,3 +95,55 @@ def test_each_outlook_day_gets_its_own_tide_factors_and_style_scores() -> None:
         for style in ("surf", "bridge", "kayak")
     }
     assert gain == {"surf": 2, "bridge": 5, "kayak": -3}
+
+
+def test_best_window_prefers_the_low_light_edge_with_a_tide_turn() -> None:
+    from datetime import timedelta
+
+    from app.domain.outlook import best_window
+    from app.providers.astronomy import (
+        MoonPhaseName,
+        SolunarPeriod,
+        SolunarRating,
+        SolunarTimes,
+        SunTimes,
+    )
+
+    rise = datetime(2026, 11, 18, 11, 50, tzinfo=UTC)  # 6:50 AM in New York
+    sun = SunTimes(sunrise=rise, sunset=rise + timedelta(hours=10))
+    quiet = SolunarTimes(
+        major_periods=[],
+        minor_periods=[],
+        moon_phase=MoonPhaseName.FULL,
+        illumination_pct=99,
+        rating=SolunarRating.GOOD,
+    )
+    dusk_turn = [
+        TidePrediction(
+            time=sun.sunset + timedelta(minutes=20), kind="low", height_ft=0.3
+        )
+    ]
+    window = best_window(sun, dusk_turn, quiet, tz_name="America/New_York")
+    assert window is not None
+    assert window.reasons[0] == "Dusk, low light"
+    assert "low tide turns at 5:10 PM" in window.reasons
+
+    # A major feeding period at dawn, no turns: dawn wins.
+    dawn_major = quiet.model_copy(
+        update={
+            "major_periods": [SolunarPeriod(start=rise, end=rise + timedelta(hours=2))]
+        }
+    )
+    window = best_window(sun, [], dawn_major, tz_name="America/New_York")
+    assert window is not None and window.reasons == [
+        "Dawn, low light",
+        "major feeding period",
+    ]
+
+    # Today, after dusk: nothing left.
+    assert (
+        best_window(
+            sun, [], quiet, not_before=sun.sunset + timedelta(hours=2), tz_name="UTC"
+        )
+        is None
+    )

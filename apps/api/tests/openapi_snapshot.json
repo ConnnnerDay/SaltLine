@@ -1699,11 +1699,6 @@
             ],
             "title": "Bag Limit"
           },
-          "closed_now": {
-            "default": false,
-            "title": "Closed Now",
-            "type": "boolean"
-          },
           "min_size": {
             "anyOf": [
               {
@@ -1740,6 +1735,28 @@
               }
             ],
             "title": "Season"
+          },
+          "season_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Season Note"
+          },
+          "season_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Season Status"
           },
           "source_url": {
             "anyOf": [

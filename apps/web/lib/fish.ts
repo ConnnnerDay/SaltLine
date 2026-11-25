@@ -1,6 +1,8 @@
 /** Shared types and labels for the Fish guide (app/fish), from apps/api's
  * `/v1/species` (the same catalogue "What's biting" ranks). */
 
+import type { SeasonStatus } from './regulations'
+
 export type FishSummary = {
   id: string
   name: string
@@ -29,7 +31,8 @@ export type FishRegulation = {
   source_url: string | null
   as_of: string
   possibly_outdated: boolean
-  closed_now?: boolean
+  season_status?: SeasonStatus | null
+  season_note?: string | null
 }
 
 export type FishDetail = FishSummary & {

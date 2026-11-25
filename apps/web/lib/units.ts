@@ -90,6 +90,12 @@ export function speed(kt: number, units: Units): string {
   return units === 'metric' ? `${Math.round(kt * KT_TO_KMH)} km/h` : `${Math.round(kt)} kt`
 }
 
+/** A water current in knots -> "1.8 kt" / "3.3 km/h": one decimal, since
+ * currents are slow and 1.8 vs 2.2 kt matters. */
+export function currentSpeed(kt: number, units: Units): string {
+  return units === 'metric' ? `${tidy(kt * KT_TO_KMH, 1)} km/h` : `${tidy(kt, 1)} kt`
+}
+
 /** Miles -> "9.6 mi" / "15 km" (one decimal under 10). */
 export function distance(mi: number, units: Units): string {
   const value = units === 'metric' ? mi * MI_TO_KM : mi

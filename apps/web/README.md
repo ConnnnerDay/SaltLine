@@ -52,8 +52,8 @@ a home spot"; picking two or more ways to fish asks which one days are
 rated for (it was silently whichever chip was tapped first); and a units
 tap made before the saved profile loads is no longer overwritten.
 
-**Feature bug hunt, round 2.** Pick cards say "Closed to harvest in TX
-today: catch and release only" when `regulation.closed_now`; rig diagram
+**Feature bug hunt, round 2.** Exact closure dates from apps/api feed the
+season badge on picks ("Closed season now: catch and release only"); rig diagram
 labels ("18–36 in leader") follow metric units; the catch error message
 mentions the time; and the sign-in, sign-up, password and delete-account
 forms use `method="post"`, so a submit before hydration can never put a

@@ -36,6 +36,8 @@ export type DayOutlook = {
   sky?: string | null
   short_forecast?: string | null
   precip_pct?: number | null
+  /** apps/api's best stretch of the day: dawn or dusk, with why. */
+  best_window?: { start: string; end: string; reasons: string[] } | null
 }
 
 const METER: Record<string, string> = {
@@ -150,6 +152,14 @@ export function NextDays({
                   </dd>
                 </div>
               </dl>
+              {day.best_window && (
+                <p className="rounded-md bg-primary-tint px-2.5 py-1.5 text-xs leading-snug text-text">
+                  <span className="font-bold text-primary">
+                    Go {tideTime.format(new Date(day.best_window.start))}–{tideTime.format(new Date(day.best_window.end))}
+                  </span>
+                  <span className="block text-text-muted">{day.best_window.reasons.slice(1).join(' · ') || day.best_window.reasons[0]}</span>
+                </p>
+              )}
               {overLimit(day) && (
                 <span className="w-fit rounded-full bg-marginal-bg px-2 py-0.5 text-xs font-semibold text-marginal-text">
                   Over your limits

@@ -1,3 +1,5 @@
+import { SeasonBadge, StaleLimitsWarning } from './season-badge'
+import { formatAsOf, type SeasonStatus } from '@/lib/regulations'
 import { Badge, type BadgeVariant, Button, Card } from './ui'
 import { SinkerIcon } from './how-art'
 import { HookIt } from './hook-it'
@@ -15,6 +17,7 @@ import { KNOTS, RIG_KNOTS } from '@/lib/knots'
 import { RIG_FIT, RIG_WATER_TIPS, WATER_LABEL, WATER_NOUN, WATER_PHRASE, watersFor } from '@/lib/fishing-style'
 import type { Preferences } from '@/app/api/preferences/route'
 import { TideNow, WhereToFish, YourLimits } from './your-day'
+import { TidalCurrents } from './tidal-currents'
 import { SunAndMoon, WeatherAlerts, type SkyConditions } from './sky'
 import { NextDays } from './next-days'
 import { WindAndWaves } from './wind-waves'
@@ -96,8 +99,9 @@ export type Regulation = {
   source_url: string | null
   as_of: string
   possibly_outdated: boolean
-  /** Harvest season closed today: catch and release only. */
-  closed_now?: boolean
+  /** This month, read from `season` by apps/api. */
+  season_status?: SeasonStatus | null
+  season_note?: string | null
 }
 
 export type SpeciesPick = {
@@ -851,12 +855,8 @@ function WhatsBiting({
                       .join(' · ') || 'see state rules'}
                   </p>
                 )}
-                {pick.regulation?.closed_now && (
-                  <p className="text-sm font-semibold text-marginal-text">
-                    ⚠ Closed to harvest in {pick.regulation.state} today
-                    {pick.regulation.season ? ` (${pick.regulation.season.replace(/^Closed /, '')})` : ''}: catch and
-                    release only.
-                  </p>
+                {pick.regulation && (
+                  <SeasonBadge status={pick.regulation.season_status} note={pick.regulation.season_note} quiet />
                 )}
                 {pick.reasons.some((reason) => !shared.includes(reason)) && (
                 <ul className="mt-0.5 flex flex-col gap-1 border-t border-border pt-2.5 text-xs leading-relaxed text-text-muted">
@@ -1000,13 +1000,6 @@ function SpeciesCalendar({
       </div>
     </div>
   )
-}
-
-/** "2026-04" -> "Apr 2026" (the regulations snapshot month). */
-function formatAsOf(asOf: string): string {
-  const [year, month] = asOf.split('-').map(Number)
-  if (!year || !month) return asOf
-  return `${_MONTH_NAMES[month - 1].slice(0, 3)} ${year}`
 }
 
 /**
@@ -1336,6 +1329,9 @@ function SizeAndBagLimits({ guidance }: { guidance: FishingGuidance }) {
   const picks = guidance.species.filter((pick) => pick.regulation)
   return (
     <div className="flex flex-col gap-4">
+    {picks.some((pick) => pick.regulation!.possibly_outdated) && (
+      <StaleLimitsWarning asOf={picks[0].regulation!.as_of} />
+    )}
     <KeepCheck
       units={requestUnits()}
       asOf={formatAsOf(picks[0].regulation!.as_of)}
@@ -1359,10 +1355,10 @@ function SizeAndBagLimits({ guidance }: { guidance: FishingGuidance }) {
                 .filter(Boolean)
                 .join(' · ') || 'See state rules'}
             </span>
+            <SeasonBadge status={regulation.season_status} note={regulation.season_note} />
             {regulation.notes && <span className="text-text-muted">{regulation.notes}</span>}
             <span className="text-xs text-text-muted">
               As of {formatAsOf(regulation.as_of)}
-              {regulation.possibly_outdated && ' — may be out of date'}
               {regulation.source_url && (
                 <>
                   {' · '}
@@ -1733,6 +1729,7 @@ export function ForecastCard({
                   <Card className="flex flex-col gap-4">
                     <SectionHeader title="Tides" aside="Next 24 hours" />
                     <TideNow forecast={forecast} profile={profile} />
+                    <TidalCurrents forecast={forecast} />
                     <TideChart tides={forecast.tides} timezone={forecast.location.timezone} />
                     <details className="collapsible group">
                       <summary className="flex w-fit cursor-pointer items-center gap-1.5 text-sm font-semibold text-primary">

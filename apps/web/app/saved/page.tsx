@@ -7,6 +7,7 @@ import { internalApiFetch } from '@/lib/internal-api-client'
 import type { Preferences } from '@/app/api/preferences/route'
 import { fetchForecast } from '@/lib/get-forecast'
 import type { SavedLocation } from '@/app/api/saved-locations/route'
+import { BestBet } from './best-bet'
 import { SavedLocationsList, type SavedLocationWithForecast } from './saved-locations-list'
 
 export const metadata: Metadata = { title: 'Saved spots' }
@@ -75,6 +76,16 @@ export default async function SavedPage() {
             <h1 className="text-3xl font-bold text-text sm:text-4xl">Saved spots</h1>
             <p className="mt-3 text-text-muted">Today&apos;s call for every spot you saved, side by side.</p>
           </header>
+          {locations && locations.length > 0 && (
+            <BestBet
+              spots={locations.map((location) => ({
+                location_id: location.location_id,
+                name: location.name,
+                forecast: location.forecast,
+              }))}
+              units={units}
+            />
+          )}
           <SavedLocationsList
             initialLocations={locations}
             initialError={error}

@@ -1,14 +1,17 @@
 import { betterAuth } from 'better-auth'
+import { APIError, createAuthMiddleware } from 'better-auth/api'
 import { nextCookies } from 'better-auth/next-js'
 import { PostgresDialect } from 'kysely'
 import { Pool } from 'pg'
 import {
   sendChangeEmailConfirmation,
   sendResetPasswordEmail,
+  sendSecurityNotice,
   sendVerificationEmail,
   smtpConfigured,
 } from './email'
 import { enabledSocialProviders, socialProvidersConfig } from './social-providers'
+import { breachCheckEnabled, isPasswordBreached } from './password-check'
 import { internalApiFetch } from './internal-api-client'
 
 /**
@@ -88,6 +91,27 @@ const EXTRA_TRUSTED_ORIGINS = (process.env.SALTLINE_TRUSTED_ORIGINS ?? '')
 export const TRUSTED_ORIGINS = [SITE_URL, ...EXTRA_TRUSTED_ORIGINS]
 
 export { enabledSocialProviders }
+const PROVIDER_NAMES: Record<string, string> = { google: 'Google', apple: 'Apple' }
+
+/** Sends a security notice without holding up (or ever failing) the
+ * request that triggered it. Without SMTP, lib/email.ts just logs it. */
+function notify(to: string | undefined, what: string, advice: string) {
+  if (!to) return
+  void sendSecurityNotice(to, what, advice).catch((error) => {
+    console.error('Failed to send security notice:', error)
+  })
+}
+
+const IF_NOT_YOU_RESET =
+  'If this wasn’t you, use “Forgot password?” on the log-in page right away: a reset signs out every device.'
+
+/** Where each password-setting endpoint carries the new password. */
+const NEW_PASSWORD_FIELD: Record<string, 'password' | 'newPassword'> = {
+  '/sign-up/email': 'password',
+  '/change-password': 'newPassword',
+  '/reset-password': 'newPassword',
+}
+
 /** Change email needs mail delivery: both of its links are emailed. */
 export const changeEmailEnabled = smtpConfigured
 
@@ -116,6 +140,26 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: smtpConfigured,
     minPasswordLength: 8,
+    // A reset is how someone takes back a compromised account, so it
+    // signs out every existing session (the attacker's included).
+    revokeSessionsOnPasswordReset: true,
+    onPasswordReset: async ({ user }) => {
+      notify(
+        user.email,
+        'your password was reset',
+        'Every device was signed out. If this wasn’t you, reset it again now and make sure your email account is secure.',
+      )
+    },
+    // With email verification on, signing up with a taken address looks
+    // like a normal sign-up (no hint that the account exists); the real
+    // owner gets told instead.
+    onExistingUserSignUp: async ({ user }) => {
+      notify(
+        user.email,
+        'someone tried to create an account with your email',
+        'If it was you, you already have an account: log in, or use “Forgot password?”. If not, you can ignore this: nothing changed.',
+      )
+    },
     sendResetPassword: async ({ user, url }) => {
       // Sprint 47 ("Degraded-mode UX"): a transient SMTP outage must
       // not fail the reset *request* itself -- Better Auth's own
@@ -191,7 +235,57 @@ export const auth = betterAuth({
   // Best-effort, same reasoning as the email hooks above: an analytics
   // side effect must never fail (or even be seen to fail) the actual
   // signup, so failures are swallowed, not surfaced.
+  hooks: {
+    // Known-breached passwords are refused wherever a password is set.
+    before: createAuthMiddleware(async (ctx) => {
+      const field = NEW_PASSWORD_FIELD[ctx.path]
+      if (!breachCheckEnabled || !field) return
+      const password = (ctx.body as Record<string, unknown> | undefined)?.[field]
+      if (typeof password !== 'string' || password.length < 8) return
+      if ((await isPasswordBreached(password)) === true) {
+        throw APIError.from('BAD_REQUEST', {
+          code: 'PASSWORD_COMPROMISED',
+          message: 'That password has appeared in a data breach. Choose a different one.',
+        })
+      }
+    }),
+    after: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== '/change-password') return
+      if (ctx.context.returned instanceof Error) return
+      notify(ctx.context.session?.user.email, 'your password was changed', IF_NOT_YOU_RESET)
+    }),
+  },
   databaseHooks: {
+    account: {
+      create: {
+        // Google/Apple connected to an account that already existed (a
+        // brand-new account signing up with Google is not news to anyone).
+        after: async (account, ctx) => {
+          const provider = PROVIDER_NAMES[account.providerId]
+          if (!provider || !ctx) return
+          const user = await ctx.context.internalAdapter.findUserById(account.userId)
+          if (!user || Date.now() - new Date(user.createdAt).getTime() < 5 * 60 * 1000) return
+          notify(
+            user.email,
+            `${provider} sign-in was connected`,
+            `If this wasn’t you, log in, disconnect it under Account → Ways to sign in, and change your password.`,
+          )
+        },
+      },
+      delete: {
+        // Only an explicit disconnect: deleting the whole account also
+        // removes these rows, and that needs no notice.
+        after: async (account, ctx) => {
+          const provider = PROVIDER_NAMES[account.providerId]
+          if (!provider || ctx?.path !== '/unlink-account') return
+          notify(
+            ctx.context.session?.user.email,
+            `${provider} sign-in was removed`,
+            IF_NOT_YOU_RESET,
+          )
+        },
+      },
+    },
     user: {
       create: {
         after: async (user) => {

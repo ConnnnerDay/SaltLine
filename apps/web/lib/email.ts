@@ -68,3 +68,13 @@ export async function sendChangeEmailConfirmation(to: string, newEmail: string, 
     `Someone (hopefully you) asked to change your Saltline sign-in email to ${newEmail}.\n\nTo approve it, open this link; we'll then send a confirmation to the new address:\n\n${url}\n\nIf this wasn't you, ignore this email and change your password: your email stays the same.`,
   )
 }
+
+/** Security notices: tell the account's owner about a change made to it,
+ * so a change they didn't make is noticed quickly. */
+export async function sendSecurityNotice(to: string, what: string, advice: string): Promise<void> {
+  await sendMail(
+    to,
+    `Saltline security notice: ${what}`,
+    `${what.charAt(0).toUpperCase()}${what.slice(1)} on your Saltline account.\n\n${advice}\n\nIf this was you, there's nothing to do.`,
+  )
+}

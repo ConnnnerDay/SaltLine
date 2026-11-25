@@ -481,6 +481,9 @@ forms): suite 650 passed. Round 3 (account: name, password,
 sign out other devices; setup: named home spot, main style): web only.
 Round 4 (product owner: Google/Apple sign-in, email change, verify-email
 resend; ADR-005 amended): web only.
+Round 5 (account security: open-redirect fix, breached-password check,
+reset revokes sessions, security notice emails, per-device sign-out):
+web only.
 **Next action** unchanged from the note below.
 
 **Session note (this repo, branch `claude/serene-gates-ahrkve`):** two

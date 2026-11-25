@@ -29,7 +29,7 @@ const linkedNames = (linked: Partial<Record<SocialProviderId, string>>) =>
 export function AccountPage({
   name,
   email,
-  otherSessions,
+  devices,
   hasPassword,
   linkedProviders,
   availableProviders,
@@ -39,8 +39,8 @@ export function AccountPage({
 }: {
   name: string
   email: string
-  /** Signed-in sessions besides this one; `null` when unknown. */
-  otherSessions: number | null
+  /** Signed-in devices, this one first; `null` when unknown. */
+  devices: Device[] | null
   /** Signs in with email + password (false: Google/Apple only). */
   hasPassword: boolean
   /** Connected Google/Apple sign-ins: provider -> Better Auth account id. */
@@ -98,7 +98,7 @@ export function AccountPage({
           </p>
         </Card>
       )}
-      <DevicesCard otherSessions={otherSessions} />
+      <DevicesCard devices={devices} />
 
       <Card className="flex flex-col gap-3">
         <div>
@@ -342,21 +342,42 @@ function PasswordCard() {
   )
 }
 
-/** Signs out every other browser and phone: for a lost phone or a shared
- * computer. This device stays signed in. */
-function DevicesCard({ otherSessions }: { otherSessions: number | null }) {
-  const [count, setCount] = useState(otherSessions)
-  const [status, setStatus] = useState<'idle' | 'working' | 'done' | 'error'>('idle')
+type Device = { id: string; label: string; lastActive: string; current: boolean }
 
-  async function handleRevoke() {
-    setStatus('working')
-    const { error } = await authClient.revokeOtherSessions()
-    if (error) {
-      setStatus('error')
+const dayFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
+
+/** Your signed-in devices, each with its own sign-out, plus "Sign out
+ * everywhere else": for a lost phone or a shared computer. */
+function DevicesCard({ devices: initial }: { devices: Device[] | null }) {
+  const [devices, setDevices] = useState(initial)
+  const [busy, setBusy] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [done, setDone] = useState(false)
+  const others = devices?.filter((device) => !device.current) ?? null
+
+  async function signOutOne(id: string) {
+    setBusy(id)
+    setError(null)
+    const response = await fetch(`/api/sessions/${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => null)
+    setBusy(null)
+    if (!response || (!response.ok && response.status !== 404)) {
+      setError('Could not sign out that device. Try again.')
       return
     }
-    setCount(0)
-    setStatus('done')
+    setDevices((current) => current?.filter((device) => device.id !== id) ?? null)
+  }
+
+  async function signOutOthers() {
+    setBusy('all')
+    setError(null)
+    const { error: revokeError } = await authClient.revokeOtherSessions()
+    setBusy(null)
+    if (revokeError) {
+      setError('Could not sign out your other devices. Try again.')
+      return
+    }
+    setDevices((current) => current?.filter((device) => device.current) ?? null)
+    setDone(true)
   }
 
   return (
@@ -364,29 +385,50 @@ function DevicesCard({ otherSessions }: { otherSessions: number | null }) {
       <div>
         <h2 className="font-semibold text-text">Signed-in devices</h2>
         <p className="mt-1 text-sm text-text-muted">
-          {count === null
+          {others === null
             ? 'Lost a phone or used a shared computer? Sign out everywhere except here.'
-            : count === 0
+            : others.length === 0
               ? 'You’re signed in only on this device.'
-              : `You’re also signed in on ${count} other ${count === 1 ? 'device or browser' : 'devices or browsers'}.`}
+              : 'Don’t recognize one? Sign it out, then change your password.'}
         </p>
       </div>
-      <Button
-        variant="secondary"
-        className="w-fit"
-        onClick={handleRevoke}
-        disabled={status === 'working' || count === 0}
-      >
-        {status === 'working' ? 'Signing out…' : 'Sign out everywhere else'}
-      </Button>
-      {status === 'done' && (
+      {devices && devices.length > 0 && (
+        <ul className="flex flex-col divide-y divide-border">
+          {devices.map((device) => (
+            <li key={device.id} className="flex items-center justify-between gap-3 py-2 text-sm">
+              <div className="min-w-0">
+                <p className="truncate font-semibold text-text">{device.label}</p>
+                <p className="text-xs text-text-muted">
+                  {device.current ? 'This device' : `Last active ${dayFormat.format(new Date(device.lastActive))}`}
+                </p>
+              </div>
+              {!device.current && (
+                <Button
+                  variant="ghost"
+                  onClick={() => signOutOne(device.id)}
+                  disabled={busy !== null}
+                  aria-label={`Sign out ${device.label}, last active ${dayFormat.format(new Date(device.lastActive))}`}
+                >
+                  {busy === device.id ? 'Signing out…' : 'Sign out'}
+                </Button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {(others === null || others.length > 1) && (
+        <Button variant="secondary" className="w-fit" onClick={signOutOthers} disabled={busy !== null}>
+          {busy === 'all' ? 'Signing out…' : 'Sign out everywhere else'}
+        </Button>
+      )}
+      {done && (
         <p role="status" className="text-sm text-text-muted">
           Done. Every other device will need to sign in again.
         </p>
       )}
-      {status === 'error' && (
+      {error && (
         <p role="alert" className="text-sm text-text">
-          Could not sign out your other devices. Try again.
+          {error}
         </p>
       )}
     </Card>

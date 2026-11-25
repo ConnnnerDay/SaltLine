@@ -8,6 +8,22 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Account security pass.** (1) Open redirect fixed: `?next=` accepted
+`/\evil.example` and `/<tab>/evil.example`, which browsers turn into
+`//evil.example` (lib/safe-redirect.ts now rejects backslashes and
+control characters and requires the parsed URL to stay same-origin).
+(2) Known-breached passwords are refused at sign-up, change and reset
+(lib/password-check.ts: Have I Been Pwned range API, only 5 hash
+characters sent; fails open so an outage never blocks anyone;
+PASSWORD_BREACH_CHECK=0 turns it off). (3) A password reset signs out
+every device. (4) Security notice emails: password changed, password
+reset, Google/Apple connected or removed, and someone trying to sign up
+with your email (that sign-up now looks like any other, so it no longer
+reveals the account exists). (5) Account lists signed-in devices ("Safari
+on iPhone", last active) with a sign-out for each; session tokens never
+reach the browser (app/api/sessions/[id] looks them up among your own
+sessions).
+
 **Google/Apple sign-in, email change, verify-email resend** (ADR-005
 amended 2026-11-25). "Continue with Google/Apple" on log-in and sign-up,
 and Connect/Disconnect on Account, appear only for providers configured
@@ -1683,6 +1699,10 @@ testing), so set `NEXT_PUBLIC_SITE_URL` to that address first.
 
 **Email** (`SMTP_HOST` and friends, see CLAUDE.md) also turns on
 required email confirmation, the resend buttons and email change.
+
+`PASSWORD_BREACH_CHECK=0` turns off the breached-password check (on by
+default; it needs outbound HTTPS to api.pwnedpasswords.com and allows
+the password if that can't be reached).
 
 `NEXT_PUBLIC_SITE_URL` (optional, default `http://localhost:3000`) —
 the real deployed origin, once one exists (Vercel isn't provisioned

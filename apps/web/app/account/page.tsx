@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { Container } from '@/app/components/ui'
 import { auth, changeEmailEnabled, enabledSocialProviders } from '@/lib/auth'
 import { smtpConfigured } from '@/lib/email'
+import { deviceLabel } from '@/lib/device-label'
 import { AccountPage as AccountPageBody } from './account-page'
 
 export const metadata: Metadata = { title: 'Account' }
@@ -42,7 +43,19 @@ export default async function AccountPage() {
           <AccountPageBody
             name={session.user.name}
             email={session.user.email}
-            otherSessions={sessions ? Math.max(0, sessions.length - 1) : null}
+            // Never the tokens: only what the list shows (app/api/sessions).
+            devices={
+              sessions
+                ? sessions
+                    .map((entry) => ({
+                      id: entry.id,
+                      label: deviceLabel(entry.userAgent),
+                      lastActive: new Date(entry.updatedAt).toISOString(),
+                      current: entry.id === session.session.id,
+                    }))
+                    .sort((a, b) => Number(b.current) - Number(a.current) || b.lastActive.localeCompare(a.lastActive))
+                : null
+            }
             // Unknown (lookup failed): assume a password, the usual case.
             hasPassword={accounts ? providerIds.includes('credential') : true}
             linkedProviders={Object.fromEntries(

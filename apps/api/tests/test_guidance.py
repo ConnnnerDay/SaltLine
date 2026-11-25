@@ -756,3 +756,93 @@ def test_fish_in_an_active_run_get_the_bonus() -> None:
     )
     red = next(pick for pick in fall.species if pick.id == "red-drum")
     assert any(reason.endswith("run is on") for reason in red.reasons)
+
+
+# --- season status (this month, read from the snapshot's season text) -------
+
+
+@pytest.mark.parametrize(
+    ("season", "month", "status", "note"),
+    [
+        ("Open year-round", 1, "open", None),
+        ("Open year-round; peak April–September", 1, "open", None),
+        ("Prohibited from retention", 6, "prohibited", "No harvest: release it"),
+        ("Closed year-round", 6, "prohibited", "No harvest: release it"),
+        ("Protected — no take", 6, "prohibited", "No harvest: release it"),
+        ("Catch and release only", 6, "release_only", "Catch-and-release only"),
+        ("Open year-round (C&R only)", 6, "release_only", "Catch-and-release only"),
+        ("Apr 1 – Jun 30", 5, "open", None),
+        ("Apr 1 – Jun 30", 11, "closed", "Closed season now: opens in April"),
+        ("Seasonal (July–October)", 3, "closed", "Closed season now: opens in July"),
+        ("Aug-Oct", 9, "open", None),
+        # Wraps the new year.
+        ("Jun 1 – Feb 28", 1, "open", None),
+        ("Jun 1 – Feb 28", 4, "closed", "Closed season now: opens in June"),
+        # Dates after "closed" are the closure, not the open season.
+        ("Closed Jan 1–May 31 in federal waters", 11, "open", None),
+        (
+            "Closed Jan 1–May 31 in federal waters",
+            3,
+            "closed",
+            "Closed season now in federal waters: check before keeping",
+        ),
+        ("Seasonal — closed Dec 1–Jan 31 and Jun 1–Aug 31", 11, "open", None),
+        ("Seasonal — closed Dec 1–Jan 31 and Jun 1–Aug 31", 7, "closed", None),
+        ("Seasonal — Gulf closed Jan–May; check FWC", 11, "open", None),
+        ("March 1 through May 31 CLOSED in Gulf; verify", 4, "closed", None),
+        # A season that varies never gets a firm "closed".
+        ("Dec 1 – Aug 14 (varies)", 11, "check", None),
+        ("Varies by area; coastal Dec–Sep; Puget Sound varies", 11, "check", None),
+        (
+            "Varies; many areas prohibit retention due to rebuilding plan",
+            3,
+            "check",
+            None,
+        ),
+        ("Seasonal — check NY DEC for open dates", 6, "check", None),
+        ("Federal season (varies yearly; typically Jun-Oct)", 1, "check", None),
+        # Descriptive dates (when the fish is around) are not a season.
+        ("Rare stray — Jun–Sep", 1, None, None),
+        ("Apr – Oct (rare)", 1, None, None),
+        ("Not present", 1, None, None),
+        (None, 1, None, None),
+    ],
+)
+def test_season_status(
+    season: str | None, month: int, status: str | None, note: str | None
+) -> None:
+    from app.domain.guidance import season_status
+
+    got_status, got_note = season_status(season, month)
+    assert got_status == status
+    if note is not None:
+        assert got_note == note
+    if status not in (None, "open"):
+        assert got_note  # every status that matters says why
+
+
+def test_every_snapshot_season_parses_without_error() -> None:
+    from app.domain.guidance import load_regulations, season_status
+
+    for rules in load_regulations()["states"].values():
+        for entry in rules.values():
+            for month in range(1, 13):
+                status, _ = season_status(entry.get("season"), month)
+                assert status in (
+                    None,
+                    "open",
+                    "closed",
+                    "release_only",
+                    "prohibited",
+                    "check",
+                )
+
+
+def test_regulation_carries_this_months_season_status() -> None:
+    from datetime import date
+
+    from app.domain.guidance import regulation_for
+
+    reg = regulation_for("red-drum", "NC", date(2026, 5, 1))
+    assert reg is not None
+    assert reg.season_status in ("open", "check", None)

@@ -73,6 +73,7 @@ _VERDICT_CHALLENGING = 32
 
 _DAWN_DUSK_WINDOW = timedelta(hours=2)
 _TIDE_TURN_WINDOW = timedelta(minutes=45)
+_STRONG_CURRENT_KT = 2.0
 
 _ONSHORE_DIRS_EAST = {"S", "SE", "E", "SSE", "ESE", "SSW", "ENE", "NE"}
 _OFFSHORE_DIRS_EAST = {"N", "NW", "W", "NNW", "WNW", "NNE"}
@@ -144,6 +145,9 @@ class StyleProfile:
     # and piers, a hazard for a kayak. Small (neap) tides the reverse.
     big_tide_points: float = 2
     small_tide_points: float = -1
+    # A strong tidal current (2 kt+ at the nearest current station): feeds
+    # bridges and jetties, a hazard for a kayak.
+    strong_current_points: float = 0
 
 
 _SHORE_WIND = (8.0, 12.0, 16.0, 20.0, 25.0)
@@ -173,6 +177,7 @@ STYLE_PROFILES: dict[str, StyleProfile] = {
         groundswell_points=-1,
         big_tide_points=4,
         small_tide_points=-2,
+        strong_current_points=1,
         alert_points={
             "small craft advisory": -1,
             "high surf advisory": -2,
@@ -190,6 +195,7 @@ STYLE_PROFILES: dict[str, StyleProfile] = {
         groundswell_points=0,
         big_tide_points=5,
         small_tide_points=-3,
+        strong_current_points=3,
         alert_points={
             "small craft advisory": -1,
             "high surf advisory": 0,
@@ -207,6 +213,7 @@ STYLE_PROFILES: dict[str, StyleProfile] = {
         groundswell_points=-8,
         big_tide_points=4,
         small_tide_points=-3,
+        strong_current_points=2,
         alert_points={
             "small craft advisory": -1,
             "high surf advisory": -12,
@@ -225,6 +232,7 @@ STYLE_PROFILES: dict[str, StyleProfile] = {
         rip_current=False,
         big_tide_points=-3,
         small_tide_points=1,
+        strong_current_points=-5,
         alert_points={**_AFLOAT_ALERTS, "small craft advisory": -16},
     ),
     # Boats: seas, not surf; the beach's onshore/offshore logic doesn't apply.
@@ -447,6 +455,7 @@ def score_conditions(
     style: str = "surf",
     tide_turns: list[datetime] | None = None,
     tide_strength: float | None = None,
+    max_current_kt: float | None = None,
 ) -> ForecastScore:
     """Score fishability from the marine and astronomical signals given.
 
@@ -602,6 +611,23 @@ def score_conditions(
                     ),
                 )
             )
+
+    if (
+        max_current_kt is not None
+        and max_current_kt >= _STRONG_CURRENT_KT
+        and profile.strong_current_points
+    ):
+        score += profile.strong_current_points
+        factors.append(
+            ScoreFactor(
+                impact=profile.strong_current_points,
+                description=(
+                    f"Strong tidal current (up to {max_current_kt:g} kt): hard paddling"
+                    if profile.strong_current_points < 0
+                    else f"Strong tidal current (up to {max_current_kt:g} kt) moving bait"
+                ),
+            )
+        )
 
     # How good the season is right now: the fish that are in season and in
     # their best water today, as (working, picks) -- working picks score

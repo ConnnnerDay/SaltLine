@@ -21,7 +21,13 @@ from pydantic import BaseModel
 from app.domain.models import Observation
 from app.domain.scoring import STYLE_PROFILES, score_conditions, storm_level
 from app.infra.timezones import safe_zone
-from app.providers.astronomy import compute_solunar_times, compute_sun_times
+from app.providers.astronomy import (
+    SolunarPeriod,
+    SolunarTimes,
+    SunTimes,
+    compute_solunar_times,
+    compute_sun_times,
+)
 from app.providers.noaa_coops import TidePrediction
 from app.providers.nws import MarineDay, WeatherDay
 
@@ -30,6 +36,61 @@ class DayTide(BaseModel):
     time: datetime
     kind: str
     height_ft: float
+
+
+class DayWindow(BaseModel):
+    """The best stretch of a day to fish: dawn or dusk (the low-light
+    bites), whichever lines up with a tide turn or a solunar feeding
+    period, with the reasons in plain words."""
+
+    start: datetime
+    end: datetime
+    reasons: list[str]
+
+
+_LOW_LIGHT = timedelta(hours=1)
+_TURN_NEAR = timedelta(minutes=45)
+
+
+def _overlaps(start: datetime, end: datetime, periods: list[SolunarPeriod]) -> bool:
+    return any(p.start < end and p.end > start for p in periods)
+
+
+def best_window(
+    sun: SunTimes,
+    tide_turns: list[TidePrediction],
+    solunar: SolunarTimes,
+    *,
+    not_before: datetime | None = None,
+    tz_name: str,
+) -> DayWindow | None:
+    """Dawn or dusk (an hour either side of sunrise or sunset), scored by a
+    tide turn near it (2), a major solunar period overlapping it (1) or a
+    minor one (0.5); dawn on a tie. Windows already over (*not_before*,
+    for today) are skipped; None when both are."""
+    zone = safe_zone(tz_name)
+    best: tuple[float, DayWindow] | None = None
+    for edge, name in ((sun.sunrise, "Dawn"), (sun.sunset, "Dusk")):
+        start, end = edge - _LOW_LIGHT, edge + _LOW_LIGHT
+        if not_before is not None and end <= not_before:
+            continue
+        points = 0.0
+        reasons = [f"{name}, low light"]
+        turn = next((t for t in tide_turns if abs(t.time - edge) <= _TURN_NEAR), None)
+        if turn is not None:
+            points += 2
+            when = turn.time.astimezone(zone).strftime("%-I:%M %p")
+            reasons.append(f"{turn.kind} tide turns at {when}")
+        if _overlaps(start, end, solunar.major_periods):
+            points += 1
+            reasons.append("major feeding period")
+        elif _overlaps(start, end, solunar.minor_periods):
+            points += 0.5
+            reasons.append("minor feeding period")
+        window = DayWindow(start=start, end=end, reasons=reasons)
+        if best is None or points > best[0]:
+            best = (points, window)
+    return best[1] if best else None
 
 
 class DayScore(BaseModel):
@@ -58,6 +119,8 @@ class DayOutlook(BaseModel):
     # The day's score and verdict for each way of fishing (surf, pier,
     # kayak...); `score`/`verdict` are the surf ones.
     score_by_style: dict[str, DayScore] = {}
+    # The best stretch of the day to go (`best_window`).
+    best_window: DayWindow | None = None
 
 
 def _label(index: int, day: date) -> str:
@@ -81,6 +144,7 @@ def build_day_outlook(
     weather_days: list[WeatherDay] | None = None,
     fish_in_season: tuple[int, int] | None = None,
     tide_strength: dict[date, float] | None = None,
+    max_current_by_day: dict[date, float] | None = None,
 ) -> list[DayOutlook]:
     zone = safe_zone(tz_name)
     today = now.astimezone(zone).date()
@@ -133,6 +197,7 @@ def build_day_outlook(
                 sun_times=sun,
                 tide_turns=turns,
                 tide_strength=(tide_strength or {}).get(day),
+                max_current_kt=(max_current_by_day or {}).get(day),
             )
             for style in STYLE_PROFILES
         }
@@ -151,6 +216,17 @@ def build_day_outlook(
                 wave_range_ft=waves,
                 score=score.score,
                 verdict=score.verdict.value,
+                best_window=best_window(
+                    sun,
+                    [
+                        p
+                        for p in tide_predictions or []
+                        if p.time.astimezone(zone).date() == day
+                    ],
+                    solunar,
+                    not_before=now if index == 0 else None,
+                    tz_name=tz_name,
+                ),
                 score_by_style={
                     style: DayScore(score=result.score, verdict=result.verdict.value)
                     for style, result in by_style.items()

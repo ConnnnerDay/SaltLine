@@ -1,3 +1,5 @@
+import { SeasonBadge, StaleLimitsWarning } from '@/app/components/season-badge'
+import { formatAsOf } from '@/lib/regulations'
 import Link from 'next/link'
 import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
@@ -77,7 +79,14 @@ function LimitsTable({
               </th>
               <td className="py-2 pr-3 text-text">{rule.min_size ? say(sizeText(rule) ?? rule.min_size) : '—'}</td>
               <td className="py-2 pr-3 text-text">{rule.bag_limit ? say(rule.bag_limit) : '—'}</td>
-              <td className="py-2 pr-3 text-text-muted">{rule.season ? say(rule.season) : 'Open'}</td>
+              <td className="py-2 pr-3 text-text-muted">
+                {rule.season ? say(rule.season) : 'Open'}
+                {rule.season_status && rule.season_status !== 'open' && (
+                  <span className="mt-1 block">
+                    <SeasonBadge status={rule.season_status} note={rule.season_note} />
+                  </span>
+                )}
+              </td>
               <td className="py-2 text-right">
                 {rule.source_url && (
                   <a href={rule.source_url} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold">
@@ -348,14 +357,17 @@ export default async function FishDetailPage({ params }: Props) {
               <h2 className="section-label">Size &amp; bag limits</h2>
               {regulations[0] && (
                 <span className="text-xs text-text-muted">
-                  Snapshot from {regulations[0].as_of}. Always check the state&apos;s current rules.
+                  Snapshot from {formatAsOf(regulations[0].as_of)}. Always check the state&apos;s current rules.
                 </span>
               )}
             </div>
+            {regulations.some((rule) => rule.possibly_outdated) && (
+              <StaleLimitsWarning asOf={regulations[0].as_of} />
+            )}
             {regulations.length > 0 && (
               <KeepCheck
                 units={units}
-                asOf={regulations[0].as_of}
+                asOf={formatAsOf(regulations[0].as_of)}
                 options={regulations.map((rule) => ({ ...rule, key: rule.state, label: rule.state }))}
               />
             )}

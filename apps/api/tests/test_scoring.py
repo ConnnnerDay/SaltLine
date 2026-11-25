@@ -813,3 +813,20 @@ class TestStormChance:
         # Not capped below Fair the way a likely-storm day is.
         assert chance.verdict not in (ScoreVerdict.CHALLENGING, ScoreVerdict.POOR)
         assert likely.verdict in (ScoreVerdict.CHALLENGING, ScoreVerdict.POOR)
+
+    def test_strong_current_by_style(self) -> None:
+        def delta(style: str, speed: float) -> int:
+            base = score_conditions((5.0, 8.0), (1.0, 2.0), style=style).score or 0
+            with_current = (
+                score_conditions(
+                    (5.0, 8.0), (1.0, 2.0), style=style, max_current_kt=speed
+                ).score
+                or 0
+            )
+            return with_current - base
+
+        assert delta("bridge", 2.4) == 3
+        assert delta("jetty", 2.4) == 2
+        assert delta("kayak", 2.4) == -5
+        assert delta("surf", 2.4) == 0
+        assert delta("bridge", 1.5) == 0  # an ordinary current changes nothing

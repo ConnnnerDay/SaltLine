@@ -64,7 +64,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (err) {
     const status = err instanceof InternalApiError ? err.status : 502
     const message =
-      status === 422
+      status === 403
+        ? 'your catch log is full (10,000 catches): delete some old ones first'
+        : status === 422
         ? 'check the entry: species is required, the time can’t be in the future, and length/weight must be realistic'
         : status === 404
           ? 'unknown location'

@@ -1,5 +1,7 @@
 import { betterAuth } from 'better-auth'
-import { APIError, createAuthMiddleware } from 'better-auth/api'
+import { APIError, createAuthMiddleware, isAPIError } from 'better-auth/api'
+import { CLIENT_IP_HEADER } from './client-ip'
+import { FixedWindow } from './fixed-window'
 import { nextCookies } from 'better-auth/next-js'
 import { PostgresDialect } from 'kysely'
 import { Pool } from 'pg'
@@ -104,6 +106,36 @@ function notify(to: string | undefined, what: string, advice: string) {
 
 const IF_NOT_YOU_RESET =
   'If this wasn’t you, use “Forgot password?” on the log-in page right away: a reset signs out every device.'
+
+// Per-account limits (any number of IPs): Better Auth's limits are per
+// IP, which a botnet or a forged-IP client spreads thin.
+/** Failed password sign-ins per account. A correct password clears it;
+ * "Forgot password?" always works, so this can't lock anyone out for
+ * good. */
+const SIGN_IN_FAILURES = new FixedWindow(10, 15 * 60_000)
+/** Emails sent *to* one address (reset, confirmation, email change), so
+ * Saltline can't be used to flood someone's inbox. */
+const EMAILS_TO_ADDRESS = new FixedWindow(3, 60 * 60_000)
+const EMAIL_FIELD: Record<string, 'email' | 'newEmail'> = {
+  '/request-password-reset': 'email',
+  '/send-verification-email': 'email',
+  '/change-email': 'newEmail',
+}
+
+const tooManyFor = (message: string) => APIError.from('TOO_MANY_REQUESTS', { code: 'TOO_MANY_REQUESTS', message })
+
+const NAME_MAX = 80
+// Control characters, zero-width characters and bidi overrides (U+202E
+// can make text display reversed, a classic disguise).
+// eslint-disable-next-line no-control-regex
+const INVISIBLE = /[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u2028-\u202e\u2060-\u2069\ufeff]/g
+
+/** A display name as typed, minus invisible characters, trimmed; `null`
+ * when nothing visible is left or it's longer than NAME_MAX. */
+export function cleanName(raw: string): string | null {
+  const name = raw.normalize('NFC').replace(INVISIBLE, '').replace(/\s+/g, ' ').trim()
+  return name && name.length <= NAME_MAX ? name : null
+}
 
 /** Where each password-setting endpoint carries the new password. */
 const NEW_PASSWORD_FIELD: Record<string, 'password' | 'newPassword'> = {
@@ -238,18 +270,58 @@ export const auth = betterAuth({
   hooks: {
     // Known-breached passwords are refused wherever a password is set.
     before: createAuthMiddleware(async (ctx) => {
+      const input = ctx.body as Record<string, unknown> | undefined
+      if (ctx.path === '/sign-in/email' && typeof input?.email === 'string') {
+        if (SIGN_IN_FAILURES.blocked(input.email.trim().toLowerCase())) {
+          throw tooManyFor(
+            'Too many wrong passwords for this account. Wait 15 minutes, or use “Forgot password?”.',
+          )
+        }
+      }
+      const emailField = EMAIL_FIELD[ctx.path]
+      const target = emailField ? input?.[emailField] : undefined
+      if (typeof target === 'string' && EMAILS_TO_ADDRESS.hit(target.trim().toLowerCase())) {
+        throw tooManyFor('We’ve sent several emails to that address already. Check your inbox (and spam), or try again in an hour.')
+      }
+      // Names: no invisible/control characters, no 20,000-character names
+      // (a NUL used to crash the request in Postgres).
+      const body = ctx.body as Record<string, unknown> | undefined
+      let cleaned: Record<string, unknown> | null = null
+      if ((ctx.path === '/sign-up/email' || ctx.path === '/update-user') && typeof body?.name === 'string') {
+        const name = cleanName(body.name)
+        if (name === null) {
+          throw APIError.from('BAD_REQUEST', {
+            code: 'INVALID_NAME',
+            message: `Enter a name of up to ${NAME_MAX} characters.`,
+          })
+        }
+        cleaned = { ...body, name }
+      }
       const field = NEW_PASSWORD_FIELD[ctx.path]
-      if (!breachCheckEnabled || !field) return
-      const password = (ctx.body as Record<string, unknown> | undefined)?.[field]
-      if (typeof password !== 'string' || password.length < 8) return
+      if (!breachCheckEnabled || !field) return cleaned ? { context: { body: cleaned } } : undefined
+      const password = body?.[field]
+      if (typeof password !== 'string' || password.length < 8) {
+        return cleaned ? { context: { body: cleaned } } : undefined
+      }
       if ((await isPasswordBreached(password)) === true) {
         throw APIError.from('BAD_REQUEST', {
           code: 'PASSWORD_COMPROMISED',
           message: 'That password has appeared in a data breach. Choose a different one.',
         })
       }
+      return cleaned ? { context: { body: cleaned } } : undefined
     }),
     after: createAuthMiddleware(async (ctx) => {
+      if (ctx.path === '/sign-in/email') {
+        const email = (ctx.body as { email?: unknown } | undefined)?.email
+        if (typeof email === 'string') {
+          const key = email.trim().toLowerCase()
+          const returned = ctx.context.returned
+          if (isAPIError(returned) && returned.statusCode === 401) SIGN_IN_FAILURES.hit(key)
+          else if (!(returned instanceof Error)) SIGN_IN_FAILURES.reset(key)
+        }
+        return
+      }
       if (ctx.path !== '/change-password') return
       if (ctx.context.returned instanceof Error) return
       notify(ctx.context.session?.user.email, 'your password was changed', IF_NOT_YOU_RESET)
@@ -287,6 +359,24 @@ export const auth = betterAuth({
       },
     },
     user: {
+      update: {
+        // Email alerts store the address they go to (apps/api), so a
+        // changed account email must reach them too: otherwise alerts
+        // keep going to an inbox the user has left. Idempotent, so any
+        // user update can send it.
+        after: async (user) => {
+          if (!user.email) return
+          try {
+            await internalApiFetch('/v1/me/alerts/email', {
+              method: 'PUT',
+              body: { email: user.email },
+              userId: user.id,
+            })
+          } catch (error) {
+            console.error('Failed to update alert emails:', error)
+          }
+        },
+      },
       create: {
         after: async (user) => {
           try {
@@ -323,6 +413,9 @@ export const auth = betterAuth({
   },
   plugins: [nextCookies()],
   advanced: {
+    // The client IP proxy.ts resolved (lib/client-ip.ts); never the raw
+    // x-forwarded-for, which clients can fill with any address.
+    ipAddress: { ipAddressHeaders: [CLIENT_IP_HEADER] },
     database: {
       validateSchema: Boolean(process.env.DATABASE_URL),
     },

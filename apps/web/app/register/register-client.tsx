@@ -9,6 +9,7 @@ import { SocialButtons } from '@/app/components/social-buttons'
 import type { SocialProviderId } from '@/lib/social-providers'
 import { safeRedirectTarget } from '@/lib/safe-redirect'
 import { authErrorMessage } from '@/lib/auth-errors'
+import { suggestEmail } from '@/lib/email-typo'
 
 /**
  * Sprint 28 ("Authentication"), per docs/architecture.md's ADR-005:
@@ -47,6 +48,7 @@ function RegisterForm({ socialProviders }: { socialProviders: SocialProviderId[]
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [checkEmail, setCheckEmail] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null)
   const [resent, setResent] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle')
 
   async function handleSubmit(event: React.FormEvent) {
@@ -140,8 +142,28 @@ function RegisterForm({ socialProviders }: { socialProviders: SocialProviderId[]
             autoComplete="email"
             required
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value)
+              setEmailSuggestion(null)
+            }}
+            onBlur={() => setEmailSuggestion(suggestEmail(email.trim()))}
           />
+          {emailSuggestion && (
+            <p role="status" className="-mt-2 mb-4 text-sm text-text">
+              Did you mean{' '}
+              <button
+                type="button"
+                className="font-semibold text-primary underline"
+                onClick={() => {
+                  setEmail(emailSuggestion)
+                  setEmailSuggestion(null)
+                }}
+              >
+                {emailSuggestion}
+              </button>
+              ?
+            </p>
+          )}
           <Field
             label="Password"
             name="password"

@@ -32,6 +32,7 @@ from app.domain.catches import (
 )
 from app.domain.forecast_cache import get_or_assemble_forecast
 from app.domain.guidance import load_catalogue
+from app.domain.limits import MAX_CATCHES, ensure_under_cap
 from app.providers.locations import load_water_temp_profiles
 
 _logger = logging.getLogger(__name__)
@@ -108,6 +109,7 @@ async def log_catch(
     state: AppState = Depends(get_app_state),  # noqa: B008
     session: AsyncSession = Depends(get_db_session),  # noqa: B008
 ) -> CatchOut:
+    await ensure_under_cap(session, CatchEntry, user_id, MAX_CATCHES, "catches")
     location = await resolve_location_id(body.location_id, state)
 
     snapshot: CatchConditions | None = None

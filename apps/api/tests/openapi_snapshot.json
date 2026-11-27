@@ -44,6 +44,22 @@
         "title": "AccountExport",
         "type": "object"
       },
+      "AlertEmailIn": {
+        "description": "The account's current email, for every one of its alert rules.",
+        "properties": {
+          "email": {
+            "maxLength": 254,
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+            "title": "Email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "title": "AlertEmailIn",
+        "type": "object"
+      },
       "AlertRuleIn": {
         "properties": {
           "email": {
@@ -3076,6 +3092,41 @@
           }
         },
         "summary": "Upsert Alert",
+        "tags": [
+          "alerts"
+        ]
+      }
+    },
+    "/v1/me/alerts/email": {
+      "put": {
+        "description": "Point every one of this user's alerts at their current email.\napps/web calls it when the account's email changes, so alerts never\nkeep going to an address the user has left (which might now be\nsomeone else's).",
+        "operationId": "set_alert_email_v1_me_alerts_email_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertEmailIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Alert Email",
         "tags": [
           "alerts"
         ]

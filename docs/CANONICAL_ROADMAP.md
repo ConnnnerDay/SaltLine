@@ -476,6 +476,11 @@ ConnnnerDay/SaltLine#51 merged):** product-owner-requested sign-up
 smoothing: nearest spots from device location in setup (computed on the
 device, never stored), optional name, show password, privacy-safe home
 from "Use my current location". apps/web only; see its README Status.
+Then (same branch): data-isolation audit, alerts follow email changes,
+name cleaning, email-typo hint, and abuse protection (`proxy.ts` per-IP
+limits, per-account sign-in/email limits, body cap, apps/api per-account
+ceilings in `app/domain/limits.py`). Fixed a real bypass: forged
+`X-Forwarded-For` gave unlimited password guesses.
 **Next action** unchanged.
 
 **Session note (this repo, branch `claude/stoic-lamport-robq75`):**

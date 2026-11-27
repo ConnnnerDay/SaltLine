@@ -8,6 +8,17 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Sign-up polish, data isolation and abuse protection.** Sign-up suggests
+a fix for mistyped email domains ("gmial.com" -> "gmail.com") and cleans
+names (no invisible/bidi characters, max 80; a NUL used to crash the
+request). Changing your email now moves your forecast alerts to the new
+address (they kept going to the old inbox). Audited every API route:
+each takes the user from the session, never the request; cross-user
+reads/deletes all 404; apps/api rejects unsigned calls. New `proxy.ts`
+and per-account limits close a real hole: a forged `X-Forwarded-For`
+gave unlimited password guesses (each fake address got a fresh
+allowance). See "Abuse protection" below.
+
 **Easier sign-up and nearest spots.** Setup's home-spot step has "Find
 spots near me": it ranks the listed spots by distance *in the browser*
 (the device position is never sent or saved) and preselects the nearest,
@@ -1724,6 +1735,45 @@ yet, `docs/CANONICAL_ROADMAP.md`'s Phase 1 blockers 9/10). Used as
 `app/layout.tsx`'s `metadataBase`, so every relative canonical/
 OpenGraph URL (sprint 49) resolves correctly. Never needs setting for
 local dev or `next build`.
+
+## Abuse protection
+
+What the app itself does (`proxy.ts`, `lib/auth.ts`, apps/api
+`app/domain/limits.py`):
+
+- **Trusted client IP** (`lib/client-ip.ts`): resolved once per request
+  and passed on in `x-saltline-client-ip`, overwriting anything a client
+  sent; Better Auth's limits read only that header.
+- **Per-IP request limits** (per minute): 60 forecast/share/fish/location
+  requests, 120 other API calls, 240 pages, 1000 link prefetches; sign-in
+  and sign-up keep Better Auth's stricter limits. Over the limit: 429
+  with `Retry-After`.
+- **Per-account limits** (any number of IPs): 10 wrong passwords per
+  account per 15 minutes (a correct password clears it; "Forgot
+  password?" always works), and 3 emails per hour to any one address.
+- **Request bodies** to `/api` are capped at 64 KB.
+- **Per-account ceilings**: 200 saved spots, 10,000 catches, 20 alerts
+  (each alert makes the checker fetch a forecast).
+- Plus: breached-password check, security notice emails, session
+  tokens kept server-side (see the Status entries above).
+
+What it **can't** do: absorb a real DDoS. Volume floods have to be
+stopped before they reach the app, by the network in front of it:
+
+- **Vercel** (the planned web host): its firewall and DDoS mitigation are
+  on by default; `x-forwarded-for` is set by Vercel, so the defaults
+  above are correct as-is.
+- **Home server**: don't expose `next start` straight to the internet.
+  Put it behind Cloudflare (a Tunnel needs no open ports) and set
+  `SALTLINE_CLIENT_IP_HEADER=cf-connecting-ip`, or behind nginx/Caddy
+  (they append the real address to `x-forwarded-for`, which the default
+  reads). Exposed directly, a client can still fake its IP to the
+  per-IP limits; the per-account limits hold regardless.
+- The limits are per server process; several instances need a shared
+  store (or the platform firewall) to enforce them together.
+
+Still open: a CAPTCHA on sign-up (roadmap sprint 28) needs a Turnstile
+or hCaptcha site key.
 
 ## Checks
 

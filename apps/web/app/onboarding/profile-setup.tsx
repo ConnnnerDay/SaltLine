@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { NearbySpots } from './nearby-spots'
 import { useRouter } from 'next/navigation'
 import { Button, Card } from '@/app/components/ui'
 import { cx } from '@/app/components/ui/cx'
@@ -96,6 +97,9 @@ export function ProfileSetup({ next, spots = [] }: { next: string; spots?: MapSp
   const [step, setStep] = useState(0)
   const [home, setHome] = useState<LocationSearchResult | null>(null)
   const [savedHomeId, setSavedHomeId] = useState<string | null>(null)
+  // The saved profile has loaded (or failed to): until then, "Find spots
+  // near me" mustn't auto-pick over a home spot that's about to appear.
+  const [profileLoaded, setProfileLoaded] = useState(false)
   const [targets, setTargets] = useState<string[]>([])
   const [times, setTimes] = useState<string[]>([])
   const [tide, setTide] = useState<string | null>(null)
@@ -131,7 +135,9 @@ export function ProfileSetup({ next, spots = [] }: { next: string; spots?: MapSp
     fetch('/api/preferences')
       .then((response) => (response.ok ? (response.json() as Promise<Preferences>) : null))
       .then((saved) => {
-        if (cancelled || !saved) return
+        if (cancelled) return
+        setProfileLoaded(true)
+        if (!saved) return
         // Fill only answers the user hasn't touched yet: this request can
         // land after they've already tapped choices, and must never undo them.
         setSavedHomeId(saved.default_location_id)
@@ -147,7 +153,9 @@ export function ProfileSetup({ next, spots = [] }: { next: string; spots?: MapSp
         if (!unitsTouched.current) setUnits(saved.units)
         setExperience((current) => current ?? saved.experience)
       })
-      .catch(() => {})
+      .catch(() => {
+        if (!cancelled) setProfileLoaded(true)
+      })
     return () => {
       cancelled = true
     }
@@ -216,7 +224,11 @@ export function ProfileSetup({ next, spots = [] }: { next: string; spots?: MapSp
         </div>
         <button
           type="button"
-          onClick={() => save({ profile_completed: true })}
+          onClick={() =>
+            // A home spot already chosen (or picked as nearest) is kept:
+            // skipping goes to its forecast, so it should also be home.
+            save({ profile_completed: true, ...(home ? { default_location_id: home.id } : {}) })
+          }
           disabled={saving}
           className="text-sm font-semibold text-text-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
         >
@@ -230,7 +242,14 @@ export function ProfileSetup({ next, spots = [] }: { next: string; spots?: MapSp
           <p className="text-sm text-text-muted">
             Your home spot is the forecast Saltline opens to. You can change it any time.
           </p>
-          <LocationSearch onSelect={setHome} label="Search for your spot" />
+          <NearbySpots
+            spots={spots}
+            units={units}
+            selectedId={home?.id ?? savedHomeId}
+            autoPick={profileLoaded && !home && !savedHomeId}
+            onSelect={(spot) => setHome({ id: spot.id, name: spot.name, state: spot.state, lat: spot.lat, lng: spot.lng })}
+          />
+          <LocationSearch onSelect={setHome} label="Or search for your spot" />
           {spots.length > 0 && (
             <>
               <div className="flex items-center gap-3 text-xs text-text-muted">

@@ -51,7 +51,7 @@ const COASTS: { key: string; label: string; match: (spot: MapSpot) => boolean }[
 const WIDTH = 960
 const NEAREST = 4
 
-function milesBetween(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+export function milesBetween(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
   const rad = Math.PI / 180
   const dLat = (b.lat - a.lat) * rad
   const dLng = (b.lng - a.lng) * rad

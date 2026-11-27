@@ -8,6 +8,20 @@ app authenticates the user and signs the internal request instead.
 
 ## Status
 
+**Easier sign-up and nearest spots.** Setup's home-spot step has "Find
+spots near me": it ranks the listed spots by distance *in the browser*
+(the device position is never sent or saved) and preselects the nearest,
+so the step is one tap and Next. It runs on its own only when location is
+already allowed (no surprise prompt), never overrides an existing home on
+a re-run, and falls back to search/map when denied. Sign-up asks for email
+and password first; the name is optional (taken from the email,
+"jake.smith@" -> "Jake", if blank), and both log-in and sign-up have
+"Show password". Find a spot's "Use my current location" now saves the
+nearest *listed* spot as a first home rather than the device point (an id
+precise to ~110 m), and offers the closest spots instead of an error when
+you're inland. "Skip setup" keeps a home spot already chosen: it used to
+open that spot's forecast without saving it.
+
 **Account security pass.** (1) Open redirect fixed: `?next=` accepted
 `/\evil.example` and `/<tab>/evil.example`, which browsers turn into
 `//evil.example` (lib/safe-redirect.ts now rejects backslashes and

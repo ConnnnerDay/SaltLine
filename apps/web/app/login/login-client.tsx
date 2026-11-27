@@ -35,6 +35,7 @@ function LoginForm({ socialProviders }: { socialProviders: SocialProviderId[] })
   const next = safeRedirectTarget(params.get('next'), '/')
   const socialError = socialErrorMessage(params.get('error'))
   const [unverified, setUnverified] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [resent, setResent] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -94,13 +95,22 @@ function LoginForm({ socialProviders }: { socialProviders: SocialProviderId[] })
           <Field
             label="Password"
             name="password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
             required
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             error={error ?? undefined}
           />
+          <label className="-mt-2 mb-3 flex items-center gap-2 text-sm text-text-muted">
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={(event) => setShowPassword(event.target.checked)}
+              className="h-4 w-4 accent-[var(--color-primary)]"
+            />
+            Show password
+          </label>
           {unverified && (
             <div className="mb-4 flex flex-col gap-2 text-sm">
               <Button type="button" variant="secondary" className="w-fit" onClick={resend} disabled={resent === 'sending' || resent === 'sent'}>

@@ -30,6 +30,13 @@ import { authErrorMessage } from '@/lib/auth-errors'
  * unchanged and still goes straight to `next`; onboarding is only for
  * a signup that just happened, not every return visit.
  */
+/** A friendly name from an email when none was typed: "jake.smith42@…"
+ * -> "Jake". Changeable later on the Account page. */
+export function nameFromEmail(email: string): string {
+  const first = email.split('@')[0]?.split(/[._+\-\d]+/).find((part) => part.length >= 2) ?? ''
+  return first ? first.charAt(0).toUpperCase() + first.slice(1).toLowerCase() : 'Angler'
+}
+
 function RegisterForm({ socialProviders }: { socialProviders: SocialProviderId[] }) {
   const router = useRouter()
   const next = safeRedirectTarget(useSearchParams().get('next'), '/locations')
@@ -39,6 +46,7 @@ function RegisterForm({ socialProviders }: { socialProviders: SocialProviderId[]
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [checkEmail, setCheckEmail] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [resent, setResent] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle')
 
   async function handleSubmit(event: React.FormEvent) {
@@ -47,7 +55,7 @@ function RegisterForm({ socialProviders }: { socialProviders: SocialProviderId[]
     setIsSubmitting(true)
     const onboarding = `/onboarding?next=${encodeURIComponent(next)}`
     const { data, error: signUpError } = await signUp.email({
-      name,
+      name: name.trim() || nameFromEmail(email.trim()),
       email,
       password,
       // Where the verification link lands (signed in, via lib/auth.ts's
@@ -126,14 +134,6 @@ function RegisterForm({ socialProviders }: { socialProviders: SocialProviderId[]
         />
         <form method="post" onSubmit={handleSubmit} noValidate className={socialProviders.length ? 'mt-4' : undefined}>
           <Field
-            label="Name"
-            name="name"
-            autoComplete="name"
-            required
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-          />
-          <Field
             label="Email"
             name="email"
             type="email"
@@ -145,7 +145,7 @@ function RegisterForm({ socialProviders }: { socialProviders: SocialProviderId[]
           <Field
             label="Password"
             name="password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             autoComplete="new-password"
             minLength={8}
             required
@@ -153,6 +153,23 @@ function RegisterForm({ socialProviders }: { socialProviders: SocialProviderId[]
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             error={error ?? undefined}
+          />
+          <label className="-mt-2 mb-4 flex items-center gap-2 text-sm text-text-muted">
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={(event) => setShowPassword(event.target.checked)}
+              className="h-4 w-4 accent-[var(--color-primary)]"
+            />
+            Show password
+          </label>
+          <Field
+            label="Name (optional)"
+            name="name"
+            autoComplete="given-name"
+            hint="What we call you. You can change it later."
+            value={name}
+            onChange={(event) => setName(event.target.value)}
           />
           <Button type="submit" variant="primary" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? 'Creating account…' : 'Create account'}

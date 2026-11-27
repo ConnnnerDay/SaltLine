@@ -77,7 +77,7 @@ export function LocationsSearchPage({
               or
               <span className="h-px flex-1 bg-border" aria-hidden="true" />
             </div>
-            <UseMyLocationButton />
+            <UseMyLocationButton spots={locations} units={units} />
           </Card>
 
           {selected && (

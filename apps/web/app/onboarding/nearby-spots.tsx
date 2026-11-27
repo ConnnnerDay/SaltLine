@@ -124,7 +124,7 @@ export function NearbySpots({
       {status === 'done' && nearest.length > 0 && (
         <div className="flex flex-col gap-2">
           <p className="text-sm font-semibold text-text">Closest to you</p>
-          <ul role="group" aria-label="Closest spots to you" className="flex flex-col gap-2">
+          <ul aria-label="Closest spots to you" className="flex flex-col gap-2">
             {nearest.map(({ spot, miles }) => {
               const selected = spot.id === selectedId
               return (

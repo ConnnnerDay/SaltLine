@@ -26,6 +26,9 @@ function socialErrorMessage(code: string | null): string | null {
     return 'There’s already a Saltline account with that email. Log in with your password, then connect Google or Apple from your Account page.'
   }
   if (code === 'access_denied') return null // they cancelled at the provider
+  if (code === 'INVALID_TOKEN' || code === 'TOKEN_EXPIRED') {
+    return 'That confirmation link has expired or was already used. Log in, and if your email still needs confirming we’ll offer to send a new link.'
+  }
   return 'That sign-in didn’t work. Try again, or log in with your email and password.'
 }
 

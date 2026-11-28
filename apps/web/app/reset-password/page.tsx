@@ -17,7 +17,11 @@ import { authErrorMessage } from '@/lib/auth-errors'
  * (a bare token in the URL), so the fallback is minimal.
  */
 function ResetPasswordForm() {
-  const token = useSearchParams().get('token')
+  const params = useSearchParams()
+  const token = params.get('token')
+  // Better Auth's link check sends a bad link here with ?error= and no
+  // token: say so up front instead of offering a form that can't work.
+  const linkError = params.get('error')
   const [newPassword, setNewPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -38,6 +42,22 @@ function ResetPasswordForm() {
       return
     }
     setDone(true)
+  }
+
+  if (linkError || !token) {
+    return (
+      <Card className="flex flex-col gap-3">
+        <p role="alert" className="text-text">
+          {linkError === 'TOKEN_EXPIRED' || linkError === 'INVALID_TOKEN'
+            ? 'This reset link has expired or was already used.'
+            : 'This reset link is incomplete.'}{' '}
+          Links work once, for an hour.
+        </p>
+        <Button variant="primary" href="/forgot-password" className="w-full">
+          Send me a new link
+        </Button>
+      </Card>
+    )
   }
 
   return (

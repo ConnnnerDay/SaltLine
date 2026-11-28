@@ -97,12 +97,12 @@ export function HeadlineStats({ stats }: { stats: StatTileData[] }) {
       {keys.map((key) => {
         const stat = byKey.get(key)!
         return (
-          <div key={key} className="bg-surface">
-            <div className={cx('flex h-full flex-col gap-1 border-t-2 px-5 py-4 sm:px-6', stat.rule)}>
-              <dt className="section-label">{stat.label}</dt>
-              <dd className="text-2xl font-bold tracking-tight text-text">{stat.value}</dd>
-              {stat.note && <dd className="text-xs text-text-muted">{stat.note}</dd>}
-            </div>
+          // One wrapper per dt/dd group: a <dl> allows a single <div>
+          // around each group, and screen readers lose the pairing deeper.
+          <div key={key} className={cx('flex h-full flex-col gap-1 border-t-2 bg-surface px-5 py-4 sm:px-6', stat.rule)}>
+            <dt className="section-label">{stat.label}</dt>
+            <dd className="text-2xl font-bold tracking-tight text-text">{stat.value}</dd>
+            {stat.note && <dd className="text-xs text-text-muted">{stat.note}</dd>}
           </div>
         )
       })}

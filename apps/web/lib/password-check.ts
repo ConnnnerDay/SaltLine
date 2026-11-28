@@ -15,7 +15,8 @@ import { createHash } from 'node:crypto'
 export const breachCheckEnabled = process.env.PASSWORD_BREACH_CHECK !== '0'
 
 const RANGE_URL = 'https://api.pwnedpasswords.com/range/'
-const TIMEOUT_MS = 2500
+// A hanging service costs sign-up at most this long; normally ~50-150 ms.
+const TIMEOUT_MS = 1500
 
 export async function isPasswordBreached(
   password: string,

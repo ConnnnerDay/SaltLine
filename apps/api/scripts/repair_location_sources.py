@@ -26,7 +26,7 @@ sources drift; review the diff before committing.
 Run from apps/api (network access to api.weather.gov,
 api.tidesandcurrents.noaa.gov and www.ndbc.noaa.gov):
 
-    python -m scripts.repair_location_sources [--dry-run]
+    python -m scripts.repair_location_sources [--dry-run] [--only-suffix=-ak]
 """
 
 from __future__ import annotations
@@ -202,7 +202,8 @@ async def _repair_buoys(
 ) -> list[str] | None:
     current: list[str] = loc.get("ndbc_stations", [])
     working = [station for station in current if await _buoy_ok(client, station)]
-    if len(working) >= min(_BUOYS_WANTED, len(current)) and working[:1] == current[:1]:
+    # An empty list isn't "all working": new spots start with none.
+    if current and len(working) >= min(_BUOYS_WANTED, len(current)) and working[:1] == current[:1]:
         return None
     candidates = sorted(
         (
@@ -224,6 +225,12 @@ async def _repair_buoys(
 
 async def main() -> None:
     dry_run = "--dry-run" in sys.argv
+    # --only-suffix=-ak checks just the spots whose id ends that way (e.g.
+    # newly added ones), leaving every other spot untouched.
+    suffix = next(
+        (arg.split("=", 1)[1] for arg in sys.argv if arg.startswith("--only-suffix=")),
+        "",
+    )
     locations: list[dict[str, Any]] = json.loads(_LOCATIONS_PATH.read_text())
     changes = 0
     async with BoundedHTTPClient() as client:
@@ -234,6 +241,8 @@ async def main() -> None:
             f"catalogs: {len(watertemp_catalog)} water-temp, {len(ndbc_catalog)} NDBC"
         )
         for loc in locations:
+            if suffix and not str(loc["id"]).endswith(suffix):
+                continue
             fixes: dict[str, Any] = {}
             if (
                 tide_station := await _repair_tides(client, loc, tide_catalog)

@@ -407,6 +407,96 @@
       "fish": [
         "akule"
       ]
+    },
+    {
+      "id": "ak-king-salmon",
+      "title": "King salmon runs",
+      "regions": [
+        "alaska"
+      ],
+      "months": [
+        5,
+        6,
+        7
+      ],
+      "fish": [
+        "chinook-salmon"
+      ]
+    },
+    {
+      "id": "ak-sockeye",
+      "title": "Sockeye run",
+      "regions": [
+        "alaska"
+      ],
+      "months": [
+        6,
+        7,
+        8
+      ],
+      "fish": [
+        "sockeye-salmon-red-salmon"
+      ]
+    },
+    {
+      "id": "ak-pink-salmon",
+      "title": "Pink salmon run",
+      "regions": [
+        "alaska"
+      ],
+      "months": [
+        7,
+        8
+      ],
+      "fish": [
+        "pink-salmon-humpy"
+      ]
+    },
+    {
+      "id": "ak-silver-salmon",
+      "title": "Silver salmon run",
+      "regions": [
+        "alaska"
+      ],
+      "months": [
+        8,
+        9
+      ],
+      "fish": [
+        "coho-salmon"
+      ]
+    },
+    {
+      "id": "ak-winter-kings",
+      "title": "Winter feeder kings",
+      "regions": [
+        "alaska"
+      ],
+      "months": [
+        10,
+        11,
+        12,
+        1,
+        2,
+        3,
+        4
+      ],
+      "fish": [
+        "chinook-salmon"
+      ]
+    },
+    {
+      "id": "ak-hooligan",
+      "title": "Hooligan run",
+      "regions": [
+        "alaska"
+      ],
+      "months": [
+        5
+      ],
+      "fish": [
+        "eulachon-smelt"
+      ]
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "_comment": "Hand-maintained. The species catalogue has one set of peak/good months per fish, written for the Carolinas, and serves every region. Where a fish's timing differs by region, the months here replace the catalogue's for that region only (app.domain.guidance.for_region). Broad patterns from the regions' main seasons, not day-precise; regions not listed keep the catalogue's months.",
+  "_comment": "Hand-maintained. The species catalogue has one set of peak/good months per fish, written for the Carolinas (or central California for Pacific fish), and serves every region. Where a fish's timing differs by region, the months here replace the catalogue's for that region only (app.domain.guidance.for_region). Broad patterns from the regions' main seasons, not day-precise; regions not listed keep the catalogue's months.",
   "seasons": {
     "striped-bass": {
       "atlantic_north": {"peak": [5, 6, 10, 11], "good": [4, 7, 9, 12]},
@@ -91,6 +91,102 @@
     "snook": {
       "atlantic_south": {"peak": [5, 6, 7, 8, 9, 10], "good": [3, 4, 11]},
       "gulf": {"peak": [5, 6, 7, 8, 9, 10], "good": [3, 4, 11]}
+    },
+    "chinook-salmon": {
+      "alaska": {"peak": [5, 6, 7], "good": [1, 2, 3, 4, 8, 10, 11, 12]}
+    },
+    "coho-salmon": {
+      "alaska": {"peak": [8, 9], "good": [7, 10]}
+    },
+    "sockeye-salmon-red-salmon": {
+      "alaska": {"peak": [6, 7], "good": [8]}
+    },
+    "pink-salmon-humpy": {
+      "alaska": {"peak": [7, 8], "good": [9]}
+    },
+    "chum-salmon-dog-salmon": {
+      "alaska": {"peak": [7, 8], "good": [6, 9]}
+    },
+    "steelhead-trout-sea-run-rainbow": {
+      "alaska": {"peak": [4, 5, 9, 10], "good": [3, 11]}
+    },
+    "dolly-varden": {
+      "alaska": {"peak": [5, 6, 8, 9], "good": [7, 10]}
+    },
+    "pacific-halibut": {
+      "alaska": {"peak": [6, 7, 8], "good": [4, 5, 9, 10]}
+    },
+    "lingcod": {
+      "alaska": {"peak": [7, 8, 9], "good": [10]}
+    },
+    "black-rockfish": {
+      "alaska": {"peak": [5, 6, 7, 8, 9], "good": [4, 10]}
+    },
+    "dusky-rockfish": {
+      "alaska": {"peak": [6, 7, 8], "good": [5, 9]}
+    },
+    "quillback-rockfish": {
+      "alaska": {"peak": [5, 6, 7, 8, 9], "good": [4, 10]}
+    },
+    "copper-rockfish": {
+      "alaska": {"peak": [5, 6, 7, 8, 9], "good": [4, 10]}
+    },
+    "china-rockfish": {
+      "alaska": {"peak": [5, 6, 7, 8, 9], "good": [4, 10]}
+    },
+    "tiger-rockfish": {
+      "alaska": {"peak": [6, 7, 8], "good": [5, 9]}
+    },
+    "canary-rockfish": {
+      "alaska": {"peak": [6, 7, 8], "good": [5, 9]}
+    },
+    "yelloweye-rockfish": {
+      "alaska": {"peak": [6, 7, 8], "good": [5, 9]}
+    },
+    "rougheye-rockfish": {
+      "alaska": {"peak": [6, 7, 8], "good": [5, 9]}
+    },
+    "pacific-ocean-perch": {
+      "alaska": {"peak": [6, 7, 8], "good": [5, 9]}
+    },
+    "pacific-cod": {
+      "alaska": {"peak": [5, 6, 7, 8], "good": [4, 9]}
+    },
+    "walleye-pollock": {
+      "alaska": {"peak": [6, 7, 8], "good": [5, 9]}
+    },
+    "kelp-greenling": {
+      "alaska": {"peak": [5, 6, 7, 8, 9], "good": [4, 10]}
+    },
+    "rock-greenling": {
+      "alaska": {"peak": [5, 6, 7, 8, 9], "good": [4, 10]}
+    },
+    "starry-flounder": {
+      "alaska": {"peak": [5, 6, 7, 8], "good": [4, 9]}
+    },
+    "rock-sole": {
+      "alaska": {"peak": [5, 6, 7, 8], "good": [4, 9]}
+    },
+    "yellowfin-sole": {
+      "alaska": {"peak": [6, 7, 8], "good": [5, 9]}
+    },
+    "pacific-staghorn-sculpin": {
+      "alaska": {"peak": [5, 6, 7, 8, 9], "good": [4, 10]}
+    },
+    "pacific-spiny-dogfish": {
+      "alaska": {"peak": [6, 7, 8], "good": [5, 9]}
+    },
+    "big-skate": {
+      "alaska": {"peak": [6, 7, 8], "good": [5, 9]}
+    },
+    "pacific-herring": {
+      "alaska": {"peak": [4, 5], "good": [3, 6]}
+    },
+    "eulachon-smelt": {
+      "alaska": {"peak": [5], "good": [4, 6]}
+    },
+    "shiner-perch": {
+      "alaska": {"peak": [6, 7, 8], "good": [5, 9]}
     }
   }
 }

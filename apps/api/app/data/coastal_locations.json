@@ -1783,5 +1783,166 @@
     "temp_region": "hawaii",
     "conditions_region": "hawaii_conditions",
     "shore_facing_deg": 180
+  },
+  {
+    "id": "homer-ak",
+    "name": "Homer Spit",
+    "state": "AK",
+    "lat": 59.6033,
+    "lng": -151.418,
+    "timezone": "America/Anchorage",
+    "coops_station": "9455500",
+    "ndbc_stations": [
+      "46108"
+    ],
+    "nws_zone": "PKZ741",
+    "temp_region": "alaska_southcentral",
+    "conditions_region": "alaska",
+    "shore_facing_deg": 135
+  },
+  {
+    "id": "ninilchik-ak",
+    "name": "Ninilchik / Deep Creek",
+    "state": "AK",
+    "lat": 60.0496,
+    "lng": -151.671,
+    "timezone": "America/Anchorage",
+    "coops_station": "9455760",
+    "ndbc_stations": [
+      "46108"
+    ],
+    "nws_zone": "PKZ742",
+    "temp_region": "alaska_southcentral",
+    "conditions_region": "alaska",
+    "shore_facing_deg": 270
+  },
+  {
+    "id": "seward-ak",
+    "name": "Seward / Resurrection Bay",
+    "state": "AK",
+    "lat": 60.1042,
+    "lng": -149.4422,
+    "timezone": "America/Anchorage",
+    "coops_station": "9455090",
+    "ndbc_stations": [
+      "46081",
+      "46076"
+    ],
+    "nws_zone": "PKZ714",
+    "temp_region": "alaska_southcentral",
+    "conditions_region": "alaska",
+    "shore_facing_deg": 180
+  },
+  {
+    "id": "anchorage-ak",
+    "name": "Anchorage / Ship Creek",
+    "state": "AK",
+    "lat": 61.224,
+    "lng": -149.898,
+    "timezone": "America/Anchorage",
+    "coops_station": "9455920",
+    "ndbc_stations": [
+      "46081"
+    ],
+    "nws_zone": "PKZ740",
+    "temp_region": "alaska_southcentral",
+    "conditions_region": "alaska",
+    "shore_facing_deg": 290
+  },
+  {
+    "id": "whittier-ak",
+    "name": "Whittier",
+    "state": "AK",
+    "lat": 60.776,
+    "lng": -148.684,
+    "timezone": "America/Anchorage",
+    "coops_station": "9454050",
+    "ndbc_stations": [
+      "46081",
+      "46060"
+    ],
+    "nws_zone": "PKZ723",
+    "temp_region": "alaska_southcentral",
+    "conditions_region": "alaska",
+    "shore_facing_deg": 60
+  },
+  {
+    "id": "valdez-ak",
+    "name": "Valdez",
+    "state": "AK",
+    "lat": 61.124,
+    "lng": -146.355,
+    "timezone": "America/Anchorage",
+    "coops_station": "9454240",
+    "ndbc_stations": [
+      "46060",
+      "46061"
+    ],
+    "nws_zone": "PKZ720",
+    "temp_region": "alaska_southcentral",
+    "conditions_region": "alaska",
+    "shore_facing_deg": 200
+  },
+  {
+    "id": "kodiak-ak",
+    "name": "Kodiak",
+    "state": "AK",
+    "lat": 57.79,
+    "lng": -152.4,
+    "timezone": "America/Anchorage",
+    "coops_station": "9457292",
+    "ndbc_stations": [
+      "46077"
+    ],
+    "nws_zone": "PKZ736",
+    "temp_region": "alaska_southcentral",
+    "conditions_region": "alaska",
+    "shore_facing_deg": 60
+  },
+  {
+    "id": "juneau-ak",
+    "name": "Juneau",
+    "state": "AK",
+    "lat": 58.299,
+    "lng": -134.411,
+    "timezone": "America/Juneau",
+    "coops_station": "9452210",
+    "ndbc_stations": [],
+    "nws_zone": "PKZ031",
+    "temp_region": "alaska_southeast",
+    "conditions_region": "alaska",
+    "shore_facing_deg": 135
+  },
+  {
+    "id": "sitka-ak",
+    "name": "Sitka",
+    "state": "AK",
+    "lat": 57.052,
+    "lng": -135.336,
+    "timezone": "America/Juneau",
+    "coops_station": "9451600",
+    "ndbc_stations": [
+      "46084"
+    ],
+    "nws_zone": "PKZ642",
+    "temp_region": "alaska_southeast",
+    "conditions_region": "alaska",
+    "shore_facing_deg": 240
+  },
+  {
+    "id": "ketchikan-ak",
+    "name": "Ketchikan",
+    "state": "AK",
+    "lat": 55.342,
+    "lng": -131.646,
+    "timezone": "America/Juneau",
+    "coops_station": "9450460",
+    "ndbc_stations": [
+      "46145"
+    ],
+    "nws_zone": "PKZ036",
+    "temp_region": "alaska_southeast",
+    "conditions_region": "alaska",
+    "shore_facing_deg": 225
   }
 ]

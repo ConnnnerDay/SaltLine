@@ -39,6 +39,8 @@ const COASTS: { title: string; match: (region: string) => boolean; order: (a: Br
   { title: 'Atlantic', match: (r) => r.startsWith('atlantic'), order: (a, b) => b.lat - a.lat },
   { title: 'Gulf of Mexico', match: (r) => r === 'gulf', order: (a, b) => a.lng - b.lng },
   { title: 'Pacific', match: (r) => r.startsWith('pacific'), order: (a, b) => b.lat - a.lat },
+  // Alaska runs west to east, Kodiak to Ketchikan.
+  { title: 'Alaska', match: (r) => r === 'alaska', order: (a, b) => a.lng - b.lng },
   { title: 'Hawaii', match: (r) => r.startsWith('hawaii'), order: (a, b) => a.lng - b.lng },
 ]
 
@@ -66,7 +68,7 @@ export function LocationsSearchPage({
             <h1 className="text-3xl font-bold text-text sm:text-4xl">Find your spot</h1>
             <p className="mt-3 text-text-muted">
               Search {locations.length || 101} curated beaches, piers, and inlets on the
-              Atlantic, Gulf, Pacific, and Hawaii coasts, or use your current location.
+              Atlantic, Gulf, Pacific, Alaska, and Hawaii coasts, or use your current location.
             </p>
           </header>
 

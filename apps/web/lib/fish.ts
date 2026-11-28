@@ -56,6 +56,7 @@ export const REGIONS: { key: string; label: string }[] = [
   { key: 'pacific', label: 'Pacific (central CA–WA)' },
   { key: 'pacific_south', label: 'Southern California' },
   { key: 'hawaii_conditions', label: 'Hawaii' },
+  { key: 'alaska', label: 'Alaska' },
 ]
 
 export const REGION_LABEL: Record<string, string> = Object.fromEntries(

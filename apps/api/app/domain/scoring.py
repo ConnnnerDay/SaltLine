@@ -90,6 +90,9 @@ _DIRS_BY_ORIENTATION: dict[str, tuple[set[str], set[str]]] = {
     "west": (_ONSHORE_DIRS_WEST, _OFFSHORE_DIRS_WEST),
     "gulf": (_ONSHORE_DIRS_GULF, _OFFSHORE_DIRS_GULF),
     "hawaii": (set(), set()),
+    # Fjords, inlets and islands face every way: without a spot's own
+    # facing there is no honest onshore/offshore call.
+    "alaska": (set(), set()),
 }
 
 _SOLUNAR_RATING_BONUS = {"Excellent": 8, "Good": 4, "Fair": 0, "Poor": -6}
@@ -307,6 +310,8 @@ def wind_orientation_for_region(conditions_region: str) -> str:
         return "gulf"
     if cr.startswith("hawaii"):
         return "hawaii"
+    if cr.startswith("alaska"):
+        return "alaska"
     return "east"
 
 

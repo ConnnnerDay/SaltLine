@@ -29,8 +29,8 @@ from app.providers.stations import CoopsStationCatalogEntry, NdbcStationCatalogE
 
 def test_load_curated_locations_count_and_uniqueness() -> None:
     locations = load_curated_locations()
-    assert len(locations) == 101
-    assert len({loc.id for loc in locations}) == 101
+    assert len(locations) == 111
+    assert len({loc.id for loc in locations}) == 111
 
 
 def test_load_curated_locations_golden_montauk() -> None:
@@ -241,15 +241,26 @@ def test_resolve_dynamic_location_far_from_everything_still_resolves_with_defaul
 
 def test_resolve_dynamic_location_nws_zone_not_inherited_when_too_far() -> None:
     locations = load_curated_locations()
-    # Kodiak, AK — no curated Alaska location exists, so the nearest curated
-    # neighbor (a Pacific NW spot) is over 1,000 miles away, well past the
-    # 75-mile NWS-zone-inherit radius.
-    lat, lng = 57.79, -152.4
+    # Utqiagvik (Barrow), AK: the nearest curated spot is in Southcentral,
+    # hundreds of miles away, well past the 75-mile NWS-zone-inherit radius.
+    lat, lng = 71.29, -156.79
 
     resolved, anchor_miles = resolve_dynamic_location(lat, lng, locations, [], [], [])
 
     assert resolved.nws_zone == ""
-    assert anchor_miles > 1000.0
+    assert anchor_miles > 500.0
+
+
+def test_resolve_dynamic_location_near_kodiak_is_an_alaska_point() -> None:
+    locations = load_curated_locations()
+    # A beach a few miles from Kodiak town.
+    resolved, anchor_miles = resolve_dynamic_location(
+        57.73, -152.5, locations, [], [], []
+    )
+    assert anchor_miles < 75.0
+    assert resolved.conditions_region == "alaska"
+    assert resolved.nws_zone.startswith("PKZ")
+    assert resolved.timezone == "America/Anchorage"
 
 
 def test_dynamic_name_places_the_point_relative_to_the_nearest_spot() -> None:
@@ -279,7 +290,7 @@ def test_curated_marine_zones_are_on_the_right_coast() -> None:
         "VA": ("ANZ",), "NC": ("AMZ",), "SC": ("AMZ",), "GA": ("AMZ",),
         "FL": ("AMZ", "GMZ"), "AL": ("GMZ",), "MS": ("GMZ",), "LA": ("GMZ",),
         "TX": ("GMZ",), "CA": ("PZZ",), "OR": ("PZZ",), "WA": ("PZZ",),
-        "HI": ("PHZ",),
+        "HI": ("PHZ",), "AK": ("PKZ",),
     }  # fmt: skip
     for loc in load_curated_locations():
         assert loc.nws_zone.startswith(prefixes[loc.state]), (loc.id, loc.nws_zone)

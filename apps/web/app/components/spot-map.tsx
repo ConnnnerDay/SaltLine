@@ -46,6 +46,7 @@ const COASTS: { key: string; label: string; match: (spot: MapSpot) => boolean }[
   { key: 'atlantic', label: 'Atlantic', match: (s) => (s.conditions_region ?? '').startsWith('atlantic') },
   { key: 'gulf', label: 'Gulf', match: (s) => s.conditions_region === 'gulf' },
   { key: 'pacific', label: 'Pacific', match: (s) => (s.conditions_region ?? '').startsWith('pacific') },
+  { key: 'alaska', label: 'Alaska', match: (s) => s.conditions_region === 'alaska' },
   { key: 'hawaii', label: 'Hawaii', match: (s) => (s.conditions_region ?? '').startsWith('hawaii') },
 ]
 

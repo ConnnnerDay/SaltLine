@@ -53,6 +53,7 @@ def test_catalogue_is_curated_and_every_species_is_region_gated() -> None:
         "pacific",
         "pacific_south",
         "hawaii_conditions",
+        "alaska",
     }
     for species in catalogue:
         assert species["regions"], species["id"]
@@ -962,3 +963,28 @@ def test_regulation_carries_this_months_season_status() -> None:
     reg = regulation_for("red-drum", "NC", date(2026, 5, 1))
     assert reg is not None
     assert reg.season_status in ("open", "check", None)
+
+
+def test_alaska_picks_are_alaska_fish_in_alaska_seasons() -> None:
+    from app.domain.guidance import for_region
+
+    catalogue = {s["id"]: s for s in load_catalogue()}
+    alaska_ids = {i for i, s in catalogue.items() if "alaska" in s["regions"]}
+    assert {"chinook-salmon", "pacific-halibut", "lingcod"} <= alaska_ids
+    # No Gulf or Atlantic fish sneak into Alaska.
+    assert "red-drum" not in alaska_ids and "striped-bass" not in alaska_ids
+
+    # July in Southcentral (54F): salmon season, picks are Alaska fish.
+    july = _guidance(region="alaska", water_temp_f=54.0, month=7)
+    assert july.species
+    assert {pick.id for pick in july.species} <= alaska_ids
+    # January (37F): winter feeder kings and cod still count, nothing
+    # warm-water does.
+    january = _guidance(region="alaska", water_temp_f=38.0, month=1)
+    assert january.species
+    assert {pick.id for pick in january.species} <= alaska_ids
+
+    # Alaska months replace the California ones: lingcod opens July 1 in
+    # Southcentral, not a winter fish there.
+    lingcod = for_region(catalogue["lingcod"], "alaska")
+    assert 1 not in lingcod["peak_months"] and 7 in lingcod["peak_months"]

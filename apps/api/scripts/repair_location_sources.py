@@ -203,7 +203,11 @@ async def _repair_buoys(
     current: list[str] = loc.get("ndbc_stations", [])
     working = [station for station in current if await _buoy_ok(client, station)]
     # An empty list isn't "all working": new spots start with none.
-    if current and len(working) >= min(_BUOYS_WANTED, len(current)) and working[:1] == current[:1]:
+    if (
+        current
+        and len(working) >= min(_BUOYS_WANTED, len(current))
+        and working[:1] == current[:1]
+    ):
         return None
     candidates = sorted(
         (

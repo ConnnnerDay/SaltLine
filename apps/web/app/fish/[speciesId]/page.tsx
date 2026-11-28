@@ -303,7 +303,7 @@ export default async function FishDetailPage({ params }: Props) {
                 <h2 className="section-label">How to catch it</h2>
                 <dl className="flex flex-col gap-3">
                   <Fact label="Bait" value={say(fish.bait)} />
-                  <HookIt hows={hooksFor(fish.bait)} say={say} label="How to hook these baits" />
+                  <HookIt hows={hooksFor(fish.bait)} units={units} label="How to hook these baits" />
                   <Fact label="Rig" value={say(fish.rig)} />
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <Fact label="Hook" value={say(fish.hook_size)} />

@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/app/components/ui'
 import { cx } from '@/app/components/ui/cx'
-import { milesBetween, type MapSpot } from '@/app/components/spot-map'
+import type { MapSpot } from '@/app/components/spot-map'
+import { milesBetween } from '@/lib/geo'
 import { distance, type Units } from '@/lib/units'
 
 type Status = 'idle' | 'locating' | 'done' | 'denied' | 'unavailable'

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { rememberHomeIfUnset } from '@/lib/remember-home'
 import { useRouter } from 'next/navigation'
 import { Button } from './ui'
-import { milesBetween } from './spot-map'
+import { milesBetween } from '@/lib/geo'
 import { distance, type Units } from '@/lib/units'
 import type { ResolvedLocation } from '@/app/api/locations/resolve/route'
 

@@ -6,7 +6,7 @@ import { monthIn } from '@/lib/zoned-time'
 import { auth } from '@/lib/auth'
 import { internalApiFetch } from '@/lib/internal-api-client'
 import type { Preferences } from '@/app/api/preferences/route'
-import type { FishSummary } from '@/lib/fish'
+import { toGuideFish, type FishSummary } from '@/lib/fish'
 import { FishGuide } from './fish-guide'
 import { SPECIES_PHOTOS } from '@/app/components/species-photo'
 
@@ -46,7 +46,7 @@ export default async function FishPage() {
           </header>
           <FishGuide
             // Just each photo's URL: the full credits manifest stays on the server.
-            species={species.map((fish) => ({ ...fish, photo: SPECIES_PHOTOS[fish.id]?.src ?? null }))}
+            species={species.map((fish) => toGuideFish(fish, SPECIES_PHOTOS[fish.id]?.src ?? null))}
             initialRegion={home?.conditions_region ?? null}
             month={month}
             favorites={prefs?.favorite_species ?? []}

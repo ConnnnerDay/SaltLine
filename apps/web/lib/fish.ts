@@ -84,16 +84,18 @@ export const MONTH_NAMES = [
 ]
 
 /** A fish's peak/good months, for one region when it has its own. */
-export function monthsFor(fish: FishSummary, region?: string | null): { peak_months: number[]; good_months: number[] } {
+type Seasons = Pick<FishSummary, 'peak_months' | 'good_months' | 'season_by_region'>
+
+export function monthsFor(fish: Seasons, region?: string | null): { peak_months: number[]; good_months: number[] } {
   return (region && fish.season_by_region?.[region]) || fish
 }
 
-export function seasonOf(fish: FishSummary, month: number, region?: string | null): 'peak' | 'good' | 'off' {
+export function seasonOf(fish: Seasons, month: number, region?: string | null): 'peak' | 'good' | 'off' {
   const { peak_months, good_months } = monthsFor(fish, region)
   return peak_months.includes(month) ? 'peak' : good_months.includes(month) ? 'good' : 'off'
 }
 
-export function spawningIn(fish: FishSummary, month: number): boolean {
+export function spawningIn(fish: { spawn?: { months: number[] } | null }, month: number): boolean {
   return Boolean(fish.spawn?.months.includes(month))
 }
 
@@ -118,4 +120,28 @@ export function monthSpan(months: number[]): string {
   return runs
     .map((run) => (run.length === 1 ? short(run[0]) : `${short(run[0])}–${short(run[run.length - 1])}`))
     .join(', ')
+}
+
+/** What the Fish guide's list needs per fish: everything else (spawning
+ * notes, targets, survivable temperatures) is on each fish's own page.
+ * The full summaries for ~580 fish made the guide's page ~250 KB. */
+export type GuideFish = Pick<
+  FishSummary,
+  'id' | 'name' | 'regions' | 'access' | 'temp_ideal_low' | 'temp_ideal_high' | 'peak_months' | 'good_months' | 'season_by_region'
+> & { spawn: { months: number[] } | null; photo: string | null }
+
+export function toGuideFish(fish: FishSummary, photo: string | null): GuideFish {
+  return {
+    id: fish.id,
+    name: fish.name,
+    regions: fish.regions,
+    access: fish.access,
+    temp_ideal_low: fish.temp_ideal_low,
+    temp_ideal_high: fish.temp_ideal_high,
+    peak_months: fish.peak_months,
+    good_months: fish.good_months,
+    ...(fish.season_by_region && Object.keys(fish.season_by_region).length ? { season_by_region: fish.season_by_region } : {}),
+    spawn: fish.spawn ? { months: fish.spawn.months } : null,
+    photo,
+  }
 }

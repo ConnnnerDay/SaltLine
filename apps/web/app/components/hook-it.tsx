@@ -1,57 +1,37 @@
+'use client'
+
+import { useState } from 'react'
 import type { BaitHow } from '@/lib/hook-bait'
-import { BaitArt, hasBaitArt } from './bait-art'
+import dynamic from 'next/dynamic'
+import type { Units } from '@/lib/units'
+
+const HookItSteps = dynamic(() => import('./hook-it-steps'), {
+  loading: () => <p className="mt-3 text-sm text-text-muted">Loading…</p>,
+})
 
 /** "How to hook it": a collapsed, step-by-step walkthrough of bait
  * how-tos (lib/hook-bait.ts): for each bait, one drawn panel per step
  * (bait-art.tsx) with the step as its caption, or just the caption when a
- * step has no drawing. Works in server and client components. */
+ * step has no drawing.
+ *
+ * The steps and drawings load and render only once the section is
+ * opened (hook-it-steps.tsx): ~90 KB of SVG markup per forecast page and
+ * ~25 KB of drawing code that most visits never need. */
 export function HookIt({
   hows,
-  say,
+  units,
   label = 'How to hook it',
 }: {
   hows: BaitHow[]
-  say: (text: string) => string
+  units: Units
   label?: string
 }) {
+  const [opened, setOpened] = useState(false)
   if (hows.length === 0) return null
   return (
-    <details className="group">
+    <details className="group" onToggle={(event) => event.currentTarget.open && setOpened(true)}>
       <summary className="w-fit cursor-pointer text-sm font-semibold text-primary">{label}</summary>
-      <div className="mt-3 flex flex-col gap-4">
-        {hows.map((how) => (
-          <section key={how.id} className="flex flex-col gap-2">
-            {hows.length > 1 && <h4 className="text-xs font-bold uppercase tracking-wide text-text-muted">{how.title}</h4>}
-            <ol className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,13rem),1fr))] gap-3">
-              {how.steps.map((step, index) => {
-                const badge = (
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-[#1c1917] bg-[#ffd166] text-xs font-black text-[#1c1917]">
-                    {index + 1}
-                  </span>
-                )
-                return (
-                  <li key={step} className="flex flex-col overflow-hidden rounded-[10px] border border-border bg-surface-raised">
-                    {hasBaitArt(how.id, index) ? (
-                      <>
-                        <div className="relative">
-                          <BaitArt id={how.id} step={index} label={`${how.title}, step ${index + 1}: ${step}`} />
-                          <span className="absolute left-2 top-2">{badge}</span>
-                        </div>
-                        <p className="px-3 py-2 text-sm leading-relaxed text-text">{say(step)}</p>
-                      </>
-                    ) : (
-                      <div className="flex items-start gap-2 px-3 py-2">
-                        {badge}
-                        <p className="text-sm leading-relaxed text-text">{say(step)}</p>
-                      </div>
-                    )}
-                  </li>
-                )
-              })}
-            </ol>
-          </section>
-        ))}
-      </div>
+      {opened && <HookItSteps hows={hows} units={units} />}
     </details>
   )
 }

@@ -138,7 +138,7 @@ export function BaitThisMonth({
               )}
               {hooksFor(bait.name).length > 0 && (
                 <div className="text-xs">
-                  <HookIt hows={hooksFor(bait.name)} say={say} />
+                  <HookIt hows={hooksFor(bait.name)} units={units} />
                 </div>
               )}
               {targetsHere(bait).length > 0 && (

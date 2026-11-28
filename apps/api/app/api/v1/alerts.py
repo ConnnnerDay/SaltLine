@@ -7,7 +7,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import (
@@ -19,6 +19,7 @@ from app.api.deps import (
 )
 from app.api.internal_auth import require_internal_signature
 from app.domain.alerts import (
+    AlertEmailIn,
     AlertRule,
     AlertRuleIn,
     AlertRuleOut,
@@ -26,6 +27,7 @@ from app.domain.alerts import (
     AlertThreshold,
     smtp_configured,
 )
+from app.domain.limits import MAX_ALERT_RULES, ensure_under_cap
 
 router = APIRouter(
     prefix="/v1/me/alerts",
@@ -89,6 +91,7 @@ async def upsert_alert(
         )
     ).scalar_one_or_none()
     if row is None:
+        await ensure_under_cap(session, AlertRule, user_id, MAX_ALERT_RULES, "alerts")
         row = AlertRule(
             user_id=user_id,
             location_id=body.location_id,
@@ -101,6 +104,22 @@ async def upsert_alert(
     await session.commit()
     await session.refresh(row)
     return await _out(row, state)
+
+
+@router.put("/email", status_code=204)
+async def set_alert_email(
+    body: AlertEmailIn,
+    user_id: str = Depends(require_authenticated_user_id),
+    session: AsyncSession = Depends(get_db_session),  # noqa: B008
+) -> None:
+    """Point every one of this user's alerts at their current email.
+    apps/web calls it when the account's email changes, so alerts never
+    keep going to an address the user has left (which might now be
+    someone else's)."""
+    await session.execute(
+        update(AlertRule).where(AlertRule.user_id == user_id).values(email=body.email)
+    )
+    await session.commit()
 
 
 @router.delete("/{alert_id}", status_code=204)

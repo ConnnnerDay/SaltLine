@@ -1004,11 +1004,12 @@
       "name": "Black rockfish",
       "legacy_name": "Black rockfish",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 46,
+      "temp_min": 40,
       "temp_max": 65,
-      "temp_ideal_low": 50,
+      "temp_ideal_low": 46,
       "temp_ideal_high": 60,
       "peak_months": [
         4,
@@ -1041,11 +1042,12 @@
       "name": "Lingcod",
       "legacy_name": "Lingcod",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 44,
+      "temp_min": 38,
       "temp_max": 62,
-      "temp_ideal_low": 48,
+      "temp_ideal_low": 44,
       "temp_ideal_high": 56,
       "peak_months": [
         10,
@@ -3678,11 +3680,12 @@
       "legacy_name": "Shiner perch",
       "regions": [
         "pacific",
-        "pacific_south"
+        "pacific_south",
+        "alaska"
       ],
-      "temp_min": 52,
+      "temp_min": 44,
       "temp_max": 68,
-      "temp_ideal_low": 56,
+      "temp_ideal_low": 50,
       "temp_ideal_high": 64,
       "peak_months": [
         5,
@@ -3846,11 +3849,12 @@
       "name": "Starry flounder",
       "legacy_name": "Starry flounder",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 44,
+      "temp_min": 36,
       "temp_max": 64,
-      "temp_ideal_low": 48,
+      "temp_ideal_low": 42,
       "temp_ideal_high": 58,
       "peak_months": [
         11,
@@ -3927,11 +3931,12 @@
       "name": "Kelp greenling",
       "legacy_name": "Kelp greenling",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 44,
+      "temp_min": 38,
       "temp_max": 60,
-      "temp_ideal_low": 48,
+      "temp_ideal_low": 44,
       "temp_ideal_high": 56,
       "peak_months": [
         5,
@@ -4106,11 +4111,12 @@
       "name": "Copper rockfish",
       "legacy_name": "Copper rockfish",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 46,
+      "temp_min": 40,
       "temp_max": 62,
-      "temp_ideal_low": 50,
+      "temp_ideal_low": 46,
       "temp_ideal_high": 58,
       "peak_months": [
         5,
@@ -4213,11 +4219,12 @@
       "name": "Chinook salmon",
       "legacy_name": "Chinook salmon (king salmon)",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 45,
+      "temp_min": 38,
       "temp_max": 65,
-      "temp_ideal_low": 50,
+      "temp_ideal_low": 44,
       "temp_ideal_high": 58,
       "peak_months": [
         4,
@@ -4250,11 +4257,12 @@
       "name": "Coho salmon",
       "legacy_name": "Coho salmon (silver salmon)",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 48,
+      "temp_min": 42,
       "temp_max": 62,
-      "temp_ideal_low": 52,
+      "temp_ideal_low": 48,
       "temp_ideal_high": 58,
       "peak_months": [
         7,
@@ -12393,11 +12401,12 @@
       "name": "Rock greenling",
       "legacy_name": "Rock greenling",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 44,
+      "temp_min": 38,
       "temp_max": 58,
-      "temp_ideal_low": 46,
+      "temp_ideal_low": 44,
       "temp_ideal_high": 54,
       "peak_months": [
         5,
@@ -12427,11 +12436,12 @@
       "legacy_name": "Pacific staghorn sculpin",
       "regions": [
         "pacific",
-        "pacific_south"
+        "pacific_south",
+        "alaska"
       ],
-      "temp_min": 44,
+      "temp_min": 38,
       "temp_max": 64,
-      "temp_ideal_low": 48,
+      "temp_ideal_low": 44,
       "temp_ideal_high": 58,
       "peak_months": [
         10,
@@ -12462,11 +12472,12 @@
       "name": "Pacific herring",
       "legacy_name": "Pacific herring",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 44,
+      "temp_min": 38,
       "temp_max": 58,
-      "temp_ideal_low": 48,
+      "temp_ideal_low": 44,
       "temp_ideal_high": 54,
       "peak_months": [
         12,
@@ -12721,11 +12732,12 @@
       "name": "Chum salmon (dog salmon)",
       "legacy_name": "Chum salmon (dog salmon)",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 46,
+      "temp_min": 42,
       "temp_max": 62,
-      "temp_ideal_low": 50,
+      "temp_ideal_low": 48,
       "temp_ideal_high": 58,
       "peak_months": [
         9,
@@ -12793,11 +12805,12 @@
       "name": "Pacific halibut",
       "legacy_name": "Pacific halibut",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 40,
+      "temp_min": 36,
       "temp_max": 62,
-      "temp_ideal_low": 45,
+      "temp_ideal_low": 42,
       "temp_ideal_high": 55,
       "peak_months": [
         5,
@@ -12827,9 +12840,10 @@
       "name": "Pink salmon (humpy)",
       "legacy_name": "Pink salmon (humpy)",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 46,
+      "temp_min": 44,
       "temp_max": 60,
       "temp_ideal_low": 50,
       "temp_ideal_high": 56,
@@ -12968,11 +12982,12 @@
       "name": "Steelhead trout (sea-run rainbow)",
       "legacy_name": "Steelhead trout (sea-run rainbow)",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 42,
+      "temp_min": 34,
       "temp_max": 60,
-      "temp_ideal_low": 46,
+      "temp_ideal_low": 40,
       "temp_ideal_high": 55,
       "peak_months": [
         11,
@@ -13001,9 +13016,10 @@
       "name": "Pacific cod",
       "legacy_name": "Pacific cod",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 36,
+      "temp_min": 34,
       "temp_max": 55,
       "temp_ideal_low": 40,
       "temp_ideal_high": 50,
@@ -13037,7 +13053,8 @@
       "name": "Yelloweye rockfish",
       "legacy_name": "Yelloweye rockfish",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
       "temp_min": 38,
       "temp_max": 58,
@@ -13071,11 +13088,12 @@
       "name": "Quillback rockfish",
       "legacy_name": "Quillback rockfish",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 44,
+      "temp_min": 40,
       "temp_max": 62,
-      "temp_ideal_low": 48,
+      "temp_ideal_low": 46,
       "temp_ideal_high": 56,
       "peak_months": [
         4,
@@ -13534,11 +13552,12 @@
       "name": "China rockfish",
       "legacy_name": "China rockfish",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 46,
+      "temp_min": 40,
       "temp_max": 62,
-      "temp_ideal_low": 50,
+      "temp_ideal_low": 46,
       "temp_ideal_high": 58,
       "peak_months": [
         4,
@@ -13677,9 +13696,10 @@
       "name": "Sockeye salmon (red salmon)",
       "legacy_name": "Sockeye salmon (red salmon)",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 46,
+      "temp_min": 44,
       "temp_max": 60,
       "temp_ideal_low": 50,
       "temp_ideal_high": 56,
@@ -13710,9 +13730,10 @@
       "name": "Rock sole",
       "legacy_name": "Rock sole",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 38,
+      "temp_min": 36,
       "temp_max": 58,
       "temp_ideal_low": 42,
       "temp_ideal_high": 52,
@@ -13818,11 +13839,12 @@
       "name": "Tiger rockfish",
       "legacy_name": "Tiger rockfish",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 44,
+      "temp_min": 40,
       "temp_max": 60,
-      "temp_ideal_low": 48,
+      "temp_ideal_low": 46,
       "temp_ideal_high": 56,
       "peak_months": [
         4,
@@ -14031,9 +14053,10 @@
       "name": "Pacific spiny dogfish",
       "legacy_name": "Pacific spiny dogfish",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 42,
+      "temp_min": 40,
       "temp_max": 62,
       "temp_ideal_low": 46,
       "temp_ideal_high": 56,
@@ -14203,7 +14226,8 @@
       "name": "Pacific ocean perch",
       "legacy_name": "Pacific ocean perch",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
       "temp_min": 36,
       "temp_max": 54,
@@ -14239,7 +14263,8 @@
       "name": "Rougheye rockfish",
       "legacy_name": "Rougheye rockfish",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
       "temp_min": 36,
       "temp_max": 54,
@@ -14381,11 +14406,12 @@
       "name": "Canary rockfish",
       "legacy_name": "Canary rockfish",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 46,
+      "temp_min": 40,
       "temp_max": 62,
-      "temp_ideal_low": 50,
+      "temp_ideal_low": 46,
       "temp_ideal_high": 58,
       "peak_months": [
         4,
@@ -15854,11 +15880,12 @@
       "name": "Dusky rockfish",
       "legacy_name": "Dusky rockfish",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 44,
+      "temp_min": 38,
       "temp_max": 58,
-      "temp_ideal_low": 48,
+      "temp_ideal_low": 44,
       "temp_ideal_high": 55,
       "peak_months": [
         5,
@@ -16547,11 +16574,12 @@
       "name": "Eulachon (smelt)",
       "legacy_name": "Eulachon (smelt)",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 42,
+      "temp_min": 36,
       "temp_max": 58,
-      "temp_ideal_low": 46,
+      "temp_ideal_low": 42,
       "temp_ideal_high": 54,
       "peak_months": [
         2,
@@ -17762,11 +17790,12 @@
       "name": "Dolly Varden",
       "legacy_name": "Dolly Varden",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 42,
+      "temp_min": 34,
       "temp_max": 58,
-      "temp_ideal_low": 46,
+      "temp_ideal_low": 40,
       "temp_ideal_high": 54,
       "peak_months": [
         7,
@@ -18069,7 +18098,8 @@
       "name": "Walleye pollock",
       "legacy_name": "Walleye pollock",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
       "temp_min": 36,
       "temp_max": 56,
@@ -19094,11 +19124,12 @@
       "name": "Big skate",
       "legacy_name": "Big skate",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
-      "temp_min": 44,
+      "temp_min": 40,
       "temp_max": 62,
-      "temp_ideal_low": 48,
+      "temp_ideal_low": 46,
       "temp_ideal_high": 58,
       "peak_months": [
         3,
@@ -20078,7 +20109,8 @@
       "name": "Yellowfin sole",
       "legacy_name": "Yellowfin sole",
       "regions": [
-        "pacific"
+        "pacific",
+        "alaska"
       ],
       "temp_min": 34,
       "temp_max": 54,

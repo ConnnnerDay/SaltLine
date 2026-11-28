@@ -1,7 +1,7 @@
 /**
  * The seasonal runs and migrations anglers plan around, by region: the
  * fall mullet run, the spring cobia run, striper blitzes, the oama run in
- * Hawaii. Months are when each typically happens (it shifts a few weeks
+ * Hawaii, salmon in Alaska. Months are when each typically happens (it shifts a few weeks
  * with the water temperature year to year), so the forecast can say what's
  * on now and what's coming. `fish` are catalogue ids, for links.
  *
@@ -238,6 +238,60 @@ export const RUNS: Run[] = [
     fish: ['akule'],
     what: 'Halalu (young akule) school in harbors and bays through summer.',
     how: 'Fish sabiki rigs, or tiny hooks with a little bread for chum, at dawn and dusk. Check local rules before you go.',
+  },
+  {
+    id: 'ak-king-salmon',
+    title: 'King salmon runs',
+    regions: ['alaska'],
+    months: [5,  6,  7],
+    fish: ['chinook-salmon'],
+    what: 'Kings return to Kenai Peninsula and Southeast streams, and stocked kings fill terminal fisheries like the Homer Spit lagoon.',
+    how: 'Fish cured roe or a big spinner near the stream mouth on the incoming tide. Many Cook Inlet king fisheries have been closed or cut back in recent years, so check ADF&G emergency orders first.',
+  },
+  {
+    id: 'ak-sockeye',
+    title: 'Sockeye run',
+    regions: ['alaska'],
+    months: [6,  7,  8],
+    fish: ['sockeye-salmon-red-salmon'],
+    what: 'Sockeye pour into the Kenai, Russian and Kasilof rivers in June and July, the biggest crowds of the Alaska summer.',
+    how: 'Sockeye rarely strike. Drift a fly on a long leader with the current through the line of fish close to the bank. In fresh water a fish hooked anywhere but the mouth must be released.',
+  },
+  {
+    id: 'ak-pink-salmon',
+    title: 'Pink salmon run',
+    regions: ['alaska'],
+    months: [7,  8],
+    fish: ['pink-salmon-humpy'],
+    what: 'Pinks flood beaches and stream mouths for a few weeks; most of Southcentral sees its big runs in even-numbered years.',
+    how: 'Cast small pink spoons or spinners from the beach near stream mouths. Fish the fresh, bright ones; they turn soft fast in fresh water.',
+  },
+  {
+    id: 'ak-silver-salmon',
+    title: 'Silver salmon run',
+    regions: ['alaska'],
+    months: [8,  9],
+    fish: ['coho-salmon'],
+    what: 'Coho (silvers) stack up off Resurrection Bay, Kachemak Bay and Southeast stream mouths in late summer.',
+    how: 'Cast spinners or cured roe from the beach on the incoming tide, or troll herring in the bays.',
+  },
+  {
+    id: 'ak-winter-kings',
+    title: 'Winter feeder kings',
+    regions: ['alaska'],
+    months: [10,  11,  12,  1,  2,  3,  4],
+    fish: ['chinook-salmon'],
+    what: 'Immature "feeder" kings stay in Kachemak Bay, Resurrection Bay and Southeast waters all winter, feeding on herring.',
+    how: 'Troll herring or a hoochie behind a flasher near bottom, where the bait is. Watch the weather windows; winter seas build fast.',
+  },
+  {
+    id: 'ak-hooligan',
+    title: 'Hooligan run',
+    regions: ['alaska'],
+    months: [5],
+    fish: ['eulachon-smelt'],
+    what: 'Eulachon (hooligan) run up glacial rivers like the Twentymile in a few short weeks in May.',
+    how: 'Alaska residents dipnet them in some rivers; check the area rules before you go. They make great halibut bait.',
   },
 ]
 

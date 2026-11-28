@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useSession } from '@/lib/auth-client'
+import { syncOfflineOwner } from '@/lib/offline-cache'
 
 /**
  * Sprint 38 ("PWA baseline"): registers public/sw.js -- see that
@@ -22,6 +24,16 @@ export function ServiceWorkerRegistration() {
       // to surface a user-facing error for a failed registration.
     })
   }, [])
+
+  // Offline copies of personal pages belong to one account: when another
+  // signs in (or nobody is signed in), they go. Not while the session
+  // check is pending or failed: unknown isn't "signed out".
+  const { data: session, isPending, error } = useSession()
+  const userId = session?.user.id ?? null
+  useEffect(() => {
+    if (isPending || error) return
+    void syncOfflineOwner(userId)
+  }, [userId, isPending, error])
 
   return null
 }

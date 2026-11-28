@@ -38,11 +38,12 @@ const CORE_SHELL = ['/', '/offline', '/manifest.webmanifest', '/icon-192', '/ico
  * `/account`: those render a signed-in user's own personal data (their
  * saved-location list, their settings) server-side into the HTML, and
  * this cache is Cache Storage -- shared by every account that ever
- * signs into this browser profile, not scoped per session. `/forecast/*`
- * and `/share/*` render a *location's* data, not an account's, so
- * caching them carries no equivalent cross-account leak risk on a
- * shared device. `/locations` is the search shell (no result data
- * until a query resolves), safe to cache indefinitely.
+ * signs into this browser profile, not scoped per session. `/` and
+ * `/forecast/*` are personal too now (home spot, saved spots in the spot
+ * switcher, fishing style), so the page app clears this cache whenever
+ * the signed-in account changes or signs out (lib/offline-cache.ts).
+ * `/locations` is the search shell (no result data until a query
+ * resolves).
  */
 const PAGE_CACHE_PATHS = ['/', '/locations', '/forecast/', '/share/']
 

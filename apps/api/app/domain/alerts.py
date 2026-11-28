@@ -68,6 +68,12 @@ class AlertRuleIn(BaseModel):
     email: str = Field(max_length=254, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
+class AlertEmailIn(BaseModel):
+    """The account's current email, for every one of its alert rules."""
+
+    email: str = Field(max_length=254, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
 class AlertRuleOut(BaseModel):
     id: int
     location_id: str

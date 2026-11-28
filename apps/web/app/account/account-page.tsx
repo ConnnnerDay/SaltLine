@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Card, Field } from '@/app/components/ui'
 import { authClient } from '@/lib/auth-client'
+import { clearOfflinePages } from '@/lib/offline-cache'
 import type { SocialProviderId } from '@/lib/social-providers'
 
 const PROVIDER_NAME: Record<SocialProviderId, string> = { google: 'Google', apple: 'Apple' }
@@ -74,6 +75,7 @@ export function AccountPage({
       )
       return
     }
+    await clearOfflinePages()
     router.push('/')
     router.refresh()
   }

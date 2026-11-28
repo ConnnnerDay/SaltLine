@@ -26,6 +26,7 @@ from app.api.deps import (
     resolve_location_id,
 )
 from app.api.internal_auth import require_internal_signature
+from app.domain.limits import MAX_SAVED_LOCATIONS, ensure_under_cap
 from app.domain.saved_locations import SavedLocation, SavedLocationOut
 
 router = APIRouter(
@@ -84,6 +85,9 @@ async def save_location(
     # Resolves (and 404s/422s) before the insert attempt, same as
     # preferences' default_location_id check -- an unresolvable id
     # should never reach the database at all.
+    await ensure_under_cap(
+        session, SavedLocation, user_id, MAX_SAVED_LOCATIONS, "saved spots"
+    )
     location = await resolve_location_id(body.location_id, state)
 
     row = SavedLocation(

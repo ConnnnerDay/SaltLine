@@ -124,11 +124,22 @@ export function NextDays({
                   <WeatherIcon sky={day.sky} className="h-7 w-7" />
                   <span className="flex flex-col text-xs leading-tight">
                     <span className="font-semibold tabular-nums text-text">
-                      {day.high_f != null ? degrees(day.high_f, units) : '—'}
-                      <span className="font-normal text-text-muted">
-                        {' / '}
-                        {day.low_f != null ? degrees(day.low_f, units) : '—'}
-                      </span>
+                      {day.high_f != null && day.low_f != null ? (
+                        <>
+                          {degrees(day.high_f, units)}
+                          <span className="font-normal text-text-muted">
+                            {' / '}
+                            {degrees(day.low_f, units)}
+                          </span>
+                        </>
+                      ) : day.low_f != null ? (
+                        // Evening: the forecast has only tonight left.
+                        <span className="font-normal text-text-muted">Low {degrees(day.low_f, units)}</span>
+                      ) : day.high_f != null ? (
+                        <>High {degrees(day.high_f, units)}</>
+                      ) : (
+                        '—'
+                      )}
                     </span>
                     <span className="line-clamp-1 text-text-muted">
                       {day.precip_pct ? `${day.precip_pct}% rain` : day.short_forecast}

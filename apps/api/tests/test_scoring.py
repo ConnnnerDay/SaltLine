@@ -155,6 +155,7 @@ class TestWindOrientationForRegion:
             ("pacific_south", "west"),
             ("gulf", "gulf"),
             ("hawaii_conditions", "hawaii"),
+            ("alaska", "alaska"),
             ("", "east"),
         ],
     )
@@ -171,6 +172,10 @@ class TestOnshoreOffshoreDirs:
         assert onshore
         assert offshore
         assert onshore.isdisjoint(offshore)
+
+    def test_alaska_both_empty_without_a_spot_facing(self) -> None:
+        # Fjords and islands face every way; no region-wide guess.
+        assert onshore_offshore_dirs("alaska") == (set(), set())
 
     def test_hawaii_both_empty(self) -> None:
         onshore, offshore = onshore_offshore_dirs("hawaii")

@@ -581,3 +581,74 @@ def test_marine_ranges_follow_changes_later_in_a_period() -> None:
     )
     assert (gusty.wind_low_kt, gusty.wind_high_kt) == (15, 20)
     assert (gusty.wave_low_ft, gusty.wave_high_ft) == (1, 2)
+
+
+# --- Coastal Waters Forecast text fallback (Alaska zones) -------------------
+
+_CWF_SAMPLE = """000
+FZAK52 PAFC 280007
+CWFAER
+
+Coastal Waters Forecast for Southcentral Alaska
+National Weather Service Anchorage AK
+307 PM AKST Fri Nov 27 2026
+
+PKZ714-281200-
+Resurrection Bay-
+307 PM AKST Fri Nov 27 2026
+
+.TONIGHT...Variable wind 10 kt becoming N after midnight. Seas 2
+ft.
+.SAT...N wind 10 kt. Seas 2 ft.
+.SAT NIGHT...N wind 15 kt. Seas 3 ft.
+.SUN AND SUN NIGHT...NE wind 20 kt. Seas 4 ft.
+
+$$
+
+PKZ740>742-
+281200-
+Cook Inlet-
+307 PM AKST Fri Nov 27 2026
+
+.TONIGHT...SW wind 20 kt. Seas 5 ft.
+.SAT...W wind 10 kt. Seas 3 ft.
+
+$$
+"""
+
+
+def test_cwf_periods_for_a_single_zone() -> None:
+    from app.providers.nws import parse_cwf_zone_periods
+
+    periods = parse_cwf_zone_periods(_CWF_SAMPLE, "PKZ714")
+    assert [p["name"] for p in periods] == ["Tonight", "Sat", "Sat Night", "Sun"]
+    # Wrapped lines are joined.
+    assert periods[0]["detailedForecast"] == (
+        "Variable wind 10 kt becoming N after midnight. Seas 2 ft."
+    )
+
+
+def test_cwf_periods_for_a_zone_inside_a_range_header() -> None:
+    from app.providers.nws import parse_cwf_zone_periods, parse_marine_zone_conditions
+
+    periods = parse_cwf_zone_periods(_CWF_SAMPLE, "PKZ741")
+    conditions = parse_marine_zone_conditions(periods)
+    assert conditions.wind_direction == "SW"
+    assert (conditions.wind_low_kt, conditions.wind_high_kt) == (10.0, 20.0)
+    assert (conditions.wave_low_ft, conditions.wave_high_ft) == (3.0, 5.0)
+
+
+def test_cwf_has_nothing_for_an_unlisted_zone() -> None:
+    from app.providers.nws import parse_cwf_zone_periods
+
+    assert parse_cwf_zone_periods(_CWF_SAMPLE, "PKZ999") == []
+
+
+def test_cwf_issuers_look_in_the_likeliest_bulletin_first() -> None:
+    from app.providers.nws import _cwf_issuers
+
+    assert _cwf_issuers("PKZ642")[0] == "AEG"  # Sitka's outer coast
+    assert _cwf_issuers("PKZ031")[:2] == ("AJK", "YAK")  # Juneau inside waters
+    assert _cwf_issuers("PKZ740")[0] == "AER"  # Cook Inlet
+    assert set(_cwf_issuers("PKZ740")) == {"AER", "ALU", "AJK", "AEG", "YAK"}
+    assert _cwf_issuers("ANZ250") == ()

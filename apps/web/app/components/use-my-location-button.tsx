@@ -4,9 +4,13 @@ import { useState } from 'react'
 import { rememberHomeIfUnset } from '@/lib/remember-home'
 import { useRouter } from 'next/navigation'
 import { Button } from './ui'
+import { milesBetween } from '@/lib/geo'
+import { distance, type Units } from '@/lib/units'
 import type { ResolvedLocation } from '@/app/api/locations/resolve/route'
 
-type Status = 'idle' | 'locating' | 'resolving' | 'error'
+type Status = 'idle' | 'locating' | 'resolving' | 'error' | 'inland'
+
+type ListedSpot = { id: string; name: string; state: string; lat: number; lng: number }
 
 /**
  * Sprint 31's device-geolocation sub-item, alongside text search
@@ -24,10 +28,16 @@ type Status = 'idle' | 'locating' | 'resolving' | 'error'
  * position are different problems with different next steps for the
  * visitor (change a browser setting vs. just use text search instead).
  */
-export function UseMyLocationButton() {
+export function UseMyLocationButton({ spots = [], units = 'imperial' }: { spots?: ListedSpot[]; units?: Units }) {
   const router = useRouter()
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
+  const [closest, setClosest] = useState<{ spot: ListedSpot; miles: number }[]>([])
+
+  async function goTo(id: string) {
+    await rememberHomeIfUnset(id)
+    router.push(`/forecast/${encodeURIComponent(id)}`)
+  }
 
   function handleClick() {
     setError(null)
@@ -41,6 +51,10 @@ export function UseMyLocationButton() {
     setStatus('locating')
     navigator.geolocation.getCurrentPosition(
       async (position) => {
+        const here = { lat: position.coords.latitude, lng: position.coords.longitude }
+        const ranked = spots
+          .map((spot) => ({ spot, miles: milesBetween(here, spot) }))
+          .sort((a, b) => a.miles - b.miles)
         setStatus('resolving')
         try {
           const response = await fetch('/api/locations/resolve', {
@@ -53,6 +67,13 @@ export function UseMyLocationButton() {
           })
           if (!response.ok) {
             const body = await response.json().catch(() => null)
+            if (response.status === 422 && ranked.length) {
+              // Inland (or no coastal data here): offer the nearest
+              // listed spots instead of a dead end.
+              setClosest(ranked.slice(0, 3))
+              setStatus('inland')
+              return
+            }
             setStatus('error')
             setError(
               response.status === 422
@@ -62,7 +83,10 @@ export function UseMyLocationButton() {
             return
           }
           const resolved = (await response.json()) as ResolvedLocation
-          await rememberHomeIfUnset(resolved.id)
+          // The forecast is for the exact point, but a first home spot is
+          // the nearest *listed* spot: a device-point id records where you
+          // are to ~110 m, too precise to keep as someone's home.
+          if (ranked[0]) await rememberHomeIfUnset(ranked[0].spot.id)
           router.push(`/forecast/${encodeURIComponent(resolved.id)}`)
         } catch {
           setStatus('error')
@@ -118,6 +142,28 @@ export function UseMyLocationButton() {
         <p className="text-sm text-danger-text" role="alert">
           {error}
         </p>
+      )}
+      {status === 'inland' && (
+        <div className="flex flex-col gap-2" role="status">
+          <p className="text-sm text-text">You&apos;re away from the coast. The closest spots:</p>
+          <ul className="flex flex-col gap-2">
+            {closest.map(({ spot, miles }) => (
+              <li key={spot.id}>
+                <button
+                  type="button"
+                  onClick={() => goTo(spot.id)}
+                  className="flex w-full items-center justify-between gap-3 rounded-md border border-border bg-surface px-3 py-2.5 text-left text-sm text-text hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                >
+                  <span>
+                    {spot.name}
+                    {spot.state ? `, ${spot.state}` : ''}
+                  </span>
+                  <span className="shrink-0 text-xs text-text-muted">{distance(miles, units)} away</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   )

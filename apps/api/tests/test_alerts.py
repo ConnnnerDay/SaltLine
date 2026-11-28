@@ -359,3 +359,40 @@ def test_compose_alert_in_metric() -> None:
     assert "Water 18°C · Wind N 19-28 km/h · Waves 0.6-0.9 m" in body
     assert "Moderate surf (0.6–0.9 m), light wind (19–28 km/h) and water 18°C." in body
     assert "°F" not in body and " kt" not in body and " ft" not in body
+
+
+def test_email_change_moves_only_this_users_alerts(client: TestClient) -> None:
+    client.put("/v1/me/alerts", json=_RULE)
+    app.dependency_overrides[require_internal_signature] = lambda: "user-2"
+    client.put("/v1/me/alerts", json=_RULE | {"email": "someone@example.com"})
+    app.dependency_overrides[require_internal_signature] = lambda: "user-1"
+
+    resp = client.put("/v1/me/alerts/email", json={"email": "new@example.com"})
+    assert resp.status_code == 204
+    assert [r["email"] for r in client.get("/v1/me/alerts").json()["rules"]] == [
+        "new@example.com"
+    ]
+    app.dependency_overrides[require_internal_signature] = lambda: "user-2"
+    assert [r["email"] for r in client.get("/v1/me/alerts").json()["rules"]] == [
+        "someone@example.com"
+    ]
+    app.dependency_overrides[require_internal_signature] = lambda: "user-1"
+    assert (
+        client.put("/v1/me/alerts/email", json={"email": "not-an-email"}).status_code
+        == 422
+    )
+
+
+def test_alert_rules_are_capped(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import app.api.v1.alerts as alerts_router
+
+    monkeypatch.setattr(alerts_router, "MAX_ALERT_RULES", 1)
+    assert client.put("/v1/me/alerts", json=_RULE).status_code == 200
+    # Updating the existing spot's rule is fine; a new spot is over the cap.
+    assert client.put("/v1/me/alerts", json=_RULE).status_code == 200
+    other = _RULE | {"location_id": "montauk-ny"}
+    resp = client.put("/v1/me/alerts", json=other)
+    assert resp.status_code == 403
+    assert "limit reached" in resp.json()["detail"]

@@ -11,7 +11,7 @@ import { ProfileSetup } from './profile-setup'
 export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Set up your profile' }
 
-type Props = { searchParams: Promise<{ next?: string }> }
+type Props = { searchParams: Promise<{ next?: string; error?: string }> }
 
 /**
  * Profile setup after registration (restored from the original app's
@@ -22,8 +22,13 @@ type Props = { searchParams: Promise<{ next?: string }> }
  */
 export default async function OnboardingPage({ searchParams }: Props) {
   const session = await auth.api.getSession({ headers: await headers() })
-  if (!session) redirect('/login?next=/onboarding')
-  const { next } = await searchParams
+  const { next, error } = await searchParams
+  if (!session) {
+    // A bad/expired confirmation link lands here signed out: keep its
+    // error so the log-in page can explain what happened.
+    const linkError = error && /^[A-Z_]{1,40}$/.test(error) ? `&error=${error}` : ''
+    redirect(`/login?next=/onboarding${linkError}`)
+  }
   // For the home-spot map; search still works if this fails.
   const spots = await internalApiFetch<MapSpot[]>('/v1/locations').catch(() => [])
 

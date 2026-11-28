@@ -51,6 +51,8 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(rule)
   } catch (err) {
     const status = err instanceof InternalApiError ? err.status : 502
-    return NextResponse.json({ error: 'could not save that alert' }, { status })
+    const message =
+      status === 403 ? 'you can have up to 20 alerts: turn one off first' : 'could not save that alert'
+    return NextResponse.json({ error: message }, { status })
   }
 }

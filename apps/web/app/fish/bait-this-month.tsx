@@ -27,7 +27,7 @@ const core = (name: string) => name.replace(/\s*\(.*\)/, '').trim().toLowerCase(
 
 function coastOf(region: string): Bait['coast'] | 'any' {
   if (region.startsWith('atlantic') || region === 'gulf') return 'east'
-  if (region.startsWith('pacific')) return 'west'
+  if (region.startsWith('pacific') || region === 'alaska') return 'west'
   if (region.startsWith('hawaii')) return 'hawaii'
   return 'any'
 }
@@ -138,7 +138,7 @@ export function BaitThisMonth({
               )}
               {hooksFor(bait.name).length > 0 && (
                 <div className="text-xs">
-                  <HookIt hows={hooksFor(bait.name)} say={say} />
+                  <HookIt hows={hooksFor(bait.name)} units={units} />
                 </div>
               )}
               {targetsHere(bait).length > 0 && (

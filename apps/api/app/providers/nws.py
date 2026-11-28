@@ -452,6 +452,110 @@ def _field(payload: object, name: str, source: str) -> Any:
     raise ProviderParseError(f"NWS response from {source} has no '{name}'")
 
 
+# Marine zones whose /zones/forecast endpoint doesn't answer (most of
+# Alaska's zones 404 there) are still in a Coastal Waters Forecast text
+# bulletin. Alaska's are AJK (Juneau: Southeast inside waters, PKZ0xx),
+# YAK (Yakutat: PKZ053), AEG (the Gulf's outer coast, PKZ6xx: Sitka,
+# Ketchikan's outside waters) and AER/ALU (Anchorage east/west: the rest).
+_CWF_LOCATIONS: dict[str, tuple[str, ...]] = {
+    "PKZ": ("AER", "ALU", "AJK", "AEG", "YAK")
+}
+
+
+def _cwf_issuers(zone: str) -> tuple[str, ...]:
+    """The CWF issuing locations to look in for *zone*, likeliest first,
+    so one zone costs one or two bulletins rather than all five."""
+    issuers = _CWF_LOCATIONS.get(zone[:3], ())
+    number = zone[3:]
+    if zone[:3] == "PKZ" and number.isdigit():
+        first = {"0": ("AJK", "YAK"), "6": ("AEG",)}.get(number[0], ("AER", "ALU"))
+        return (*first, *(i for i in issuers if i not in first))
+    return issuers
+
+
+_UGC_TIME = re.compile(r"^\d{6}$")
+_CWF_PERIOD = re.compile(
+    r"^\.([A-Z][A-Z ]*?)\.\.\.(.*?)(?=^\.[A-Z]|\Z)", re.MULTILINE | re.DOTALL
+)
+
+
+def _ugc_zones(header: str) -> set[str]:
+    """Zone ids in a bulletin section's UGC header: "PKZ740-741>743-281200-"
+    -> {PKZ740, PKZ741, PKZ742, PKZ743}."""
+    zones: set[str] = set()
+    prefix = ""
+    for token in header.replace("\n", "").split("-"):
+        token = token.strip()
+        if not token or _UGC_TIME.match(token):
+            continue
+        if token[:3].isalpha():
+            prefix, token = token[:3], token[3:]
+        if not prefix:
+            continue
+        low, _, high = token.partition(">")
+        if low.isdigit() and (not high or high.isdigit()):
+            for number in range(int(low), int(high or low) + 1):
+                zones.add(f"{prefix}{number:03d}")
+    return zones
+
+
+def parse_cwf_zone_periods(text: str, zone: str) -> list[dict[str, Any]]:
+    """*zone*'s forecast periods from a Coastal Waters Forecast bulletin, in
+    the shape the zone endpoint returns ({"name", "detailedForecast"}), so
+    `parse_marine_zone_conditions` reads both the same way. "SAT NIGHT"
+    becomes "Sat Night"; "SUN AND SUN NIGHT" starts a day ("Sun"). Empty
+    when the bulletin has no section for *zone*."""
+    for section in text.split("$$"):
+        lines = section.strip().splitlines()
+        # The UGC header starts at the first zone code ("PKZ740-...", after
+        # the bulletin's own title lines in the first section) and runs to
+        # the line ending in a 6-digit expiry time ("...-281200-").
+        start = next(
+            (
+                i
+                for i, line in enumerate(lines)
+                if re.match(r"^[A-Z]{2}Z\d{3}[->]", line)
+            ),
+            None,
+        )
+        if start is None:
+            continue
+        header: list[str] = []
+        for line in lines[start:]:
+            header.append(line)
+            if re.search(r"\d{6}-\s*$", line):
+                break
+        if zone not in _ugc_zones(" ".join(header)):
+            continue
+        periods = []
+        for match in _CWF_PERIOD.finditer(section):
+            name = match.group(1).strip().title()
+            if " And " in name:  # "Sun And Sun Night": one day
+                name = name.split(" And ")[0]
+            detail = " ".join(match.group(2).split())
+            periods.append({"name": name, "detailedForecast": detail})
+        return periods
+    return []
+
+
+async def _cwf_periods(client: BoundedHTTPClient, zone: str) -> list[dict[str, Any]]:
+    for location in _cwf_issuers(zone):
+        listing: Any = await client.get_json(
+            f"https://api.weather.gov/products/types/CWF/locations/{location}",
+            headers=_NWS_HEADERS,
+        )
+        graph = listing.get("@graph") or []
+        if not graph:
+            continue
+        product: Any = await client.get_json(
+            f"https://api.weather.gov/products/{graph[0]['id']}", headers=_NWS_HEADERS
+        )
+        periods = parse_cwf_zone_periods(str(product.get("productText") or ""), zone)
+        if periods:
+            return periods
+    return []
+
+
 async def fetch_marine_zone_conditions(
     client: BoundedHTTPClient, zone: str = NWS_MARINE_ZONE_DEFAULT
 ) -> MarineZoneConditions:
@@ -459,10 +563,23 @@ async def fetch_marine_zone_conditions(
     `ProviderError` subclass on failure — marine conditions are
     decision-relevant, so callers must see the failure rather than get a
     silently empty result (unlike alerts, see `fetch_point_alerts`).
+
+    Falls back to the office's Coastal Waters Forecast text for zones
+    the forecast endpoint doesn't serve (`_CWF_LOCATIONS`).
     """
     url = f"https://api.weather.gov/zones/forecast/{zone}/forecast"
-    data = await client.get_json(url, headers=_NWS_HEADERS)
-    periods = _field(data, "periods", url)
+    try:
+        data = await client.get_json(url, headers=_NWS_HEADERS)
+        periods = _field(data, "periods", url)
+    except ProviderError:
+        if zone[:3] not in _CWF_LOCATIONS:
+            raise
+        try:
+            periods = await _cwf_periods(client, zone)
+        except ProviderError:
+            periods = []
+        if not periods:
+            raise
     return parse_marine_zone_conditions(periods)
 
 

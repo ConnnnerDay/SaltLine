@@ -52,7 +52,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (err) {
     const status = err instanceof InternalApiError ? err.status : 502
     const message =
-      status === 409
+      status === 403
+        ? 'you’ve reached the limit of 200 saved spots: remove one first'
+        : status === 409
         ? 'that location is already saved'
         : status === 404
           ? 'unknown location'

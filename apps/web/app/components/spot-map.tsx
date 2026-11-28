@@ -1,7 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { geoAlbersUsa, geoPath } from 'd3-geo'
+import { useMemo, useState, useSyncExternalStore } from 'react'
+import { milesBetween } from '@/lib/geo'
+import { geoAlbersUsa, geoPath, type GeoProjection, type GeoStreamWrapper } from 'd3-geo'
 import { feature, mesh } from 'topojson-client'
 import type { GeometryCollection, Topology } from 'topojson-specification'
 import usStates from 'us-atlas/states-10m.json'
@@ -45,19 +46,13 @@ const COASTS: { key: string; label: string; match: (spot: MapSpot) => boolean }[
   { key: 'atlantic', label: 'Atlantic', match: (s) => (s.conditions_region ?? '').startsWith('atlantic') },
   { key: 'gulf', label: 'Gulf', match: (s) => s.conditions_region === 'gulf' },
   { key: 'pacific', label: 'Pacific', match: (s) => (s.conditions_region ?? '').startsWith('pacific') },
+  { key: 'alaska', label: 'Alaska', match: (s) => s.conditions_region === 'alaska' },
   { key: 'hawaii', label: 'Hawaii', match: (s) => (s.conditions_region ?? '').startsWith('hawaii') },
 ]
 
 const WIDTH = 960
 const NEAREST = 4
 
-function milesBetween(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
-  const rad = Math.PI / 180
-  const dLat = (b.lat - a.lat) * rad
-  const dLng = (b.lng - a.lng) * rad
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLng / 2) ** 2
-  return 3958.8 * 2 * Math.asin(Math.sqrt(h))
-}
 
 function coastOf(spot: MapSpot): string {
   return COASTS.find((c) => c.key !== 'all' && c.match(spot))?.key ?? 'all'
@@ -66,6 +61,40 @@ const HEIGHT = 600
 
 // The topology is static, so its GeoJSON is built once.
 const topology = usStates as unknown as Topology<{ states: GeometryCollection; nation: GeometryCollection }>
+/**
+ * A projection stream that skips points within `min` viewBox units of the
+ * last one kept. The dataset is print-map detail; at this map's size
+ * (960 units wide, shown at phone width) neighbouring points are often
+ * under a pixel apart. Halves the coastline path with no visible change.
+ */
+function thinned(projection: GeoProjection, min: number): GeoStreamWrapper {
+  return {
+    stream(sink) {
+      let lastX: number | undefined
+      let lastY = 0
+      return projection.stream({
+        point(x, y) {
+          if (lastX === undefined || Math.abs(x - lastX) + Math.abs(y - lastY) >= min) {
+            sink.point(x, y)
+            lastX = x
+            lastY = y
+          }
+        },
+        lineStart() {
+          lastX = undefined
+          sink.lineStart()
+        },
+        lineEnd: () => sink.lineEnd(),
+        polygonStart: () => sink.polygonStart(),
+        polygonEnd: () => sink.polygonEnd(),
+        sphere: () => sink.sphere?.(),
+      })
+    },
+  }
+}
+
+const subscribeNever = () => () => {}
+
 const STATES = feature(topology, topology.objects.states)
 const BORDERS = mesh(topology, topology.objects.states, (a, b) => a !== b)
 
@@ -81,6 +110,8 @@ export function SpotMap({
   onSelect: (spot: MapSpot) => void
 }) {
   const [coast, setCoast] = useState('all')
+  // false while server-rendering and hydrating, true in the browser after.
+  const drawLand = useSyncExternalStore(subscribeNever, () => true, () => false)
   const [state, setState] = useState<string | null>(null)
   const [hovered, setHovered] = useState<MapSpot | null>(null)
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null)
@@ -137,7 +168,7 @@ export function SpotMap({
       // digit, which React reports as a hydration mismatch.
       if (xy) points.set(spot.id, [Math.round(xy[0] * 10) / 10, Math.round(xy[1] * 10) / 10])
     }
-    return { path: geoPath(projection), points, projection }
+    return { path: geoPath(thinned(projection, 1)).digits(1), points, projection }
   }, [coast, spots, visible])
 
   function movePin(next: { lat: number; lng: number } | null) {
@@ -265,8 +296,16 @@ export function SpotMap({
       <div className="overflow-hidden rounded-md border border-border bg-water">
         <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="block h-auto w-full">
           <title>Map of Saltline&apos;s fishing spots</title>
-          <path d={path(STATES) ?? ''} className="fill-surface" />
-          <path d={path(BORDERS) ?? ''} fill="none" strokeWidth={0.8} className="stroke-border" />
+          {/* Land is drawn in the browser, after load: ~250 KB of path
+              data would otherwise sit in every setup/Find-a-spot page's
+              HTML. The frame (viewBox) and the spot dots are there from
+              the start, so nothing shifts when it appears. */}
+          {drawLand && (
+            <>
+              <path d={path(STATES) ?? ''} className="fill-surface" />
+              <path d={path(BORDERS) ?? ''} fill="none" strokeWidth={0.8} className="stroke-border" />
+            </>
+          )}
           {spots.map((spot) => {
             const xy = points.get(spot.id)
             if (!xy || !visible.includes(spot)) return null

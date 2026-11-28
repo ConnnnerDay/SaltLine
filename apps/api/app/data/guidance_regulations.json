@@ -13722,8 +13722,8 @@
       "lingcod": {
         "min_size": "35 in TL",
         "bag_limit": "2 per day",
-        "season": "Open year-round (check for area closures)",
-        "notes": "Alaska lingcod: 35-inch TL minimum (stricter than most lower-48 states), 2/day bag limit. Found in shallow rocky reefs and kelp in Southeast and Southcentral Alaska. Check AK F&G for any area-specific closures.",
+        "season": "Varies by area; Southcentral opens July 1",
+        "notes": "Southcentral has a 35 in minimum size and a July 1 opener to protect nest-guarding males. Rules differ in Southeast; check ADF&G for your area.",
         "source": "https://www.adfg.alaska.gov/index.cfm?adfg=fishing.main"
       },
       "starry-flounder": {
@@ -13852,11 +13852,17 @@
         "notes": "Check ADFG."
       },
       "pacific-halibut": {
-        "min_size": "32 in TL",
-        "bag_limit": "2 per day (IPHC limit)",
-        "season": "Seasonal \u2014 IPHC sets annual season dates",
-        "notes": "Alaska Pacific halibut: 32-inch minimum, 2 fish/day. Season dates and area-specific limits set annually by the International Pacific Halibut Commission (IPHC). Verify 2026 season, area, and limits with AK F&G and the IPHC before fishing \u2014 regulations are complex.",
-        "source": "https://www.adfg.alaska.gov/index.cfm?adfg=fishing.main"
+        "min_size": "None (unguided)",
+        "bag_limit": "2 per day (unguided)",
+        "season": "February 1 through December 31",
+        "notes": "Charter (guided) anglers have tighter limits set each year by NOAA and the IPHC. Verify current rules with ADF&G.",
+        "source": "https://www.adfg.alaska.gov/index.cfm?adfg=fishing.main",
+        "closed_periods": [
+          [
+            "01-01",
+            "01-31"
+          ]
+        ]
       },
       "pink-salmon-humpy": {
         "min_size": "No minimum",

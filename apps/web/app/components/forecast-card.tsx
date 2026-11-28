@@ -10,6 +10,7 @@ import { sizeText } from '@/lib/size-rule'
 import { KeepCheck } from './keep-check'
 import { pickWarning } from '@/lib/fish-id'
 import { cx } from './ui/cx'
+import { SpeciesCalendar } from './species-calendar'
 import { HourlyChart } from './hourly-chart'
 import { RigDiagram } from './rig-diagram'
 import { RIGS, rigsFor, type RigId } from '@/lib/rigs'
@@ -246,15 +247,22 @@ function SourceStatusList({ sources }: { sources: SourceStatus[] }) {
   )
 }
 
+/** Tide predictions start at local midnight (apps/api asks NOAA by
+ * date), so late in the day most of them are already past. The chart
+ * shows the last turn for context and the 24 hours ahead. */
+function tideWindow(predictions: ForecastTides['predictions'], now: number) {
+  const inWindow = predictions.filter((prediction) => {
+    const time = new Date(prediction.time).getTime()
+    return time >= now - 2 * 3600 * 1000 && time <= now + 24 * 3600 * 1000
+  })
+  // Old cached data with nothing ahead: show what there is.
+  return inWindow.length >= 2 ? inWindow : predictions.slice(0, 8)
+}
+
 function TideChart({ tides, timezone }: { tides: ForecastTides; timezone: string }) {
-  // The chart covers the next ~24 hours (the table lists every
-  // prediction): three days of zigzag is too dense to read.
-  const firstTime = tides.predictions.length
-    ? new Date(tides.predictions[0].time).getTime()
-    : 0
-  const points = tides.predictions.filter(
-    (prediction) => new Date(prediction.time).getTime() - firstTime <= 26 * 3600 * 1000,
-  )
+  // The next ~24 hours, from just before now (the table lists the rest):
+  // three days of zigzag is too dense to read.
+  const points = tideWindow(tides.predictions, currentTime().getTime())
   if (points.length < 2) return null
 
   const times = points.map((p) => new Date(p.time).getTime())
@@ -377,7 +385,11 @@ function TideTable({
             </tr>
           </thead>
           <tbody>
-            {tides.predictions.map((prediction) => (
+            {(() => {
+              const now = currentTime().getTime()
+              const upcoming = tides.predictions.filter((prediction) => new Date(prediction.time).getTime() >= now)
+              return upcoming.length ? upcoming : tides.predictions
+            })().map((prediction) => (
               <tr key={prediction.time} className="border-t border-border">
                 <td className="py-1.5 pr-4 text-text sm:pr-12">
                   {formatter.format(new Date(prediction.time))}
@@ -891,118 +903,6 @@ const _MONTH_NAMES = [
 ]
 
 /**
- * The original "Species calendar": every target species for the region,
- * month by month -- peak (coral), good (blue) or off. A real table, so
- * screen readers get each cell's level as text (the colored block is
- * decorative); the current month's column is outlined.
- */
-const CALENDAR_ROWS = 12
-
-function SpeciesCalendar({
-  rows,
-  currentMonth,
-  linkFish = false,
-}: {
-  rows: NonNullable<FishingGuidance['calendar']>
-  currentMonth: number
-  /** Signed in: names open the Fish guide (the public share page has none). */
-  linkFish?: boolean
-}) {
-  // In season now first (peak, then good, then off), catalogue order
-  // within each; the first CALENDAR_ROWS show, the rest on request.
-  const rank = (row: (typeof rows)[number]) =>
-    row.months[currentMonth - 1] === 'peak' ? 0 : row.months[currentMonth - 1] === 'good' ? 1 : 2
-  const sorted = rows
-    .map((row, index) => ({ row, index }))
-    .sort((a, b) => rank(a.row) - rank(b.row) || a.index - b.index)
-    .map(({ row }) => row)
-  const extra = sorted.length - CALENDAR_ROWS
-  return (
-    <div className="group flex min-w-0 flex-col gap-3">
-      <div className="relative max-w-full overflow-x-auto">
-        <table className="w-full min-w-[520px] border-separate border-spacing-y-1 text-left text-sm sm:w-auto">
-          <caption className="sr-only">Peak and good months for each species in this area</caption>
-          <thead>
-            <tr className="text-text-muted">
-              <th scope="col" className="py-1 pr-3 font-medium">
-                Species
-              </th>
-              {_MONTH_INITIALS.map((initial, index) => (
-                <th
-                  key={index}
-                  scope="col"
-                  className={cx(
-                    'w-7 py-1 text-center text-xs font-bold sm:w-9',
-                    index + 1 === currentMonth && 'text-accent',
-                  )}
-                >
-                  <abbr title={_MONTH_NAMES[index]} className="no-underline">
-                    {initial}
-                  </abbr>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((row, rowIndex) => (
-              <tr
-                key={row.id}
-                className={cx(rowIndex >= CALENDAR_ROWS && 'hidden group-has-[details[open]]:table-row')}
-              >
-                <th scope="row" className="whitespace-nowrap py-0.5 pr-6 font-semibold text-text">
-                  {linkFish ? (
-                    <a href={`/fish/${encodeURIComponent(row.id)}`} className="text-text no-underline hover:underline">
-                      {row.name}
-                    </a>
-                  ) : (
-                    row.name
-                  )}
-                </th>
-                {row.months.map((level, index) => (
-                  <td key={index} className="px-0.5 py-0.5">
-                    <span
-                      className={cx(
-                        'block h-5 rounded-sm',
-                        level === 'peak' && 'bg-tier-prime',
-                        level === 'good' && 'bg-tier-high',
-                        level === '' && 'bg-tier-low',
-                        index + 1 === currentMonth && 'ring-2 ring-text',
-                      )}
-                    />
-                    <span className="sr-only">
-                      {_MONTH_NAMES[index]}: {level === 'peak' ? 'peak' : level === 'good' ? 'good' : 'off'}
-                    </span>
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {extra > 0 && (
-        <details>
-          <summary className="w-fit cursor-pointer text-sm font-semibold text-primary">
-            <span className="group-has-[details[open]]:hidden">Show all {sorted.length} species</span>
-            <span className="hidden group-has-[details[open]]:inline">Show fewer</span>
-          </summary>
-        </details>
-      )}
-      <div className="flex flex-wrap gap-4 text-xs text-text-muted">
-        <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-sm bg-tier-prime" /> Peak
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-sm bg-tier-high" /> Good
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-sm bg-tier-low" /> Off season
-        </span>
-      </div>
-    </div>
-  )
-}
-
-/**
  * "Rigs & tips": the rigs today's picks call for, taught once each --
  * a diagram (rig-diagram.tsx), how to tie it and how to fish it
  * (lib/rigs.ts) -- then the exact hook, sinker and setup for each of
@@ -1256,7 +1156,7 @@ function RigsAndTips({
           <h4 className="section-label">Today&apos;s baits</h4>
           <HookIt
             hows={hooksFor(guidance.species.map((pick) => pick.bait).join('; '))}
-            say={(text) => localizeText(text, requestUnits())}
+            units={requestUnits()}
             label="How to hook today's baits"
           />
         </section>

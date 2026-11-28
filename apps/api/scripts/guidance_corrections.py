@@ -19,6 +19,7 @@ from typing import Any
 
 _N, _M, _S, _G = "atlantic_north", "atlantic_mid", "atlantic_south", "gulf"
 _P, _PS, _H = "pacific", "pacific_south", "hawaii_conditions"
+_AK = "alaska"
 
 # Not in US waters, or a duplicate of another entry: left out entirely.
 SKIP_IDS = {
@@ -230,6 +231,47 @@ FIELD_CORRECTIONS: dict[str, dict[str, Any]] = {
     },
 }
 
+# Alaska (Southcentral and Southeast): the fish an Alaska angler actually
+# targets, added to the catalogue's regions. Their Alaska months live in
+# app/data/regional_seasons.json. Value: the coldest water (F) the fish is
+# still caught in up there, lowering the legacy minimum where it was set
+# for California (winter feeder kings bite in 38-40F Kachemak Bay and
+# Sitka water; cod, halibut and char in the mid 30s). None keeps it.
+ALASKA_SPECIES: dict[str, int | None] = {
+    "chinook-salmon": 38,
+    "coho-salmon": 42,
+    "sockeye-salmon-red-salmon": 44,
+    "pink-salmon-humpy": 44,
+    "chum-salmon-dog-salmon": 42,
+    "steelhead-trout-sea-run-rainbow": 34,
+    "dolly-varden": 34,
+    "pacific-halibut": 36,
+    "lingcod": 38,
+    "black-rockfish": 40,
+    "dusky-rockfish": 38,
+    "quillback-rockfish": 40,
+    "copper-rockfish": 40,
+    "china-rockfish": 40,
+    "tiger-rockfish": 40,
+    "canary-rockfish": 40,
+    "yelloweye-rockfish": None,
+    "rougheye-rockfish": None,
+    "pacific-ocean-perch": None,
+    "pacific-cod": 34,
+    "walleye-pollock": None,
+    "kelp-greenling": 38,
+    "rock-greenling": 38,
+    "starry-flounder": 36,
+    "rock-sole": 36,
+    "yellowfin-sole": None,
+    "pacific-staghorn-sculpin": 38,
+    "pacific-spiny-dogfish": 40,
+    "big-skate": 40,
+    "pacific-herring": 38,
+    "eulachon-smelt": 36,
+    "shiner-perch": 44,
+}
+
 # Regulation snapshot fixes: state -> catalogue id -> fields.
 # `closed_periods` ("MM-DD" start/end, inclusive, may wrap the new year)
 # drive the "closed to harvest" flag on picks (Regulation.closed_now).
@@ -271,12 +313,30 @@ REGULATION_CORRECTIONS: dict[str, dict[str, dict[str, Any]]] = {
             "notes": "Closed season protects spawning ama'ama.",
         },
     },
+    # Alaska sport rules differ by area (Southeast vs Southcentral) and
+    # guided vs unguided; these are the statewide basics.
+    "AK": {
+        "pacific-halibut": {
+            "min_size": "None (unguided)",
+            "bag_limit": "2 per day (unguided)",
+            "season": "February 1 through December 31",
+            "closed_periods": [["01-01", "01-31"]],
+            "notes": "Charter (guided) anglers have tighter limits set each "
+            "year by NOAA and the IPHC. Verify current rules with ADF&G.",
+        },
+        "lingcod": {
+            "season": "Varies by area; Southcentral opens July 1",
+            "notes": "Southcentral has a 35 in minimum size and a July 1 "
+            "opener to protect nest-guarding males. Rules differ in "
+            "Southeast; check ADF&G for your area.",
+        },
+    },
 }
 
 
 def apply(species: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """*species* without SKIP_IDS, with PROTECTED_IDS and
-    FIELD_CORRECTIONS applied. Fails loudly on an unknown id, so a
+    """*species* without SKIP_IDS, with PROTECTED_IDS, FIELD_CORRECTIONS
+    and ALASKA_SPECIES applied. Fails loudly on an unknown id, so a
     renamed slug can't silently drop a correction."""
     ids = {str(record["id"]) for record in species}
     named = SKIP_IDS | PROTECTED_IDS | set(FIELD_CORRECTIONS)
@@ -284,8 +344,17 @@ def apply(species: list[dict[str, Any]]) -> list[dict[str, Any]]:
     if unknown:
         raise SystemExit(f"guidance_corrections: unknown species ids {unknown}")
     kept = [record for record in species if record["id"] not in SKIP_IDS]
+    unknown = sorted(set(ALASKA_SPECIES) - ids)
+    if unknown:
+        raise SystemExit(f"guidance_corrections: unknown Alaska ids {unknown}")
     for record in kept:
         record.update(FIELD_CORRECTIONS.get(str(record["id"]), {}))
         if record["id"] in PROTECTED_IDS:
             record["access"] = "protected"
+        if record["id"] in ALASKA_SPECIES:
+            record["regions"] = [*record["regions"], _AK]
+            cold = ALASKA_SPECIES[str(record["id"])]
+            if cold is not None and cold < record["temp_min"]:
+                record["temp_min"] = cold
+                record["temp_ideal_low"] = min(record["temp_ideal_low"], cold + 6)
     return kept

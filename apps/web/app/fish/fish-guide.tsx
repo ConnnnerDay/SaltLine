@@ -4,11 +4,10 @@ import { pickWarning } from '@/lib/fish-id'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { cx } from '@/app/components/ui/cx'
-import { ACCESS_LABEL, MONTH_NAMES, REGION_LABEL, REGIONS, seasonOf, spawningIn, type FishSummary } from '@/lib/fish'
+import { ACCESS_LABEL, MONTH_NAMES, REGION_LABEL, REGIONS, seasonOf, spawningIn, type FishSummary, type GuideFish } from '@/lib/fish'
 import { BaitThisMonth } from './bait-this-month'
 import { temp, type Units } from '@/lib/units'
 
-type GuideFish = FishSummary & { photo: string | null }
 
 const PAGE = 48
 const SEASONS = [

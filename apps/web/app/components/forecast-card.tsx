@@ -246,15 +246,22 @@ function SourceStatusList({ sources }: { sources: SourceStatus[] }) {
   )
 }
 
+/** Tide predictions start at local midnight (apps/api asks NOAA by
+ * date), so late in the day most of them are already past. The chart
+ * shows the last turn for context and the 24 hours ahead. */
+function tideWindow(predictions: ForecastTides['predictions'], now: number) {
+  const inWindow = predictions.filter((prediction) => {
+    const time = new Date(prediction.time).getTime()
+    return time >= now - 2 * 3600 * 1000 && time <= now + 24 * 3600 * 1000
+  })
+  // Old cached data with nothing ahead: show what there is.
+  return inWindow.length >= 2 ? inWindow : predictions.slice(0, 8)
+}
+
 function TideChart({ tides, timezone }: { tides: ForecastTides; timezone: string }) {
-  // The chart covers the next ~24 hours (the table lists every
-  // prediction): three days of zigzag is too dense to read.
-  const firstTime = tides.predictions.length
-    ? new Date(tides.predictions[0].time).getTime()
-    : 0
-  const points = tides.predictions.filter(
-    (prediction) => new Date(prediction.time).getTime() - firstTime <= 26 * 3600 * 1000,
-  )
+  // The next ~24 hours, from just before now (the table lists the rest):
+  // three days of zigzag is too dense to read.
+  const points = tideWindow(tides.predictions, currentTime().getTime())
   if (points.length < 2) return null
 
   const times = points.map((p) => new Date(p.time).getTime())
@@ -377,7 +384,11 @@ function TideTable({
             </tr>
           </thead>
           <tbody>
-            {tides.predictions.map((prediction) => (
+            {(() => {
+              const now = currentTime().getTime()
+              const upcoming = tides.predictions.filter((prediction) => new Date(prediction.time).getTime() >= now)
+              return upcoming.length ? upcoming : tides.predictions
+            })().map((prediction) => (
               <tr key={prediction.time} className="border-t border-border">
                 <td className="py-1.5 pr-4 text-text sm:pr-12">
                   {formatter.format(new Date(prediction.time))}

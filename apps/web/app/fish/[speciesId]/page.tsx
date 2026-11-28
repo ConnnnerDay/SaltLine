@@ -11,6 +11,7 @@ import { InternalApiError, internalApiFetch } from '@/lib/internal-api-client'
 import type { Preferences } from '@/app/api/preferences/route'
 import { ACCESS_LABEL, MONTH_NAMES, REGION_LABEL, TARGET_LABEL, monthSpan, monthsFor, seasonOf, spawningIn, type FishDetail } from '@/lib/fish'
 import { localizeText, temp, type Units } from '@/lib/units'
+import { monthIn } from '@/lib/zoned-time'
 import { FavoriteButton } from '../favorite-button'
 import { RigDiagram } from '@/app/components/rig-diagram'
 import { RIGS, rigsFor } from '@/lib/rigs'
@@ -133,7 +134,7 @@ export default async function FishDetailPage({ params }: Props) {
   }
   const [prefs, locations, saved, catalogue] = await Promise.all([
     internalApiFetch<Preferences>('/v1/me/preferences', { userId }).catch(() => null),
-    internalApiFetch<{ id: string; state: string; conditions_region: string }[]>('/v1/locations').catch(() => []),
+    internalApiFetch<{ id: string; state: string; conditions_region: string; timezone?: string }[]>('/v1/locations').catch(() => []),
     internalApiFetch<SavedLocation[]>('/v1/me/locations', { userId }).catch(() => [] as SavedLocation[]),
     internalApiFetch<{ id: string; name: string }[]>('/v1/species').catch(() => []),
   ])
@@ -152,7 +153,8 @@ export default async function FishDetailPage({ params }: Props) {
   // timing there differs from the catalogue's (regional_seasons.json).
   const seasonRegion = home && fish.season_by_region?.[home.conditions_region] ? home.conditions_region : null
   const months = monthsFor(fish, seasonRegion)
-  const month = new Date().getMonth() + 1
+  // The month where the angler is, not on the (UTC) server.
+  const month = monthIn(home?.timezone)
   const now = seasonOf(fish, month, seasonRegion)
   const regulations = [...fish.regulations].sort(
     (a, b) => Number(b.state === homeState) - Number(a.state === homeState) || a.state.localeCompare(b.state),

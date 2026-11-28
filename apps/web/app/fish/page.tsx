@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { Container } from '@/app/components/ui'
+import { monthIn } from '@/lib/zoned-time'
 import { auth } from '@/lib/auth'
 import { internalApiFetch } from '@/lib/internal-api-client'
 import type { Preferences } from '@/app/api/preferences/route'
@@ -27,10 +28,11 @@ export default async function FishPage() {
   const [species, prefs, locations] = await Promise.all([
     internalApiFetch<FishSummary[]>('/v1/species').catch(() => [] as FishSummary[]),
     internalApiFetch<Preferences>('/v1/me/preferences', { userId }).catch(() => null),
-    internalApiFetch<{ id: string; conditions_region: string }[]>('/v1/locations').catch(() => []),
+    internalApiFetch<{ id: string; conditions_region: string; timezone?: string }[]>('/v1/locations').catch(() => []),
   ])
   const home = locations.find((spot) => spot.id === prefs?.default_location_id)
-  const month = new Date().getMonth() + 1
+  // The month where the angler is, not on the (UTC) server.
+  const month = monthIn(home?.timezone)
 
   return (
     <main>

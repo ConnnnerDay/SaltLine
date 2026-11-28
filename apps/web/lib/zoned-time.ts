@@ -47,3 +47,14 @@ export function wallClockToIso(local: string, timeZone?: string | null): string 
   ms = asUtc - offsetAt(ms)
   return new Date(ms).toISOString()
 }
+
+/** This month (1-12) where *timeZone* is: the server's own clock is UTC
+ * in production, already next month on the last evening of a month in
+ * the US. Without a zone (no home spot yet), US Eastern. */
+export function monthIn(timeZone?: string | null, now: Date = new Date()): number {
+  try {
+    return Number(new Intl.DateTimeFormat('en-US', { timeZone: timeZone ?? 'America/New_York', month: 'numeric' }).format(now))
+  } catch {
+    return Number(new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', month: 'numeric' }).format(now))
+  }
+}

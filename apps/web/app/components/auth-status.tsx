@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession, signOut } from '@/lib/auth-client'
+import { clearOfflinePages } from '@/lib/offline-cache'
 
 /**
  * The one session-dependent piece of the otherwise server-rendered
@@ -79,6 +80,8 @@ function AccountMenu({ name }: { name: string }) {
 
   async function handleSignOut() {
     setOpen(false)
+    // Offline copies of your pages go too (shared devices).
+    await clearOfflinePages()
     await signOut()
     router.push('/')
     router.refresh()
